@@ -341,6 +341,14 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
+**Working now (15:55 UTC):** M29 (teams, new match setup) is written and
+committed locally but not pushed: `tools/check.sh` fails on it, because an
+AI change made for team matches (a spent wave is reinforced from home)
+makes the three-way free-for-all of the check run past 90 minutes. Fixing
+that first. M30 (two more factions: Brackenfold and Lodestone Circle) is in
+the working tree. The owner finds the Brackenfold the worst-looking
+faction: its models are to be redone before M30 is called finished.
+
 Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
 
