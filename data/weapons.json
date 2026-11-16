@@ -194,7 +194,7 @@
 		"cooldown": 0.4, "hits_air": true, "fx": "tracer_heavy"
 	},
 	"lanner_missile": {
-		"name": "Lanner Missiles", "damage_type": "piercing", "damage": 58.0, "range": 9.5,
+		"name": "Lanner Missiles", "damage_type": "piercing", "damage": 64.0, "range": 9.5,
 		"cooldown": 2.2, "projectile_speed": 26.0, "homing": true, "fx": "missile"
 	},
 	"condor_bombs": {
