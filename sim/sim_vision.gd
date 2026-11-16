@@ -5,7 +5,6 @@ extends RefCounted
 ## building they own. Rebuilt four times a second.
 
 const INTERVAL: int = 5
-const STEALTH_DETECT_RANGE: float = 5.0
 const STEALTH_REVEAL_TICKS: int = 50  ## how long firing keeps a stealth unit visible
 const SITE_SIGHT: float = 4.0
 
@@ -64,7 +63,7 @@ static func can_see(w: SimWorld, player_id: int, e: SimEntity) -> bool:
 	if not is_visible(w, player_id, e.pos):
 		return false
 	if is_stealthed(w, e):
-		for n: SimEntity in w.query_radius(e.pos, STEALTH_DETECT_RANGE):
+		for n: SimEntity in w.query_radius(e.pos, e.def.detect_range):
 			if n.owner == player_id and n.def != null:
 				return true
 		return false

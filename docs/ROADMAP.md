@@ -265,7 +265,11 @@ Notes on this session's pushes:
   straight, ignore terrain and buildings, only crowd each other); per-weapon
   `hits_air` / `hits_ground`; artillery minimum range and scatter.
 
-Half-done / next: M9 Foundry Pact.
+Half-done / next: M9 Foundry Pact — the roster, data, models and simulation
+mechanics are in and tested (Pylons, Crawler deploy/pack, mines, Ratchet
+repair, Linked-vehicle self-repair, faction `roles` for the AI). Still to do:
+deploy/pack and faction choice in the UI, and making the AI role-based so it
+can play Foundry (it still uses Aegis ids).
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your

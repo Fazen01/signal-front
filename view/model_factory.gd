@@ -17,6 +17,13 @@ const CONCRETE_DARK: Color = Color(0.36, 0.37, 0.37)
 const HAZARD: Color = Color(0.92, 0.72, 0.10)
 const RUST: Color = Color(0.46, 0.30, 0.20)
 const CHARRED: Color = Color(0.10, 0.09, 0.08)
+# Foundry Pact palette: iron, soot, rust and furnace glow.
+const IRON: Color = Color(0.33, 0.30, 0.28)
+const IRON_DARK: Color = Color(0.18, 0.17, 0.16)
+const BRASS: Color = Color(0.70, 0.52, 0.22)
+const FURNACE: Color = Color(1.0, 0.45, 0.10)
+const DRAB: Color = Color(0.40, 0.33, 0.25)
+const DRAB_DARK: Color = Color(0.24, 0.20, 0.16)
 
 static var _materials: Dictionary[String, StandardMaterial3D] = {}
 static var _meshes: Dictionary[String, Mesh] = {}
@@ -180,6 +187,53 @@ static func build(model: String, team: Color) -> Node3D:
 			_command_lab(root, team)
 		"airpad":
 			_airpad(root, team)
+		"levy":
+			_soldier(root, team, IRON_DARK, DRAB, DRAB_DARK)
+			box(root, Vector3(0.6, 0.07, 0.08), Vector3(0.25, 0.9, 0.2), mat(GUNMETAL))
+		"sapper":
+			_soldier(root, team, BRASS, DRAB, DRAB_DARK)
+			box(root, Vector3(0.24, 0.5, 0.44), Vector3(-0.28, 0.9, 0.0), mat(RUST))
+			cyl(root, 0.2, 0.2, 0.08, Vector3(-0.42, 0.95, 0.0), mat(IRON_DARK), 8, Vector3(0.0, 0.0, PI * 0.5))
+		"breaker":
+			_soldier(root, team, IRON_DARK, DRAB, DRAB_DARK)
+			barrel(root, 0.13, 1.1, Vector3(-0.4, 1.25, 0.22), mat(IRON))
+			box(root, Vector3(0.2, 0.3, 0.3), Vector3(-0.42, 1.25, 0.22), mat(RUST))
+		"scow":
+			_scow(root, team)
+		"ratchet":
+			_ratchet(root, team)
+		"tusk":
+			_tusk(root, team)
+		"harrow":
+			_harrow(root, team)
+		"anvil":
+			_anvil(root, team)
+		"mauler":
+			_mauler(root, team)
+		"crawler":
+			_crawler(root, team, false)
+		"crawler_factory":
+			_crawler(root, team, true)
+		"foundry_core":
+			_foundry_core(root, team)
+		"pylon":
+			_pylon(root, team)
+		"scrapyard":
+			_scrapyard(root, team)
+		"muster_hall":
+			_muster_hall(root, team)
+		"bastion":
+			_bastion(root, team)
+		"skyspike":
+			_skyspike(root, team)
+		"arsenal":
+			_arsenal(root, team)
+		"mine":
+			cyl(root, 0.45, 0.55, 0.14, Vector3(0.0, 0.07, 0.0), mat(IRON_DARK), 8)
+			cyl(root, 0.12, 0.12, 0.12, Vector3(0.0, 0.2, 0.0), team_mat(team), 6)
+			for i: int in 3:
+				var ang: float = float(i) * TAU / 3.0
+				cyl(root, 0.02, 0.02, 0.2, Vector3(cos(ang) * 0.3, 0.22, sin(ang) * 0.3), mat(METAL), 4)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -260,9 +314,9 @@ static func build_uplink(light: Color = Color(0.9, 0.9, 0.95)) -> Node3D:
 
 # --------------------------------------------------------------- infantry
 
-static func _soldier(root: Node3D, team: Color, helmet: Color) -> void:
-	box(root, Vector3(0.26, 0.62, 0.36), Vector3(0.0, 0.31, 0.0), mat(UNIFORM_DARK))
-	box(root, Vector3(0.34, 0.52, 0.48), Vector3(0.0, 0.86, 0.0), mat(UNIFORM))
+static func _soldier(root: Node3D, team: Color, helmet: Color, uniform: Color = UNIFORM, legs: Color = UNIFORM_DARK) -> void:
+	box(root, Vector3(0.26, 0.62, 0.36), Vector3(0.0, 0.31, 0.0), mat(legs))
+	box(root, Vector3(0.34, 0.52, 0.48), Vector3(0.0, 0.86, 0.0), mat(uniform))
 	box(root, Vector3(0.37, 0.16, 0.51), Vector3(0.0, 0.98, 0.0), team_mat(team))
 	ball(root, 0.19, Vector3(0.02, 1.3, 0.0), mat(helmet), 6)
 
@@ -536,3 +590,221 @@ static func _airpad(root: Node3D, team: Color) -> void:
 	box(root, Vector3(0.9, 2.6, 0.9), Vector3(2.2, 1.5, -2.2), mat(CONCRETE))
 	box(root, Vector3(1.2, 0.5, 1.2), Vector3(2.2, 3.0, -2.2), mat(GLASS, 0.3, 0.3, 0.2))
 	ball(root, 0.16, Vector3(2.2, 3.5, -2.2), mat(team, 1.4))
+
+
+# ------------------------------------------------------------ Foundry Pact
+
+static func _tracks(root: Node3D, length: float, half_width: float, height: float = 0.55) -> void:
+	box(root, Vector3(length, height, 0.5), Vector3(0.0, height * 0.5, half_width), mat(RUBBER))
+	box(root, Vector3(length, height, 0.5), Vector3(0.0, height * 0.5, -half_width), mat(RUBBER))
+	box(root, Vector3(length * 0.96, 0.08, 0.54), Vector3(0.0, height + 0.02, half_width), mat(IRON_DARK))
+	box(root, Vector3(length * 0.96, 0.08, 0.54), Vector3(0.0, height + 0.02, -half_width), mat(IRON_DARK))
+
+
+static func _stack(root: Node3D, pos: Vector3, height: float, radius: float = 0.14) -> void:
+	cyl(root, radius * 0.8, radius, height, pos + Vector3(0.0, height * 0.5, 0.0), mat(IRON_DARK), 6)
+	cyl(root, radius * 0.9, radius * 0.9, 0.06, pos + Vector3(0.0, height, 0.0), mat(FURNACE, 1.2), 6)
+
+
+static func _scow(root: Node3D, team: Color) -> void:
+	box(root, Vector3(2.4, 0.35, 1.3), Vector3(0.0, 0.52, 0.0), mat(IRON_DARK))
+	box(root, Vector3(0.75, 0.8, 1.3), Vector3(0.8, 1.05, 0.0), mat(IRON))
+	box(root, Vector3(0.06, 0.2, 1.0), Vector3(1.19, 1.2, 0.0), mat(GLASS, 0.15, 0.3, 0.2))
+	box(root, Vector3(1.55, 0.75, 1.4), Vector3(-0.4, 1.0, 0.0), mat(RUST, 0.0, 0.4, 0.7))
+	box(root, Vector3(1.57, 0.16, 1.42), Vector3(-0.4, 1.3, 0.0), team_mat(team))
+	box(root, Vector3(1.3, 0.2, 1.1), Vector3(-0.4, 1.42, 0.0), mat(BRASS, 0.0, 0.6, 0.5))
+	for x: float in [-0.85, 0.0, 0.85]:
+		wheel(root, 0.36, 0.26, Vector3(x, 0.36, 0.68))
+		wheel(root, 0.36, 0.26, Vector3(x, 0.36, -0.68))
+
+
+static func _ratchet(root: Node3D, team: Color) -> void:
+	box(root, Vector3(2.1, 0.3, 1.15), Vector3(0.0, 0.5, 0.0), mat(IRON_DARK))
+	box(root, Vector3(0.7, 0.7, 1.15), Vector3(0.7, 0.98, 0.0), mat(IRON))
+	box(root, Vector3(1.2, 0.4, 1.1), Vector3(-0.4, 0.85, 0.0), mat(HAZARD))
+	box(root, Vector3(1.22, 0.1, 1.12), Vector3(-0.4, 1.08, 0.0), team_mat(team))
+	cyl(root, 0.08, 0.1, 1.3, Vector3(-0.6, 1.6, 0.0), mat(IRON), 5)
+	box(root, Vector3(1.3, 0.1, 0.1), Vector3(-0.05, 2.2, 0.0), mat(HAZARD), Vector3(0.0, 0.0, 0.25))
+	box(root, Vector3(0.2, 0.3, 0.2), Vector3(0.55, 1.95, 0.0), mat(GUNMETAL))
+	for x: float in [-0.7, 0.7]:
+		wheel(root, 0.32, 0.24, Vector3(x, 0.32, 0.6))
+		wheel(root, 0.32, 0.24, Vector3(x, 0.32, -0.6))
+
+
+static func _tusk(root: Node3D, team: Color) -> void:
+	_tracks(root, 2.6, 0.72)
+	box(root, Vector3(2.3, 0.6, 1.3), Vector3(-0.05, 0.75, 0.0), mat(IRON))
+	wedge(root, Vector3(0.7, 0.6, 1.3), Vector3(1.45, 0.75, 0.0), mat(IRON), 0.0)
+	box(root, Vector3(2.32, 0.12, 1.32), Vector3(-0.05, 0.6, 0.0), team_mat(team))
+	_stack(root, Vector3(-1.0, 1.05, 0.45), 0.5, 0.1)
+	var t: Node3D = _turret(root, Vector3(0.1, 1.05, 0.0))
+	box(t, Vector3(1.2, 0.5, 1.15), Vector3(0.0, 0.25, 0.0), mat(IRON_DARK))
+	barrel(t, 0.15, 1.1, Vector3(0.5, 0.26, 0.0), mat(GUNMETAL))
+	cyl(t, 0.2, 0.2, 0.3, Vector3(1.6, 0.26, 0.0), mat(GUNMETAL), 6, Vector3(0.0, 0.0, -PI * 0.5))
+
+
+static func _harrow(root: Node3D, team: Color) -> void:
+	box(root, Vector3(1.5, 0.5, 0.45), Vector3(-0.45, 0.27, 0.62), mat(RUBBER))
+	box(root, Vector3(1.5, 0.5, 0.45), Vector3(-0.45, 0.27, -0.62), mat(RUBBER))
+	wheel(root, 0.32, 0.24, Vector3(0.85, 0.32, 0.62))
+	wheel(root, 0.32, 0.24, Vector3(0.85, 0.32, -0.62))
+	box(root, Vector3(2.3, 0.45, 1.15), Vector3(0.0, 0.66, 0.0), mat(IRON))
+	box(root, Vector3(0.6, 0.5, 1.1), Vector3(0.75, 1.1, 0.0), mat(IRON_DARK))
+	box(root, Vector3(2.32, 0.1, 1.17), Vector3(0.0, 0.5, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(-0.45, 0.9, 0.0))
+	cyl(t, 0.5, 0.55, 0.3, Vector3(0.0, 0.15, 0.0), mat(IRON_DARK), 8)
+	for z: float in [-0.22, 0.22]:
+		cyl(t, 0.05, 0.05, 1.5, Vector3(0.5, 0.75, z), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.85))
+	box(t, Vector3(0.5, 0.5, 0.7), Vector3(-0.1, 0.5, 0.0), mat(IRON))
+	box(t, Vector3(0.3, 0.08, 0.72), Vector3(-0.2, 0.78, 0.0), team_mat(team))
+
+
+static func _anvil(root: Node3D, team: Color) -> void:
+	_tracks(root, 2.5, 0.7)
+	box(root, Vector3(2.3, 0.45, 1.25), Vector3(0.0, 0.72, 0.0), mat(IRON))
+	box(root, Vector3(0.6, 0.55, 1.2), Vector3(0.8, 1.2, 0.0), mat(IRON_DARK))
+	box(root, Vector3(2.32, 0.1, 1.27), Vector3(0.0, 0.58, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(-0.45, 0.95, 0.0))
+	cyl(t, 0.55, 0.6, 0.25, Vector3(0.0, 0.12, 0.0), mat(IRON_DARK), 8)
+	cyl(t, 0.24, 0.28, 1.5, Vector3(0.3, 0.85, 0.0), mat(GUNMETAL), 7, Vector3(0.0, 0.0, -0.5))
+	cyl(t, 0.3, 0.3, 0.12, Vector3(0.66, 1.52, 0.0), mat(BRASS, 0.0, 0.6, 0.5), 7, Vector3(0.0, 0.0, -0.5))
+
+
+static func _mauler(root: Node3D, team: Color) -> void:
+	_tracks(root, 3.1, 0.9, 0.7)
+	box(root, Vector3(2.8, 0.6, 1.5), Vector3(-0.05, 0.9, 0.0), mat(IRON))
+	wedge(root, Vector3(0.7, 0.6, 1.5), Vector3(1.7, 0.9, 0.0), mat(IRON), 0.0)
+	box(root, Vector3(3.12, 0.12, 0.56), Vector3(0.0, 0.8, 0.9), team_mat(team))
+	box(root, Vector3(3.12, 0.12, 0.56), Vector3(0.0, 0.8, -0.9), team_mat(team))
+	_stack(root, Vector3(-1.3, 1.2, 0.5), 0.7)
+	_stack(root, Vector3(-1.3, 1.2, -0.5), 0.7)
+	var t: Node3D = _turret(root, Vector3(-0.1, 1.2, 0.0))
+	box(t, Vector3(1.6, 0.6, 1.4), Vector3(0.0, 0.3, 0.0), mat(IRON_DARK))
+	wedge(t, Vector3(0.5, 0.6, 1.4), Vector3(1.05, 0.3, 0.0), mat(IRON_DARK), 0.0)
+	barrel(t, 0.14, 2.0, Vector3(1.1, 0.32, 0.0), mat(GUNMETAL))
+	cyl(t, 0.2, 0.2, 0.4, Vector3(3.0, 0.32, 0.0), mat(GUNMETAL), 6, Vector3(0.0, 0.0, -PI * 0.5))
+	box(t, Vector3(0.7, 0.1, 0.8), Vector3(-0.3, 0.65, 0.0), team_mat(team))
+	box(t, Vector3(0.4, 0.3, 0.4), Vector3(-0.4, 0.8, 0.4), mat(IRON))
+
+
+## The Crawler as a vehicle, or unfolded into its factory when deployed.
+static func _crawler(root: Node3D, team: Color, deployed: bool) -> void:
+	if not deployed:
+		_tracks(root, 3.4, 1.0, 0.7)
+		box(root, Vector3(3.2, 0.9, 1.7), Vector3(0.0, 1.05, 0.0), mat(IRON))
+		box(root, Vector3(0.8, 0.6, 1.5), Vector3(1.1, 1.8, 0.0), mat(IRON_DARK))
+		box(root, Vector3(0.06, 0.25, 1.2), Vector3(1.52, 1.85, 0.0), mat(GLASS, 0.15, 0.3, 0.2))
+		box(root, Vector3(3.22, 0.16, 1.72), Vector3(0.0, 0.8, 0.0), team_mat(team))
+		box(root, Vector3(1.9, 0.25, 0.25), Vector3(-0.5, 1.7, 0.6), mat(HAZARD))
+		box(root, Vector3(1.9, 0.25, 0.25), Vector3(-0.5, 1.7, -0.6), mat(HAZARD))
+		_stack(root, Vector3(-1.3, 1.5, 0.0), 0.9, 0.18)
+		return
+	box(root, Vector3(5.7, 0.4, 5.7), Vector3(0.0, 0.0, 0.0), mat(IRON_DARK))
+	box(root, Vector3(4.6, 1.4, 2.2), Vector3(0.0, 0.9, -1.4), mat(IRON))
+	box(root, Vector3(4.65, 0.2, 2.25), Vector3(0.0, 1.2, -1.4), team_mat(team))
+	box(root, Vector3(1.0, 0.7, 1.6), Vector3(1.6, 1.95, -1.4), mat(IRON_DARK))
+	_stack(root, Vector3(-1.7, 1.6, -1.6), 1.6, 0.22)
+	_stack(root, Vector3(-1.0, 1.6, -1.6), 1.2, 0.18)
+	# Unfolded assembly gantry over the yard.
+	for x: float in [-2.1, 2.1]:
+		cyl(root, 0.12, 0.12, 2.6, Vector3(x, 1.5, 1.9), mat(HAZARD), 5)
+		cyl(root, 0.12, 0.12, 2.6, Vector3(x, 1.5, 0.0), mat(HAZARD), 5)
+		box(root, Vector3(0.22, 0.22, 2.1), Vector3(x, 2.8, 0.95), mat(HAZARD))
+	box(root, Vector3(4.4, 0.22, 0.3), Vector3(0.0, 2.8, 0.95), mat(HAZARD))
+	box(root, Vector3(0.5, 0.6, 0.5), Vector3(0.4, 2.4, 0.95), mat(GUNMETAL))
+	box(root, Vector3(3.4, 0.08, 1.8), Vector3(0.0, 0.26, 1.0), mat(CONCRETE_DARK))
+	box(root, Vector3(0.8, 0.5, 0.6), Vector3(-1.0, 0.5, 1.2), mat(RUST, 0.0, 0.4, 0.7))
+
+
+static func _foundry_core(root: Node3D, team: Color) -> void:
+	box(root, Vector3(7.7, 0.5, 7.7), Vector3(0.0, 0.0, 0.0), mat(IRON_DARK))
+	box(root, Vector3(6.0, 2.4, 6.0), Vector3(0.0, 1.4, 0.0), mat(IRON))
+	box(root, Vector3(6.1, 0.4, 6.1), Vector3(0.0, 1.0, 0.0), team_mat(team))
+	box(root, Vector3(4.0, 1.4, 4.0), Vector3(0.0, 3.3, 0.0), mat(IRON_DARK))
+	for sx: float in [-1.0, 1.0]:
+		wedge(root, Vector3(1.2, 2.6, 5.0), Vector3(sx * 3.4, 1.5, 0.0), mat(IRON_DARK), 0.0 if sx > 0.0 else 1.0)
+	# Furnace mouth and stacks.
+	box(root, Vector3(2.0, 1.2, 0.2), Vector3(0.0, 0.9, 3.02), mat(FURNACE, 1.6))
+	box(root, Vector3(2.4, 0.3, 0.3), Vector3(0.0, 1.65, 3.05), mat(IRON_DARK))
+	_stack(root, Vector3(-1.4, 4.0, -1.4), 2.6, 0.4)
+	_stack(root, Vector3(-0.3, 4.0, -1.5), 1.9, 0.32)
+	_stack(root, Vector3(-1.5, 4.0, -0.3), 1.5, 0.28)
+	cyl(root, 0.22, 0.34, 3.2, Vector3(1.2, 5.6, 1.2), mat(IRON, 0.0, 0.5, 0.5), 6)
+	ring(root, 0.8, 1.0, Vector3(1.2, 6.2, 1.2), team_mat(team))
+	ball(root, 0.28, Vector3(1.2, 7.3, 1.2), mat(team, 1.4))
+	var t: Node3D = _turret(root, Vector3(1.2, 4.0, -1.2))
+	box(t, Vector3(0.9, 0.5, 0.8), Vector3(0.0, 0.25, 0.0), mat(IRON_DARK))
+	barrel(t, 0.07, 0.9, Vector3(0.4, 0.3, 0.16), mat(GUNMETAL))
+	barrel(t, 0.07, 0.9, Vector3(0.4, 0.3, -0.16), mat(GUNMETAL))
+
+
+static func _pylon(root: Node3D, team: Color) -> void:
+	cyl(root, 0.85, 0.98, 0.5, Vector3(0.0, 0.25, 0.0), mat(IRON_DARK), 6)
+	cyl(root, 0.5, 0.75, 1.2, Vector3(0.0, 1.1, 0.0), mat(IRON), 6)
+	for i: int in 3:
+		var ang: float = float(i) * TAU / 3.0
+		wedge(root, Vector3(0.7, 1.3, 0.25), Vector3(cos(ang) * 0.75, 0.9, sin(ang) * 0.75), mat(IRON_DARK), 0.0, Vector3(0.0, -ang, 0.0))
+	cyl(root, 0.14, 0.2, 1.3, Vector3(0.0, 2.35, 0.0), mat(BRASS, 0.0, 0.6, 0.5), 6)
+	ring(root, 0.5, 0.66, Vector3(0.0, 2.5, 0.0), team_mat(team))
+	ball(root, 0.2, Vector3(0.0, 3.15, 0.0), mat(team, 1.4))
+
+
+static func _scrapyard(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.4, 5.7), Vector3(0.0, 0.0, 0.0), mat(IRON_DARK))
+	box(root, Vector3(2.6, 1.8, 2.4), Vector3(-1.2, 1.1, -1.3), mat(IRON))
+	box(root, Vector3(2.65, 0.22, 2.45), Vector3(-1.2, 1.7, -1.3), team_mat(team))
+	_stack(root, Vector3(-2.0, 2.0, -2.0), 1.3, 0.24)
+	# Crusher and scrap heaps.
+	box(root, Vector3(1.6, 1.0, 1.6), Vector3(1.5, 0.7, -1.4), mat(IRON_DARK))
+	box(root, Vector3(1.2, 0.3, 1.2), Vector3(1.5, 1.6, -1.4), mat(HAZARD))
+	cyl(root, 0.1, 0.1, 0.7, Vector3(1.5, 1.3, -1.4), mat(METAL), 5)
+	for k: int in 6:
+		var ang: float = float(k) * 1.1
+		box(root, Vector3(0.7, 0.5, 0.6), Vector3(cos(ang) * 1.3 + 0.2, 0.45 + float(k % 2) * 0.3, 1.5 + sin(ang) * 0.7), mat(RUST if k % 2 == 0 else BRASS, 0.0, 0.5, 0.6), Vector3(0.2, ang, 0.3))
+
+
+static func _muster_hall(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.4, 5.7), Vector3(0.0, 0.0, 0.0), mat(IRON_DARK))
+	box(root, Vector3(4.8, 1.5, 3.4), Vector3(0.0, 0.95, -0.6), mat(DRAB))
+	box(root, Vector3(5.0, 0.3, 3.6), Vector3(0.0, 1.8, -0.6), mat(IRON_DARK))
+	box(root, Vector3(4.85, 0.22, 3.45), Vector3(0.0, 1.45, -0.6), team_mat(team))
+	for x: float in [-1.8, -0.6, 0.6, 1.8]:
+		box(root, Vector3(0.35, 1.5, 0.35), Vector3(x, 0.95, 1.2), mat(IRON))
+	box(root, Vector3(1.2, 1.2, 0.1), Vector3(0.0, 0.8, 1.12), mat(GUNMETAL))
+	box(root, Vector3(1.4, 0.9, 1.2), Vector3(-1.8, 0.65, 2.0), mat(DRAB_DARK))
+	cyl(root, 0.05, 0.05, 3.0, Vector3(2.3, 1.7, 2.1), mat(METAL), 5)
+	wedge(root, Vector3(0.9, 0.6, 0.05), Vector3(2.75, 2.85, 2.1), team_mat(team), 0.0)
+	_stack(root, Vector3(1.9, 1.95, -1.6), 0.9, 0.2)
+
+
+static func _bastion(root: Node3D, team: Color) -> void:
+	cyl(root, 0.92, 0.98, 0.7, Vector3(0.0, 0.35, 0.0), mat(IRON_DARK), 6)
+	ring(root, 0.86, 0.96, Vector3(0.0, 0.7, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 0.75, 0.0))
+	cyl(t, 0.6, 0.72, 0.6, Vector3(0.0, 0.3, 0.0), mat(IRON), 6)
+	barrel(t, 0.14, 1.3, Vector3(0.4, 0.34, 0.0), mat(GUNMETAL))
+	box(t, Vector3(0.4, 0.12, 0.5), Vector3(-0.2, 0.66, 0.0), team_mat(team))
+
+
+static func _skyspike(root: Node3D, team: Color) -> void:
+	cyl(root, 0.88, 0.98, 0.5, Vector3(0.0, 0.25, 0.0), mat(IRON_DARK), 6)
+	cyl(root, 0.4, 0.55, 0.7, Vector3(0.0, 0.85, 0.0), mat(IRON), 6)
+	ring(root, 0.84, 0.92, Vector3(0.0, 0.5, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 1.2, 0.0))
+	box(t, Vector3(0.6, 0.5, 1.0), Vector3(0.0, 0.25, 0.0), mat(IRON_DARK))
+	for z: float in [-0.35, 0.0, 0.35]:
+		cyl(t, 0.02, 0.06, 1.7, Vector3(0.45, 0.95, z), mat(BRASS, 0.0, 0.6, 0.5), 5, Vector3(0.0, 0.0, -0.6))
+	box(t, Vector3(0.3, 0.1, 1.02), Vector3(-0.1, 0.52, 0.0), team_mat(team))
+
+
+static func _arsenal(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.4, 5.7), Vector3(0.0, 0.0, 0.0), mat(IRON_DARK))
+	box(root, Vector3(4.6, 2.2, 4.0), Vector3(0.0, 1.3, -0.3), mat(IRON))
+	box(root, Vector3(4.65, 0.3, 4.05), Vector3(0.0, 1.9, -0.3), team_mat(team))
+	wedge(root, Vector3(4.0, 1.0, 4.6), Vector3(0.0, 2.9, -0.3), mat(IRON_DARK), 0.5, Vector3(0.0, PI * 0.5, 0.0))
+	box(root, Vector3(2.2, 1.6, 0.14), Vector3(0.0, 1.0, 1.75), mat(GUNMETAL))
+	box(root, Vector3(2.6, 0.2, 0.2), Vector3(0.0, 1.9, 1.8), mat(HAZARD))
+	_stack(root, Vector3(-1.8, 2.4, -1.8), 2.0, 0.3)
+	_stack(root, Vector3(1.8, 2.4, -1.8), 2.0, 0.3)
+	cyl(root, 0.7, 0.7, 0.14, Vector3(0.0, 2.6, 1.72), mat(BRASS, 0.0, 0.7, 0.4), 8, Vector3(PI * 0.5, 0.0, 0.0))
+	box(root, Vector3(1.0, 0.6, 0.9), Vector3(2.1, 0.7, 2.1), mat(RUST, 0.0, 0.4, 0.7))

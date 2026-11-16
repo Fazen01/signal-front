@@ -7,7 +7,7 @@ extends RefCounted
 
 enum Type {
 	MOVE, ATTACK, ATTACK_MOVE, STOP, HOLD, HARVEST, BUILD, REPAIR, TRAIN, CANCEL_TRAIN,
-	CANCEL_BUILDING, RALLY, CAPTURE, DIRECTIVE, SURRENDER, UNLOCK,
+	CANCEL_BUILDING, RALLY, CAPTURE, DIRECTIVE, SURRENDER, UNLOCK, DEPLOY, PACK,
 }
 
 var type: int = Type.MOVE
@@ -109,6 +109,27 @@ static func capture(p: int, unit_ids: PackedInt32Array, target: int, queued: boo
 	c.ids = unit_ids
 	c.target_id = target
 	c.queue = queued
+	return c
+
+
+## Send deployable units (the Foundry Crawler) to set up with their
+## footprint's top-left cell at `at_cell`.
+static func deploy(p: int, unit_ids: PackedInt32Array, at_cell: Vector2i, queued: bool = false) -> SimCommand:
+	var c: SimCommand = SimCommand.new()
+	c.type = Type.DEPLOY
+	c.player = p
+	c.ids = unit_ids
+	c.cell = at_cell
+	c.queue = queued
+	return c
+
+
+## Pack a deployed building back up into its unit.
+static func pack(p: int, building: int) -> SimCommand:
+	var c: SimCommand = SimCommand.new()
+	c.type = Type.PACK
+	c.player = p
+	c.target_id = building
 	return c
 
 

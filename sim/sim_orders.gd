@@ -152,7 +152,37 @@ static func finish_order(e: SimEntity) -> void:
 		e.chasing = false
 
 
+## Passive effects that run whatever the unit is doing.
+static func _upkeep(w: SimWorld, e: SimEntity) -> void:
+	var f: FactionDef = w.players[e.owner].faction
+	# Foundry: Linked vehicles patch themselves up when left alone.
+	if f.linked_vehicle_repair > 0.0 and e.linked and e.hp < e.max_hp and e.def.is_vehicle():
+		if w.tick_count - e.last_hit_tick > 80:
+			e.hp = minf(e.max_hp, e.hp + e.max_hp * f.linked_vehicle_repair * SimWorld.DT)
+	# Repair trucks mend the most damaged friendly vehicle or building nearby.
+	if e.def.repair_rate > 0.0 and (w.tick_count + e.id) % 5 == 0:
+		var worst: SimEntity = null
+		var worst_frac: float = 0.999
+		for n: SimEntity in w.query_radius(e.pos, e.def.repair_radius + SimCombat.BIG_RADIUS):
+			if n == e or n.owner != e.owner or n.def == null or not n.constructed:
+				continue
+			if n.kind == SimEntity.Kind.UNIT and not n.def.is_vehicle():
+				continue
+			if n.pos.distance_to(e.pos) - n.radius > e.def.repair_radius:
+				continue
+			var frac: float = n.hp / n.max_hp
+			if frac < worst_frac:
+				worst_frac = frac
+				worst = n
+		if worst != null:
+			worst.hp = minf(worst.max_hp, worst.hp + e.def.repair_rate * 0.25)
+			e.target_id = 0
+			e.work_ticks = worst.id  # remembered so the view can draw the repair beam
+
+
 static func update_unit(w: SimWorld, e: SimEntity) -> void:
+	if e.owner >= 0:
+		_upkeep(w, e)
 	var o: SimOrder = e.current_order()
 	if o == null:
 		_idle(w, e)

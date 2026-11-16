@@ -1,11 +1,31 @@
 {
 	"aegis": {
 		"name": "Aegis Directorate",
-		"desc": "Disciplined, precise, networked. Linked units gain weapon range; Dark hits them hardest.",
+		"desc": "Disciplined, precise, networked. Long-range relays, aircraft and artillery. Linked units gain weapon range; Dark hits them hardest.",
 		"hq": "hq",
 		"start_units": ["field_engineer", "field_engineer", "hauler", "hauler", "trooper", "trooper"],
 		"linked_range_bonus": 0.15,
 		"dark_rof_mult": 0.6,
+		"roles": {
+			"builder": "field_engineer", "hauler": "hauler", "relay": "relay", "barracks": "barracks",
+			"works": "vehicle_works", "depot": "depot", "turret_ground": "sentry_turret",
+			"turret_armor": "lance_battery", "turret_air": "flak_post", "tier3": "command_lab",
+			"airpad": "airpad"
+		},
+		"playable": true
+	},
+	"foundry": {
+		"name": "Foundry Pact",
+		"desc": "Slow heavy industry. Cheap armored Pylons, mobile Crawler factories, mines and the toughest tanks. Linked vehicles repair themselves.",
+		"hq": "foundry_core",
+		"start_units": ["sapper", "sapper", "scow", "scow", "levy", "levy", "levy"],
+		"linked_vehicle_repair": 0.012,
+		"roles": {
+			"builder": "sapper", "hauler": "scow", "relay": "pylon", "barracks": "muster_hall",
+			"mobile_unit": "crawler", "mobile_factory": "crawler_factory", "depot": "scrapyard",
+			"turret_ground": "bastion", "turret_armor": "bastion", "turret_air": "skyspike",
+			"tier3": "arsenal"
+		},
 		"playable": true
 	}
 }

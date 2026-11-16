@@ -66,5 +66,67 @@
 		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"produces": ["kestrel", "scout_drone"], "model": "airpad",
 		"hotkey": "I", "requires": ["command_lab"]
+	},
+	"foundry_core": {
+		"name": "Foundry Core", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "foundry", "tier": 1, "cost": 2000, "build_time": 60.0,
+		"hp": 3600, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true,
+		"produces": ["sapper", "scow", "crawler"], "model": "foundry_core", "buildable": false
+	},
+	"pylon": {
+		"name": "Pylon", "desc": "Cheap armored relay with a short radius. Build many: a dense web is hard to cut.",
+		"faction": "foundry", "tier": 1, "cost": 80, "build_time": 8.0,
+		"hp": 900, "armor": "structure", "footprint": [1, 1], "sight": 8.0,
+		"signal_radius": 11.0, "bandwidth_provided": 5, "model": "pylon", "hotkey": "R"
+	},
+	"scrapyard": {
+		"name": "Scrapyard", "desc": "Drop-off point for salvage. Builds Scows.",
+		"faction": "foundry", "tier": 1, "cost": 230, "build_time": 20.0,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["scow"], "model": "scrapyard", "hotkey": "P"
+	},
+	"muster_hall": {
+		"name": "Muster Hall", "desc": "Trains infantry and unlocks the Crawler.",
+		"faction": "foundry", "tier": 1, "cost": 180, "build_time": 16.0,
+		"hp": 1400, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["levy", "breaker", "sapper"], "model": "muster_hall", "hotkey": "B"
+	},
+	"crawler_factory": {
+		"name": "Crawler (deployed)", "desc": "A deployed Crawler. Assembles vehicles; pack it up to move the factory.",
+		"faction": "foundry", "tier": 2, "cost": 420, "build_time": 22.0,
+		"hp": 950, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"produces": ["scow", "ratchet", "tusk", "harrow", "anvil", "mauler"], "packs_to": "crawler",
+		"model": "crawler_factory", "buildable": false
+	},
+	"bastion": {
+		"name": "Bastion", "desc": "Heavy gun emplacement. Shells ground targets.",
+		"faction": "foundry", "tier": 2, "cost": 220, "build_time": 15.0,
+		"hp": 1100, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["bastion_gun"], "turret": true, "model": "bastion",
+		"hotkey": "T", "requires": ["muster_hall"]
+	},
+	"skyspike": {
+		"name": "Skyspike", "desc": "Anti-air emplacement. Cannot fire at ground targets.",
+		"faction": "foundry", "tier": 2, "cost": 190, "build_time": 14.0,
+		"hp": 800, "armor": "structure", "footprint": [1, 1], "sight": 13.0,
+		"weapons": ["flak_burst"], "turret": true, "model": "skyspike",
+		"hotkey": "K", "requires": ["muster_hall"]
+	},
+	"arsenal": {
+		"name": "Arsenal", "desc": "Tier 3: unlocks the Mauler. Directives recharge 25% faster.",
+		"faction": "foundry", "tier": 3, "cost": 480, "build_time": 30.0,
+		"hp": 1700, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "arsenal",
+		"hotkey": "C", "requires": ["muster_hall"]
+	},
+	"mine": {
+		"name": "Mine", "desc": "Hidden explosive. Goes off when an enemy ground unit drives over it. Can be laid anywhere.",
+		"faction": "foundry", "tier": 1, "cost": 40, "build_time": 2.5,
+		"hp": 60, "armor": "structure", "footprint": [1, 1], "radius": 0.6, "sight": 2.0,
+		"blocks": false, "needs_coverage": false, "stealth": true, "detect_range": 2.2,
+		"mine_trigger": 1.7, "mine_damage": 160.0, "mine_splash": 2.6,
+		"model": "mine", "hotkey": "M"
 	}
 }

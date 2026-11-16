@@ -30,6 +30,10 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 				for e: SimEntity in SimOrders.own_units(w, cmd):
 					if e.def.builder:
 						SimOrders.give_order(e, SimOrder.make(SimOrder.Type.CAPTURE, site.pos, site.id), cmd.queue)
+		SimCommand.Type.DEPLOY:
+			_cmd_deploy(w, cmd)
+		SimCommand.Type.PACK:
+			_cmd_pack(w, cmd)
 		SimCommand.Type.RALLY:
 			var b: SimEntity = _own_building(w, cmd)
 			if b != null:
@@ -81,7 +85,9 @@ static func placement_error(w: SimWorld, player_id: int, def: EntityDef, cell: V
 		return "Requires %s" % w.data.entity(def.requires[0]).name
 	for y: int in range(cell.y, cell.y + def.footprint.y):
 		for x: int in range(cell.x, cell.x + def.footprint.x):
-			if not w.map.is_cell_buildable(Vector2i(x, y)):
+			var c: Vector2i = Vector2i(x, y)
+			# Things that do not block (mines) only need walkable ground.
+			if not (w.map.is_cell_buildable(c) if def.blocks else w.map.is_cell_passable(c)):
 				return "Ground is blocked"
 	var centre: Vector2 = Vector2(
 		(float(cell.x) + float(def.footprint.x) * 0.5) * SimMap.CELL,
@@ -95,7 +101,34 @@ static func placement_error(w: SimWorld, player_id: int, def: EntityDef, cell: V
 		if other.kind == SimEntity.Kind.UNIT and w.are_enemies(player_id, other.owner) and not other.def.is_air():
 			if Rect2i(cell, def.footprint).has_point(w.map.cell_of(other.pos)):
 				return "Enemy units in the way"
+	if not def.needs_coverage:
+		return ""
 	return SimSignal.placement_error(w, player_id, def, centre)
+
+
+## Why a deployable unit cannot set up with its footprint at `cell`, or "".
+static func deploy_error(w: SimWorld, player_id: int, unit_def: EntityDef, cell: Vector2i) -> String:
+	var bdef: EntityDef = w.data.entity(unit_def.deploys_to)
+	if bdef == null:
+		return "Cannot deploy that"
+	for y: int in range(cell.y, cell.y + bdef.footprint.y):
+		for x: int in range(cell.x, cell.x + bdef.footprint.x):
+			if not w.map.is_cell_buildable(Vector2i(x, y)):
+				return "Ground is blocked"
+	var centre: Vector2 = footprint_centre(cell, bdef)
+	for other: SimEntity in w.query_radius(centre, bdef.radius * SQUARE + 3.0):
+		if (other.kind == SimEntity.Kind.FIELD or other.kind == SimEntity.Kind.UPLINK) and other.pos.distance_to(centre) < other.radius + bdef.radius:
+			return "Too close to a salvage field or uplink"
+	if not SimSignal.is_covered(w, player_id, centre):
+		return "Must deploy inside your signal coverage"
+	return ""
+
+
+static func footprint_centre(cell: Vector2i, def: EntityDef) -> Vector2:
+	return Vector2(
+		(float(cell.x) + float(def.footprint.x) * 0.5) * SimMap.CELL,
+		(float(cell.y) + float(def.footprint.y) * 0.5) * SimMap.CELL
+	)
 
 
 static func can_place(w: SimWorld, player_id: int, def: EntityDef, cell: Vector2i) -> bool:
@@ -121,7 +154,8 @@ static func _cmd_build(w: SimWorld, cmd: SimCommand) -> void:
 	p.salvage -= def.cost
 	p.stat_salvage_spent += def.cost
 	var site: SimEntity = w.spawn_building(def.id, cmd.player, cmd.cell, false)
-	_evict_units(w, Rect2i(cmd.cell, def.footprint))
+	if def.blocks:
+		_evict_units(w, Rect2i(cmd.cell, def.footprint))
 	var ev: SimEvent = w.emit_event(SimEvent.Type.BUILDING_PLACED, site.id, cmd.player, site.pos)
 	ev.text = def.id
 	for e: SimEntity in builders:
@@ -135,6 +169,68 @@ static func _evict_units(w: SimWorld, rect: Rect2i) -> void:
 			e.pos = w.map.nearest_free_pos(e.pos)
 			if e.moving:
 				SimMovement.start_move(w, e, e.move_goal)
+
+
+static func _cmd_deploy(w: SimWorld, cmd: SimCommand) -> void:
+	for e: SimEntity in SimOrders.own_units(w, cmd):
+		if e.def.deploys_to == "":
+			continue
+		var bdef: EntityDef = w.data.entity(e.def.deploys_to)
+		var order: SimOrder = SimOrder.make(SimOrder.Type.DEPLOY, footprint_centre(cmd.cell, bdef))
+		order.cell = cmd.cell
+		SimOrders.give_order(e, order, cmd.queue)
+		break  # one footprint, one unit
+
+
+static func _update_deploy(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
+	var d: float = e.pos.distance_to(o.pos)
+	var there: bool = d <= 1.0 or (o.started and not e.moving and d <= 3.5)
+	if not there:
+		if not o.started or (not e.moving and w.tick_count >= e.repath_tick):
+			SimMovement.start_move(w, e, o.pos)
+			o.started = true
+			e.repath_tick = w.tick_count + 20
+			if not e.moving:
+				e.stuck_ticks += 20
+		if e.stuck_ticks > 80:
+			SimOrders.finish_order(e)
+		return
+	SimMovement.stop(e)
+	var why: String = deploy_error(w, e.owner, e.def, o.cell)
+	if why != "":
+		w.alert(e.owner, why, e.pos)
+		SimOrders.finish_order(e)
+		return
+	# Swap the unit for its building, keeping its state of repair.
+	var frac: float = e.hp / e.max_hp
+	var owner: int = e.owner
+	var bdef: EntityDef = w.data.entity(e.def.deploys_to)
+	w.players[owner].bandwidth_used -= e.def.bandwidth
+	w.remove_entity(e)
+	var b: SimEntity = w.spawn_building(bdef.id, owner, o.cell, true)
+	b.hp = maxf(1.0, b.max_hp * frac)
+	_evict_units(w, Rect2i(o.cell, bdef.footprint))
+	var ev: SimEvent = w.emit_event(SimEvent.Type.BUILDING_PLACED, b.id, owner, b.pos)
+	ev.text = bdef.id
+
+
+static func _cmd_pack(w: SimWorld, cmd: SimCommand) -> void:
+	var b: SimEntity = _own_building(w, cmd)
+	if b == null or not b.constructed or b.def.packs_to == "":
+		return
+	var p: SimPlayer = w.players[cmd.player]
+	for q: String in b.queue:
+		var refund: int = w.data.entity(q).cost
+		p.salvage += refund
+		p.stat_salvage_spent -= refund
+	b.queue.clear()
+	var frac: float = b.hp / b.max_hp
+	w.on_building_removed(b)
+	w.remove_entity(b)
+	var u: SimEntity = w.spawn_unit(b.def.packs_to, cmd.player, b.pos, PI * 0.5)
+	u.hp = maxf(1.0, u.max_hp * frac)
+	var ev: SimEvent = w.emit_event(SimEvent.Type.UNIT_READY, u.id, cmd.player, u.pos)
+	ev.text = u.def.id
 
 
 static func _cmd_repair(w: SimWorld, cmd: SimCommand) -> void:
@@ -212,6 +308,8 @@ static func update_order(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 			_update_repair(w, e, o)
 		SimOrder.Type.CAPTURE:
 			_update_capture(w, e, o)
+		SimOrder.Type.DEPLOY:
+			_update_deploy(w, e, o)
 		_:
 			SimOrders.finish_order(e)
 
@@ -408,6 +506,10 @@ static func _update_building(w: SimWorld, b: SimEntity) -> void:
 				b.constructed = true
 				w.on_building_completed(b, true)
 		return
+	if b.def.mine_trigger > 0.0:
+		if (w.tick_count + b.id) % 2 == 0:
+			_check_mine(w, b)
+		return
 	if workers > 0 and b.hp < b.max_hp and b.linked:
 		b.hp = minf(b.max_hp, b.hp + b.max_hp * w.data.repair_rate * sqrt(float(workers)) * SimWorld.DT)
 	if b.queue.is_empty() or b.owner < 0:
@@ -426,6 +528,33 @@ static func _update_building(w: SimWorld, b: SimEntity) -> void:
 	b.queue.remove_at(0)
 	b.prod_progress = 0.0
 	_deliver_unit(w, b, def)
+
+
+## A mine goes off when an enemy ground unit comes within its trigger radius.
+static func _check_mine(w: SimWorld, mine: SimEntity) -> void:
+	var tripped: bool = false
+	for n: SimEntity in w.query_radius(mine.pos, mine.def.mine_trigger + 1.6):
+		if n.kind != SimEntity.Kind.UNIT or n.def.is_air() or not w.are_enemies(mine.owner, n.owner):
+			continue
+		if n.pos.distance_to(mine.pos) <= mine.def.mine_trigger + n.radius * 0.5:
+			tripped = true
+			break
+	if not tripped:
+		return
+	var ev: SimEvent = w.emit_event(SimEvent.Type.IMPACT, mine.id, mine.owner, mine.pos)
+	ev.text = "mine"
+	ev.value = mine.def.mine_splash
+	var explosive: int = GameData.DAMAGE_TYPES.find("explosive")
+	for n: SimEntity in w.query_radius(mine.pos, mine.def.mine_splash + SimCombat.BIG_RADIUS):
+		if n.def == null or n == mine or not w.are_enemies(mine.owner, n.owner) or n.def.is_air():
+			continue
+		var d: float = mine.pos.distance_to(n.pos) - n.radius
+		if d > mine.def.mine_splash:
+			continue
+		var falloff: float = 1.0 if d <= 0.0 else lerpf(1.0, 0.4, d / mine.def.mine_splash)
+		SimCombat.apply_damage(w, n, mine.def.mine_damage * falloff, explosive, null, mine.owner)
+	w.on_building_removed(mine)
+	w.remove_entity(mine)
 
 
 static func _deliver_unit(w: SimWorld, b: SimEntity, def: EntityDef) -> void:

@@ -15,6 +15,8 @@ const ENTITY_KEYS: Array[String] = [
 	"hp", "armor", "move", "speed", "turn_rate", "radius", "sight", "weapons", "turret", "model",
 	"hotkey", "requires", "buildable", "builder", "builds", "harvester", "capacity", "footprint",
 	"signal_radius", "signal_root", "depot", "produces", "stealth", "directive_cooldown_mult",
+	"radius", "blocks", "needs_coverage", "packs_to", "deploys_to", "mine_trigger", "mine_damage",
+	"mine_splash", "detect_range", "repair_rate", "repair_radius", "ai_role", "ai_weight",
 ]
 const DIRECTIVE_KEYS: Array[String] = [
 	"name", "desc", "cost", "cooldown", "radius", "duration", "target", "damage", "shells",
@@ -22,7 +24,9 @@ const DIRECTIVE_KEYS: Array[String] = [
 ]
 const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
+	"linked_vehicle_repair", "roles",
 ]
+const AI_ROLES: Array[String] = ["", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air"]
 
 static var _shared: GameData = null
 
@@ -269,6 +273,20 @@ func _load_entities(d: Dictionary, building: bool) -> void:
 		e.depot = bool(src.get("depot", false))
 		e.produces = _strings(src, "produces")
 		e.directive_cooldown_mult = float(src.get("directive_cooldown_mult", 1.0))
+		e.blocks = bool(src.get("blocks", true))
+		e.needs_coverage = bool(src.get("needs_coverage", true))
+		e.packs_to = str(src.get("packs_to", ""))
+		e.deploys_to = str(src.get("deploys_to", ""))
+		e.mine_trigger = float(src.get("mine_trigger", 0.0))
+		e.mine_damage = float(src.get("mine_damage", 0.0))
+		e.mine_splash = float(src.get("mine_splash", 0.0))
+		e.detect_range = float(src.get("detect_range", 5.0))
+		e.repair_rate = float(src.get("repair_rate", 0.0))
+		e.repair_radius = float(src.get("repair_radius", 0.0))
+		e.ai_role = str(src.get("ai_role", ""))
+		e.ai_weight = float(src.get("ai_weight", 0.0))
+		if not AI_ROLES.has(e.ai_role):
+			errors.append("entity %s: unknown ai_role '%s'" % [id, e.ai_role])
 		if building:
 			e.radius = float(src.get("radius", float(maxi(e.footprint.x, e.footprint.y)) * coverage_cell * 0.5))
 		else:
@@ -290,6 +308,11 @@ func _load_factions(d: Dictionary) -> void:
 		f.linked_range_bonus = float(src.get("linked_range_bonus", 0.0))
 		f.dark_rof_mult = float(src.get("dark_rof_mult", -1.0))
 		f.playable = bool(src.get("playable", true))
+		f.linked_vehicle_repair = float(src.get("linked_vehicle_repair", 0.0))
+		if src.has("roles"):
+			var raw_roles: Dictionary = src["roles"]
+			for rk: Variant in raw_roles.keys():
+				f.roles[str(rk)] = str(raw_roles[rk])
 		factions[id] = f
 
 
@@ -365,6 +388,13 @@ func _validate() -> void:
 		for other: String in e.requires + e.builds + e.produces:
 			if not entities.has(other):
 				errors.append("entity %s: refers to unknown entity '%s'" % [e.id, other])
+			elif entities[other].faction != e.faction:
+				errors.append("entity %s: refers to '%s' from another faction" % [e.id, other])
+		for link: String in [e.deploys_to, e.packs_to]:
+			if link != "" and not entities.has(link):
+				errors.append("entity %s: unknown deploy/pack target '%s'" % [e.id, link])
+		if e.deploys_to != "" and entities.has(e.deploys_to) and entities[e.deploys_to].packs_to != e.id:
+			errors.append("entity %s: deploy target must pack back into it" % e.id)
 		for b: String in e.builds:
 			if entities.has(b) and not entities[b].is_building:
 				errors.append("entity %s: builds non-building '%s'" % [e.id, b])
@@ -377,3 +407,10 @@ func _validate() -> void:
 		for u: String in f.start_units:
 			if not entities.has(u):
 				errors.append("faction %s: unknown start unit '%s'" % [f.id, u])
+		for needed: String in ["builder", "hauler", "relay", "barracks", "depot"]:
+			if f.role(needed) == "":
+				errors.append("faction %s: missing AI role '%s'" % [f.id, needed])
+		for rk: String in f.roles.keys():
+			var target: String = f.roles[rk]
+			if not entities.has(target) or entities[target].faction != f.id:
+				errors.append("faction %s: role '%s' points at '%s', which is not one of its entities" % [f.id, rk, target])

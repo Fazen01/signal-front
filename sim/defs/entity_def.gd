@@ -37,6 +37,12 @@ var builder: bool = false
 var builds: Array[String] = []
 var harvester: bool = false
 var stealth: bool = false  ## hidden from enemies while standing still
+var detect_range: float = 5.0  ## how close an enemy must be to see it while stealthed
+var deploys_to: String = ""  ## unit -> building it deploys into
+var repair_rate: float = 0.0  ## hp per second this unit repairs on nearby friends
+var repair_radius: float = 0.0
+var ai_role: String = ""  ## how the skirmish AI classes this unit
+var ai_weight: float = 0.0  ## base production weight for the AI (0 = never built for the army)
 var capacity: int = 0
 
 # Buildings
@@ -46,6 +52,12 @@ var signal_root: bool = false
 var depot: bool = false
 var produces: Array[String] = []
 var directive_cooldown_mult: float = 1.0  ## owning one shortens Directive cooldowns
+var blocks: bool = true  ## occupies its footprint cells (mines do not)
+var needs_coverage: bool = true  ## must be placed inside own coverage
+var packs_to: String = ""  ## building -> unit it packs up into
+var mine_trigger: float = 0.0  ## > 0: explodes when an enemy ground unit is this close
+var mine_damage: float = 0.0
+var mine_splash: float = 0.0
 
 const AIR_ALTITUDE: float = 6.0
 
@@ -65,6 +77,10 @@ func is_air() -> bool:
 ## Height above the ground this entity is drawn (and aimed) at.
 func altitude() -> float:
 	return AIR_ALTITUDE if move == MOVE_AIR else 0.0
+
+
+func is_mine() -> bool:
+	return mine_trigger > 0.0
 
 
 func is_armed() -> bool:

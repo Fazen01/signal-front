@@ -319,7 +319,7 @@ static func kill(w: SimWorld, t: SimEntity, killer: SimEntity, killer_owner: int
 			killer.xp += float(value)
 			_check_rank(w, killer)
 	# Vehicles and buildings leave salvageable wrecks; infantry do not.
-	if t.kind == SimEntity.Kind.BUILDING or t.def.is_vehicle():
+	if (t.kind == SimEntity.Kind.BUILDING and not t.def.is_mine()) or t.def.is_vehicle():
 		var amount: int = int(float(value) * w.data.wreck_fraction)
 		if amount > 0:
 			w.spawn_wreck(t.pos, amount, maxf(0.8, t.radius * 0.8), t.def.model, t.facing)

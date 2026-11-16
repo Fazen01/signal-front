@@ -178,7 +178,8 @@ func spawn_building(def_id: String, owner: int, cell: Vector2i, constructed: boo
 	# Emitters start unlinked until the grid is rebuilt; everything else is
 	# Linked or Dark according to the coverage it stands in.
 	e.linked = def.signal_radius <= 0.0 and SimSignal.is_covered(self, owner, e.pos)
-	map.set_occupied(Rect2i(cell, def.footprint), e.id)
+	if def.blocks:
+		map.set_occupied(Rect2i(cell, def.footprint), e.id)
 	e.rally = e.pos + Vector2(0.0, float(def.footprint.y) * SimMap.CELL * 0.5 + 3.0)
 	emit_event(SimEvent.Type.SPAWNED, e.id, owner, e.pos)
 	if constructed:
@@ -241,7 +242,8 @@ func on_building_completed(e: SimEntity, announce: bool) -> void:
 
 
 func on_building_removed(e: SimEntity) -> void:
-	map.set_occupied(Rect2i(e.footprint_cell, e.def.footprint), 0)
+	if e.def.blocks:
+		map.set_occupied(Rect2i(e.footprint_cell, e.def.footprint), 0)
 	if e.constructed and e.owner >= 0:
 		var p: SimPlayer = players[e.owner]
 		p.building_counts[e.def.id] = maxi(0, p.building_counts.get(e.def.id, 0) - 1)

@@ -51,5 +51,34 @@
 	"kestrel_rockets": {
 		"name": "Rocket Pods", "damage_type": "explosive", "damage": 30.0, "range": 9.5,
 		"cooldown": 0.9, "projectile_speed": 22.0, "splash": 1.2, "fx": "missile"
+	},
+	"levy_carbine": {
+		"name": "Carbine", "damage_type": "ballistic", "damage": 5.5, "range": 7.5,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"breaker_rocket": {
+		"name": "Breaker Rocket", "damage_type": "piercing", "damage": 46.0, "range": 9.5,
+		"cooldown": 3.0, "projectile_speed": 14.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"tusk_gun": {
+		"name": "Assault Gun", "damage_type": "explosive", "damage": 48.0, "range": 8.5,
+		"cooldown": 1.9, "projectile_speed": 26.0, "splash": 1.4, "fx": "shell"
+	},
+	"mauler_cannon": {
+		"name": "Mauler Cannon", "damage_type": "piercing", "damage": 88.0, "range": 10.5,
+		"cooldown": 3.0, "projectile_speed": 30.0, "splash": 1.0, "fx": "shell"
+	},
+	"anvil_mortar": {
+		"name": "Siege Mortar", "damage_type": "explosive", "damage": 70.0, "range": 17.0,
+		"min_range": 5.0, "cooldown": 4.2, "projectile_speed": 13.0, "splash": 2.6, "scatter": 2.2,
+		"fx": "artillery"
+	},
+	"harrow_flak": {
+		"name": "Harrow Flak", "damage_type": "flak", "damage": 15.0, "range": 11.0,
+		"cooldown": 0.33, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"bastion_gun": {
+		"name": "Bastion Gun", "damage_type": "explosive", "damage": 42.0, "range": 11.0,
+		"cooldown": 1.5, "projectile_speed": 24.0, "splash": 1.6, "fx": "shell"
 	}
 }
