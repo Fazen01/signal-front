@@ -211,6 +211,25 @@ func _run_script(battle: BattleScene) -> void:
 				battle.cam.set_distance(46.0)
 			if _count == _frames - 30:
 				battle.time_scale = 1.0
+		"march":
+			# An armoured column on the move, for dust trails and tracks.
+			if _count == 3:
+				var mw: SimWorld = battle.world
+				var mme: int = battle.local_player
+				var mhq: Vector2 = mw.players[mme].start_pos
+				var mdir: Vector2 = (mw.map.world_size() * 0.5 - mhq).normalized()
+				var mfrom: Vector2 = mw.map.nearest_free_pos(mhq + mdir * 16.0)
+				var mids: PackedInt32Array = PackedInt32Array()
+				var mkinds: Array[String] = ["bulwark", "warden", "bulwark", "tempest", "courser", "bulwark", "longbow", "hauler"]
+				for k: int in mkinds.size():
+					var side: Vector2 = Vector2(-mdir.y, mdir.x) * (float(k % 4) * 3.2 - 4.8)
+					var unit: SimEntity = mw.spawn_unit(mkinds[k], mme, mfrom + side - mdir * float(k / 4) * 4.0)
+					unit.facing = mdir.angle()
+					unit.prev_facing = unit.facing
+					mids.append(unit.id)
+				mw.push_command(SimCommand.move(mme, mids, mfrom + mdir * 40.0))
+				battle.cam.center_on(mfrom + mdir * 5.0)
+				battle.cam.set_distance(30.0)
 		"result":
 			if _count == 5:
 				battle.world.push_command(SimCommand.surrender(battle.local_player))

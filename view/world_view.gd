@@ -11,6 +11,8 @@ var _ghosts: Array[EntityView] = []  ## remembered enemy buildings that died uns
 var fx: FxLayer = null
 var audio: AudioManager = null  ## set by the battle scene
 var _trail_clock: float = 0.0
+var _dust_clock: float = 0.0
+var _dust_turn: int = 0
 var _proj_views: Dictionary[int, MeshInstance3D] = {}
 var _proj_mesh: BoxMesh = null
 var _proj_mats: Dictionary[String, StandardMaterial3D] = {}
@@ -95,6 +97,30 @@ func sync(alpha: float) -> void:
 func _process(delta: float) -> void:
 	# Missiles leave a puff of exhaust a dozen times a second.
 	_trail_clock = 0.08 if _trail_clock <= 0.0 else _trail_clock - delta
+	_dust_clock -= delta
+	if _dust_clock <= 0.0:
+		_dust_clock = 0.2
+		_wheel_dust()
+
+
+## Dust behind ground vehicles on the move. Half of them puff on each pass,
+## and none do while the air is already full of effects.
+func _wheel_dust() -> void:
+	if world == null or fx.active_count() > 90:
+		return
+	_dust_turn += 1
+	for e: SimEntity in world.entities:
+		if e.kind != SimEntity.Kind.UNIT or (e.id + _dust_turn) % 2 != 0:
+			continue
+		if not e.def.is_vehicle() or e.def.altitude() > 0.0:
+			continue
+		if e.pos.distance_squared_to(e.prev_pos) < 0.0004:
+			continue
+		var v: EntityView = views.get(e.id, null)
+		if v == null or not v.shown:
+			continue
+		var back: Vector2 = e.pos - Vector2(cos(e.facing), sin(e.facing)) * e.radius * 0.9
+		fx.trail_dust(Vector3(back.x, world.map.height_at(back) + 0.25, back.y), 0.5 + e.radius * 0.35)
 
 
 func _sync_projectiles(alpha: float) -> void:

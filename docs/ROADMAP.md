@@ -133,6 +133,7 @@ only (`view/`): nothing here changes the simulation or the data.
       flashes that light their surroundings; effects fade out properly
 - [x] A live AI-versus-AI match plays behind the main menu
 - [x] Minimap and coverage overlay colours retuned for the new ground
+- [x] Dust behind ground vehicles on the move
 
 ## Session log
 
@@ -203,7 +204,11 @@ better graphics (units, buildings, map) and to carry on; that is M15 above.
   ground shows through) and uncovered ground is dimmed a little more; the
   bright rim is unchanged.
 
-Status at 10:05 UTC: M15 is complete and pushed; `tools/check.sh` passes.
+- Vehicle dust is thinned out when more than 90 effects are already live,
+  so a big fight does not pay for it. `tools/screenshot.sh march 75 march`
+  captures a column on the move.
+
+Status at 10:15 UTC: M15 is complete and pushed; `tools/check.sh` passes.
 Nothing is half-finished. What nobody has seen yet is all of this on a real
 GPU — the captures here are software-rendered.
 

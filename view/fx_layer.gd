@@ -371,6 +371,21 @@ func explosion(at: Vector3, size: float) -> void:
 		dust(at, size * 0.6)
 
 
+## How many mesh effects are live; callers use it to thin out optional ones.
+func active_count() -> int:
+	return _active.size()
+
+
+## A low puff of dust behind a moving vehicle.
+func trail_dust(at: Vector3, size: float) -> void:
+	var fx: Fx = _spawn(_blast_mesh, Color(0.56, 0.50, 0.40, 0.30), 0.75)
+	fx.node.position = at
+	fx.base_scale = Vector3(size, size * 0.6, size) * 0.6
+	fx.node.scale = fx.base_scale
+	fx.grow = size * 1.1
+	fx.rise = 0.5
+
+
 ## A small trailing puff (missile exhaust).
 func puff(at: Vector3) -> void:
 	var fx: Fx = _spawn(_blast_mesh, Color(0.8, 0.78, 0.74, 0.5), 0.45)
