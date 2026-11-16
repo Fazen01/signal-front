@@ -194,6 +194,47 @@ func test_a_wave_that_is_winning_presses_on() -> void:
 	check(ai2.wave_state == SimAI.Wave.ASSAULT, "and stays in the assault")
 
 
+## How far the fastest wave unit gets ahead of the troopers in ten seconds
+## of an assault across the map, with the AI's orders given once a second.
+func _lead_after_ten_seconds(together: bool) -> float:
+	var w: SimWorld = SimSetup.create_match(MatchConfig.skirmish(11))
+	w.collect_events = false
+	var ai: SimAI = w.ais[0]
+	ai.next_think = 1 << 40  # only the assault orders below, no other thinking
+	ai.keeps_together = together
+	var home: Vector2 = w.players[ai.player_id].start_pos
+	var enemy: Vector2 = w.players[0].start_pos
+	var at: Vector2 = w.map.nearest_free_pos(home + (enemy - home).normalized() * 14.0)
+	var slow: Array[SimEntity] = SimTestUtil.spawn_group(w, "trooper", ai.player_id, at, 6)
+	var fast: Array[SimEntity] = SimTestUtil.spawn_group(w, "kestrel", ai.player_id, at, 2)
+	ai.wave_ids.clear()
+	for e: SimEntity in slow + fast:
+		ai.wave_ids.append(e.id)
+	ai.wave_state = SimAI.Wave.ASSAULT
+	ai.wave_target = 0
+	ai.wave_target_pos = enemy
+	ai.wave_tick = w.tick_count
+	ai._f = w.players[ai.player_id].faction
+	var worst: float = 0.0
+	for second: int in 10:
+		ai._survey(w)
+		ai._assault(w, second == 0)
+		SimTestUtil.run(w, 20)
+		var body: float = 0.0
+		for e: SimEntity in slow:
+			body += e.pos.distance_to(enemy) / float(slow.size())
+		for e: SimEntity in fast:
+			worst = maxf(worst, body - e.pos.distance_to(enemy))
+	return worst
+
+
+func test_a_wave_keeps_together_on_the_way_in() -> void:
+	var loose: float = _lead_after_ten_seconds(false)
+	var tight: float = _lead_after_ten_seconds(true)
+	check(loose > 25.0, "left alone, gunships run far ahead of the infantry (%.1f)" % loose)
+	check(tight < SimAI.LEASH_LEAD + 9.0, "kept together, they wait for it (%.1f ahead at most)" % tight)
+
+
 func test_the_ai_keeps_a_scout_out() -> void:
 	var w: SimWorld = SimSetup.create_match(MatchConfig.skirmish(11))
 	w.collect_events = false
