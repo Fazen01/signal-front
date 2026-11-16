@@ -49,12 +49,12 @@ decision in the session log at the bottom.
 
 ## M5 — First playable (tag `v0.1`)
 
-- [ ] Aegis Directorate roster complete through T2
+- [x] Aegis Directorate roster complete through T2
 - [x] Skirmish AI: economy, relay expansion, army, attack waves, defense
-- [ ] Win/lose conditions, victory screen with stats
-- [ ] Main menu → skirmish setup → match → back to menu
+- [x] Win/lose conditions, victory screen with stats
+- [x] Main menu → skirmish setup → match → back to menu
 - [x] `tools/check.sh` runs a full headless AI-vs-AI match that ends with a winner
-- [ ] README: how to run, controls, what is in the build
+- [x] README: how to run, controls, what is in the build
 
 ## M6 — Battlefield awareness
 
@@ -222,6 +222,28 @@ Signal decisions:
 - The overlay dims uncovered ground and tints covered ground in the team
   colour with a brighter rim; it shows only the local player's network.
 
-Half-done / next: M5 — the skirmish AI, win/lose rules and the headless
-AI-vs-AI match in `check.sh` are done; menus, result screen and README are
-being written.
+- M5 First playable (tag `v0.1`): scripted-priority skirmish AI (hauler
+  economy, build order, relay expansion toward uncovered salvage, depots at
+  far fields, turrets, army mix weighted by enemy composition, staged attack
+  waves that prefer relays whose loss cuts the most enemy network, base
+  defence, three difficulty levels); HQ-loss defeat and surrender; main menu,
+  skirmish setup, pause menu, victory/defeat screen with stats; README.
+  `check.sh` now also walks menu → setup → match → result → menu headless and
+  plays a full AI-vs-AI match (seed 1 ends at about 8:36 game time in ~8 s).
+
+M5 decisions and known gaps:
+- A player is defeated when their HQ is destroyed; all their remaining units
+  and buildings are destroyed with it.
+- The AI currently sees the whole map (there is no fog of war until M6). When
+  fog lands it must be limited to what it has scouted.
+- Two T2 roster details wait for later systems: the Marksman's "stealth while
+  still" needs fog of war (M6) and the Field Engineer's "capture" needs Uplink
+  Sites (M6). Everything else in the T1/T2 Aegis roster is in.
+- AI-vs-AI matches on seeds 1-7 all end with a winner in 7-15 game minutes,
+  shorter than the 15-25 minute target, and the first player wins more often
+  than the second. Income is high (~2,500 salvage a minute mid-game) and the
+  AI floats salvage because it runs one Barracks and one Vehicle Works.
+  Left for M13 balance; noted so it is not mistaken for a bug.
+
+Half-done / next: M6 battlefield awareness (fog of war, minimap, Uplink
+Sites, quality-of-life selection keys).

@@ -52,9 +52,10 @@ run_step() {
 
 run_step import 600 "" --import
 run_step tests 900 "TESTS PASSED" -s res://tests/run_tests.gd
-run_step boot_main 300 "Signal Front boot ok" --fixed-fps 60 --quit-after 300
+run_step boot_menu 300 "Main menu ready" --fixed-fps 60 --quit-after 300
 run_step boot_battle 600 "Battle scene exit at tick" --fixed-fps 60 --quit-after 600 res://scenes/battle.tscn
 run_step smoke_battle 600 "Smoke driver finished" --fixed-fps 60 --quit-after 400 res://scenes/battle.tscn -- --smoke
+run_step flow 600 "Flow smoke finished" --fixed-fps 60 --quit-after 4000 -- --flow-smoke
 run_step ai_match 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=1 --max-minutes=45
 
 if [ "${failed}" -ne 0 ]; then

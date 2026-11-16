@@ -10,6 +10,15 @@ var pending_config: MatchConfig = null
 var last_config: MatchConfig = null
 
 
+func _ready() -> void:
+	# Menus keep working while a match is paused.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	if OS.get_cmdline_user_args().has("--flow-smoke"):
+		var smoke: FlowSmoke = FlowSmoke.new()
+		smoke.name = "FlowSmoke"
+		add_child(smoke)
+
+
 func start_match(config: MatchConfig) -> void:
 	pending_config = config
 	last_config = config

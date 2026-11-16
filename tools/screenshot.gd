@@ -39,6 +39,11 @@ func _process(_delta: float) -> void:
 	var battle: BattleScene = _scene as BattleScene
 	if battle != null and _script_name != "":
 		_run_script(battle)
+	var menu: MainMenu = _scene as MainMenu
+	if menu != null and _script_name == "setup" and _count == 3:
+		menu.open_skirmish()
+	if menu != null and _script_name == "help" and _count == 3:
+		menu.call("_show", menu.get("_help"))
 	if _count == _frames:
 		_save(_shot_name)
 		get_tree().quit(0)
@@ -100,6 +105,12 @@ func _run_script(battle: BattleScene) -> void:
 				battle.cam.distance = 80.0
 				battle.cam.set("_target_distance", 80.0)
 				battle.cam.center_on(hq_pos + dir * 36.0)
+		"result":
+			if _count == 5:
+				battle.world.push_command(SimCommand.surrender(battle.local_player))
+		"pause":
+			if _count == 5:
+				battle.toggle_pause_menu()
 		"wide":
 			if _count == 2:
 				battle.cam.distance = 95.0

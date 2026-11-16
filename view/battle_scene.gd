@@ -16,6 +16,7 @@ var cam: RtsCamera = null
 var controller: SelectionController = null
 var overlay: BattleOverlay = null
 var hud: Hud = null
+var menus: MatchMenus = null
 var ui_layer: CanvasLayer = null
 
 # Building placement
@@ -82,6 +83,10 @@ func _ready() -> void:
 	hud.name = "Hud"
 	ui_layer.add_child(hud)
 	hud.setup(self)
+	menus = MatchMenus.new()
+	menus.name = "Menus"
+	ui_layer.add_child(menus)
+	menus.setup(self)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		var smoke: SmokeDriver = SmokeDriver.new()
 		smoke.name = "Smoke"
@@ -191,6 +196,9 @@ func _handle_event(ev: SimEvent) -> void:
 				if done != null:
 					hud.push_alert("%s complete" % done.def.name, Hud.CYAN)
 				hud.rebuild_card()
+		SimEvent.Type.MATCH_OVER:
+			cancel_placement()
+			menus.show_result(world, local_player)
 
 
 func _on_selection_changed() -> void:
@@ -206,7 +214,7 @@ func _on_selection_changed() -> void:
 # when the event was consumed (for example by building placement).
 
 func is_input_blocked() -> bool:
-	return paused
+	return paused or world.game_over
 
 
 func on_left_click(_screen: Vector2, shift: bool) -> bool:
@@ -251,7 +259,36 @@ func on_hotkey(key: InputEventKey) -> bool:
 
 
 func toggle_pause_menu() -> void:
-	pass
+	if world.game_over:
+		return
+	paused = not paused
+	menus.set_pause_open(paused)
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	# While paused the controller ignores input, so Escape is handled here.
+	var key: InputEventKey = event as InputEventKey
+	if key != null and key.pressed and not key.echo and key.physical_keycode == KEY_ESCAPE and paused:
+		toggle_pause_menu()
+		get_viewport().set_input_as_handled()
+
+
+func surrender() -> void:
+	paused = false
+	menus.set_pause_open(false)
+	world.push_command(SimCommand.surrender(local_player))
+
+
+func quit_to_menu() -> void:
+	var game: GameState = get_node_or_null("/root/Game") as GameState
+	if game != null:
+		game.to_menu()
+
+
+func play_again() -> void:
+	var game: GameState = get_node_or_null("/root/Game") as GameState
+	if game != null:
+		game.start_match(config)
 
 
 # ------------------------------------------------------ building placement
