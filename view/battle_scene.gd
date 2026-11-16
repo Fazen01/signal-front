@@ -27,6 +27,7 @@ var _tutorial_marker: MeshInstance3D = null
 var _tutorial_index: int = -1
 var _tutorial_ping_in: float = 0.0
 var ui_layer: CanvasLayer = null
+var time_of_day: String = "noon"  ## the hour the scene is lit for
 var skin: UiSkin = null  ## the interface look: the local player's faction, or neutral when watching
 
 # Directive targeting
@@ -354,7 +355,8 @@ func _read_spectate_args() -> void:
 
 
 func _build_environment() -> void:
-	SceneLight.add_to(self, GameSettings.shadows, world.map.region)
+	time_of_day = config.time_of_day if SceneLight.TIMES.has(config.time_of_day) else "noon"
+	SceneLight.add_to(self, GameSettings.shadows, world.map.region, time_of_day)
 
 
 func _process(delta: float) -> void:

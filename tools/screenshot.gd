@@ -67,6 +67,14 @@ func _ready() -> void:
 			bconfig.factions = [_script_name.trim_prefix("base_"), "aegis"]
 			bconfig.region = "temperate"
 			bgame.pending_config = bconfig
+	if _script_name.begins_with("time_"):
+		# "time_<hour>": the Greenwood on seed 4 at that hour, seen from the base.
+		var tgame2: GameState = get_node_or_null("/root/Game") as GameState
+		if tgame2 != null:
+			var tconfig: MatchConfig = MatchConfig.skirmish(4)
+			tconfig.region = "temperate"
+			tconfig.time_of_day = _script_name.trim_prefix("time_")
+			tgame2.pending_config = tconfig
 	if _script_name.begins_with("crowd_"):
 		var kgame: GameState = get_node_or_null("/root/Game") as GameState
 		var kdef: EntityDef = GameData.shared().entity(_script_name.trim_prefix("crowd_"))

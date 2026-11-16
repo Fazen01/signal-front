@@ -65,6 +65,7 @@ const FACTION_NOTES: Dictionary[String, String] = {
 }
 
 const MENU_LEFT: float = 96.0  ## left edge of the main menu column
+const LIGHT_ORDER: Array[String] = ["noon", "morning", "evening", "overcast"]  ## the Light setting; midday first, as it is the usual one
 
 var _main_box: VBoxContainer = null
 var _setup: PanelContainer = null
@@ -88,6 +89,7 @@ var _map_ids: Array[String] = []  ## "" = generated
 var _map_players: Array[int] = []
 var _map_blurb: Label = null
 var _region: OptionButton = null
+var _light: OptionButton = null
 var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
@@ -348,6 +350,11 @@ func _build_setup() -> void:
 	land.add_child(dice)
 	_row(rows, "Region", land)
 	_region.item_selected.connect(func(_i: int) -> void: _update_preview())
+	_light = OptionButton.new()
+	for id: String in LIGHT_ORDER:
+		_light.add_item(SceneLight.TIME_NAMES[id])
+	_light.tooltip_text = "The hour the battle is fought at: where the sun stands and what colour the light is. It changes nothing about how the match plays."
+	_row(rows, "Light", _light)
 	_seed.value_changed.connect(func(_v: float) -> void: _update_preview())
 
 	# The seats.
@@ -719,6 +726,8 @@ func build_config() -> MatchConfig:
 	config.map_id = _map_ids[maxi(_map.selected, 0)]
 	if _region.selected > 0:
 		config.region = SimMapGen.REGIONS[_region.selected - 1]
+	if _light.selected > 0:
+		config.time_of_day = LIGHT_ORDER[_light.selected]
 	if config.map_id == COMPACT_MAP:
 		config.map_id = ""
 		config.map_cells = SimMapGen.SMALL_CELLS

@@ -65,3 +65,16 @@ func test_bad_saves_are_refused() -> void:
 	var first: Dictionary = entities[0]
 	first["def_id"] = "no_such_thing"
 	check(SimSave.from_dict(snapshot) == null, "a save naming an unknown unit is refused")
+
+
+func test_the_hour_a_match_is_lit_for_survives_a_save() -> void:
+	var config: MatchConfig = MatchConfig.skirmish(3)
+	check_eq(config.time_of_day, "", "a match is lit for midday unless told otherwise")
+	config.time_of_day = "evening"
+	var again: MatchConfig = SimSave.config_from_dict(SimSave.config_to_dict(config))
+	check_eq(again.time_of_day, "evening", "the hour picked in the setup is kept")
+	for id: String in SceneLight.TIMES:
+		check(SceneLight.TIME_NAMES.has(id), "%s has a name for the setup screen" % id)
+	check(MainMenu.LIGHT_ORDER[0] == "noon", "midday is the first choice")
+	for id: String in MainMenu.LIGHT_ORDER:
+		check(SceneLight.TIMES.has(id), "%s is an hour the light knows" % id)

@@ -260,7 +260,10 @@ middle of the map with four ways across and the richest salvage of the map
 inside. Every region has five kinds of its own, the last always such a
 prize behind a wall or a moat. Worn tracks show the routes between the
 bases. The skirmish setup shows a picture of the map you are about to get:
-the land, the salvage, the uplink sites and where each seat starts.
+the land, the salvage, the uplink sites and where each seat starts. Its
+**Light** setting picks the hour the battle is lit for (Midday unless you
+choose Morning, Evening or Overcast); like the region, it changes the look
+and nothing else.
 
 A battlefield also lies in one of four **regions**, picked by the seed or in
 the skirmish setup: the **Greenwood** (grass and woods), the **Dustlands**

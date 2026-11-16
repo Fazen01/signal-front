@@ -15,6 +15,7 @@ var seed_value: int = 1
 var map_cells: int = SimMapGen.STANDARD_CELLS  ## size of a generated two-player map
 var map_id: String = ""  ## a layout in data/maps, or "" for a generated map
 var region: String = ""  ## a SimMapGen region, or "" for the seed's (or the layout's) own
+var time_of_day: String = ""  ## the hour the battle is lit for (a SceneLight time), or "" for midday; looks only
 var watch: bool = false  ## nobody plays: every side is an AI and the person at the screen watches
 var tutorial: String = ""  ## a SimTutorial mission id, or "" for a normal match
 var factions: Array[String] = ["aegis", "aegis"]

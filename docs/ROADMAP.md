@@ -318,7 +318,12 @@ map generation itself to be improved.
       it: do not bring that back.)
 - [x] Combat: bigger and more varied explosions, smoke that lingers,
       wrecks that burn, weapon effects per faction
-- [ ] The game as a whole: lighting per time of day, water and sky
+- [x] Lighting by hour, as an option only: the skirmish setup has a Light
+      setting (Midday, Morning, Evening, Overcast). The owner first said
+      "I don't want that", then that it need not be removed if it was
+      already built, which it was. So it is kept, but a match is lit for
+      midday, as before, unless another hour is picked
+- [ ] The game as a whole: water and sky
 
 ## Ideas for later (proposed by session 1, not yet asked for)
 
@@ -493,18 +498,13 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (22:46 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
-read.** M28 to M31 and session 7's branch are pushed (check passed, 32
-steps). M32 (a unit of its own for six factions, the Paymaster in place of
-the Wardrum the owner disliked, a factions page in How to Play) is
-committed locally: `tools/check.sh` failed on it once, on the Lodestone
-match, which ran past 45 minutes with both sides out of salvage. The fix
-(the AI builds siege guns against turrets; an AI with no income that is
-outmatched concedes) is written and being tested. M33 (map preview in the
-setup, a fifth kind of country per region, three more layouts) and the
-combat half of M34 (weapon fire in each faction's colour, bigger
-explosions, burning wrecks) are in the working tree. This session's worker
-has been restarted four times today; each restart kills a running check.
+**Working now (23:45 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
+read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to M33,
+the combat half of M34, session 7's branch, and the fixes listed in the
+log below (vehicle spacing, repairs under fire, conceding only when no
+person plays). Running now: the balance league over all ten factions
+(M26), from a scratch copy of the tree. Open: M26's two boxes, high ground
+(M33), a look pass over every faction's models and water and sky (M34).
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
