@@ -36,7 +36,7 @@ static func update(w: SimWorld) -> void:
 			_advance(w, e)
 	for i: int in n:
 		var e: SimEntity = w.entities[i]
-		if e.alive and e.kind == SimEntity.Kind.UNIT and not e.def.is_air():
+		if e.alive and e.kind == SimEntity.Kind.UNIT:
 			_separate(w, e)
 
 
@@ -102,6 +102,7 @@ static func _advance(w: SimWorld, e: SimEntity) -> void:
 
 static func _separate(w: SimWorld, e: SimEntity) -> void:
 	var push: Vector2 = Vector2.ZERO
+	var air: bool = e.def.is_air()
 	var bx: int = int(e.pos.x / SimWorld.BUCKET)
 	var by: int = int(e.pos.y / SimWorld.BUCKET)
 	for oy: int in range(by - 1, by + 2):
@@ -112,7 +113,8 @@ static func _separate(w: SimWorld, e: SimEntity) -> void:
 				continue
 			var bucket: Array = w.buckets[oy * w.bucket_w + ox]
 			for n: SimEntity in bucket:
-				if n == e or not n.alive or n.kind != SimEntity.Kind.UNIT or n.def.is_air():
+				# Aircraft only crowd other aircraft; ground units only each other.
+				if n == e or not n.alive or n.kind != SimEntity.Kind.UNIT or n.def.is_air() != air:
 					continue
 				var d: Vector2 = e.pos - n.pos
 				var min_d: float = e.radius + n.radius
@@ -136,7 +138,9 @@ static func _separate(w: SimWorld, e: SimEntity) -> void:
 	if push == Vector2.ZERO:
 		return
 	var moved: Vector2 = e.pos + push.limit_length(MAX_PUSH)
-	if w.map.is_passable(moved):
+	if air:
+		e.pos = w.map.clamp_to_map(moved)
+	elif w.map.is_passable(moved):
 		e.pos = moved
 	else:
 		# Slide along whichever axis is free.

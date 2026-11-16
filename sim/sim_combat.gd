@@ -72,6 +72,15 @@ static func reach_against(w: SimWorld, e: SimEntity, t: SimEntity) -> float:
 	return best * range_mult(w, e)
 
 
+## Smallest minimum range among e's weapons that can hit t.
+static func _shortest_min_range(e: SimEntity, t: SimEntity) -> float:
+	var best: float = INF
+	for wd: WeaponDef in e.def.weapons:
+		if can_hit(wd, t):
+			best = minf(best, wd.min_range)
+	return 0.0 if best == INF else best
+
+
 # --------------------------------------------------------------- per unit
 
 static func _update_combatant(w: SimWorld, e: SimEntity) -> void:
@@ -145,6 +154,8 @@ static func _acquire(w: SimWorld, e: SimEntity) -> int:
 		var mult: float = best_multiplier(w, e, n)
 		if mult <= 0.01:
 			continue
+		if d < _shortest_min_range(e, n):
+			continue  # too close for anything we carry
 		var score: float = (maxf(d, 0.0) + 2.0) / mult
 		if not n.def.is_armed():
 			score *= 1.6

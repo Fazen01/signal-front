@@ -31,6 +31,15 @@ static func cooldown_left(w: SimWorld, player_id: int, def: DirectiveDef) -> flo
 	return maxf(0.0, float(ready - w.tick_count) * SimWorld.DT)
 
 
+## Cooldown multiplier from buildings the player owns (the Command Lab).
+static func cooldown_mult(w: SimWorld, player_id: int) -> float:
+	var best: float = 1.0
+	for e: SimEntity in w.entities:
+		if e.alive and e.owner == player_id and e.kind == SimEntity.Kind.BUILDING and e.constructed and e.linked:
+			best = minf(best, e.def.directive_cooldown_mult)
+	return best
+
+
 ## Why the target position is not allowed for this Directive, or "".
 static func target_error(w: SimWorld, player_id: int, def: DirectiveDef, pos: Vector2) -> String:
 	match def.target:
@@ -74,7 +83,7 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 	if why != "":
 		w.alert(cmd.player, why, cmd.pos)
 		return
-	p.directive_ready[def.id] = w.tick_count + int(def.cooldown * float(SimWorld.TICK_RATE))
+	p.directive_ready[def.id] = w.tick_count + int(def.cooldown * cooldown_mult(w, cmd.player) * float(SimWorld.TICK_RATE))
 	p.stat_directives_used += 1
 	var ev: SimEvent = w.emit_event(SimEvent.Type.DIRECTIVE, 0, cmd.player, cmd.pos)
 	ev.text = def.id

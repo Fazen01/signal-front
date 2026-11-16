@@ -45,6 +45,9 @@ var signal_radius: float = 0.0
 var signal_root: bool = false
 var depot: bool = false
 var produces: Array[String] = []
+var directive_cooldown_mult: float = 1.0  ## owning one shortens Directive cooldowns
+
+const AIR_ALTITUDE: float = 6.0
 
 
 func is_infantry() -> bool:
@@ -57,6 +60,11 @@ func is_vehicle() -> bool:
 
 func is_air() -> bool:
 	return move == MOVE_AIR
+
+
+## Height above the ground this entity is drawn (and aimed) at.
+func altitude() -> float:
+	return AIR_ALTITUDE if move == MOVE_AIR else 0.0
 
 
 func is_armed() -> bool:

@@ -32,22 +32,24 @@ func _ready() -> void:
 			buildings.append(def)
 		else:
 			units.append(def)
-	var x: float = -14.0
+	# Units in rows of seven at the front, buildings in rows of five behind.
+	var i: int = 0
 	for def: EntityDef in units:
-		_put(ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[0]), Vector3(x, 0.0, 7.0), def.name)
-		x += 3.6
-	_put(ModelFactory.build_wreck("bulwark", 3), Vector3(x, 0.0, 7.0), "Wreck")
-	x = -17.0
+		var model: Node3D = ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[0])
+		_put(model, Vector3(-15.0 + float(i % 7) * 5.0, def.altitude() * 0.35, 9.0 + float(i / 7) * 6.5), def.name)
+		i += 1
+	_put(ModelFactory.build_wreck("bulwark", 3), Vector3(-15.0 + float(i % 7) * 5.0, 0.0, 9.0 + float(i / 7) * 6.5), "Wreck")
+	i = 0
 	for def: EntityDef in buildings:
-		_put(ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[1]), Vector3(x, 0.0, -3.0), def.name)
-		x += float(def.footprint.x) * 1.1 + 4.0
-	_put(ModelFactory.build_field(5), Vector3(-12.0, 0.0, 14.0), "Salvage Field")
-	_put(ModelFactory.build_uplink(), Vector3(-4.0, 0.0, 14.0), "Uplink Site")
+		_put(ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[1]), Vector3(-18.0 + float(i % 5) * 9.5, 0.0, -14.0 + float(i / 5) * 10.0), def.name)
+		i += 1
+	_put(ModelFactory.build_field(5), Vector3(22.0, 0.0, 9.0), "Salvage Field")
+	_put(ModelFactory.build_uplink(), Vector3(22.0, 0.0, 16.0), "Uplink Site")
 
 	var cam: Camera3D = Camera3D.new()
 	cam.fov = 40.0
 	add_child(cam)
-	cam.look_at_from_position(Vector3(0.0, 26.0, 34.0), Vector3(0.0, 0.0, 2.0), Vector3.UP)
+	cam.look_at_from_position(Vector3(2.0, 40.0, 46.0), Vector3(2.0, 0.0, 3.0), Vector3.UP)
 	cam.current = true
 
 

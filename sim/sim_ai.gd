@@ -50,6 +50,7 @@ var _sites: Array[SimEntity] = []
 var _enemies: Array[SimEntity] = []
 var _enemy_buildings: Array[SimEntity] = []
 var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have seen
+var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
 var _spent: int = 0  ## salvage committed by commands issued this think
 var _bandwidth_committed: int = 0  ## bandwidth of units ordered this think
 
@@ -320,6 +321,12 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 		return "sentry_turret"
 	if builds_turrets and me.has_building("vehicle_works") and _count("lance_battery") < 1:
 		return "lance_battery"
+	if builds_turrets and me.has_building("vehicle_works") and _enemy_air_seen > 0 and _count("flak_post") < 2:
+		return "flak_post"
+	if level > 0 and me.has_building("vehicle_works") and _count("command_lab") == 0 and me.salvage > 650 and w.tick_count > 20 * 240:
+		return "command_lab"
+	if level > 0 and me.has_building("command_lab") and _count("airpad") == 0 and me.salvage > 550:
+		return "airpad"
 	if relays < 6 and _relay_goal(w) != Vector2.INF and me.salvage > 500:
 		return "relay"
 	if me.salvage > 900 and barracks < max_barracks:
@@ -493,8 +500,11 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 	var heavy: int = 0
 	var light: int = 0
 	var infantry: int = 0
+	var air: int = 0
 	for e: SimEntity in _enemies:
-		if e.def.is_infantry():
+		if e.def.is_air():
+			air += 1
+		elif e.def.is_infantry():
 			infantry += 1
 		elif w.data.armor_classes[e.def.armor] == "heavy":
 			heavy += 1
@@ -508,7 +518,11 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 		"courser": 0.5,
 		"warden": 2.0 + float(infantry) * 0.3 + float(light) * 0.2,
 		"bulwark": 2.5 + float(heavy) * 0.5 + float(light) * 0.3,
+		"tempest": 0.2 + float(maxi(air, _enemy_air_seen)) * 1.6,
+		"longbow": 1.4,
+		"kestrel": 2.5,
 	}
+	_enemy_air_seen = maxi(_enemy_air_seen, air)
 	for b: SimEntity in _buildings:
 		if b.def.produces.is_empty() or b.def.signal_root or b.def.depot or not b.linked:
 			continue

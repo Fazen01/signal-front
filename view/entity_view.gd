@@ -15,6 +15,8 @@ var base_y: float = 0.0
 var shown: bool = true  ## false while hidden by fog of war
 var seen_once: bool = false  ## the local player has seen this at least once
 var owner_id: int = -1
+var altitude: float = 0.0  ## aircraft are drawn this far above the ground
+var _rotors: Array[Node3D] = []
 var _selected: bool = false
 
 
@@ -36,6 +38,12 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 			model = ModelFactory.build_uplink()
 	add_child(model)
 	turret = model.get_node_or_null("Turret") as Node3D
+	if e.def != null and e.kind == SimEntity.Kind.UNIT:
+		altitude = e.def.altitude()
+		model.position.y = altitude
+		for child: Node in model.get_children():
+			if str(child.name).begins_with("Rotor"):
+				_rotors.append(child as Node3D)
 	var ring_color: Color = RING_NEUTRAL
 	if e.owner >= 0:
 		ring_color = RING_OWN if e.owner == local_player else RING_ENEMY
@@ -83,6 +91,11 @@ func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 			model.rotation.y = -f
 			if turret != null:
 				turret.rotation.y = -(lerp_angle(e.prev_aim, e.aim, alpha) - f)
+			if altitude > 0.0:
+				var t: float = float(Time.get_ticks_msec()) * 0.001
+				model.position.y = altitude + sin(t * 1.7 + float(entity_id)) * 0.18
+				for r: Node3D in _rotors:
+					r.rotation.y = t * 38.0
 		SimEntity.Kind.BUILDING:
 			if turret != null:
 				turret.rotation.y = -lerp_angle(e.prev_aim, e.aim, alpha)

@@ -43,5 +43,10 @@ func test_armed_units_have_usable_weapons() -> void:
 	var data: GameData = GameData.shared()
 	for def: EntityDef in data.entities.values():
 		for wd: WeaponDef in def.weapons:
-			check(wd.max_range <= def.sight + 6.0, "%s: weapon %s out-ranges sight by too much" % [def.id, wd.id])
+			# Artillery (anything with a minimum range) out-ranges its own sight
+			# on purpose and relies on spotters; everything else should not.
+			if wd.min_range <= 0.0:
+				check(wd.max_range <= def.sight + 6.0, "%s: weapon %s out-ranges sight by too much" % [def.id, wd.id])
+			else:
+				check(wd.max_range <= 30.0, "%s: artillery range sane" % def.id)
 			check(wd.damage / wd.cooldown < 200.0, "%s: weapon %s dps sane" % [def.id, wd.id])

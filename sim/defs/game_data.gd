@@ -14,7 +14,7 @@ const ENTITY_KEYS: Array[String] = [
 	"name", "desc", "faction", "tier", "cost", "build_time", "bandwidth", "bandwidth_provided",
 	"hp", "armor", "move", "speed", "turn_rate", "radius", "sight", "weapons", "turret", "model",
 	"hotkey", "requires", "buildable", "builder", "builds", "harvester", "capacity", "footprint",
-	"signal_radius", "signal_root", "depot", "produces", "stealth",
+	"signal_radius", "signal_root", "depot", "produces", "stealth", "directive_cooldown_mult",
 ]
 const DIRECTIVE_KEYS: Array[String] = [
 	"name", "desc", "cost", "cooldown", "radius", "duration", "target", "damage", "shells",
@@ -268,6 +268,7 @@ func _load_entities(d: Dictionary, building: bool) -> void:
 		e.signal_root = bool(src.get("signal_root", false))
 		e.depot = bool(src.get("depot", false))
 		e.produces = _strings(src, "produces")
+		e.directive_cooldown_mult = float(src.get("directive_cooldown_mult", 1.0))
 		if building:
 			e.radius = float(src.get("radius", float(maxi(e.footprint.x, e.footprint.y)) * coverage_cell * 0.5))
 		else:

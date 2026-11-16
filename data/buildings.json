@@ -29,7 +29,7 @@
 		"name": "Vehicle Works", "desc": "Assembles vehicles. Unlocks tier 2.",
 		"faction": "aegis", "tier": 2, "cost": 400, "build_time": 28.0,
 		"hp": 1500, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
-		"produces": ["hauler", "courser", "warden", "bulwark"], "model": "vehicle_works",
+		"produces": ["hauler", "courser", "warden", "bulwark", "tempest", "longbow"], "model": "vehicle_works",
 		"hotkey": "V", "requires": ["barracks"]
 	},
 	"sentry_turret": {
@@ -45,5 +45,26 @@
 		"hp": 700, "armor": "structure", "footprint": [1, 1], "sight": 13.0,
 		"weapons": ["battery_missile"], "turret": true, "model": "lance_battery",
 		"hotkey": "L", "requires": ["vehicle_works"]
+	},
+	"flak_post": {
+		"name": "Flak Post", "desc": "Anti-air emplacement. Cannot fire at ground targets.",
+		"faction": "aegis", "tier": 2, "cost": 200, "build_time": 14.0,
+		"hp": 650, "armor": "structure", "footprint": [1, 1], "sight": 13.0,
+		"weapons": ["flak_burst"], "turret": true, "model": "flak_post",
+		"hotkey": "K", "requires": ["vehicle_works"]
+	},
+	"command_lab": {
+		"name": "Command Lab", "desc": "Unlocks tier 3: the Airpad and Longbow artillery. Directives recharge 25% faster.",
+		"faction": "aegis", "tier": 3, "cost": 500, "build_time": 30.0,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "command_lab",
+		"hotkey": "C", "requires": ["vehicle_works"]
+	},
+	"airpad": {
+		"name": "Airpad", "desc": "Builds Kestrel gunships and Scout Drones.",
+		"faction": "aegis", "tier": 3, "cost": 450, "build_time": 26.0,
+		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"produces": ["kestrel", "scout_drone"], "model": "airpad",
+		"hotkey": "I", "requires": ["command_lab"]
 	}
 }

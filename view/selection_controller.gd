@@ -85,12 +85,18 @@ func prune() -> void:
 
 # --------------------------------------------------------------- picking
 
+## World position to aim picking and box selection at for an entity.
+func aim_point(e: SimEntity) -> Vector3:
+	var lift: float = 0.5 + (e.def.altitude() if e.def != null else 0.0)
+	return Vector3(e.pos.x, world.map.height_at(e.pos) + lift, e.pos.y)
+
+
 func screen_pos(e: SimEntity) -> Vector2:
-	return cam.cam.unproject_position(Vector3(e.pos.x, world.map.height_at(e.pos) + 0.5, e.pos.y))
+	return cam.cam.unproject_position(aim_point(e))
 
 
 func is_on_screen(e: SimEntity) -> bool:
-	var wp: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 0.5, e.pos.y)
+	var wp: Vector3 = aim_point(e)
 	if cam.cam.is_position_behind(wp):
 		return false
 	return cam.get_viewport().get_visible_rect().has_point(cam.cam.unproject_position(wp))
@@ -120,7 +126,7 @@ func pick_entity(screen: Vector2) -> SimEntity:
 	for e: SimEntity in world.entities:
 		if not e.alive or e.kind != SimEntity.Kind.UNIT or not battle.world_view.is_shown(e.id):
 			continue
-		var wp: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 0.6, e.pos.y)
+		var wp: Vector3 = aim_point(e)
 		if cam.cam.is_position_behind(wp):
 			continue
 		var sp: Vector2 = cam.cam.unproject_position(wp)
@@ -236,7 +242,7 @@ func _box_select(rect: Rect2, add: bool) -> void:
 	for e: SimEntity in world.entities:
 		if not e.alive or e.owner != player:
 			continue
-		var wp: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 0.5, e.pos.y)
+		var wp: Vector3 = aim_point(e)
 		if cam.cam.is_position_behind(wp):
 			continue
 		if rect.has_point(cam.cam.unproject_position(wp)):

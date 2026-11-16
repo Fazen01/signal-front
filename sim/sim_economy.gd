@@ -92,7 +92,7 @@ static func placement_error(w: SimWorld, player_id: int, def: EntityDef, cell: V
 			return "Too close to a salvage field"
 		if other.kind == SimEntity.Kind.UPLINK and other.pos.distance_to(centre) < other.radius + def.radius * SQUARE:
 			return "Too close to an uplink site"
-		if other.kind == SimEntity.Kind.UNIT and w.are_enemies(player_id, other.owner):
+		if other.kind == SimEntity.Kind.UNIT and w.are_enemies(player_id, other.owner) and not other.def.is_air():
 			if Rect2i(cell, def.footprint).has_point(w.map.cell_of(other.pos)):
 				return "Enemy units in the way"
 	return SimSignal.placement_error(w, player_id, def, centre)

@@ -71,8 +71,8 @@ decision in the session log at the bottom.
 
 ## M8 — T3 and air
 
-- [ ] Command Lab, Airpad, Longbow, Kestrel, Scout Drone, Tempest, Flak Post
-- [ ] Air movement layer, anti-air targeting rules
+- [x] Command Lab, Airpad, Longbow, Kestrel, Scout Drone, Tempest, Flak Post
+- [x] Air movement layer, anti-air targeting rules
 
 ## M9 — Foundry Pact
 
@@ -260,7 +260,12 @@ Notes on this session's pushes:
   bar (click or Alt+1..6) with a targeting ring, ground effects, veterancy
   ranks with chevrons; the Normal and Hard AI unlock and use Directives.
 
-Half-done / next: M8 tier 3 and air units.
+- M8 Tier 3 and air: Command Lab, Airpad, Flak Post, Tempest, Longbow,
+  Kestrel and Scout Drone with models; an air movement layer (aircraft fly
+  straight, ignore terrain and buildings, only crowd each other); per-weapon
+  `hits_air` / `hits_ground`; artillery minimum range and scatter.
+
+Half-done / next: M9 Foundry Pact.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -295,3 +300,16 @@ Fog decisions:
   damaged units, blacks out the assault target and surges during assaults.
   The Easy AI does not use Directives.
 - With Directives in, AI-vs-AI seed 1 runs 15:29 (was about 9-10 minutes).
+- Air: aircraft are simulated in 2D like everything else and drawn 6 units
+  up. Rifles, machine guns, autocannons and missiles can hit them (weakly,
+  per the damage table); tank cannons, artillery and rockets cannot; the
+  Flak Post cannot hit ground. Aircraft leave no wreck.
+- The Tempest is tier 2 (Vehicle Works) so anti-air exists before aircraft
+  do. The Command Lab's "Directive upgrades" are a 25% shorter cooldown on
+  every Directive while a linked lab stands.
+- The Field Engineer's command card is now full (9 buildings + 3 orders = 12
+  slots). The next faction building for an engineer needs a bigger card or a
+  second page.
+- The AI builds a Command Lab and Airpad from about minute 4 on Normal/Hard,
+  mixes in Kestrels and Longbows, and answers enemy aircraft with Tempests
+  and Flak Posts. It does not build Scout Drones yet.

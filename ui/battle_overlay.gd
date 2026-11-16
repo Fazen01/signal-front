@@ -105,4 +105,6 @@ func _draw_dark_icon(at: Vector2) -> void:
 func _bar_height(e: SimEntity) -> float:
 	if e.kind == SimEntity.Kind.BUILDING:
 		return 3.2 + e.radius * 0.9
+	if e.def.is_air():
+		return 2.0 + e.def.altitude()
 	return 1.9 if e.def.is_infantry() else 2.1

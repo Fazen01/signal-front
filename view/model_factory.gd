@@ -166,6 +166,20 @@ static func build(model: String, team: Color) -> Node3D:
 			_warden(root, team)
 		"bulwark":
 			_bulwark(root, team)
+		"tempest":
+			_tempest(root, team)
+		"longbow":
+			_longbow(root, team)
+		"kestrel":
+			_kestrel(root, team)
+		"scout_drone":
+			_scout_drone(root, team)
+		"flak_post":
+			_flak_post(root, team)
+		"command_lab":
+			_command_lab(root, team)
+		"airpad":
+			_airpad(root, team)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -308,6 +322,76 @@ static func _bulwark(root: Node3D, team: Color) -> void:
 	cyl(t, 0.015, 0.015, 0.9, Vector3(-0.5, 0.9, -0.4), mat(GUNMETAL), 4)
 
 
+static func _tempest(root: Node3D, team: Color) -> void:
+	box(root, Vector3(2.4, 0.5, 0.42), Vector3(0.0, 0.28, 0.66), mat(RUBBER))
+	box(root, Vector3(2.4, 0.5, 0.42), Vector3(0.0, 0.28, -0.66), mat(RUBBER))
+	box(root, Vector3(2.1, 0.45, 1.2), Vector3(0.0, 0.62, 0.0), mat(HULL))
+	wedge(root, Vector3(0.45, 0.45, 1.2), Vector3(1.27, 0.62, 0.0), mat(HULL), 0.0)
+	box(root, Vector3(2.42, 0.1, 0.44), Vector3(0.0, 0.56, 0.66), team_mat(team))
+	box(root, Vector3(2.42, 0.1, 0.44), Vector3(0.0, 0.56, -0.66), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(-0.1, 0.86, 0.0))
+	box(t, Vector3(0.9, 0.5, 1.0), Vector3(0.0, 0.25, 0.0), mat(HULL_DARK))
+	for z: float in [-0.36, -0.14, 0.14, 0.36]:
+		cyl(t, 0.04, 0.04, 1.2, Vector3(0.62, 0.62, z), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -1.0))
+	cyl(t, 0.3, 0.3, 0.06, Vector3(-0.3, 0.72, 0.0), team_mat(team), 8, Vector3(0.0, 0.0, 0.5))
+
+
+static func _longbow(root: Node3D, team: Color) -> void:
+	box(root, Vector3(2.6, 0.5, 0.45), Vector3(0.0, 0.28, 0.7), mat(RUBBER))
+	box(root, Vector3(2.6, 0.5, 0.45), Vector3(0.0, 0.28, -0.7), mat(RUBBER))
+	box(root, Vector3(2.4, 0.5, 1.25), Vector3(0.0, 0.64, 0.0), mat(HULL))
+	box(root, Vector3(0.7, 0.5, 1.1), Vector3(0.75, 1.1, 0.0), mat(HULL_DARK))
+	box(root, Vector3(2.62, 0.1, 0.47), Vector3(0.0, 0.58, 0.7), team_mat(team))
+	box(root, Vector3(2.62, 0.1, 0.47), Vector3(0.0, 0.58, -0.7), team_mat(team))
+	box(root, Vector3(0.5, 0.25, 1.5), Vector3(-1.1, 0.35, 0.0), mat(GUNMETAL))
+	var t: Node3D = _turret(root, Vector3(-0.35, 0.95, 0.0))
+	box(t, Vector3(0.9, 0.55, 0.9), Vector3(0.0, 0.28, 0.0), mat(HULL_DARK))
+	cyl(t, 0.11, 0.13, 2.6, Vector3(0.95, 1.0, 0.0), mat(GUNMETAL), 6, Vector3(0.0, 0.0, -0.95))
+	box(t, Vector3(0.4, 0.1, 0.5), Vector3(-0.25, 0.6, 0.0), team_mat(team))
+
+
+# --------------------------------------------------------------- aircraft
+
+static func _rotor(root: Node3D, pos: Vector3, radius: float, node_name: String) -> void:
+	var r: Node3D = Node3D.new()
+	r.name = node_name
+	r.position = pos
+	root.add_child(r)
+	box(r, Vector3(radius * 2.0, 0.03, 0.14), Vector3.ZERO, mat(GUNMETAL))
+	box(r, Vector3(0.14, 0.03, radius * 2.0), Vector3.ZERO, mat(GUNMETAL))
+	cyl(r, 0.08, 0.08, 0.12, Vector3.ZERO, mat(METAL), 6)
+
+
+static func _kestrel(root: Node3D, team: Color) -> void:
+	box(root, Vector3(1.9, 0.6, 0.75), Vector3(0.15, 0.5, 0.0), mat(HULL))
+	wedge(root, Vector3(0.7, 0.6, 0.75), Vector3(1.45, 0.5, 0.0), mat(HULL), 0.0)
+	box(root, Vector3(0.6, 0.3, 0.6), Vector3(0.75, 0.86, 0.0), mat(GLASS, 0.15, 0.3, 0.2))
+	box(root, Vector3(1.7, 0.2, 0.22), Vector3(-1.5, 0.6, 0.0), mat(HULL_DARK))
+	box(root, Vector3(0.1, 0.55, 0.5), Vector3(-2.3, 0.82, 0.0), team_mat(team))
+	box(root, Vector3(0.5, 0.1, 2.3), Vector3(0.1, 0.42, 0.0), mat(HULL_DARK))
+	for z: float in [-1.05, 1.05]:
+		cyl(root, 0.16, 0.16, 0.8, Vector3(0.15, 0.3, z), mat(GUNMETAL), 6, Vector3(0.0, 0.0, -PI * 0.5))
+		box(root, Vector3(0.2, 0.06, 0.4), Vector3(0.1, 0.5, z), team_mat(team))
+	box(root, Vector3(1.9, 0.08, 0.77), Vector3(0.15, 0.24, 0.0), team_mat(team))
+	cyl(root, 0.06, 0.06, 0.3, Vector3(0.1, 0.95, 0.0), mat(METAL), 5)
+	_rotor(root, Vector3(0.1, 1.12, 0.0), 1.9, "Rotor")
+	var t: Node3D = _turret(root, Vector3(1.1, 0.16, 0.0))
+	box(t, Vector3(0.3, 0.16, 0.3), Vector3.ZERO, mat(GUNMETAL))
+	barrel(t, 0.04, 0.5, Vector3(0.1, -0.02, 0.0), mat(GUNMETAL))
+
+
+static func _scout_drone(root: Node3D, team: Color) -> void:
+	box(root, Vector3(0.6, 0.18, 0.4), Vector3(0.0, 0.3, 0.0), mat(HULL_DARK))
+	ball(root, 0.14, Vector3(0.28, 0.2, 0.0), mat(GLASS, 0.6, 0.3, 0.2), 6)
+	box(root, Vector3(0.62, 0.06, 0.42), Vector3(0.0, 0.4, 0.0), team_mat(team))
+	var i: int = 0
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			box(root, Vector3(0.5, 0.05, 0.06), Vector3(sx * 0.32, 0.32, sz * 0.3), mat(METAL), Vector3(0.0, -sx * sz * 0.75, 0.0))
+			_rotor(root, Vector3(sx * 0.5, 0.42, sz * 0.46), 0.3, "Rotor%d" % i)
+			i += 1
+
+
 # -------------------------------------------------------------- buildings
 
 static func _hq(root: Node3D, team: Color) -> void:
@@ -412,3 +496,43 @@ static func _lance_battery(root: Node3D, team: Color) -> void:
 		for y: float in [0.38, 0.62]:
 			box(t, Vector3(0.1, 0.17, 0.2), Vector3(0.66, y + 0.16, z), mat(HAZARD), Vector3(0.0, 0.0, 0.3))
 	box(t, Vector3(0.4, 0.1, 0.5), Vector3(-0.3, 0.6, 0.0), team_mat(team), Vector3(0.0, 0.0, 0.3))
+
+
+static func _flak_post(root: Node3D, team: Color) -> void:
+	cyl(root, 0.85, 0.95, 0.5, Vector3(0.0, 0.25, 0.0), mat(CONCRETE_DARK), 8)
+	cyl(root, 0.45, 0.55, 0.6, Vector3(0.0, 0.78, 0.0), mat(HULL), 6)
+	ring(root, 0.82, 0.9, Vector3(0.0, 0.5, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 1.1, 0.0))
+	box(t, Vector3(0.7, 0.5, 0.9), Vector3(0.0, 0.25, 0.0), mat(HULL_DARK))
+	for z: float in [-0.3, -0.1, 0.1, 0.3]:
+		cyl(t, 0.045, 0.045, 1.4, Vector3(0.5, 0.75, z), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.75))
+	box(t, Vector3(0.3, 0.1, 0.92), Vector3(-0.15, 0.52, 0.0), team_mat(team))
+
+
+static func _command_lab(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.4, 5.7), Vector3(0.0, 0.0, 0.0), mat(CONCRETE_DARK))
+	box(root, Vector3(4.4, 1.6, 4.4), Vector3(0.0, 1.0, 0.0), mat(CONCRETE))
+	box(root, Vector3(4.45, 0.25, 4.45), Vector3(0.0, 1.5, 0.0), team_mat(team))
+	ball(root, 1.5, Vector3(0.0, 1.8, 0.0), mat(HULL, 0.0, 0.4, 0.5), 10)
+	ring(root, 1.5, 1.62, Vector3(0.0, 1.85, 0.0), team_mat(team))
+	for sx: float in [-1.0, 1.0]:
+		cyl(root, 0.06, 0.06, 1.6, Vector3(sx * 1.8, 2.6, -1.8), mat(METAL), 5)
+		cyl(root, 0.5, 0.1, 0.25, Vector3(sx * 1.8, 3.5, -1.8), mat(METAL, 0.0, 0.6, 0.4), 8, Vector3(0.6, 0.0, sx * 0.4))
+	box(root, Vector3(1.2, 1.1, 0.1), Vector3(0.0, 0.75, 2.22), mat(GUNMETAL))
+	box(root, Vector3(0.8, 0.5, 0.8), Vector3(1.7, 2.05, 1.7), mat(HULL_DARK))
+	ball(root, 0.2, Vector3(1.7, 2.5, 1.7), mat(team, 1.4))
+
+
+static func _airpad(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.8, 0.4, 5.8), Vector3(0.0, 0.0, 0.0), mat(CONCRETE_DARK))
+	cyl(root, 2.1, 2.1, 0.12, Vector3(0.6, 0.26, 0.6), mat(CONCRETE), 16)
+	ring(root, 1.9, 2.05, Vector3(0.6, 0.34, 0.6), team_mat(team))
+	box(root, Vector3(0.3, 0.04, 1.6), Vector3(0.1, 0.34, 0.6), mat(HAZARD))
+	box(root, Vector3(0.3, 0.04, 1.6), Vector3(1.1, 0.34, 0.6), mat(HAZARD))
+	box(root, Vector3(1.0, 0.04, 0.3), Vector3(0.6, 0.34, 0.6), mat(HAZARD))
+	box(root, Vector3(1.6, 1.5, 5.2), Vector3(-2.0, 0.95, 0.0), mat(HULL))
+	roof(root, 1.6, 0.5, 5.2, Vector3(-2.0, 1.95, 0.0), mat(HULL_DARK))
+	box(root, Vector3(1.65, 0.2, 5.25), Vector3(-2.0, 1.5, 0.0), team_mat(team))
+	box(root, Vector3(0.9, 2.6, 0.9), Vector3(2.2, 1.5, -2.2), mat(CONCRETE))
+	box(root, Vector3(1.2, 0.5, 1.2), Vector3(2.2, 3.0, -2.2), mat(GLASS, 0.3, 0.3, 0.2))
+	ball(root, 0.16, Vector3(2.2, 3.5, -2.2), mat(team, 1.4))

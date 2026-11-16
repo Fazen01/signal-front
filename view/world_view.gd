@@ -107,7 +107,11 @@ func _sync_projectiles(alpha: float) -> void:
 		var total: float = maxf(p.start_pos.distance_to(p.target_pos), 0.01)
 		var done: float = clampf(p.start_pos.distance_to(flat) / total, 0.0, 1.0)
 		var arc: float = 1.6 if p.weapon.homing else 0.5
-		var y: float = world.map.height_at(flat) + 1.0 + sin(done * PI) * arc
+		if p.weapon.fx == "artillery":
+			arc = 7.0
+		# Climb or dive between the shooter's and the target's altitude.
+		var lift: float = lerpf(_altitude_of(p.source_id), _altitude_of(p.target_id), done)
+		var y: float = world.map.height_at(flat) + 1.0 + lift + sin(done * PI) * arc
 		var at: Vector3 = Vector3(flat.x, y, flat.y)
 		var ahead: Vector2 = p.target_pos - flat
 		if ahead.length() > 0.05:
@@ -136,6 +140,13 @@ func _proj_mat(fx_name: String) -> StandardMaterial3D:
 	m.albedo_color = color
 	_proj_mats[fx_name] = m
 	return m
+
+
+func _altitude_of(id: int) -> float:
+	var e: SimEntity = world.get_entity(id)
+	if e == null or e.def == null:
+		return 0.0
+	return e.def.altitude()
 
 
 func _directive_fx(ev: SimEvent) -> void:
@@ -178,7 +189,7 @@ func handle_event(ev: SimEvent) -> void:
 		SimEvent.Type.RANK_UP:
 			fx.ground_ring(_ground(ev.pos, 0.2), 1.6, Color(1.0, 0.85, 0.3, 0.9), 0.8, true)
 		SimEvent.Type.SHOT:
-			fx.tracer(_ground(ev.pos, 1.0), _ground(ev.pos2, 0.8), ev.text == "tracer_heavy")
+			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), _ground(ev.pos2, 0.8 + _altitude_of(ev.other_id)), ev.text == "tracer_heavy")
 		SimEvent.Type.PROJECTILE:
 			fx.flash(_ground(ev.pos, 1.1), 0.4, Color(1.0, 0.8, 0.45, 0.9), 0.08)
 		SimEvent.Type.IMPACT:

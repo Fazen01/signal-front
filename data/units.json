@@ -16,7 +16,7 @@
 		"faction": "aegis", "tier": 1, "cost": 80, "build_time": 7.0, "bandwidth": 1,
 		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 10.0, "builder": true, "model": "engineer", "hotkey": "F",
-		"builds": ["depot", "relay", "barracks", "vehicle_works", "sentry_turret", "lance_battery"]
+		"builds": ["depot", "relay", "barracks", "vehicle_works", "sentry_turret", "lance_battery", "flak_post", "command_lab", "airpad"]
 	},
 	"marksman": {
 		"name": "Marksman", "desc": "Long-sighted sharpshooter. Hidden while standing still unless an enemy is close.",
@@ -48,5 +48,30 @@
 		"faction": "aegis", "tier": 2, "cost": 380, "build_time": 20.0, "bandwidth": 4,
 		"hp": 720, "armor": "heavy", "move": "vehicle", "speed": 3.3, "turn_rate": 2.2,
 		"radius": 1.15, "sight": 11.0, "weapons": ["tank_cannon"], "turret": true, "model": "bulwark", "hotkey": "B"
+	},
+	"tempest": {
+		"name": "Tempest", "desc": "Anti-air track. Shreds aircraft; its flak is weak against armor.",
+		"faction": "aegis", "tier": 2, "cost": 240, "build_time": 14.0, "bandwidth": 3,
+		"hp": 380, "armor": "light", "move": "vehicle", "speed": 4.0, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 12.0, "weapons": ["tempest_flak"], "turret": true, "model": "tempest", "hotkey": "T"
+	},
+	"longbow": {
+		"name": "Longbow", "desc": "Artillery. Huge range and splash, but it cannot hit close targets and needs spotters.",
+		"faction": "aegis", "tier": 3, "cost": 420, "build_time": 22.0, "bandwidth": 4,
+		"hp": 300, "armor": "light", "move": "vehicle", "speed": 2.8, "turn_rate": 2.2,
+		"radius": 1.1, "sight": 10.0, "weapons": ["longbow_shell"], "turret": true, "model": "longbow",
+		"hotkey": "L", "requires": ["command_lab"]
+	},
+	"kestrel": {
+		"name": "Kestrel", "desc": "Gunship. Flies over any terrain and rockets ground targets; helpless against flak.",
+		"faction": "aegis", "tier": 3, "cost": 450, "build_time": 22.0, "bandwidth": 4,
+		"hp": 320, "armor": "air", "move": "air", "speed": 6.5, "turn_rate": 4.0,
+		"radius": 1.1, "sight": 12.0, "weapons": ["kestrel_rockets"], "turret": true, "model": "kestrel", "hotkey": "K"
+	},
+	"scout_drone": {
+		"name": "Scout Drone", "desc": "Unarmed flying scout with very long sight. Spots for artillery.",
+		"faction": "aegis", "tier": 3, "cost": 90, "build_time": 8.0, "bandwidth": 1,
+		"hp": 90, "armor": "air", "move": "air", "speed": 8.0, "turn_rate": 6.0,
+		"radius": 0.6, "sight": 18.0, "model": "scout_drone", "hotkey": "N"
 	}
 }

@@ -68,14 +68,19 @@ is invisible to the enemy unless they come close.
 
 ## What is in this build
 
-First playable (`v0.1`): one faction, the **Aegis Directorate**, in a mirror
-match against a scripted AI (Easy / Normal / Hard) on seeded, mirrored
-128 × 128 maps.
+One faction so far, the **Aegis Directorate**, in a mirror match against a
+scripted AI (Easy / Normal / Hard) on seeded, mirrored 128 × 128 maps.
 
-- Units: Trooper, Lancer, Field Engineer, Marksman, Hauler, Courser, Warden,
-  Bulwark.
+- Infantry: Trooper, Lancer (anti-armor), Field Engineer (builds, repairs,
+  captures), Marksman (long sight, hidden while still).
+- Vehicles: Hauler, Courser (scout), Warden (autocannon), Bulwark (tank),
+  Tempest (anti-air), Longbow (artillery: long range, minimum range, needs
+  spotters).
+- Aircraft: Kestrel (gunship), Scout Drone. Aircraft ignore terrain; only
+  some weapons can hit them and flak is by far the best.
 - Buildings: Headquarters, Depot, Relay, Barracks, Vehicle Works, Sentry
-  Turret, Lance Battery.
+  Turret, Lance Battery, Flak Post, Command Lab (tier 3, faster Directives),
+  Airpad.
 - Systems: salvage economy with wrecks, construction and production queues,
   Bandwidth cap, the Signal Grid (link chains, coverage, Linked/Dark effects,
   placement rules), fog of war with vision shared through coverage, minimap,
@@ -83,8 +88,8 @@ match against a scripted AI (Easy / Normal / Hard) on seeded, mirrored
   against armor classes, projectiles, forest cover, win/lose with a stats
   screen.
 
-Not in yet (see the roadmap): air units and tier 3, the Foundry Pact and
-Nomad Circuit factions, sound, save/load.
+Not in yet (see the roadmap): the Foundry Pact and Nomad Circuit factions,
+hand-made maps and 4-player games, sound, save/load.
 
 ## For developers
 

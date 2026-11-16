@@ -63,7 +63,9 @@ static func _cmd_move(w: SimWorld, cmd: SimCommand, order_type: int) -> void:
 		return
 	var slots: Array[Vector2] = formation_slots(w, units, cmd.pos)
 	for i: int in units.size():
-		give_order(units[i], SimOrder.make(order_type, slots[i]), cmd.queue)
+		# Ground units cannot stand on blocked cells; aircraft can hover anywhere.
+		var slot: Vector2 = slots[i] if units[i].def.is_air() else w.map.nearest_free_pos(slots[i])
+		give_order(units[i], SimOrder.make(order_type, slot), cmd.queue)
 
 
 static func _cmd_attack(w: SimWorld, cmd: SimCommand) -> void:
@@ -136,7 +138,7 @@ static func formation_slots(w: SimWorld, units: Array[SimEntity], target: Vector
 			units[i + k] = row_units[k]
 			var offset: float = (float(k) - float(count - 1) * 0.5) * spacing
 			var slot: Vector2 = target + side * offset - dir * (float(row) * spacing)
-			slots.append(w.map.nearest_free_pos(w.map.clamp_to_map(slot)))
+			slots.append(w.map.clamp_to_map(slot))
 		i += count
 		row += 1
 	return slots
