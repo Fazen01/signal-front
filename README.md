@@ -127,8 +127,11 @@ wrecks; ground units vanish when they stand still in forest.
 ## Maps
 
 A seeded, symmetric generator (176 × 176 for two players, a compact 128 × 128
-option for shorter matches, 192 × 192 for three or four) and three hand-made
-layouts: **Twin Fords** (a river with three
+option for shorter matches, 192 × 192 for three or four). The seed also picks
+the kind of country: open **plains**, **highlands** crossed by rock ridges
+with passes through them, **lakeland**, or (two players only) a **river
+valley** with fords. Worn tracks show the routes between the bases. There
+are also three hand-made layouts: **Twin Fords** (a river with three
 crossings), **Crater Ring** (rich salvage inside a rock ring) and
 **Crossroads** (four players, ridges and a central plaza).
 

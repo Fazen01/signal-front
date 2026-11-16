@@ -58,6 +58,11 @@ func _ready() -> void:
 		var lgame: GameState = get_node_or_null("/root/Game") as GameState
 		if lgame != null:
 			lgame.pending_config = lconfig
+	if _script_name.begins_with("seed_"):
+		# "seed_<n>": the generated two-player map for that seed, seen whole.
+		var sgame: GameState = get_node_or_null("/root/Game") as GameState
+		if sgame != null:
+			sgame.pending_config = MatchConfig.skirmish(int(_script_name.trim_prefix("seed_")))
 	_scene = packed.instantiate()
 	add_child(_scene)
 
@@ -89,6 +94,13 @@ func _save(shot: String) -> void:
 
 
 func _run_script(battle: BattleScene) -> void:
+	if _script_name.begins_with("seed_") and _count == 2:
+		battle.fog_view.visible = false
+		battle.terrain.set_fog_texture(null)
+		battle.signal_view.set_overlay_visible(false)
+		battle.cam.center_on(battle.world.map.world_size() * 0.5)
+		battle.cam.set_distance(150.0)
+		print("Map: ", battle.world.map.name)
 	match _script_name:
 		"closeup":
 			if _count == 2:

@@ -59,7 +59,7 @@ void fragment() {
 	// Worn ground: R = vehicle tracks, G = stains under scrap, B = the
 	// packed earth of a base. Looked up a little off-position so that tracks
 	// wander instead of running ruler-straight.
-	vec3 mark = texture(mark_tex, (p + (mid.rg - 0.5) * 5.0 + (fine.rg - 0.5) * 0.5) / map_size).rgb;
+	vec3 mark = texture(mark_tex, (p + (mid.rg - 0.5) * 3.2 + (fine.rg - 0.5) * 0.5) / map_size).rgb;
 	// Terrain weights: UV = (forest, rock), UV2.x = water.
 	float forest = smoothstep(0.30, 0.56, UV.x + wob);
 	float rock = smoothstep(0.22, 0.46, UV.y + wob * 0.8);
@@ -352,6 +352,19 @@ func _stamp_path(points: PackedVector2Array, radius: float, strength: int) -> vo
 		var steps: int = maxi(1, int(a.distance_to(b) / 0.8))
 		for k: int in steps + 1:
 			_stamp(a.lerp(b, float(k) / float(steps)), radius, 0, strength)
+
+
+## True if a spot stands on a vehicle track or right beside one. Trees,
+## bushes, boulders, stones and logs are kept off the tracks with this; the
+## reach covers the way the ground shader lets a track wander.
+func _on_trail(at: Vector3) -> bool:
+	var k: float = float(MARK_SCALE) / SimMap.CELL
+	for off: Vector2 in [Vector2.ZERO, Vector2(2.2, 0.0), Vector2(-2.2, 0.0), Vector2(0.0, 2.2), Vector2(0.0, -2.2), Vector2(1.6, 1.6), Vector2(-1.6, 1.6), Vector2(1.6, -1.6), Vector2(-1.6, -1.6)]:
+		var x: int = int((at.x + off.x) * k)
+		var y: int = int((at.z + off.y) * k)
+		if x >= 0 and y >= 0 and x < _mark_w and y < _mark_h and _marks[(y * _mark_w + x) * 3] > 36:
+			return true
+	return false
 
 
 ## How worn the ground is at a world position (tracks or base earth), 0-255.
@@ -676,18 +689,25 @@ func _build_trees() -> void:
 				for i: int in count:
 					var leafy: bool = _rng.chance(0.8 if grove > 0.25 else 0.12)
 					var k: int = (2 + _rng.range_i(0, 1)) if leafy else _rng.range_i(0, 1)
-					kinds[k].append(_spot(x, y, 0.1, 0.78, 1.32, 0.16, 0.0))
+					var tree: Transform3D = _spot(x, y, 0.1, 0.78, 1.32, 0.16, 0.0)
+					if _on_trail(tree.origin):
+						continue
+					kinds[k].append(tree)
 					var shade: float = _rng.range_f(0.78, 1.0)
 					tints[k].append(Color(shade * _rng.range_f(0.86, 1.0), shade, shade * _rng.range_f(0.8, 1.0)))
 				if _rng.chance(0.3):
-					kinds[4].append(_spot(x, y, 0.1, 0.7, 1.2, 0.2, 0.0))
-					tints[4].append(Color(0.9, 0.95, 0.85) * _rng.range_f(0.8, 1.0))
+					var shrub: Transform3D = _spot(x, y, 0.1, 0.7, 1.2, 0.2, 0.0)
+					if not _on_trail(shrub.origin):
+						kinds[4].append(shrub)
+						tints[4].append(Color(0.9, 0.95, 0.85) * _rng.range_f(0.8, 1.0))
 			elif t == SimMap.Terrain.GROUND:
 				# Bushes straggle out of the forest edge; the odd one stands alone.
 				var edge: bool = _is(x - 1, y, SimMap.Terrain.FOREST) or _is(x + 1, y, SimMap.Terrain.FOREST) or _is(x, y - 1, SimMap.Terrain.FOREST) or _is(x, y + 1, SimMap.Terrain.FOREST)
 				if _rng.chance(0.4 if edge else 0.012):
-					kinds[4].append(_spot(x, y, 0.15, 0.6, 1.15, 0.2, 0.0))
-					tints[4].append(Color(0.95, 1.0, 0.85) * _rng.range_f(0.8, 1.0))
+					var bush: Transform3D = _spot(x, y, 0.15, 0.6, 1.15, 0.2, 0.0)
+					if not _on_trail(bush.origin):
+						kinds[4].append(bush)
+						tints[4].append(Color(0.95, 1.0, 0.85) * _rng.range_f(0.8, 1.0))
 	var foliage: ShaderMaterial = _prop_material(0.022, false, 0.22)
 	var meshes: Array[ArrayMesh] = [_conifer(3, 1.0), _conifer(4, 0.82), _broadleaf(11), _broadleaf(29), _bush(5)]
 	var names: Array[String] = ["Conifers", "TallConifers", "Broadleaf", "BroadleafB", "Bushes"]
@@ -718,16 +738,21 @@ func _build_rocks() -> void:
 					var k: int = _rng.range_i(0, 2)
 					var xf: Transform3D = _spot(x, y, 0.22, 0.8, 1.7, 0.3, 0.1)
 					xf.basis = Basis.from_euler(Vector3(_rng.range_f(-0.25, 0.25), 0.0, _rng.range_f(-0.25, 0.25))) * xf.basis
-					big[k].append(xf)
-					big_tints[k].append(Color.WHITE * _rng.range_f(0.78, 1.0))
+					if not _on_trail(xf.origin):
+						big[k].append(xf)
+						big_tints[k].append(Color.WHITE * _rng.range_f(0.78, 1.0))
 				for i: int in _rng.range_i(0, 2):
-					small.append(_spot(x, y, 0.05, 0.22, 0.5, 0.3, 0.05))
-					small_tints.append(Color.WHITE * _rng.range_f(0.7, 1.0))
+					var chip: Transform3D = _spot(x, y, 0.05, 0.22, 0.5, 0.3, 0.05)
+					if not _on_trail(chip.origin):
+						small.append(chip)
+						small_tints.append(Color.WHITE * _rng.range_f(0.7, 1.0))
 			elif t == SimMap.Terrain.GROUND and _rng.chance(0.03):
 				# Loose stones out on the grass.
 				for i: int in _rng.range_i(1, 3):
-					small.append(_spot(x, y, 0.1, 0.12, 0.3, 0.3, 0.04))
-					small_tints.append(Color.WHITE * _rng.range_f(0.7, 1.0))
+					var pebble: Transform3D = _spot(x, y, 0.1, 0.12, 0.3, 0.3, 0.04)
+					if not _on_trail(pebble.origin):
+						small.append(pebble)
+						small_tints.append(Color.WHITE * _rng.range_f(0.7, 1.0))
 	var stone: ShaderMaterial = _prop_material(0.0, false)
 	for k: int in big.size():
 		var spots: Array[Transform3D] = []
@@ -828,12 +853,12 @@ func _build_litter() -> void:
 			if by_wood and _rng.chance(0.09):
 				var lying: Transform3D = _spot(x, y, 0.2, 0.8, 1.3, 0.0, -0.13)
 				lying.basis = lying.basis * Basis(Vector3.RIGHT, PI * 0.5)
-				if _worn_at(Vector2(lying.origin.x, lying.origin.z)) < 40:
+				if _worn_at(Vector2(lying.origin.x, lying.origin.z)) < 40 and not _on_trail(lying.origin):
 					logs.append(lying)
 					wood_tints.append(Color.WHITE * _rng.range_f(0.75, 1.0))
 			elif by_wood and _rng.chance(0.07):
 				var cut: Transform3D = _spot(x, y, 0.2, 0.8, 1.3, 0.1, 0.0)
-				if _worn_at(Vector2(cut.origin.x, cut.origin.z)) < 40:
+				if _worn_at(Vector2(cut.origin.x, cut.origin.z)) < 40 and not _on_trail(cut.origin):
 					stumps.append(cut)
 					stump_tints.append(Color.WHITE * _rng.range_f(0.75, 1.0))
 			# Flowers come in patches of one colour.

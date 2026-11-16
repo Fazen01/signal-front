@@ -380,7 +380,7 @@ func _update_map() -> void:
 	var index: int = maxi(_map.selected, 0)
 	var capacity: int = _map_players[index]
 	if _map_ids[index] == "":
-		_map_blurb.text = "A new battlefield from the seed: 176 x 176 for two players, 192 x 192 for three or four."
+		_map_blurb.text = "A new battlefield from the seed: plains, highlands, lakeland or a river valley. 176 x 176 for two players, 192 x 192 for three or four."
 	elif _map_ids[index] == COMPACT_MAP:
 		_map_blurb.text = "A small 128 x 128 battlefield from the seed. The armies meet early; expect a match of about ten minutes."
 	else:

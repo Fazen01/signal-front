@@ -163,6 +163,20 @@ generator, the layouts and everything the simulation reads are untouched.
 - [x] Flowers in patches, reeds along the water, fallen logs and stumps at
       the edge of the woods
 
+## M18 — Map generator (owner request, 16 November)
+
+The owner asked for trees and stones to keep off the tracks, and for the
+map generation itself to be improved.
+
+- [x] Trees, bushes, boulders, stones, logs and stumps keep off the tracks
+- [x] The seed picks a kind of country: plains, highlands (rock ridges with
+      passes), lakeland, or a river valley with fords (two players only)
+- [x] Irregular woods, lakes and outcrops instead of round blobs; woods no
+      longer overwrite water or rock
+- [x] Uplink sites are part of the reachability check; tests for every kind,
+      determinism, symmetry and river crossings
+- [x] Match length checked against the old generator
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
@@ -272,6 +286,32 @@ then for more work on the map (M17).**
   `layout_twin_fords`, `layout_crater_ring` and `layout_crossroads` show a
   hand-made map whole with fog off. All three were looked at: the tracks
   cross Twin Fords at a ford and enter Crater Ring through its gaps.
+
+**10:55 UTC — the owner asked for the generator itself to be improved
+(M18), which overrides the decision above to leave it alone.**
+
+- The new generator keeps the share of open ground where it was, so that
+  the pacing work is not thrown away: 16 seeds at 176 x 176 give 85.8% open
+  ground, 8.1% forest, 3.9% rock, 2.2% water (before: 83.8 / 9.8 / 4.3 /
+  2.2), and the route between the bases is no longer than before.
+- **Match length, old generator against new**, `tools/pace_batch.gd`, seeds
+  1-6, three pairings, 18 matches each: median about 15.6 minutes before
+  and 16.3 after, one stalemate in 18 either way.
+- **Finding: one ford per arm was not enough.** With a single ford on each
+  arm of the river, seed 1 gave a 37-minute match and a stalemate. With two
+  fords per arm the same seed plays in 15-19 minutes on all three pairings.
+  The river can also be crossed in the middle of the map and round both
+  ends. A test dams the middle ford and checks the bases still connect.
+- River valleys are two-player only: a river cannot be laid symmetrically
+  between four starts. The compact map gets the same kinds as the standard.
+- The fields and uplink sites are placed exactly as before; only the
+  terrain around them changed.
+- **Decision: woods only grow on open ground.** They used to be painted
+  last and could overwrite a pond or an outcrop, which on the new maps would
+  have bridged rivers with forest.
+- `tools/screenshot.sh seed_4 30 seed_4` shows the map for a seed whole.
+  `tools/check.sh` plays its five matches on the new maps; all end with a
+  winner (the three-way one in 22 minutes, it used to take 55).
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

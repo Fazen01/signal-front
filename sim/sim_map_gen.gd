@@ -4,6 +4,11 @@ extends RefCounted
 ## layouts in res://data/maps. Two-player maps are rotated 180 degrees about
 ## the centre; four-player maps are rotated in quarter turns, so every start
 ## is identical.
+##
+## The seed also picks the kind of country: open plains, highlands crossed by
+## rock ridges with passes through them, lakeland, or (two players only) a
+## river valley with fords. Whatever the kind, about the same share of the
+## map stays open ground, so matches run to a similar length on all of them.
 
 const START_MARGIN_CELLS: int = 13  ## start position, in cells from the corner
 const START_CLEAR_CELLS: int = 11  ## radius kept free of obstacles around a start
@@ -13,6 +18,9 @@ const SMALL_CELLS: int = 64  ## 128 x 128 world units: the compact two-player ma
 const STANDARD_CELLS: int = 88  ## 176 x 176 world units: the default two-player map
 const LARGE_CELLS: int = 96  ## 192 x 192 world units, up to four players
 const LAYOUT_DIR: String = "res://data/maps"
+const THEME_NAMES: Dictionary[String, String] = {
+	"plains": "Plains", "river": "River Valley", "highlands": "Highlands", "lakes": "Lakeland", "open": "Open Ground",
+}
 
 
 ## Generates a map for `players` starts (2 or 4) on a square of `size_cells`.
@@ -22,7 +30,7 @@ static func generate(seed_value: int, size_cells: int = SMALL_CELLS, players: in
 	while attempt < 24:
 		var m: SimMap = _generate_once(seed_value + attempt * 7919, size_cells, order, attempt >= 16)
 		if _starts_connected(m):
-			m.name = "Generated %d" % seed_value
+			m.name = "%s %d" % [m.name, seed_value]
 			return m
 		attempt += 1
 	# Fall back to open ground; always playable.
@@ -84,17 +92,40 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool) ->
 		# Opposite corners first, so two players on a four-start map face each other.
 		m.starts = [m.starts[0], m.starts[2], m.starts[1], m.starts[3]]
 
-	# Blob counts are per symmetric copy, so divide by the symmetry order.
+	var theme: String = _pick_theme(rng, order, sparse)
+	m.name = THEME_NAMES[theme]
+	# Feature counts are per symmetric copy, so divide by the symmetry order.
 	var scale: float = float(n * n) / float(SMALL_CELLS * SMALL_CELLS) * 2.0 / float(order)
-	var rocks: int = int(round((2.0 if sparse else 7.0) * scale))
-	var ponds: int = int(round((0.0 if sparse else 2.0) * scale))
-	var forests: int = int(round(7.0 * scale))
-	for i: int in rocks:
-		_blob(m, rng, order, SimMap.Terrain.ROCK, rng.range_f(1.6, 3.6))
-	for i: int in ponds:
-		_blob(m, rng, order, SimMap.Terrain.WATER, rng.range_f(2.2, 4.2))
-	for i: int in forests:
-		_blob(m, rng, order, SimMap.Terrain.FOREST, rng.range_f(2.4, 5.0))
+	# Rock and water go down first; woods only grow on what is still open.
+	match theme:
+		"river":
+			_river(m, rng)
+			_scatter(m, rng, order, 4.0 * scale, SimMap.Terrain.ROCK, 1.4, 2.6)
+			_ridges(m, rng, order, 0.8 * scale, 5.0, 8.0)
+			_scatter(m, rng, order, 5.0 * scale, SimMap.Terrain.FOREST, 2.6, 4.6)
+			_scatter(m, rng, order, 6.0 * scale, SimMap.Terrain.FOREST, 1.2, 2.2)
+		"highlands":
+			_ridges(m, rng, order, 3.2 * scale, 7.0, 13.0)
+			_scatter(m, rng, order, 4.0 * scale, SimMap.Terrain.ROCK, 1.3, 2.4)
+			_scatter(m, rng, order, 1.0 * scale, SimMap.Terrain.WATER, 1.8, 2.8)
+			_scatter(m, rng, order, 4.0 * scale, SimMap.Terrain.FOREST, 2.6, 4.6)
+			_scatter(m, rng, order, 6.0 * scale, SimMap.Terrain.FOREST, 1.2, 2.2)
+		"lakes":
+			_scatter(m, rng, order, 2.2 * scale, SimMap.Terrain.WATER, 3.0, 5.0)
+			_scatter(m, rng, order, 1.6 * scale, SimMap.Terrain.WATER, 1.6, 2.4)
+			_scatter(m, rng, order, 4.5 * scale, SimMap.Terrain.ROCK, 1.4, 2.6)
+			_scatter(m, rng, order, 5.0 * scale, SimMap.Terrain.FOREST, 2.6, 5.0)
+			_scatter(m, rng, order, 6.0 * scale, SimMap.Terrain.FOREST, 1.2, 2.2)
+		"plains":
+			_scatter(m, rng, order, 5.5 * scale, SimMap.Terrain.ROCK, 1.5, 3.0)
+			_ridges(m, rng, order, 1.0 * scale, 5.0, 9.0)
+			_scatter(m, rng, order, 1.4 * scale, SimMap.Terrain.WATER, 2.2, 3.6)
+			_scatter(m, rng, order, 5.0 * scale, SimMap.Terrain.FOREST, 3.0, 5.6)
+			_scatter(m, rng, order, 7.0 * scale, SimMap.Terrain.FOREST, 1.3, 2.3)
+		_:
+			# Open ground: the fallback when nothing denser stays connected.
+			_scatter(m, rng, order, 2.0 * scale, SimMap.Terrain.ROCK, 1.6, 3.0)
+			_scatter(m, rng, order, 7.0 * scale, SimMap.Terrain.FOREST, 2.4, 5.0)
 
 	# Salvage near each start, on the side facing the map centre.
 	var centre: Vector2 = size * 0.5
@@ -132,22 +163,128 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool) ->
 	return m
 
 
-## Paints a roughly round blob and its symmetric images.
-static func _blob(m: SimMap, rng: SimRng, order: int, terrain: int, radius_cells: float) -> void:
-	var cx: float = rng.range_f(2.0, float(m.w) - 2.0)
-	var cy: float = rng.range_f(2.0, float(m.h) - 2.0)
-	var squash: float = rng.range_f(0.6, 1.0)
+## Which kind of country a seed gives. A river only suits two players: it
+## cannot be laid symmetrically between four.
+static func _pick_theme(rng: SimRng, order: int, sparse: bool) -> String:
+	if sparse:
+		return "open"
+	var roll: float = rng.next_float()
+	if order == 2:
+		if roll < 0.30:
+			return "river"
+		if roll < 0.55:
+			return "highlands"
+		if roll < 0.78:
+			return "lakes"
+		return "plains"
+	if roll < 0.40:
+		return "highlands"
+	if roll < 0.70:
+		return "lakes"
+	return "plains"
+
+
+## `count` irregular blobs of one terrain at random places.
+static func _scatter(m: SimMap, rng: SimRng, order: int, count: float, terrain: int, r_min: float, r_max: float) -> void:
+	for i: int in int(round(count)):
+		var at: Vector2 = Vector2(rng.range_f(2.0, float(m.w) - 2.0), rng.range_f(2.0, float(m.h) - 2.0))
+		_blob(m, rng, order, terrain, rng.range_f(r_min, r_max), at)
+
+
+## Paints an irregular blob centred on cell position `at`, and its symmetric
+## images. Forest only takes open ground, so it never bridges water or rock.
+static func _blob(m: SimMap, rng: SimRng, order: int, terrain: int, radius_cells: float, at: Vector2) -> void:
+	var squash: float = rng.range_f(0.55, 1.0)
 	var tilt: float = rng.range_f(0.0, PI)
-	var wobble: float = rng.range_f(0.0, TAU)
-	var r: int = int(ceilf(radius_cells)) + 1
+	var w1: float = rng.range_f(0.0, TAU)
+	var w2: float = rng.range_f(0.0, TAU)
+	var w3: float = rng.range_f(0.0, TAU)
+	var r: int = int(ceilf(radius_cells * 1.45)) + 1
 	for dy: int in range(-r, r + 1):
 		for dx: int in range(-r, r + 1):
 			var v: Vector2 = Vector2(float(dx), float(dy)).rotated(tilt)
 			v.y /= squash
-			var edge: float = radius_cells * (1.0 + 0.18 * sin(v.angle() * 3.0 + wobble))
+			var ang: float = v.angle()
+			var edge: float = radius_cells * (1.0 + 0.20 * sin(ang * 3.0 + w1) + 0.13 * sin(ang * 5.0 + w2) + 0.07 * sin(ang * 9.0 + w3))
 			if v.length() <= edge:
-				for c: Vector2i in cell_images(m, Vector2i(int(cx) + dx, int(cy) + dy), order):
-					m.set_terrain(c, terrain)
+				_paint(m, order, Vector2i(int(at.x) + dx, int(at.y) + dy), terrain)
+
+
+## Sets one cell and its symmetric images.
+static func _paint(m: SimMap, order: int, c: Vector2i, terrain: int) -> void:
+	for image: Vector2i in cell_images(m, c, order):
+		if not m.in_bounds(image):
+			continue
+		if terrain == SimMap.Terrain.FOREST and m.terrain_cell(image) != SimMap.Terrain.GROUND:
+			continue
+		m.set_terrain(image, terrain)
+
+
+## A filled circle of one terrain around cell position `at`, with its images.
+static func _disc(m: SimMap, order: int, at: Vector2, radius_cells: float, terrain: int) -> void:
+	var r: int = int(ceilf(radius_cells)) + 1
+	var c0: Vector2i = Vector2i(int(floor(at.x)), int(floor(at.y)))
+	for dy: int in range(-r, r + 1):
+		for dx: int in range(-r, r + 1):
+			var c: Vector2i = Vector2i(c0.x + dx, c0.y + dy)
+			if Vector2(float(c.x) + 0.5 - at.x, float(c.y) + 0.5 - at.y).length() <= radius_cells:
+				_paint(m, order, c, terrain)
+
+
+## Rock ridges: long, slightly bent walls. The longer ones have a pass cut
+## through them, so a ridge shapes the fighting without sealing anything off.
+static func _ridges(m: SimMap, rng: SimRng, order: int, count: float, len_min: float, len_max: float) -> void:
+	for i: int in int(round(count)):
+		var mid: Vector2 = Vector2(rng.range_f(5.0, float(m.w) - 5.0), rng.range_f(5.0, float(m.h) - 5.0))
+		var length: float = rng.range_f(len_min, len_max)
+		var along: Vector2 = Vector2.RIGHT.rotated(rng.range_f(0.0, PI))
+		var bend: float = rng.range_f(-0.3, 0.3) * length
+		var girth: float = rng.range_f(1.2, 1.9)
+		var pass_at: float = rng.range_f(0.35, 0.65) if length >= 8.0 else -1.0
+		var steps: int = int(length / 0.7)
+		for k: int in steps + 1:
+			var t: float = float(k) / float(steps)
+			if pass_at >= 0.0 and absf(t - pass_at) * length < 1.9:
+				continue
+			var at: Vector2 = mid + along * (t - 0.5) * length + along.orthogonal() * bend * sin(t * PI)
+			_disc(m, order, at, girth * rng.range_f(0.75, 1.15), SimMap.Terrain.ROCK)
+
+
+## A river across the middle of a two-player map, running between the two
+## far corners so it lies square across the way from one base to the other.
+## It can be crossed at the centre of the map, at two fords on each arm, and
+## round both ends, where it runs out into a small lake short of the corner.
+static func _river(m: SimMap, rng: SimRng) -> void:
+	var n: float = float(m.w)
+	var centre: Vector2 = Vector2(n * 0.5, n * 0.5)
+	var along: Vector2 = Vector2(1.0, -1.0).normalized()
+	var across: Vector2 = Vector2(1.0, 1.0).normalized()
+	var length: float = n * 0.7071 * rng.range_f(0.60, 0.72)
+	var swing: float = rng.range_f(2.0, 4.5)
+	var waves: float = rng.range_f(1.4, 2.4)
+	var phase: float = rng.range_f(0.0, TAU)
+	var ford_at: Array[float] = [rng.range_f(0.30, 0.40), rng.range_f(0.62, 0.74)]
+	var steps: int = int(length / 0.6)
+	var fords: Array[Vector2] = []
+	var mouth: Vector2 = centre
+	for k: int in steps + 1:
+		var t: float = float(k) / float(steps)
+		# The meander dies away towards the centre, where the two arms meet.
+		var at: Vector2 = centre + along * t * length + across * swing * sin(t * waves * PI + phase) * minf(1.0, t * 4.0)
+		_disc(m, 2, at, rng.range_f(1.5, 2.1), SimMap.Terrain.WATER)
+		for want: float in ford_at:
+			if absf(t - want) < 0.5 / float(steps):
+				fords.append(at)
+		mouth = at
+	_blob(m, rng, 2, SimMap.Terrain.WATER, rng.range_f(2.6, 3.4), mouth)
+	_disc(m, 2, centre, 3.2, SimMap.Terrain.GROUND)
+	for ford: Vector2 in fords:
+		_disc(m, 2, ford, 2.8, SimMap.Terrain.GROUND)
+	# Woods along the banks.
+	for k: int in 3:
+		var t: float = rng.range_f(0.12, 0.9)
+		var bank: float = (1.0 if rng.chance(0.5) else -1.0) * rng.range_f(4.5, 6.5)
+		_blob(m, rng, 2, SimMap.Terrain.FOREST, rng.range_f(2.0, 3.2), centre + along * t * length + across * bank)
 
 
 ## Turns every cell whose centre is within `radius_cells` cells of `centre`
@@ -222,7 +359,8 @@ static func _roll(x: float, y: float, p1: float, p2: float, p3: float) -> float:
 	return 0.9 * sin(x * 0.11 + p1) * cos(y * 0.13 + p2) + 0.45 * sin((x + y) * 0.07 + p3) + 0.6
 
 
-## Every start must reach every other start and every salvage field.
+## Every start must reach every other start, every salvage field and every
+## uplink site.
 static func _starts_connected(m: SimMap) -> bool:
 	if m.starts.size() < 2:
 		return true
@@ -231,6 +369,8 @@ static func _starts_connected(m: SimMap) -> bool:
 		targets.append(m.starts[i])
 	for f: Vector3 in m.field_spots:
 		targets.append(Vector2(f.x, f.y))
+	for u: Vector2 in m.uplink_spots:
+		targets.append(u)
 	for t: Vector2 in targets:
 		var path: PackedVector2Array = m.find_path(m.starts[0], t, true)
 		if path.size() == 0 or path[path.size() - 1].distance_to(t) > SimMap.CELL * 2.0:

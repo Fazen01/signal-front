@@ -130,3 +130,75 @@ func test_generated_two_player_sizes() -> void:
 	# Fields must be reachable on the larger map too.
 	SimTestUtil.run(standard, 20 * 60)
 	check(standard.players[0].stat_salvage_collected > 0, "haulers find fields on the standard map")
+
+
+func _kind_of(m: SimMap) -> String:
+	return m.name.rsplit(" ", true, 1)[0]
+
+
+func _reaches(m: SimMap, from: Vector2, to: Vector2) -> bool:
+	var path: PackedVector2Array = m.find_path(from, to, true)
+	return path.size() > 0 and path[path.size() - 1].distance_to(to) <= SimMap.CELL * 2.0
+
+
+func test_generated_maps_come_in_several_kinds() -> void:
+	var kinds: Dictionary[String, int] = {}
+	for seed_value: int in range(1, 25):
+		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2)
+		kinds[_kind_of(m)] = int(kinds.get(_kind_of(m), 0)) + 1
+		check_eq(_symmetry_mismatches(m, 2), 0, "seed %d (%s): half-turn symmetric" % [seed_value, m.name])
+		check(_all_reachable(m), "seed %d (%s): every start and field is reachable" % [seed_value, m.name])
+		for u: Vector2 in m.uplink_spots:
+			check(_reaches(m, m.starts[0], u), "seed %d (%s): uplink sites are reachable" % [seed_value, m.name])
+		for s: Vector2 in m.starts:
+			check(_hq_fits(m, s), "seed %d (%s): an HQ fits on every start" % [seed_value, m.name])
+		var open: int = 0
+		for t: int in m.terrain:
+			if t == SimMap.Terrain.GROUND:
+				open += 1
+		var share: float = float(open) / float(m.w * m.h)
+		check(share > 0.74 and share < 0.95, "seed %d (%s): %d%% open ground" % [seed_value, m.name, int(share * 100.0)])
+	for kind: String in ["River Valley", "Highlands", "Lakeland", "Plains"]:
+		check(kinds.has(kind), "%s turns up among 24 seeds" % kind)
+	check(not kinds.has("Open Ground"), "no seed needed the open-ground fallback")
+
+
+func test_same_seed_gives_the_same_map() -> void:
+	var a: SimMap = SimMapGen.generate(11, SimMapGen.STANDARD_CELLS, 2)
+	var b: SimMap = SimMapGen.generate(11, SimMapGen.STANDARD_CELLS, 2)
+	check(a.terrain == b.terrain and a.name == b.name, "generation is deterministic")
+	check(a.heights == b.heights, "heights too")
+	var c: SimMap = SimMapGen.generate(12, SimMapGen.STANDARD_CELLS, 2)
+	check(a.terrain != c.terrain, "another seed gives another map")
+
+
+func test_a_river_can_be_crossed_in_more_than_one_place() -> void:
+	var found: int = 0
+	for seed_value: int in range(1, 40):
+		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2)
+		if _kind_of(m) != "River Valley":
+			continue
+		found += 1
+		var water: int = 0
+		for t: int in m.terrain:
+			if t == SimMap.Terrain.WATER:
+				water += 1
+		check(water > m.w, "seed %d: there is a river (%d water cells)" % [seed_value, water])
+		# Dam the ford in the middle of the map: the bases must still connect.
+		var mid: Vector2i = Vector2i(m.w / 2, m.h / 2)
+		for dy: int in range(-5, 6):
+			for dx: int in range(-5, 6):
+				m.set_terrain(mid + Vector2i(dx, dy), SimMap.Terrain.WATER)
+		m.finalize()
+		check(_reaches(m, m.starts[0], m.starts[1]), "seed %d: the river has another crossing besides the middle" % seed_value)
+		if found >= 4:
+			break
+	check(found >= 3, "river valleys turn up (%d found)" % found)
+
+
+func test_four_player_maps_never_get_a_river() -> void:
+	for seed_value: int in range(1, 13):
+		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.LARGE_CELLS, 4)
+		check(_kind_of(m) != "River Valley", "seed %d: %s" % [seed_value, m.name])
+		check_eq(_symmetry_mismatches(m, 4), 0, "seed %d: quarter-turn symmetric" % seed_value)
+		check(_all_reachable(m), "seed %d: every start and field is reachable" % seed_value)
