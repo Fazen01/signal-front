@@ -187,6 +187,11 @@ points of noise), so the Nomads are now clearly behind.
   90 -> 86, Sidewinder 190 -> 181, Prowler 280 -> 266. Nomad then won 12 of
   24 on seeds 1-6 (7-5 against Aegis, 5-7 against Foundry). A 10% cut, or
   15% faster Nomad production, each swung the Aegis matchup to 8-4.
+- Three-way free-for-alls (Foundry, Nomad, Aegis) now take 17-55 game
+  minutes (seeds 1-5). `check.sh`'s three-way step plays seed 5, the slowest
+  at 55:25, against a 60-minute cap, which is too thin a margin: the cap for
+  that step is now 90 game minutes. It still has to end with a winner and
+  takes about four minutes of wall time.
 - `tools/pace_batch.gd --scale=id.field:mult` scales one field of any unit,
   building or weapon for an experiment.
 - Frame cost on the larger default map with 300 units (CPU only): average
