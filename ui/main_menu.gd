@@ -16,6 +16,9 @@ GETTING STARTED
   2. Select a Field Engineer and build a Barracks, then Relays towards more
      salvage. Relays also raise your Bandwidth (the unit cap).
   3. Build a Vehicle Works for tanks, then destroy the enemy Headquarters.
+  4. Right-click an Uplink Site with a Field Engineer to capture it: it pays
+     salvage while it is inside your coverage.
+You only see what your coverage and your units see.
 
 CAMERA
   W / D / arrow keys / screen edge   pan  (A and S also pan with nothing selected)
@@ -30,6 +33,9 @@ SELECTION AND ORDERS
   Ctrl+1..9, then 1..9               set and recall control groups (double-tap centres)
   Shift + order                      queue the order
   G                                  toggle the signal coverage overlay
+  . (period) or F1                   select the next idle Field Engineer
+  Ctrl+F5..F8, then F5..F8           save and recall camera bookmarks
+  Minimap                            left click moves the camera, right click orders
   Esc                                cancel, or open the pause menu
 
 The command card at the bottom right shows what the selection can build or

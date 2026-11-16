@@ -60,8 +60,8 @@ decision in the session log at the bottom.
 
 - [x] Fog of war and shared vision through coverage
 - [x] Minimap with camera box, click-to-move, alerts
-- [ ] Uplink Sites; capture by Field Engineer
-- [ ] Double-click select, idle-builder key, camera bookmarks
+- [x] Uplink Sites; capture by Field Engineer
+- [x] Double-click select, idle-builder key, camera bookmarks
 
 ## M7 — Directives and veterancy
 
@@ -250,9 +250,12 @@ Notes on this session's pushes:
   branch (`send-pack: unexpected disconnect`). The tag exists only in this
   session's clone. The M5 commit to tag is `457055b`.
 
-Half-done / next: M6 — fog of war (simulation and view) and the minimap are
-done. Still to do for M6: Uplink Sites with engineer capture, idle-builder
-key and camera bookmarks.
+- M6 Battlefield awareness: fog of war with vision shared through coverage,
+  Marksman stealth, minimap (camera box, click to move, right-click orders,
+  alert pings), Uplink Sites captured by Field Engineers, double-click
+  select, idle-builder key (period or F1), camera bookmarks (Ctrl+F5..F8).
+
+Half-done / next: M7 Directives and veterancy.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -269,3 +272,8 @@ Fog decisions:
   instance so they do not glow out of the fog.
 - "X under attack" alerts fire at most every 15 s per player, for buildings
   and haulers, and ping the minimap.
+- Uplink Sites: the design pays "whoever has them inside their coverage" and
+  the roadmap adds capture by engineer. Implemented as both: an engineer
+  captures the site (8 s), and it pays 3 salvage a second only while inside
+  its owner's coverage. An enemy engineer can flip it. Sites cannot be
+  destroyed and go neutral if their owner is defeated.

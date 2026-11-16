@@ -438,7 +438,13 @@ func _entity_name(e: SimEntity) -> String:
 func _entity_detail(e: SimEntity) -> String:
 	if e.def == null:
 		if e.kind == SimEntity.Kind.UPLINK:
-			return "Neutral uplink. Pays salvage to whoever covers it with signal."
+			var rate: int = world.data.uplink_income_per_second
+			if e.owner < 0:
+				return "Neutral. Capture it with a Field Engineer; it then pays %d salvage a second while it is inside your signal coverage." % rate
+			var who: String = "You hold" if e.owner == player else "%s holds" % world.players[e.owner].name
+			if e.linked:
+				return "%s this site. Paying %d salvage a second." % [who, rate]
+			return "%s this site, but it is outside their coverage and pays nothing." % who
 		return "Salvage remaining: %d. Send a Hauler to collect it." % e.salvage
 	var lines: Array[String] = []
 	lines.append("Health %d / %d" % [int(ceilf(e.hp)), int(e.max_hp)])

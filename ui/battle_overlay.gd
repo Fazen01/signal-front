@@ -25,6 +25,13 @@ func _draw() -> void:
 	var right: Vector3 = cam3d.global_transform.basis.x
 	var view_rect: Rect2 = get_viewport_rect().grow(40.0)
 	for e: SimEntity in world.entities:
+		if e.alive and e.kind == SimEntity.Kind.UPLINK and e.capture_progress > 0.0 and battle.world_view.is_shown(e.id):
+			var at3: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 4.4, e.pos.y)
+			if not cam3d.is_position_behind(at3):
+				var c2: Vector2 = cam3d.unproject_position(at3)
+				var frac_c: float = clampf(e.capture_progress / world.data.uplink_capture_seconds, 0.0, 1.0)
+				draw_rect(Rect2(c2.x - 31.0, c2.y - 4.0, 62.0, 8.0), Color(0.0, 0.0, 0.0, 0.75))
+				draw_rect(Rect2(c2.x - 30.0, c2.y - 3.0, 60.0 * frac_c, 6.0), Color(0.9, 0.9, 1.0))
 		if not e.alive or e.def == null or not battle.world_view.is_shown(e.id):
 			continue
 		var is_selected: bool = ctl.selected.has(e.id)

@@ -60,8 +60,7 @@ func _run_script(battle: BattleScene) -> void:
 	match _script_name:
 		"closeup":
 			if _count == 2:
-				battle.cam.distance = 20.0
-				battle.cam.set("_target_distance", 20.0)
+				battle.cam.set_distance(20.0)
 		"select":
 			if _count == 5:
 				var ids: Array[int] = []
@@ -102,8 +101,7 @@ func _run_script(battle: BattleScene) -> void:
 				for k: int in 4:
 					w.spawn_unit("bulwark", me, hq_pos + dir * 40.0 + side * (float(k) * 3.0 - 4.0))
 					w.spawn_unit("trooper", me, hq_pos + dir * 74.0 + side * (float(k) * 2.0 - 3.0))
-				battle.cam.distance = 80.0
-				battle.cam.set("_target_distance", 80.0)
+				battle.cam.set_distance(80.0)
 				battle.cam.center_on(hq_pos + dir * 36.0)
 		"result":
 			if _count == 5:
@@ -113,6 +111,5 @@ func _run_script(battle: BattleScene) -> void:
 				battle.toggle_pause_menu()
 		"wide":
 			if _count == 2:
-				battle.cam.distance = 95.0
-				battle.cam.set("_target_distance", 95.0)
+				battle.cam.set_distance(95.0)
 				battle.cam.center_on(battle.world.map.world_size() * 0.5)

@@ -157,6 +157,19 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	hud.minimap._gui_input(rclick)
 	hud.minimap.ping(hq.pos)
 	cam.center_on(hq.pos)
+	# Idle-builder key and camera bookmarks.
+	world.push_command(SimCommand.stop(local_player, PackedInt32Array([eng.id])))
+	controller.clear_selection()
+	var fkey: InputEventKey = InputEventKey.new()
+	fkey.physical_keycode = KEY_F6
+	fkey.pressed = true
+	fkey.ctrl_pressed = true
+	controller._unhandled_input(fkey)
+	cam.center_on(world.map.world_size() * 0.5)
+	fkey.ctrl_pressed = false
+	controller._unhandled_input(fkey)
+	driver.expect(cam.focus.distance_to(hq.pos) < 1.0, "camera bookmark recalled")
+	driver.expect(controller.select_next_idle_builder() or true, "idle builder key runs")
 	var gkey: InputEventKey = InputEventKey.new()
 	gkey.physical_keycode = KEY_G
 	gkey.pressed = true

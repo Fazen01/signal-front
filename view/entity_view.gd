@@ -63,6 +63,16 @@ func set_selected(on: bool) -> void:
 		select_ring.visible = on
 
 
+## Uplink sites change hands: rebuild the model in the new owner's colour.
+func refresh_owner(e: SimEntity, world: SimWorld) -> void:
+	if kind != SimEntity.Kind.UPLINK or e.owner == owner_id:
+		return
+	owner_id = e.owner
+	model.queue_free()
+	model = ModelFactory.build_uplink(world.players[e.owner].color if e.owner >= 0 else Color(0.9, 0.9, 0.95))
+	add_child(model)
+
+
 func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 	var p: Vector2 = e.prev_pos.lerp(e.pos, alpha)
 	base_y = map.height_at(p)

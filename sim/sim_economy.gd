@@ -24,6 +24,12 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 			_cmd_cancel_train(w, cmd)
 		SimCommand.Type.CANCEL_BUILDING:
 			_cmd_cancel_building(w, cmd)
+		SimCommand.Type.CAPTURE:
+			var site: SimEntity = w.get_entity(cmd.target_id)
+			if site != null and site.kind == SimEntity.Kind.UPLINK:
+				for e: SimEntity in SimOrders.own_units(w, cmd):
+					if e.def.builder:
+						SimOrders.give_order(e, SimOrder.make(SimOrder.Type.CAPTURE, site.pos, site.id), cmd.queue)
 		SimCommand.Type.RALLY:
 			var b: SimEntity = _own_building(w, cmd)
 			if b != null:
@@ -84,6 +90,8 @@ static func placement_error(w: SimWorld, player_id: int, def: EntityDef, cell: V
 	for other: SimEntity in w.query_radius(centre, def.radius * SQUARE + 3.0):
 		if other.kind == SimEntity.Kind.FIELD and other.pos.distance_to(centre) < other.radius + def.radius:
 			return "Too close to a salvage field"
+		if other.kind == SimEntity.Kind.UPLINK and other.pos.distance_to(centre) < other.radius + def.radius * SQUARE:
+			return "Too close to an uplink site"
 		if other.kind == SimEntity.Kind.UNIT and w.are_enemies(player_id, other.owner):
 			if Rect2i(cell, def.footprint).has_point(w.map.cell_of(other.pos)):
 				return "Enemy units in the way"
@@ -202,6 +210,8 @@ static func update_order(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 			_update_harvest(w, e, o)
 		SimOrder.Type.REPAIR:
 			_update_repair(w, e, o)
+		SimOrder.Type.CAPTURE:
+			_update_capture(w, e, o)
 		_:
 			SimOrders.finish_order(e)
 
@@ -326,6 +336,34 @@ static func _update_repair(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 		SimOrders.finish_order(e)
 
 
+static func _update_capture(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
+	var site: SimEntity = w.get_entity(o.target_id)
+	if site == null or site.kind != SimEntity.Kind.UPLINK or site.owner == e.owner:
+		SimMovement.stop(e)
+		SimOrders.finish_order(e)
+		return
+	if not _approach(w, e, o, site, site.radius + e.radius + 0.8):
+		if e.stuck_ticks > 40:
+			SimOrders.finish_order(e)
+		return
+	if site.capturer != e.owner:
+		site.capturer = e.owner
+		site.capture_progress = 0.0
+	site.capture_progress += SimWorld.DT
+	e.facing = rotate_toward(e.facing, (site.pos - e.pos).angle(), e.def.turn_rate * SimWorld.DT)
+	e.aim = e.facing
+	if site.capture_progress >= w.data.uplink_capture_seconds:
+		var previous: int = site.owner
+		site.owner = e.owner
+		site.capture_progress = 0.0
+		site.capturer = -1
+		site.linked = SimSignal.is_covered(w, site.owner, site.pos)
+		w.alert(e.owner, "Uplink Site captured", site.pos)
+		if previous >= 0:
+			w.alert(previous, "Uplink Site lost", site.pos)
+		SimOrders.finish_order(e)
+
+
 # -------------------------------------------------------------- per tick
 
 static func update(w: SimWorld) -> void:
@@ -340,6 +378,20 @@ static func update(w: SimWorld) -> void:
 			w.remove_entity(e)
 	if w.tick_count % 10 == 0:
 		recompute_bandwidth(w)
+	if w.tick_count % SimWorld.TICK_RATE == 0:
+		_pay_uplinks(w)
+
+
+## Once a second: every owned uplink inside its owner's coverage pays out.
+static func _pay_uplinks(w: SimWorld) -> void:
+	for e: SimEntity in w.entities:
+		if e.kind != SimEntity.Kind.UPLINK or e.owner < 0:
+			continue
+		e.linked = SimSignal.is_covered(w, e.owner, e.pos)
+		if e.linked:
+			var p: SimPlayer = w.players[e.owner]
+			p.salvage += w.data.uplink_income_per_second
+			p.stat_salvage_collected += w.data.uplink_income_per_second
 
 
 static func _update_building(w: SimWorld, b: SimEntity) -> void:

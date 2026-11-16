@@ -101,6 +101,17 @@ static func repair(p: int, unit_ids: PackedInt32Array, target: int, queued: bool
 	return c
 
 
+## Send Field Engineers to capture an uplink site.
+static func capture(p: int, unit_ids: PackedInt32Array, target: int, queued: bool = false) -> SimCommand:
+	var c: SimCommand = SimCommand.new()
+	c.type = Type.CAPTURE
+	c.player = p
+	c.ids = unit_ids
+	c.target_id = target
+	c.queue = queued
+	return c
+
+
 static func train(p: int, building: int, unit_def: String) -> SimCommand:
 	var c: SimCommand = SimCommand.new()
 	c.type = Type.TRAIN

@@ -22,6 +22,8 @@ var dragging: bool = false
 var drag_start: Vector2 = Vector2.ZERO
 var drag_now: Vector2 = Vector2.ZERO
 var _last_group: int = -1
+var _idle_cursor: int = 0
+var _bookmarks: Dictionary[int, Vector4] = {}  ## F5..F8 -> focus x, focus z, yaw, distance
 var _last_group_ms: int = 0
 
 
@@ -267,6 +269,20 @@ func _on_key(key: InputEventKey) -> void:
 			_recall_group(index, key.shift_pressed)
 		get_viewport().set_input_as_handled()
 		return
+	if code >= KEY_F5 and code <= KEY_F8:
+		if key.ctrl_pressed:
+			_bookmarks[int(code)] = Vector4(cam.focus.x, cam.focus.y, cam.yaw, cam.distance)
+		elif _bookmarks.has(int(code)):
+			var b: Vector4 = _bookmarks[int(code)]
+			cam.yaw = b.z
+			cam.set_distance(b.w)
+			cam.center_on(Vector2(b.x, b.y))
+		get_viewport().set_input_as_handled()
+		return
+	if code == KEY_PERIOD or code == KEY_F1:
+		select_next_idle_builder()
+		get_viewport().set_input_as_handled()
+		return
 	if key.ctrl_pressed or key.alt_pressed:
 		return
 	if battle.on_hotkey(key):
@@ -289,6 +305,21 @@ func _on_key(key: InputEventKey) -> void:
 			if mode != Mode.NORMAL:
 				mode = Mode.NORMAL
 				get_viewport().set_input_as_handled()
+
+
+## Selects the next builder that has nothing to do and looks at it.
+func select_next_idle_builder() -> bool:
+	var idle: Array[SimEntity] = []
+	for e: SimEntity in world.entities:
+		if e.alive and e.owner == player and e.kind == SimEntity.Kind.UNIT and e.def.builder and e.orders.is_empty():
+			idle.append(e)
+	if idle.is_empty():
+		return false
+	_idle_cursor = (_idle_cursor + 1) % idle.size()
+	var pick: SimEntity = idle[_idle_cursor]
+	set_selection([pick.id])
+	cam.center_on(pick.pos)
+	return true
 
 
 func _recall_group(index: int, add: bool) -> void:
@@ -353,6 +384,12 @@ func context_order(screen: Vector2, queued: bool) -> void:
 		world.push_command(SimCommand.attack(player, ids, target.id, queued))
 		battle.show_order_marker(target.pos, Color(1.0, 0.3, 0.25))
 		return
+	if target != null and target.kind == SimEntity.Kind.UPLINK and target.owner != player:
+		var capturers: PackedInt32Array = _filter(ids, func(e: SimEntity) -> bool: return e.def.builder)
+		if not capturers.is_empty():
+			world.push_command(SimCommand.capture(player, capturers, target.id, queued))
+			battle.show_order_marker(target.pos, Color(0.9, 0.9, 1.0))
+			return
 	if target != null and target.is_harvestable():
 		var haulers: PackedInt32Array = _filter(ids, func(e: SimEntity) -> bool: return e.def.harvester)
 		if not haulers.is_empty():

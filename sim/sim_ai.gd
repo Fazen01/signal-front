@@ -270,6 +270,18 @@ func _run_construction(w: SimWorld, me: SimPlayer) -> void:
 			w.push_command(SimCommand.repair(player_id, _ids(free), b.id))
 			return
 
+	# A spare engineer claims any uplink site our network already reaches.
+	if free.size() >= 2 or w.tick_count > 20 * 90:
+		for e: SimEntity in w.entities:
+			if e.kind == SimEntity.Kind.UPLINK and e.owner != player_id and SimSignal.is_covered(w, player_id, e.pos):
+				if _threat_near(e.pos, 16.0) == null:
+					var one: Array[SimEntity] = [free[free.size() - 1]]
+					w.push_command(SimCommand.capture(player_id, _ids(one), e.id))
+					free.remove_at(free.size() - 1)
+					break
+		if free.is_empty():
+			return
+
 	var next: String = _next_building(w, me)
 	if next == "":
 		return
@@ -332,6 +344,17 @@ func _relay_goal(w: SimWorld) -> Vector2:
 		if d < best_d:
 			best_d = d
 			best = e.pos
+	if best == Vector2.INF:
+		# Then the nearest uplink site on our half of the map.
+		for e: SimEntity in w.entities:
+			if e.kind != SimEntity.Kind.UPLINK or SimSignal.is_covered(w, player_id, e.pos):
+				continue
+			var d: float = e.pos.distance_to(_hq.pos)
+			if e.pos.distance_to(_enemy_hq_pos(w)) < d:
+				continue
+			if d < best_d:
+				best_d = d
+				best = e.pos
 	if best == Vector2.INF and _count("relay") < 4:
 		# Nothing left to claim: push the network towards the middle.
 		var mid: Vector2 = w.map.world_size() * 0.5

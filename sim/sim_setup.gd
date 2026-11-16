@@ -15,6 +15,8 @@ static func create_match(config: MatchConfig) -> SimWorld:
 		p.ai_level = config.ai_levels[i]
 	for f: Vector3 in map.field_spots:
 		w.spawn_field(Vector2(f.x, f.y), int(f.z))
+	for u: Vector2 in map.uplink_spots:
+		w.spawn_uplink(u)
 	for p: SimPlayer in w.players:
 		place_base(w, p)
 		if p.is_ai:

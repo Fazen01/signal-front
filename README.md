@@ -31,6 +31,12 @@ destroying one relay can black out everything chained behind it.
 3. Build a **Vehicle Works** for Wardens and Bulwark tanks, add turrets where
    your network is thin, and destroy the enemy Headquarters to win.
 4. Destroyed vehicles and buildings leave wrecks that Haulers can collect.
+5. Send a Field Engineer to capture **Uplink Sites** (right-click one). A site
+   pays a salvage trickle while it is inside your coverage.
+
+You only see what your network and your units see: everything inside your
+coverage is visible, plus a circle around each unit. A Marksman standing still
+is invisible to the enemy unless they come close.
 
 ### Controls
 
@@ -46,6 +52,9 @@ destroying one relay can black out everything chained behind it.
 | Shift + order | Queue the order |
 | Ctrl+1..9, then 1..9 | Set / recall a control group (double-tap centres the camera) |
 | G | Toggle the signal coverage overlay |
+| . (period) or F1 | Select the next idle Field Engineer |
+| Ctrl+F5..F8, then F5..F8 | Save / recall a camera bookmark |
+| Minimap: left click / right click | Move the camera / order the selection there |
 | Letter in [brackets] on the command card | Build or train that item |
 | Esc | Cancel placement or attack-move; otherwise open the pause menu |
 
@@ -61,12 +70,12 @@ match against a scripted AI (Easy / Normal / Hard) on seeded, mirrored
   Turret, Lance Battery.
 - Systems: salvage economy with wrecks, construction and production queues,
   Bandwidth cap, the Signal Grid (link chains, coverage, Linked/Dark effects,
-  placement rules), damage types against armor classes, projectiles, forest
+  placement rules), fog of war with vision shared through coverage, minimap,
+  Uplink Sites, damage types against armor classes, projectiles, forest
   cover, win/lose with a stats screen.
 
-Not in yet (see the roadmap): fog of war, minimap, Uplink Sites, Directives,
-veterancy, air units and tier 3, the Foundry Pact and Nomad Circuit factions,
-sound, save/load.
+Not in yet (see the roadmap): Directives, veterancy, air units and tier 3,
+the Foundry Pact and Nomad Circuit factions, sound, save/load.
 
 ## For developers
 

@@ -192,6 +192,19 @@ func spawn_field(at: Vector2, amount: int) -> SimEntity:
 	return e
 
 
+## A neutral uplink site. A Field Engineer captures it; it then pays its
+## owner a salvage trickle while it sits inside that owner's coverage.
+func spawn_uplink(at: Vector2) -> SimEntity:
+	var e: SimEntity = SimEntity.new()
+	e.kind = SimEntity.Kind.UPLINK
+	e.pos = at
+	e.radius = 2.2
+	e.linked = false
+	_register(e)
+	emit_event(SimEvent.Type.SPAWNED, e.id, -1, e.pos)
+	return e
+
+
 func spawn_wreck(at: Vector2, amount: int, radius: float, model: String, facing: float) -> SimEntity:
 	var e: SimEntity = SimEntity.new()
 	e.kind = SimEntity.Kind.WRECK
@@ -366,7 +379,11 @@ func defeat_player(id: int) -> void:
 	for i: int in n:
 		var e: SimEntity = entities[i]
 		if e.alive and e.owner == id:
-			SimCombat.kill(self, e, null, -1)
+			if e.kind == SimEntity.Kind.UPLINK:
+				e.owner = -1  # uplinks outlive their owner and go neutral
+				e.linked = false
+			else:
+				SimCombat.kill(self, e, null, -1)
 	SimSignal.mark_dirty(self)
 
 

@@ -233,3 +233,44 @@ func test_hotkeys_do_not_clash() -> void:
 				check(key != "", "%s needs a hotkey" % id)
 				check(not seen.has(key), "%s: hotkey %s used twice in one card" % [def.id, key])
 				seen.append(key)
+
+
+func test_engineer_captures_uplink_and_it_pays_in_coverage() -> void:
+	var w: SimWorld = _world_with_hq()
+	var hq: SimEntity = _own(w, 0, "hq")[0]
+	var site: SimEntity = w.spawn_uplink(hq.pos + Vector2(18, 0))
+	var eng: SimEntity = _own(w, 0, "field_engineer")[0]
+	w.push_command(SimCommand.capture(0, PackedInt32Array([eng.id]), site.id))
+	SimTestUtil.run(w, 20 * 20)
+	check_eq(site.owner, 0, "engineer captured the site")
+	check(eng.orders.is_empty(), "engineer is idle afterwards")
+	var before: int = w.players[0].salvage
+	SimTestUtil.run(w, 20 * 10)
+	check_eq(w.players[0].salvage - before, 10 * w.data.uplink_income_per_second, "site pays a steady trickle inside coverage")
+
+
+func test_uplink_outside_coverage_pays_nothing() -> void:
+	var w: SimWorld = _world_with_hq()
+	var hq: SimEntity = _own(w, 0, "hq")[0]
+	var site: SimEntity = w.spawn_uplink(hq.pos + Vector2(40, 0))
+	site.owner = 0
+	var before: int = w.players[0].salvage
+	SimTestUtil.run(w, 20 * 6)
+	check_eq(w.players[0].salvage, before, "no income outside coverage")
+	check(not site.linked, "site shows as unlinked")
+	w.spawn_building("relay", 0, w.map.cell_of(hq.pos + Vector2(28, 0)), true)
+	SimTestUtil.run(w, 20 * 6)
+	check(w.players[0].salvage > before, "a relay that reaches it turns the income on")
+
+
+func test_enemy_can_retake_uplink() -> void:
+	var w: SimWorld = _world_with_hq()
+	var hq: SimEntity = _own(w, 0, "hq")[0]
+	var site: SimEntity = w.spawn_uplink(hq.pos + Vector2(18, 0))
+	site.owner = 0
+	var raider: SimEntity = w.spawn_unit("field_engineer", 1, site.pos + Vector2(4, 0))
+	raider.hp = 100000.0
+	raider.max_hp = 100000.0
+	w.push_command(SimCommand.capture(1, PackedInt32Array([raider.id]), site.id))
+	SimTestUtil.run(w, 20 * 14)
+	check_eq(site.owner, 1, "enemy engineer flipped the site")

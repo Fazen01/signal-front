@@ -43,6 +43,11 @@ func ground_right() -> Vector2:
 	return Vector2(cos(yaw), -sin(yaw))
 
 
+func set_distance(d: float) -> void:
+	distance = clampf(d, MIN_DISTANCE, MAX_DISTANCE)
+	_target_distance = distance
+
+
 func center_on(p: Vector2) -> void:
 	focus = p
 	_clamp_focus()

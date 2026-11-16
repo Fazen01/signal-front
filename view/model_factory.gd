@@ -230,14 +230,17 @@ static func build_field(seed_value: int) -> Node3D:
 	return root
 
 
-## A neutral uplink site: a pad with a dormant mast.
-static func build_uplink() -> Node3D:
+## An uplink site: a pad with a mast that lights up in its owner's colour.
+static func build_uplink(light: Color = Color(0.9, 0.9, 0.95)) -> Node3D:
 	var root: Node3D = Node3D.new()
 	root.name = "Model"
 	cyl(root, 2.2, 2.4, 0.3, Vector3(0.0, 0.15, 0.0), mat(CONCRETE_DARK), 10)
 	cyl(root, 0.25, 0.4, 3.0, Vector3(0.0, 1.8, 0.0), mat(METAL, 0.0, 0.6, 0.4), 6)
-	ring(root, 0.9, 1.1, Vector3(0.0, 2.6, 0.0), mat(Color(0.9, 0.9, 0.95), 0.6))
-	ball(root, 0.35, Vector3(0.0, 3.5, 0.0), mat(Color(0.9, 0.9, 0.95), 0.9))
+	ring(root, 0.9, 1.1, Vector3(0.0, 2.6, 0.0), mat(light, 0.6))
+	ball(root, 0.35, Vector3(0.0, 3.5, 0.0), mat(light, 0.9))
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0 + 0.4
+		box(root, Vector3(0.5, 0.5, 0.5), Vector3(cos(ang) * 1.7, 0.5, sin(ang) * 1.7), mat(light, 0.5))
 	return root
 
 

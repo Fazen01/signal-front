@@ -47,6 +47,8 @@ var forest_vehicle_speed_mult: float = 0.5
 var harvest_seconds: float = 4.0
 var unload_seconds: float = 1.0
 var repair_rate: float = 0.04
+var uplink_income_per_second: int = 3
+var uplink_capture_seconds: float = 8.0
 
 
 ## Shared instance, loaded once. Definitions are immutable after loading.
@@ -137,6 +139,8 @@ func _load_rules(d: Dictionary) -> void:
 	harvest_seconds = float(d.get("harvest_seconds", harvest_seconds))
 	unload_seconds = float(d.get("unload_seconds", unload_seconds))
 	repair_rate = float(d.get("repair_rate", repair_rate))
+	uplink_income_per_second = int(d.get("uplink_income_per_second", uplink_income_per_second))
+	uplink_capture_seconds = float(d.get("uplink_capture_seconds", uplink_capture_seconds))
 	armor_classes = _strings(d, "armor_classes")
 	damage_table.clear()
 	var table: Dictionary = d.get("damage_table", {})

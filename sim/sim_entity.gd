@@ -68,6 +68,10 @@ var prod_progress: float = 0.0  ## seconds of work on queue[0]
 var rally: Vector2 = Vector2.ZERO
 var has_rally: bool = false
 
+# Uplink sites
+var capture_progress: float = 0.0  ## seconds of capture work so far
+var capturer: int = -1  ## player currently capturing
+
 # Wreck visuals
 var wreck_model: String = ""
 

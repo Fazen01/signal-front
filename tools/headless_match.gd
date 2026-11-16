@@ -68,7 +68,7 @@ func _status_line(w: SimWorld) -> String:
 		var buildings: int = 0
 		var relays: int = 0
 		for e: SimEntity in w.entities:
-			if e.alive and e.owner == p.id:
+			if e.alive and e.owner == p.id and e.def != null:
 				if e.kind == SimEntity.Kind.UNIT:
 					units += 1
 					if e.def.is_armed():
