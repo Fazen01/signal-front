@@ -122,6 +122,21 @@ anything left half-done, whether Godot verification was available.
 Status: **finished** at about 04:00 UTC, M0 through M14 (two split-out M13
 items left open, see below).
 
+Where things stand, for whoever reads this first:
+- The game is playable end to end: menu -> tutorials or skirmish (three
+  factions, generated or hand-made maps, one to three AI opponents) -> match
+  -> result, with save/load, settings and a Windows export preset.
+- `tools/check.sh` passes on the last pushed commit: 120 unit tests, headless
+  boots, synthetic-input smoke runs, the full flow from the project and from
+  an exported pack, and five AI-vs-AI matches that each end with a winner.
+- Open roadmap items: confirming 60 fps on a real GPU, and match length (AI
+  matches last about 9 minutes, the design wants 15-25).
+- Never verified by a person: how it feels with a real mouse and keyboard,
+  how it sounds, how it performs on a GPU. Start there.
+- The rest of this entry is in the order things were built: each milestone's
+  summary, then the decisions taken for it. Notes marked "(later: ...)" were
+  true when written and have since been dealt with.
+
 Godot verification: **available**. `tools/install_godot.sh` downloads the
 official 4.7.2 Linux build and `tools/check.sh` runs it headless. A
 software-GL display (`xvfb-run` + `--rendering-driver opengl3`, Mesa llvmpipe)
@@ -241,15 +256,18 @@ M5 decisions and known gaps:
 - A player is defeated when their HQ is destroyed; all their remaining units
   and buildings are destroyed with it.
 - The AI currently sees the whole map (there is no fog of war until M6). When
-  fog lands it must be limited to what it has scouted.
+  fog lands it must be limited to what it has scouted. (later: done in M6.)
 - Two T2 roster details wait for later systems: the Marksman's "stealth while
   still" needs fog of war (M6) and the Field Engineer's "capture" needs Uplink
-  Sites (M6). Everything else in the T1/T2 Aegis roster is in.
+  Sites (M6). Everything else in the T1/T2 Aegis roster is in. (later: both
+  done in M6.)
 - AI-vs-AI matches on seeds 1-7 all end with a winner in 7-15 game minutes,
   shorter than the 15-25 minute target, and the first player wins more often
   than the second. Income is high (~2,500 salvage a minute mid-game) and the
   AI floats salvage because it runs one Barracks and one Vehicle Works.
-  Left for M13 balance; noted so it is not mistaken for a bug.
+  Left for M13 balance; noted so it is not mistaken for a bug. (later: M13
+  removed the seat bias and M11 the floating salvage; match length is still
+  open.)
 
 Notes on this session's pushes:
 - The `v0.1` tag could not be pushed: the session may only write its own
