@@ -144,7 +144,10 @@ Working on: the open M13 item on 1v1 match length. Findings so far (27
 games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
 12.2; HQ health x2.5 with tougher buildings and turrets -> 10.4. Traces show
 matches are decided by minute 3-6 when one army is wiped out; the rest is
-mopping up.
+mopping up. Slower macro plus tougher defences together -> average 13.9; a
+larger generated map (88 cells instead of 64) alone -> 13.6, median 12.0.
+Tried and dropped: waves that retreat when cut below 40% made matches
+shorter (8.4), because the survivors die running and the enemy follows.
 
 ### 2026-11-16 — session 2 (branch `claude/relay-session-1116-0451`)
 

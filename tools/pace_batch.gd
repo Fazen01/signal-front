@@ -7,6 +7,8 @@ extends SceneTree
 ##          [--unit-build=1.5] [--bld-build=1.5] [--harvest=6.0]
 ##          [--hq-hp=2.0] [--bld-hp=1.5] [--turret-dmg=1.5] [--damage=0.8]
 ##          [--wave-cd=1.5] [--first-wave=10] [--start-salvage=400]
+##          [--map-cells=88]  generated map size (64 is the shipped two-player size)
+##          [--ai.<field>=value]  set any SimAI variable on every AI
 ##          [--trace=1]  a status line for every 30 seconds of each match
 ## Prints one "PACE" line per pairing and a "PACE TOTAL" line.
 
@@ -56,11 +58,23 @@ func _init() -> void:
 		for seed_value: int in seeds:
 			var config: MatchConfig = MatchConfig.ai_vs_ai(seed_value)
 			config.factions = [ab[0], ab[1]]
+			if knobs.has("map-cells"):
+				config.map_cells = int(knobs["map-cells"])
 			var w: SimWorld = SimSetup.create_match(config)
 			w.collect_events = false
 			for ai: SimAI in w.ais:
 				if knobs.has("wave-cd"):
 					ai.wave_cooldown_ticks = int(float(ai.wave_cooldown_ticks) * knobs["wave-cd"])
+				for key: String in knobs:
+					if key.begins_with("ai."):
+						var field: String = key.trim_prefix("ai.")
+						var current: Variant = ai.get(field)
+						if current is int:
+							ai.set(field, int(knobs[key]))
+						elif current is bool:
+							ai.set(field, knobs[key] != 0.0)
+						else:
+							ai.set(field, knobs[key])
 				if knobs.has("first-wave"):
 					ai.first_wave = int(knobs["first-wave"])
 					ai.wave_size = ai.first_wave
