@@ -142,8 +142,9 @@ Done so far:
   Hard); a guard of 40% / 30% / 25% of the army stays home; Normal and Hard
   pull a wave back when it is down to a third or facing 1.5 times its value.
 
-In progress (07:35 UTC): match length (the open M13 item). Averages over
-three seeds per faction pairing, 27 games each:
+In progress (07:25 UTC; the "07:35" in the previous version of this note was
+a mistake, it was 06:25): match length, the open M13 item. Averages over
+three or four seeds per faction pairing:
 - baseline 10.0 minutes; first attack delayed to 4:00 alone 10.1; harvesting
   2.5 times slower on top 11.0; guard + retreat + the two fixes above 9.4.
   The first large clash decided the match whenever it happened.
@@ -151,12 +152,16 @@ three seeds per faction pairing, 27 games each:
   4 s) 12.7; retreating units defend their base instead of walking through
   the fight 12.9; loading time in proportion to the load 13.1; headquarters
   health +50% and a longer-ranged headquarters gun 17.3 but with two
-  60-minute stalemates; anti-stalemate rules (third wave in a row commits,
-  siege units when the enemy army is gone) and richer fields 20.6 with one
-  stalemate left.
-- Still to do before this lands: remove the remaining stalemate, rebalance
-  the factions (Aegis is winning too much under the slower economy), run
-  the full check. None of this is committed yet; the working tree holds it.
+  60-minute stalemates; richer fields and anti-stalemate rules 20-22 with
+  one stalemate in 36 games.
+- Stalemates found and their causes: a 62-unit wave recalled by four free
+  Reinforcement Drop infantry; riflemen sent against splash turrets for
+  half an hour; a boxed-in AI sitting on 7,000 salvage because its only
+  relay spots were under fire. Each has a fix in the working tree.
+- Still to do before this lands: confirm no stalemates on fresh seeds,
+  rebalance the factions (Aegis wins too much under the slower economy),
+  run the full check. The working tree holds the changes; they are not
+  committed yet because the batch that validates them is still running.
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
