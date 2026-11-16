@@ -64,7 +64,7 @@ func setup(scene: BattleScene) -> void:
 
 static func panel_style(accent: Color = Color(0.25, 0.55, 0.9, 0.7)) -> StyleBoxFlat:
 	var sb: StyleBoxFlat = StyleBoxFlat.new()
-	sb.bg_color = Color(0.05, 0.07, 0.09, 0.88)
+	sb.bg_color = Color(0.05, 0.07, 0.09, 0.95)
 	sb.border_color = accent
 	sb.set_border_width_all(1)
 	sb.set_corner_radius_all(3)
@@ -125,6 +125,7 @@ func _build_bottom_bar() -> void:
 	minimap = Minimap.new()
 	minimap.name = "Minimap"
 	minimap_slot.add_child(minimap)
+	minimap.clip_contents = true
 	minimap.setup(battle)
 
 	var sel: VBoxContainer = VBoxContainer.new()
@@ -159,7 +160,7 @@ func _build_bottom_bar() -> void:
 	row.add_child(_card)
 	for i: int in CARD_SLOTS:
 		var b: Button = Button.new()
-		b.custom_minimum_size = Vector2(118.0, 50.0)
+		b.custom_minimum_size = Vector2(128.0, 50.0)
 		b.focus_mode = Control.FOCUS_NONE
 		b.add_theme_font_size_override("font_size", 13)
 		b.clip_text = true
