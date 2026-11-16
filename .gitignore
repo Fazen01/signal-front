@@ -1,7 +1,6 @@
 # Godot
 .godot/
 *.translation
-export_presets.cfg
 .import/
 
 # Local Godot binary fetched by tools/install_godot.sh
@@ -12,3 +11,6 @@ build/
 *.tmp
 *.log
 screenshots/
+
+# export_presets.cfg is tracked on purpose: the roadmap asks for a Windows
+# export preset, and this one holds no credentials or signing keys.

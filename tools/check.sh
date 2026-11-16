@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # The gate for every push: import the project, run the unit tests, boot the
-# real scenes headless, run a headless AI-vs-AI match, and fail on any script
-# error, engine error or warning-treated-as-error in the output.
+# real scenes headless, drive the interface with synthetic input, walk the
+# whole menu -> match -> result -> load -> tutorial flow, play headless
+# AI-vs-AI matches, and repeat the flow from an exported pack. Fails on any
+# script error, engine error or warning-treated-as-error in the output.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,7 +23,13 @@ run_step() {
 	shift 3
 	local log="${LOG_DIR}/${name}.log"
 	local t0=$SECONDS
-	timeout "${limit}" "${GODOT}" --headless --path "${ROOT}" "$@" >"${log}" 2>&1
+	if [ "${1:-}" = "--main-pack" ]; then
+		# Run an exported pack from somewhere else, so nothing can be read
+		# from the project folder by accident.
+		(cd "${LOG_DIR}" && timeout "${limit}" "${GODOT}" --headless "$@" >"${log}" 2>&1)
+	else
+		timeout "${limit}" "${GODOT}" --headless --path "${ROOT}" "$@" >"${log}" 2>&1
+	fi
 	local code=$?
 	local dt=$((SECONDS - t0))
 	local bad=0
@@ -61,6 +69,18 @@ run_step ai_match_foundry 900 "MATCH RESULT" -s res://tools/headless_match.gd --
 run_step ai_match_nomad 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=3 --max-minutes=45 --factions=nomad,foundry
 run_step ai_match_layout 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=45 --map=twin_fords --factions=aegis,foundry
 run_step ai_match_three 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=60 --factions=foundry,nomad,aegis
+
+# The exported game: build the pack the Windows preset would ship and play the
+# whole flow from it. Catches data files or scenes missing from the export.
+PACK="${LOG_DIR}/export_check.pck"
+rm -f "${PACK}"
+run_step export_pack 600 "" --export-pack "Windows Desktop" "${PACK}"
+if [ -f "${PACK}" ]; then
+	run_step flow_exported 600 "Flow smoke finished" --main-pack "${PACK}" --fixed-fps 60 --quit-after 4000 -- --flow-smoke
+else
+	echo "[FAIL] export_pack: no pack was written"
+	failed=1
+fi
 
 if [ "${failed}" -ne 0 ]; then
 	echo "CHECK FAILED"

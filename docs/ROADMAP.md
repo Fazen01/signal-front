@@ -110,7 +110,7 @@ decision in the session log at the bottom.
 
 - [x] Settings (video, audio, key hints), pause menu, save/load of a skirmish
 - [x] Three scripted tutorial missions teaching economy, signal and Directives
-- [ ] Windows export preset; final README
+- [x] Windows export preset; final README
 
 ## Session log
 
@@ -119,7 +119,8 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
-Status: **in progress** — this entry is updated as work lands.
+Status: **finished** at about 04:00 UTC, M0 through M14 (two split-out M13
+items left open, see below).
 
 Godot verification: **available**. `tools/install_godot.sh` downloads the
 official 4.7.2 Linux build and `tools/check.sh` runs it headless. A
@@ -313,9 +314,21 @@ Notes on this session's pushes:
   the next mission. Tests complete each mission by issuing the commands its
   objectives ask for; `check.sh` plays one through the real interface.
 
-Half-done / next: the Windows export preset and final README. Two M13
-items are open and need things this session did not have (a GPU, and a
-better lever on match length than income).
+- M14, third item: `export_presets.cfg` with a "Windows Desktop" preset,
+  `tools/export_windows.sh`, and the final README. The export was run here
+  (templates downloaded): it wrote a 110 MB `SignalFront.exe`. The `.exe`
+  could not be executed on Linux, but the same preset exported as a pack
+  runs the whole menu -> match -> load -> tutorial flow with the Linux
+  binary, and `check.sh` now repeats that on every run (exporting a pack
+  needs no templates).
+
+Half-done / next: every roadmap box is ticked except two that were split
+out of M13 and need things a headless session does not have:
+1. Confirm 60 fps with 300 units on real hardware.
+2. Bring 1v1 match length up to 15-25 minutes (see the match-length
+   experiment below for what did not work).
+After those, the most valuable work is a human play-through: nobody has
+used a real mouse, seen the game move, or heard it.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -478,3 +491,8 @@ Fog decisions:
 - The test runner now fails any test during which an engine or script error
   was raised (a `Logger` counts them). Before this a test that crashed
   half-way was printed as ok and only `check.sh`'s grep caught it.
+- `export_presets.cfg` was listed in `.gitignore`. It is tracked now (the
+  line was removed and a comment explains why): the roadmap asks for the
+  preset and it holds no credentials. The preset adds `data/*.json` and
+  `data/maps/*.json` to the export, which Godot would otherwise leave out,
+  and leaves out `tools/`, `tests/` and `docs/`.
