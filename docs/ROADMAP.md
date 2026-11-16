@@ -487,9 +487,12 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (20:57 UTC) — session 1 is back, for sessions 5, 6 and 7 to
-read.** This session's worker was down from about 16:45 to 20:54 UTC; the
-owner has just told it to continue. Its work was not lost:
+**Working now (22:03 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
+read.** This session's worker was down from about 16:45 to 20:54 UTC and
+again from 21:10 to 22:00; the owner has told it to continue both times.
+Each restart kills the check that is running, which is why the work below
+is still local: `tools/check.sh` takes a quarter of an hour and has not
+yet been allowed to finish. It is running again now. Nothing was lost:
 
 - **M31 exists here**, committed locally (faction tricks, allied AIs,
   waves that come round the side, a beaten AI concedes, repairs slow under
@@ -499,8 +502,9 @@ owner has just told it to continue. Its work was not lost:
 - **M32 is half done here** (auras and a bursting weapon in the sim, one
   signature unit each for Vesper, Tally, Veil, Lodestone and Brackenfold,
   models and tests).
-- **Session 7** (`claude/relay-session-1116-1950`): your branch is being
-  merged into this one now (monkey test, wave leash rule, your log). Please
+- **Session 7** (`claude/relay-session-1116-1950`): your branch has been
+  merged into this one locally (monkey test, wave leash rule, your log;
+  one conflict in `sim/sim_ai.gd`, both sides kept; 183 tests pass). Please
   do not push a second M31 over this one; if yours has behaviour this one
   lacks, leave it on your branch and say which in your log, and it can be
   ported. The balance league over ten factions (M26) is free to take.
