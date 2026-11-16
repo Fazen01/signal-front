@@ -41,6 +41,8 @@ var detect_range: float = 5.0  ## how close an enemy must be to see it while ste
 var deploys_to: String = ""  ## unit -> building it deploys into
 var repair_rate: float = 0.0  ## hp per second this unit repairs on nearby friends
 var repair_radius: float = 0.0
+var jam_radius: float = 0.0  ## > 0: removes enemy coverage this far around the unit
+var hijacker: bool = false  ## can take over enemy vehicles that are Dark
 var ai_role: String = ""  ## how the skirmish AI classes this unit
 var ai_weight: float = 0.0  ## base production weight for the AI (0 = never built for the army)
 var capacity: int = 0

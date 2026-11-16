@@ -29,5 +29,21 @@
 			"tier3": "arsenal"
 		},
 		"playable": true
+	},
+	"nomad": {
+		"name": "Nomad Circuit",
+		"desc": "Fast, light, elusive. No fixed relays: Beacon Rigs deploy and pack up, and even the headquarters can relocate. Jammers, hijackers, forest cloaking and half again as much salvage from wrecks.",
+		"hq": "caravan_hub",
+		"start_units": ["tinker", "tinker", "skiff", "skiff", "drifter", "drifter", "beacon_rig"],
+		"forest_cloak": true,
+		"wreck_salvage_mult": 1.5,
+		"drop_squad": ["drifter", "drifter", "drifter", "drifter", "splicer"],
+		"roles": {
+			"builder": "tinker", "hauler": "skiff", "relay": "beacon", "relay_unit": "beacon_rig",
+			"barracks": "camp", "works": "chop_shop", "depot": "cache",
+			"turret_ground": "snare_turret", "turret_armor": "snare_turret", "turret_air": "snare_turret",
+			"tier3": "signal_loom"
+		},
+		"playable": true
 	}
 }

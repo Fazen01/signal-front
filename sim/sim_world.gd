@@ -256,6 +256,8 @@ func remove_entity(e: SimEntity) -> void:
 		return
 	e.alive = false
 	_dead.append(e)
+	if e.def != null and e.def.jam_radius > 0.0:
+		SimSignal.mark_dirty(self)  # what it was jamming comes back
 
 
 # ---------------------------------------------------------------- reveals
@@ -374,8 +376,12 @@ func tick() -> void:
 func _check_victory() -> void:
 	var has_hq: Dictionary[int, bool] = {}
 	for e: SimEntity in entities:
-		if e.alive and e.owner >= 0 and e.kind == SimEntity.Kind.BUILDING and e.def.signal_root and e.constructed:
+		if not e.alive or e.owner < 0 or e.def == null:
+			continue
+		if e.kind == SimEntity.Kind.BUILDING and e.def.signal_root and e.constructed:
 			has_hq[e.owner] = true
+		elif e.kind == SimEntity.Kind.UNIT and e.def.deploys_to != "" and data.entity(e.def.deploys_to).signal_root:
+			has_hq[e.owner] = true  # a headquarters on the move still counts
 	for p: SimPlayer in players:
 		if not p.defeated and not has_hq.has(p.id):
 			defeat_player(p.id)

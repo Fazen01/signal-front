@@ -272,7 +272,11 @@ Notes on this session's pushes:
   `check.sh` also runs a Foundry-vs-Aegis match and drives the Crawler's
   Deploy/Pack through the real interface.
 
-Half-done / next: M10 Nomad Circuit.
+Half-done / next: M10 Nomad Circuit — the roster, data, models and
+simulation mechanics are in and tested (Beacon Rigs, relocating Caravan Hub,
+Jammer Buggy, forest cloak, Splicer hijack, +50% wreck salvage). Still to do:
+the view (hijacked vehicles change colour, jam ring, right-click hijack) and
+the AI (it cannot yet expand a network made of deployable rigs).
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your

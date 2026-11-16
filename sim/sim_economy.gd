@@ -30,6 +30,11 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 				for e: SimEntity in SimOrders.own_units(w, cmd):
 					if e.def.builder:
 						SimOrders.give_order(e, SimOrder.make(SimOrder.Type.CAPTURE, site.pos, site.id), cmd.queue)
+			elif site != null and site.kind == SimEntity.Kind.UNIT:
+				for e: SimEntity in SimOrders.own_units(w, cmd):
+					if hijack_error(w, e, site) == "":
+						SimOrders.give_order(e, SimOrder.make(SimOrder.Type.CAPTURE, site.pos, site.id), cmd.queue)
+						e.work_ticks = 0
 		SimCommand.Type.DEPLOY:
 			_cmd_deploy(w, cmd)
 		SimCommand.Type.PACK:
@@ -119,9 +124,9 @@ static func deploy_error(w: SimWorld, player_id: int, unit_def: EntityDef, cell:
 	for other: SimEntity in w.query_radius(centre, bdef.radius * SQUARE + 3.0):
 		if (other.kind == SimEntity.Kind.FIELD or other.kind == SimEntity.Kind.UPLINK) and other.pos.distance_to(centre) < other.radius + bdef.radius:
 			return "Too close to a salvage field or uplink"
-	if not SimSignal.is_covered(w, player_id, centre):
-		return "Must deploy inside your signal coverage"
-	return ""
+	if bdef.signal_root:
+		return ""  # a headquarters brings its own signal
+	return SimSignal.placement_error(w, player_id, bdef, centre)
 
 
 static func footprint_centre(cell: Vector2i, def: EntityDef) -> Vector2:
@@ -394,7 +399,11 @@ static func _update_harvest(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 			if e.work_ticks >= int(w.data.harvest_seconds * float(SimWorld.TICK_RATE)):
 				var take: int = mini(e.def.capacity - e.cargo, res.salvage)
 				res.salvage -= take
-				e.cargo += take
+				# Some factions (the Nomad Circuit) strip wrecks more thoroughly.
+				if res.kind == SimEntity.Kind.WRECK:
+					e.cargo += int(float(take) * w.players[e.owner].faction.wreck_salvage_mult)
+				else:
+					e.cargo += take
 				if res.salvage <= 0:
 					w.remove_entity(res)
 				e.job = Job.TO_DEPOT
@@ -434,8 +443,60 @@ static func _update_repair(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 		SimOrders.finish_order(e)
 
 
+## Why `e` cannot hijack `t`, or "".
+static func hijack_error(w: SimWorld, e: SimEntity, t: SimEntity) -> String:
+	if e.def == null or not e.def.hijacker:
+		return "Only Splicers can hijack"
+	if t == null or t.kind != SimEntity.Kind.UNIT or t.def == null or not t.def.is_vehicle():
+		return "Only vehicles can be hijacked"
+	if not w.are_enemies(e.owner, t.owner):
+		return "Not an enemy"
+	if t.linked:
+		return "The vehicle must be Dark (outside its owner's signal)"
+	if not SimVision.can_see(w, e.owner, t):
+		return "Cannot see the target"
+	return ""
+
+
+## A Splicer closing on a Dark enemy vehicle and taking it over.
+static func _update_hijack(w: SimWorld, e: SimEntity, o: SimOrder, t: SimEntity) -> void:
+	if hijack_error(w, e, t) != "":
+		SimMovement.stop(e)
+		SimOrders.finish_order(e)
+		return
+	var reach: float = t.radius + e.radius + 0.9
+	if e.pos.distance_to(t.pos) > reach:
+		e.work_ticks = 0
+		if not e.moving or w.tick_count >= e.repath_tick:
+			SimMovement.start_move(w, e, t.pos)
+			e.repath_tick = w.tick_count + 10
+			o.started = true
+		return
+	SimMovement.stop(e)
+	e.work_ticks += 1
+	if e.work_ticks < int(w.data.hijack_seconds * float(SimWorld.TICK_RATE)):
+		return
+	var old_owner: SimPlayer = w.players[t.owner]
+	var new_owner: SimPlayer = w.players[e.owner]
+	old_owner.bandwidth_used -= t.def.bandwidth
+	old_owner.stat_units_lost += 1
+	new_owner.bandwidth_used += t.def.bandwidth - e.def.bandwidth
+	new_owner.stat_kills += 1
+	w.alert(old_owner.id, "%s hijacked!" % t.def.name, t.pos)
+	w.alert(new_owner.id, "%s hijacked" % t.def.name, t.pos)
+	t.owner = e.owner
+	SimOrders.clear_orders(t)
+	t.hold = false
+	t.cargo = 0
+	# The Splicer stays inside its prize.
+	w.remove_entity(e)
+
+
 static func _update_capture(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 	var site: SimEntity = w.get_entity(o.target_id)
+	if site != null and site.kind == SimEntity.Kind.UNIT:
+		_update_hijack(w, e, o, site)
+		return
 	if site == null or site.kind != SimEntity.Kind.UPLINK or site.owner == e.owner:
 		SimMovement.stop(e)
 		SimOrders.finish_order(e)

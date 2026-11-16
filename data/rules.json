@@ -18,6 +18,7 @@
 	"repair_rate": 0.04,
 	"uplink_income_per_second": 3,
 	"uplink_capture_seconds": 8.0,
+	"hijack_seconds": 4.0,
 	"command_point_value": 300,
 	"start_command_points": 1,
 	"near_coverage_range": 15.0,

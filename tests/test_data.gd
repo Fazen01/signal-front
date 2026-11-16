@@ -34,7 +34,10 @@ func test_every_unit_can_be_obtained() -> void:
 		else:
 			var has_source: bool = false
 			for other: EntityDef in data.entities.values():
-				if other.produces.has(def.id) and other.faction == def.faction:
+				if other.faction != def.faction:
+					continue
+				# Trained somewhere, or what a building packs up into.
+				if other.produces.has(def.id) or other.packs_to == def.id:
 					has_source = true
 			check(has_source, "unit %s is produced somewhere" % def.id)
 

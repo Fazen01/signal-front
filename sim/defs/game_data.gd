@@ -17,6 +17,7 @@ const ENTITY_KEYS: Array[String] = [
 	"signal_radius", "signal_root", "depot", "produces", "stealth", "directive_cooldown_mult",
 	"radius", "blocks", "needs_coverage", "packs_to", "deploys_to", "mine_trigger", "mine_damage",
 	"mine_splash", "detect_range", "repair_rate", "repair_radius", "ai_role", "ai_weight",
+	"jam_radius", "hijacker",
 ]
 const DIRECTIVE_KEYS: Array[String] = [
 	"name", "desc", "cost", "cooldown", "radius", "duration", "target", "damage", "shells",
@@ -24,9 +25,11 @@ const DIRECTIVE_KEYS: Array[String] = [
 ]
 const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
-	"linked_vehicle_repair", "roles", "drop_squad",
+	"linked_vehicle_repair", "roles", "drop_squad", "forest_cloak", "wreck_salvage_mult",
 ]
-const AI_ROLES: Array[String] = ["", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air"]
+const AI_ROLES: Array[String] = [
+	"", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air", "hijacker",
+]
 
 static var _shared: GameData = null
 
@@ -59,6 +62,7 @@ var unload_seconds: float = 1.0
 var repair_rate: float = 0.04
 var uplink_income_per_second: int = 3
 var uplink_capture_seconds: float = 8.0
+var hijack_seconds: float = 4.0
 var command_point_value: int = 300
 var start_command_points: int = 1
 var near_coverage_range: float = 15.0
@@ -163,6 +167,7 @@ func _load_rules(d: Dictionary) -> void:
 	repair_rate = float(d.get("repair_rate", repair_rate))
 	uplink_income_per_second = int(d.get("uplink_income_per_second", uplink_income_per_second))
 	uplink_capture_seconds = float(d.get("uplink_capture_seconds", uplink_capture_seconds))
+	hijack_seconds = float(d.get("hijack_seconds", hijack_seconds))
 	command_point_value = int(d.get("command_point_value", command_point_value))
 	start_command_points = int(d.get("start_command_points", start_command_points))
 	near_coverage_range = float(d.get("near_coverage_range", near_coverage_range))
@@ -283,6 +288,8 @@ func _load_entities(d: Dictionary, building: bool) -> void:
 		e.detect_range = float(src.get("detect_range", 5.0))
 		e.repair_rate = float(src.get("repair_rate", 0.0))
 		e.repair_radius = float(src.get("repair_radius", 0.0))
+		e.jam_radius = float(src.get("jam_radius", 0.0))
+		e.hijacker = bool(src.get("hijacker", false))
 		e.ai_role = str(src.get("ai_role", ""))
 		e.ai_weight = float(src.get("ai_weight", 0.0))
 		if not AI_ROLES.has(e.ai_role):
@@ -310,6 +317,8 @@ func _load_factions(d: Dictionary) -> void:
 		f.playable = bool(src.get("playable", true))
 		f.linked_vehicle_repair = float(src.get("linked_vehicle_repair", 0.0))
 		f.drop_squad = _strings(src, "drop_squad")
+		f.forest_cloak = bool(src.get("forest_cloak", false))
+		f.wreck_salvage_mult = float(src.get("wreck_salvage_mult", 1.0))
 		if src.has("roles"):
 			var raw_roles: Dictionary = src["roles"]
 			for rk: Variant in raw_roles.keys():

@@ -50,10 +50,17 @@ static func is_explored(w: SimWorld, player_id: int, pos: Vector2) -> bool:
 	return i >= 0 and w.explored[player_id][i] != 0
 
 
-## True while a stealth-capable unit is actually hidden: standing still and
-## not having fired for a moment.
+## True while an entity is actually hidden: it has stealth (or belongs to a
+## forest-cloaking faction and stands in forest), is standing still and has
+## not fired for a moment.
 static func is_stealthed(w: SimWorld, e: SimEntity) -> bool:
-	return e.def != null and e.def.stealth and not e.moving and w.tick_count - e.last_fire_tick > STEALTH_REVEAL_TICKS
+	if e.def == null or e.moving or w.tick_count - e.last_fire_tick <= STEALTH_REVEAL_TICKS:
+		return false
+	if e.def.stealth:
+		return true
+	if e.kind != SimEntity.Kind.UNIT or e.owner < 0 or e.def.is_air():
+		return false
+	return w.players[e.owner].faction.forest_cloak and w.map.terrain_at(e.pos) == SimMap.Terrain.FOREST
 
 
 ## Can this player currently see this entity?

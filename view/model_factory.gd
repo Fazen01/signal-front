@@ -24,6 +24,11 @@ const BRASS: Color = Color(0.70, 0.52, 0.22)
 const FURNACE: Color = Color(1.0, 0.45, 0.10)
 const DRAB: Color = Color(0.40, 0.33, 0.25)
 const DRAB_DARK: Color = Color(0.24, 0.20, 0.16)
+# Nomad Circuit palette: sand, canvas and patched metal.
+const SAND: Color = Color(0.70, 0.60, 0.42)
+const SAND_DARK: Color = Color(0.44, 0.37, 0.26)
+const CANVAS: Color = Color(0.82, 0.76, 0.62)
+const PATCH: Color = Color(0.20, 0.50, 0.50)
 
 static var _materials: Dictionary[String, StandardMaterial3D] = {}
 static var _meshes: Dictionary[String, Mesh] = {}
@@ -234,6 +239,63 @@ static func build(model: String, team: Color) -> Node3D:
 			for i: int in 3:
 				var ang: float = float(i) * TAU / 3.0
 				cyl(root, 0.02, 0.02, 0.2, Vector3(cos(ang) * 0.3, 0.22, sin(ang) * 0.3), mat(METAL), 4)
+		"drifter":
+			_soldier(root, team, SAND_DARK, SAND, SAND_DARK)
+			box(root, Vector3(0.5, 0.08, 0.1), Vector3(0.25, 0.9, 0.2), mat(GUNMETAL))
+			wedge(root, Vector3(0.45, 0.5, 0.5), Vector3(-0.1, 1.05, 0.0), mat(CANVAS), 0.5)
+		"tinker":
+			_soldier(root, team, PATCH, SAND, SAND_DARK)
+			box(root, Vector3(0.22, 0.44, 0.42), Vector3(-0.27, 0.9, 0.0), mat(PATCH))
+			box(root, Vector3(0.1, 0.5, 0.1), Vector3(0.25, 0.75, 0.24), mat(METAL))
+		"splicer":
+			_soldier(root, team, GUNMETAL, SAND_DARK, GUNMETAL)
+			cyl(root, 0.02, 0.02, 0.7, Vector3(-0.2, 1.5, 0.15), mat(METAL), 4)
+			ball(root, 0.07, Vector3(-0.2, 1.88, 0.15), mat(Color(0.6, 1.0, 0.9), 1.4), 5)
+			box(root, Vector3(0.2, 0.3, 0.36), Vector3(-0.26, 0.9, 0.0), mat(PATCH))
+		"skiff":
+			_skiff(root, team)
+		"dart":
+			_dart(root, team)
+		"sidewinder":
+			_sidewinder(root, team)
+		"gnat":
+			_buggy(root, team)
+			var gt: Node3D = _turret(root, Vector3(-0.25, 0.95, 0.0))
+			box(gt, Vector3(0.4, 0.3, 0.5), Vector3(0.0, 0.15, 0.0), mat(SAND_DARK))
+			for z: float in [-0.14, 0.14]:
+				cyl(gt, 0.035, 0.035, 1.1, Vector3(0.4, 0.55, z), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.9))
+		"jammer_buggy":
+			_buggy(root, team)
+			cyl(root, 0.04, 0.06, 1.3, Vector3(-0.3, 1.6, 0.0), mat(METAL), 5)
+			cyl(root, 0.5, 0.1, 0.2, Vector3(-0.3, 2.2, 0.0), mat(PATCH, 0.3, 0.5, 0.4), 8, Vector3(0.5, 0.0, 0.0))
+			ball(root, 0.12, Vector3(-0.3, 2.4, 0.0), mat(Color(0.8, 0.3, 1.0), 1.5), 6)
+		"prowler":
+			_prowler(root, team)
+		"beacon_rig":
+			_beacon_rig(root, team)
+		"beacon":
+			_beacon(root, team)
+		"caravan":
+			_caravan(root, team, false)
+		"caravan_hub":
+			_caravan(root, team, true)
+		"cache":
+			_cache(root, team)
+		"camp":
+			_camp(root, team)
+		"chop_shop":
+			_chop_shop(root, team)
+		"snare_turret":
+			cyl(root, 0.7, 0.85, 0.4, Vector3(0.0, 0.2, 0.0), mat(SAND_DARK), 6)
+			for i: int in 3:
+				var sa: float = float(i) * TAU / 3.0
+				box(root, Vector3(0.9, 0.08, 0.1), Vector3(cos(sa) * 0.5, 0.5, sin(sa) * 0.5), mat(METAL), Vector3(0.0, -sa, 0.5))
+			var st: Node3D = _turret(root, Vector3(0.0, 0.9, 0.0))
+			box(st, Vector3(0.5, 0.35, 0.5), Vector3(0.0, 0.18, 0.0), mat(SAND))
+			barrel(st, 0.045, 0.9, Vector3(0.2, 0.2, 0.0), mat(GUNMETAL))
+			box(st, Vector3(0.25, 0.08, 0.52), Vector3(-0.1, 0.38, 0.0), team_mat(team))
+		"signal_loom":
+			_signal_loom(root, team)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -808,3 +870,189 @@ static func _arsenal(root: Node3D, team: Color) -> void:
 	_stack(root, Vector3(1.8, 2.4, -1.8), 2.0, 0.3)
 	cyl(root, 0.7, 0.7, 0.14, Vector3(0.0, 2.6, 1.72), mat(BRASS, 0.0, 0.7, 0.4), 8, Vector3(PI * 0.5, 0.0, 0.0))
 	box(root, Vector3(1.0, 0.6, 0.9), Vector3(2.1, 0.7, 2.1), mat(RUST, 0.0, 0.4, 0.7))
+
+
+# ------------------------------------------------------------ Nomad Circuit
+
+static func _tent(parent: Node3D, length_x: float, height: float, width_z: float, pos: Vector3, color: Color) -> void:
+	roof(parent, length_x, height, width_z, pos + Vector3(0.0, height * 0.5, 0.0), mat(color, 0.0, 0.0, 1.0))
+
+
+## The shared light buggy chassis (Gnat, Jammer Buggy).
+static func _buggy(root: Node3D, team: Color) -> void:
+	box(root, Vector3(1.6, 0.25, 0.9), Vector3(0.0, 0.5, 0.0), mat(SAND_DARK))
+	wedge(root, Vector3(0.6, 0.3, 0.85), Vector3(0.55, 0.78, 0.0), mat(SAND), 0.0)
+	box(root, Vector3(1.62, 0.08, 0.92), Vector3(0.0, 0.62, 0.0), team_mat(team))
+	for bar: float in [-0.4, 0.4]:
+		box(root, Vector3(1.0, 0.05, 0.05), Vector3(-0.2, 1.0, bar), mat(METAL))
+		box(root, Vector3(0.05, 0.4, 0.05), Vector3(-0.68, 0.82, bar), mat(METAL))
+		box(root, Vector3(0.05, 0.4, 0.05), Vector3(0.28, 0.82, bar), mat(METAL))
+	for x: float in [-0.55, 0.55]:
+		wheel(root, 0.34, 0.24, Vector3(x, 0.34, 0.55))
+		wheel(root, 0.34, 0.24, Vector3(x, 0.34, -0.55))
+
+
+static func _skiff(root: Node3D, team: Color) -> void:
+	box(root, Vector3(1.9, 0.25, 1.0), Vector3(0.0, 0.48, 0.0), mat(SAND_DARK))
+	box(root, Vector3(0.55, 0.5, 0.95), Vector3(0.62, 0.85, 0.0), mat(SAND))
+	box(root, Vector3(1.1, 0.4, 1.05), Vector3(-0.35, 0.8, 0.0), mat(PATCH))
+	box(root, Vector3(1.12, 0.1, 1.07), Vector3(-0.35, 1.0, 0.0), team_mat(team))
+	box(root, Vector3(0.9, 0.18, 0.85), Vector3(-0.35, 1.08, 0.0), mat(RUST, 0.0, 0.4, 0.7))
+	for x: float in [-0.6, 0.6]:
+		wheel(root, 0.32, 0.22, Vector3(x, 0.32, 0.55))
+		wheel(root, 0.32, 0.22, Vector3(x, 0.32, -0.55))
+
+
+static func _dart(root: Node3D, team: Color) -> void:
+	wheel(root, 0.34, 0.16, Vector3(0.55, 0.34, 0.0))
+	wheel(root, 0.34, 0.16, Vector3(-0.55, 0.34, 0.0))
+	box(root, Vector3(1.0, 0.22, 0.26), Vector3(0.0, 0.6, 0.0), mat(SAND))
+	wedge(root, Vector3(0.5, 0.3, 0.3), Vector3(0.45, 0.82, 0.0), mat(SAND_DARK), 0.0)
+	box(root, Vector3(0.5, 0.08, 0.28), Vector3(-0.2, 0.74, 0.0), team_mat(team))
+	box(root, Vector3(0.26, 0.4, 0.3), Vector3(-0.15, 0.98, 0.0), mat(SAND_DARK))
+	ball(root, 0.14, Vector3(-0.1, 1.28, 0.0), mat(GUNMETAL), 6)
+	var t: Node3D = _turret(root, Vector3(0.35, 0.7, 0.0))
+	barrel(t, 0.03, 0.5, Vector3(0.1, 0.0, 0.14), mat(GUNMETAL))
+	barrel(t, 0.03, 0.5, Vector3(0.1, 0.0, -0.14), mat(GUNMETAL))
+
+
+static func _sidewinder(root: Node3D, team: Color) -> void:
+	box(root, Vector3(2.0, 0.28, 1.05), Vector3(0.0, 0.5, 0.0), mat(SAND_DARK))
+	box(root, Vector3(0.6, 0.55, 1.0), Vector3(0.68, 0.9, 0.0), mat(SAND))
+	box(root, Vector3(0.05, 0.2, 0.8), Vector3(1.0, 1.0, 0.0), mat(GLASS, 0.15, 0.3, 0.2))
+	box(root, Vector3(2.02, 0.08, 1.07), Vector3(0.0, 0.64, 0.0), team_mat(team))
+	for x: float in [-0.65, 0.65]:
+		wheel(root, 0.33, 0.24, Vector3(x, 0.33, 0.58))
+		wheel(root, 0.33, 0.24, Vector3(x, 0.33, -0.58))
+	var t: Node3D = _turret(root, Vector3(-0.45, 0.85, 0.0))
+	box(t, Vector3(0.3, 0.3, 0.3), Vector3(0.0, 0.15, 0.0), mat(METAL))
+	for z: float in [-0.28, 0.28]:
+		box(t, Vector3(1.2, 0.22, 0.22), Vector3(0.1, 0.5, z), mat(PATCH), Vector3(0.0, 0.0, 0.25))
+		box(t, Vector3(0.1, 0.16, 0.16), Vector3(0.68, 0.65, z), mat(HAZARD), Vector3(0.0, 0.0, 0.25))
+
+
+static func _prowler(root: Node3D, team: Color) -> void:
+	for x: float in [-0.75, 0.0, 0.75]:
+		wheel(root, 0.36, 0.28, Vector3(x, 0.36, 0.68))
+		wheel(root, 0.36, 0.28, Vector3(x, 0.36, -0.68))
+	box(root, Vector3(2.3, 0.5, 1.2), Vector3(0.0, 0.7, 0.0), mat(SAND))
+	wedge(root, Vector3(0.6, 0.5, 1.2), Vector3(1.45, 0.7, 0.0), mat(SAND), 0.0)
+	box(root, Vector3(2.32, 0.1, 1.22), Vector3(0.0, 0.56, 0.0), team_mat(team))
+	box(root, Vector3(0.6, 0.3, 0.9), Vector3(-0.9, 1.05, 0.0), mat(CANVAS, 0.0, 0.0, 1.0))
+	var t: Node3D = _turret(root, Vector3(0.1, 0.95, 0.0))
+	box(t, Vector3(0.95, 0.4, 0.9), Vector3(0.0, 0.2, 0.0), mat(SAND_DARK))
+	barrel(t, 0.07, 1.3, Vector3(0.45, 0.22, 0.0), mat(GUNMETAL))
+	box(t, Vector3(0.3, 0.08, 0.4), Vector3(-0.2, 0.44, 0.0), team_mat(team))
+
+
+static func _beacon_rig(root: Node3D, team: Color) -> void:
+	box(root, Vector3(2.0, 0.28, 1.05), Vector3(0.0, 0.5, 0.0), mat(SAND_DARK))
+	box(root, Vector3(0.6, 0.55, 1.0), Vector3(0.68, 0.9, 0.0), mat(SAND))
+	box(root, Vector3(2.02, 0.08, 1.07), Vector3(0.0, 0.64, 0.0), team_mat(team))
+	for x: float in [-0.65, 0.65]:
+		wheel(root, 0.33, 0.24, Vector3(x, 0.33, 0.58))
+		wheel(root, 0.33, 0.24, Vector3(x, 0.33, -0.58))
+	# Folded mast lying along the bed.
+	cyl(root, 0.07, 0.1, 1.6, Vector3(-0.4, 1.0, 0.0), mat(METAL, 0.0, 0.6, 0.4), 6, Vector3(0.0, 0.0, -PI * 0.5 + 0.12))
+	ring(root, 0.28, 0.36, Vector3(-1.0, 1.08, 0.0), team_mat(team))
+
+
+static func _beacon(root: Node3D, team: Color) -> void:
+	box(root, Vector3(1.7, 0.3, 1.0), Vector3(0.0, 0.25, 0.0), mat(SAND_DARK))
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0 + 0.78
+		box(root, Vector3(1.3, 0.06, 0.08), Vector3(cos(ang) * 0.6, 0.35, sin(ang) * 0.6), mat(METAL), Vector3(0.0, -ang, 0.3))
+	cyl(root, 0.08, 0.14, 3.4, Vector3(0.0, 2.1, 0.0), mat(METAL, 0.0, 0.6, 0.4), 6)
+	ring(root, 0.5, 0.62, Vector3(0.0, 2.9, 0.0), team_mat(team))
+	ring(root, 0.3, 0.4, Vector3(0.0, 3.5, 0.0), team_mat(team))
+	ball(root, 0.18, Vector3(0.0, 3.95, 0.0), mat(team, 1.4))
+	wedge(root, Vector3(0.7, 0.45, 0.04), Vector3(0.4, 2.3, 0.0), mat(CANVAS, 0.0, 0.0, 1.0), 0.0)
+
+
+## The Caravan on the road, or deployed as the Caravan Hub.
+static func _caravan(root: Node3D, team: Color, deployed: bool) -> void:
+	if not deployed:
+		for x: float in [-1.5, -0.5, 0.5, 1.5]:
+			wheel(root, 0.5, 0.4, Vector3(x, 0.5, 1.15))
+			wheel(root, 0.5, 0.4, Vector3(x, 0.5, -1.15))
+		box(root, Vector3(4.2, 0.5, 2.2), Vector3(0.0, 0.85, 0.0), mat(SAND_DARK))
+		box(root, Vector3(2.8, 1.3, 2.1), Vector3(-0.5, 1.75, 0.0), mat(SAND))
+		_tent(root, 2.8, 0.6, 2.1, Vector3(-0.5, 2.4, 0.0), CANVAS)
+		box(root, Vector3(1.0, 0.9, 2.0), Vector3(1.55, 1.55, 0.0), mat(SAND_DARK))
+		box(root, Vector3(0.06, 0.35, 1.6), Vector3(2.07, 1.7, 0.0), mat(GLASS, 0.15, 0.3, 0.2))
+		box(root, Vector3(4.22, 0.14, 2.22), Vector3(0.0, 1.12, 0.0), team_mat(team))
+		cyl(root, 0.1, 0.14, 1.8, Vector3(-1.4, 3.3, 0.6), mat(METAL), 6)
+		ball(root, 0.2, Vector3(-1.4, 4.3, 0.6), mat(team, 1.4))
+		return
+	box(root, Vector3(7.7, 0.4, 7.7), Vector3(0.0, 0.0, 0.0), mat(SAND_DARK))
+	# The parked crawler-truck in the middle with tents pitched around it.
+	box(root, Vector3(4.2, 1.6, 2.4), Vector3(0.0, 1.1, 0.0), mat(SAND))
+	box(root, Vector3(4.25, 0.3, 2.45), Vector3(0.0, 1.5, 0.0), team_mat(team))
+	_tent(root, 4.2, 0.9, 2.4, Vector3(0.0, 1.9, 0.0), CANVAS)
+	for sz: float in [-1.0, 1.0]:
+		_tent(root, 5.0, 1.4, 2.2, Vector3(0.0, 0.2, sz * 2.5), CANVAS.darkened(0.12))
+		box(root, Vector3(1.0, 0.7, 0.8), Vector3(-2.6, 0.55, sz * 2.6), mat(PATCH))
+	for sx: float in [-1.0, 1.0]:
+		box(root, Vector3(0.9, 0.9, 0.9), Vector3(sx * 3.2, 0.65, 0.0), mat(RUST, 0.0, 0.4, 0.7))
+	cyl(root, 0.16, 0.26, 4.2, Vector3(1.0, 4.4, 0.6), mat(METAL, 0.0, 0.6, 0.4), 6)
+	ring(root, 0.75, 0.9, Vector3(1.0, 5.2, 0.6), team_mat(team))
+	ring(root, 0.45, 0.58, Vector3(1.0, 5.9, 0.6), team_mat(team))
+	ball(root, 0.24, Vector3(1.0, 6.6, 0.6), mat(team, 1.4))
+	var t: Node3D = _turret(root, Vector3(-1.2, 2.9, -0.5))
+	box(t, Vector3(0.7, 0.4, 0.6), Vector3(0.0, 0.2, 0.0), mat(SAND_DARK))
+	barrel(t, 0.06, 0.9, Vector3(0.3, 0.24, 0.12), mat(GUNMETAL))
+	barrel(t, 0.06, 0.9, Vector3(0.3, 0.24, -0.12), mat(GUNMETAL))
+
+
+static func _cache(root: Node3D, team: Color) -> void:
+	box(root, Vector3(3.8, 0.3, 3.8), Vector3(0.0, 0.0, 0.0), mat(SAND_DARK))
+	_tent(root, 2.6, 1.2, 2.2, Vector3(-0.3, 0.15, -0.5), CANVAS)
+	box(root, Vector3(2.65, 0.14, 0.1), Vector3(-0.3, 0.5, 0.62), team_mat(team))
+	box(root, Vector3(0.9, 0.7, 0.8), Vector3(1.2, 0.5, 1.1), mat(RUST, 0.0, 0.4, 0.7))
+	box(root, Vector3(0.9, 0.7, 0.8), Vector3(0.2, 0.5, 1.25), mat(PATCH))
+	box(root, Vector3(0.8, 0.6, 0.7), Vector3(0.7, 1.15, 1.15), mat(SAND))
+	cyl(root, 0.04, 0.04, 2.2, Vector3(1.5, 1.2, -1.5), mat(METAL), 5)
+	wedge(root, Vector3(0.7, 0.45, 0.04), Vector3(1.86, 2.0, -1.5), team_mat(team), 0.0)
+
+
+static func _camp(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.3, 5.7), Vector3(0.0, 0.0, 0.0), mat(SAND_DARK))
+	_tent(root, 4.4, 1.7, 2.6, Vector3(0.0, 0.15, -1.2), CANVAS)
+	box(root, Vector3(4.45, 0.16, 0.1), Vector3(0.0, 0.6, 0.12), team_mat(team))
+	_tent(root, 1.8, 1.1, 1.6, Vector3(-1.6, 0.15, 1.6), CANVAS.darkened(0.15))
+	_tent(root, 1.8, 1.1, 1.6, Vector3(0.6, 0.15, 1.7), CANVAS.darkened(0.08))
+	cyl(root, 0.3, 0.36, 0.3, Vector3(2.1, 0.3, 1.4), mat(GUNMETAL), 6)
+	cyl(root, 0.2, 0.05, 0.4, Vector3(2.1, 0.6, 1.4), mat(FURNACE, 1.6), 5)
+	cyl(root, 0.05, 0.05, 3.0, Vector3(2.4, 1.6, -2.3), mat(METAL), 5)
+	wedge(root, Vector3(0.9, 0.55, 0.04), Vector3(2.86, 2.8, -2.3), team_mat(team), 0.0)
+
+
+static func _chop_shop(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.3, 5.7), Vector3(0.0, 0.0, 0.0), mat(SAND_DARK))
+	box(root, Vector3(4.6, 1.8, 2.6), Vector3(0.0, 1.05, -1.2), mat(SAND))
+	box(root, Vector3(4.8, 0.2, 3.0), Vector3(0.0, 2.05, -1.1), mat(PATCH), Vector3(0.12, 0.0, 0.0))
+	box(root, Vector3(4.65, 0.2, 2.65), Vector3(0.0, 1.5, -1.2), team_mat(team))
+	box(root, Vector3(2.4, 1.4, 0.1), Vector3(0.0, 0.85, 0.12), mat(GUNMETAL))
+	# Half-built vehicle on stands in the yard.
+	box(root, Vector3(1.6, 0.3, 0.9), Vector3(-0.8, 0.75, 1.6), mat(SAND_DARK))
+	for x: float in [-1.4, -0.2]:
+		box(root, Vector3(0.2, 0.5, 0.2), Vector3(x, 0.4, 1.6), mat(METAL))
+	wheel(root, 0.34, 0.24, Vector3(1.2, 0.5, 1.9))
+	wheel(root, 0.34, 0.24, Vector3(1.6, 0.34, 1.3))
+	box(root, Vector3(0.9, 0.7, 0.8), Vector3(2.1, 0.5, -0.2), mat(RUST, 0.0, 0.4, 0.7))
+	cyl(root, 0.1, 0.1, 2.6, Vector3(-2.3, 1.5, 0.6), mat(HAZARD), 5)
+	box(root, Vector3(1.4, 0.12, 0.12), Vector3(-1.7, 2.7, 0.6), mat(HAZARD))
+
+
+static func _signal_loom(root: Node3D, team: Color) -> void:
+	box(root, Vector3(5.7, 0.3, 5.7), Vector3(0.0, 0.0, 0.0), mat(SAND_DARK))
+	cyl(root, 1.9, 2.2, 1.2, Vector3(0.0, 0.75, 0.0), mat(SAND), 8)
+	cyl(root, 1.95, 1.95, 0.2, Vector3(0.0, 1.2, 0.0), team_mat(team), 8)
+	for i: int in 6:
+		var ang: float = float(i) * TAU / 6.0
+		var p: Vector3 = Vector3(cos(ang) * 1.5, 0.0, sin(ang) * 1.5)
+		cyl(root, 0.04, 0.06, 3.2, p + Vector3(0.0, 2.9, 0.0), mat(METAL, 0.0, 0.6, 0.4), 4, Vector3(sin(ang) * 0.22, 0.0, -cos(ang) * 0.22))
+	ring(root, 1.3, 1.42, Vector3(0.0, 3.2, 0.0), team_mat(team))
+	ring(root, 0.85, 0.95, Vector3(0.0, 3.9, 0.0), mat(Color(0.6, 1.0, 0.9), 1.2))
+	ball(root, 0.3, Vector3(0.0, 4.5, 0.0), mat(team, 1.5))
+	_tent(root, 1.6, 0.9, 1.4, Vector3(2.0, 0.15, 2.0), CANVAS)

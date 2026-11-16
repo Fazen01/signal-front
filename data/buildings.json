@@ -128,5 +128,53 @@
 		"blocks": false, "needs_coverage": false, "stealth": true, "detect_range": 2.2,
 		"mine_trigger": 1.7, "mine_damage": 160.0, "mine_splash": 2.6,
 		"model": "mine", "hotkey": "M"
+	},
+	"caravan_hub": {
+		"name": "Caravan Hub", "desc": "The root of your signal network. It can pack up and relocate, but your whole network goes Dark while it moves.",
+		"faction": "nomad", "tier": 1, "cost": 2000, "build_time": 60.0,
+		"hp": 2600, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "packs_to": "caravan",
+		"produces": ["tinker", "skiff", "beacon_rig"], "model": "caravan_hub", "buildable": false
+	},
+	"beacon": {
+		"name": "Beacon", "desc": "A deployed Beacon Rig. Projects signal and adds bandwidth; pack it up to move it.",
+		"faction": "nomad", "tier": 1, "cost": 140, "build_time": 10.0,
+		"hp": 450, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 15.0, "bandwidth_provided": 8, "packs_to": "beacon_rig",
+		"model": "beacon", "buildable": false
+	},
+	"cache": {
+		"name": "Cache", "desc": "Small drop-off point for salvage. Builds Skiffs.",
+		"faction": "nomad", "tier": 1, "cost": 200, "build_time": 14.0,
+		"hp": 700, "armor": "structure", "footprint": [2, 2], "sight": 8.0,
+		"depot": true, "produces": ["skiff"], "model": "cache", "hotkey": "P"
+	},
+	"camp": {
+		"name": "Camp", "desc": "Trains infantry.",
+		"faction": "nomad", "tier": 1, "cost": 160, "build_time": 14.0,
+		"hp": 800, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["drifter", "splicer", "tinker"], "model": "camp", "hotkey": "B"
+	},
+	"chop_shop": {
+		"name": "Chop Shop", "desc": "Builds the Circuit's vehicles.",
+		"faction": "nomad", "tier": 2, "cost": 340, "build_time": 22.0,
+		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["skiff", "dart", "sidewinder", "gnat", "prowler", "jammer_buggy", "beacon_rig"],
+		"model": "chop_shop", "hotkey": "V", "requires": ["camp"]
+	},
+	"snare_turret": {
+		"name": "Snare Turret", "desc": "Light gun that fires at ground and air alike.",
+		"faction": "nomad", "tier": 2, "cost": 140, "build_time": 10.0,
+		"hp": 450, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["snare_gun"], "turret": true, "model": "snare_turret",
+		"hotkey": "T", "requires": ["camp"]
+	},
+	"signal_loom": {
+		"name": "Signal Loom", "desc": "Tier 3: unlocks the Prowler. Directives recharge 25% faster.",
+		"faction": "nomad", "tier": 3, "cost": 420, "build_time": 26.0,
+		"hp": 1000, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "signal_loom",
+		"hotkey": "C", "requires": ["chop_shop"]
 	}
 }

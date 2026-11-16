@@ -62,6 +62,12 @@ static func placement_error(w: SimWorld, player_id: int, def: EntityDef, centre:
 # -------------------------------------------------------------- per tick
 
 static func update(w: SimWorld) -> void:
+	# Jammers move, so coverage has to follow them.
+	if not w.signal_dirty and w.tick_count >= w.signal_next_tick:
+		for j: SimEntity in w.entities:
+			if j.def != null and j.def.jam_radius > 0.0 and j.alive:
+				w.signal_dirty = true
+				break
 	if w.signal_dirty and w.tick_count >= w.signal_next_tick:
 		recompute(w)
 	# Mobile units check the cell they stand on every tick.
@@ -125,6 +131,10 @@ static func recompute(w: SimWorld) -> void:
 		for b: Vector4 in w.blackouts:
 			if w.are_enemies(int(b.w), p.id):
 				_clear_disc(w, grid, Vector2(b.x, b.y), b.z)
+		# So does an enemy jammer, wherever it currently is.
+		for j: SimEntity in w.entities:
+			if j.alive and j.def != null and j.def.jam_radius > 0.0 and w.are_enemies(j.owner, p.id):
+				_clear_disc(w, grid, j.pos, j.def.jam_radius)
 		w.coverage[p.id] = grid
 
 	# Everything that cannot move takes its state from the new grids.
