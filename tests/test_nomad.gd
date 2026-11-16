@@ -178,10 +178,14 @@ func test_nomads_get_more_from_wrecks() -> void:
 	var before: int = w.players[0].salvage
 	w.push_command(SimCommand.harvest(0, PackedInt32Array([skiff.id]), wreck.id))
 	var ticks: int = 0
-	while wreck.alive and ticks < 20 * 40:
+	var fullest: int = 0
+	while wreck.alive and ticks < 20 * 60:
 		w.tick()
 		ticks += 1
-	while skiff.cargo > 0 and ticks < 20 * 80:
+		fullest = maxi(fullest, skiff.cargo)
+	while skiff.cargo > 0 and ticks < 20 * 100:
 		w.tick()
 		ticks += 1
+		fullest = maxi(fullest, skiff.cargo)
 	check(w.players[0].salvage - before >= 90, "60 salvage of wreck pays 90 to a Nomad (got %d)" % (w.players[0].salvage - before))
+	check(fullest <= skiff.def.capacity, "and the Skiff never carries more than it can hold (%d of %d)" % [fullest, skiff.def.capacity])

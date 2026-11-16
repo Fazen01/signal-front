@@ -303,6 +303,20 @@ table with the margin to read it by. `--scale mote.cost:1.1` tries a change
 without editing the data.
 
 ```bash
+tools/balance_tune.py --rounds 3 --seeds 1-6
+```
+
+Plays leagues and nudges the price of each faction's fighting units toward
+an even win rate; `--write` puts the prices into `data/units.json`.
+
+```bash
+.godot-bin/godot --headless --path . -s res://tools/invariant_check.gd -- --seeds=1,2 --minutes=15
+```
+
+Bug hunt: plays AI matches with every faction and reports any state that
+should be impossible.
+
+```bash
 .godot-bin/godot --headless --path . -s res://tools/perf_bench.gd
 ```
 

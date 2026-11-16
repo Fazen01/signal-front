@@ -91,6 +91,12 @@ func _refresh_texture() -> void:
 	var map: SimMap = world.map
 	var vis: PackedByteArray = world.visible[player]
 	var seen: PackedByteArray = world.explored[player]
+	if battle.watching:
+		# A spectator's map has no fog.
+		vis = PackedByteArray()
+		vis.resize(map.w * map.h)
+		vis.fill(1)
+		seen = vis
 	var cover: PackedByteArray = world.coverage[player]
 	var bytes: PackedByteArray = PackedByteArray()
 	bytes.resize(map.w * map.h * 4)

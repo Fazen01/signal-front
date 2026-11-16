@@ -14,3 +14,4 @@ screenshots/
 
 # export_presets.cfg is tracked on purpose: the roadmap asks for a Windows
 # export preset, and this one holds no credentials or signing keys.
+__pycache__/

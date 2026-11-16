@@ -397,13 +397,16 @@ static func _update_harvest(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 				return
 			e.work_ticks += 1
 			if e.work_ticks >= int(w.data.harvest_seconds * float(SimWorld.TICK_RATE)):
-				var take: int = mini(e.def.capacity - e.cargo, res.salvage)
-				res.salvage -= take
-				# Some factions (the Nomad Circuit) strip wrecks more thoroughly.
+				# Some factions (the Nomad Circuit) strip wrecks more thoroughly:
+				# every piece taken off a wreck is worth more in the bed. The
+				# hauler still never carries more than it can hold, so it takes
+				# less off the wreck and the wreck lasts longer.
+				var worth: float = 1.0
 				if res.kind == SimEntity.Kind.WRECK:
-					e.cargo += int(float(take) * w.players[e.owner].faction.wreck_salvage_mult)
-				else:
-					e.cargo += take
+					worth = maxf(1.0, w.players[e.owner].faction.wreck_salvage_mult)
+				var take: int = mini(int(float(e.def.capacity - e.cargo) / worth), res.salvage)
+				res.salvage -= take
+				e.cargo = mini(e.def.capacity, e.cargo + roundi(float(take) * worth))
 				if res.salvage <= 0:
 					w.remove_entity(res)
 				e.job = Job.TO_DEPOT

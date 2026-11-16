@@ -240,6 +240,26 @@ static func ring(parent: Node3D, inner: float, outer: float, pos: Vector3, m: Ma
 	return _place(parent, _meshes[key], pos, m, Vector3.ZERO)
 
 
+## The upper half of a cylinder lying along Z, closed at both ends: an
+## arched roof that sits on the ground instead of being half buried in it.
+static func arch(parent: Node3D, radius: float, depth: float, pos: Vector3, m: Material, sides: int = 12) -> MeshInstance3D:
+	var key: String = "arch|%.3f|%.3f|%d" % [radius, depth, sides]
+	if not _meshes.has(key):
+		var buf: MeshBuf = MeshBuf.new()
+		var inside: Vector3 = Vector3(0.0, radius * 0.3, 0.0)
+		var hz: float = depth * 0.5
+		for i: int in sides:
+			var a0: float = PI * float(i) / float(sides)
+			var a1: float = PI * float(i + 1) / float(sides)
+			var p0: Vector3 = Vector3(cos(a0) * radius, sin(a0) * radius, 0.0)
+			var p1: Vector3 = Vector3(cos(a1) * radius, sin(a1) * radius, 0.0)
+			buf.quad(p0 + Vector3(0.0, 0.0, -hz), p0 + Vector3(0.0, 0.0, hz), p1 + Vector3(0.0, 0.0, hz), p1 + Vector3(0.0, 0.0, -hz), inside, Color.WHITE)
+			for end: float in [-hz, hz]:
+				buf.tri(Vector3(0.0, 0.0, end), p0 + Vector3(0.0, 0.0, end), p1 + Vector3(0.0, 0.0, end), inside, Color.WHITE, Color.WHITE, Color.WHITE)
+		_meshes[key] = buf.commit()
+	return _place(parent, _meshes[key], pos, m, Vector3.ZERO)
+
+
 static func _turret(root: Node3D, pos: Vector3) -> Node3D:
 	return group(root, "Turret", pos)
 
@@ -2204,12 +2224,11 @@ static func _helipad(root: Node3D, at: Vector3, radius: float, team: Color) -> v
 
 ## An arched hangar with its door facing +Z.
 static func _arch(root: Node3D, at: Vector3, radius: float, depth: float, team: Color) -> void:
-	var turn: Vector3 = Vector3(PI * 0.5, 0.0, 0.0)
-	cyl(root, radius, radius, depth, at, mat(CLOUD), 12, turn)
+	arch(root, radius, depth, at, mat(CLOUD))
 	for k: float in [-0.4, 0.0, 0.4]:
-		cyl(root, radius + 0.04, radius + 0.04, 0.12, at + Vector3(0.0, 0.0, depth * k), mat(CLOUD_DARK), 12, turn)
-	cyl(root, radius + 0.05, radius + 0.05, 0.22, at + Vector3(0.0, 0.0, depth * 0.5 - 0.14), team_mat(team), 12, turn)
-	cyl(root, radius - 0.22, radius - 0.22, 0.06, at + Vector3(0.0, 0.0, depth * 0.5 + 0.01), mat(GUNMETAL), 12, turn)
+		arch(root, radius + 0.04, 0.12, at + Vector3(0.0, 0.0, depth * k), mat(CLOUD_DARK))
+	arch(root, radius + 0.05, 0.22, at + Vector3(0.0, 0.0, depth * 0.5 - 0.14), team_mat(team))
+	arch(root, radius - 0.22, 0.06, at + Vector3(0.0, 0.0, depth * 0.5 + 0.01), mat(GUNMETAL))
 	box(root, Vector3(radius * 1.2, 0.1, 0.08), at + Vector3(0.0, radius * 0.72, depth * 0.5 + 0.04), mat(FLAME))
 
 

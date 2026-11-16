@@ -265,11 +265,15 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	driver.expect(on_hotkey(gkey) and signal_view.is_overlay_visible(), "G shows it again")
 	# Game speed, the army key, the alert key and queueing five at once.
 	var plus: InputEventKey = InputEventKey.new()
-	plus.physical_keycode = KEY_EQUAL
+	plus.keycode = KEY_PLUS
+	plus.unicode = 43
+	plus.physical_keycode = KEY_MINUS  # where "+" sits on a Nordic keyboard
 	plus.pressed = true
 	driver.expect(on_hotkey(plus) and is_equal_approx(time_scale, 1.5), "+ speeds the game up")
 	var minus: InputEventKey = InputEventKey.new()
-	minus.physical_keycode = KEY_MINUS
+	minus.keycode = KEY_MINUS
+	minus.unicode = 45
+	minus.physical_keycode = KEY_SLASH  # and where "-" sits on one
 	minus.pressed = true
 	on_hotkey(minus)
 	driver.expect(on_hotkey(minus) and is_equal_approx(time_scale, 0.5), "- slows it down")
@@ -507,10 +511,12 @@ func on_hotkey(key: InputEventKey) -> bool:
 	if key.physical_keycode == KEY_G:
 		signal_view.set_overlay_visible(not signal_view.is_overlay_visible())
 		return true
-	if key.physical_keycode == KEY_EQUAL or key.physical_keycode == KEY_KP_ADD:
+	# Plus and minus go by what is printed on the key, not where it sits: on
+	# many keyboards (Nordic ones among them) "+" is where a US board has "-".
+	if key.keycode == KEY_PLUS or key.keycode == KEY_EQUAL or key.unicode == 43 or key.physical_keycode == KEY_KP_ADD:
 		change_speed(1)
 		return true
-	if key.physical_keycode == KEY_MINUS or key.physical_keycode == KEY_KP_SUBTRACT:
+	if key.keycode == KEY_MINUS or key.unicode == 45 or key.physical_keycode == KEY_KP_SUBTRACT:
 		change_speed(-1)
 		return true
 	if key.physical_keycode == KEY_SPACE:

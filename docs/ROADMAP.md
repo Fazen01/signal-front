@@ -240,8 +240,16 @@ map generation itself to be improved.
 
 ## M27 — Bug hunt (owner request)
 
-- [ ] An invariant checker that plays matches and stops on impossible states
-- [ ] Fix what it finds
+- [x] `tools/invariant_check.gd`: plays AI matches and, once a second,
+      checks the world for states that should be impossible (units outside
+      the map or inside rock, health and cargo out of range, bandwidth
+      that does not add up, footprints and occupied cells that disagree,
+      dead players with a headquarters, not-a-number positions)
+- [x] Tests that every model builds and fits its unit, that no command
+      card repeats a key, and that every faction can reach all it owns
+- [x] Save and reload mid-match for every faction, in both modes
+- [x] Whole matches of the new factions through the real battle scene
+- [x] Fixed what these found (three bugs, listed in the session log)
 
 ## Ideas for later (proposed by session 1, not yet asked for)
 
@@ -528,6 +536,36 @@ Crimson Tally, Umbral Veil), a Watch option (the AI plays every side),
   the newest are in the M26 entry when the league has run.
 - `tools/screenshot.sh base_tally 60 base_tally` (any faction id) shows a
   full base with one of every unit; `watch` shows a watched match.
+- The commit before this one (`89feaa8`) is in the history with a failing
+  check: it was pushed together with the commit that fixes it, after the
+  fix had passed. The branch tip has passed `tools/check.sh` at every push.
+
+**13:15 UTC — bug hunt (M27).** What was run, and what it found:
+
+- `tools/invariant_check.gd`, 26 AI matches of 10-22 minutes over every
+  faction, two to four players. **Bug 1: a Nomad Skiff carried 112 salvage
+  in a bed that holds 80.** The wreck bonus was added after the load had
+  been capped. Fixed: a Skiff takes less off the wreck per trip, so the
+  wreck lasts longer and still pays half as much again in total; the test
+  now also checks the load never exceeds the capacity. Nothing else failed.
+- A test that builds every model. **Bug 2: the Accord's arched hangars
+  were whole cylinders with their lower half 1.6 units under the ground**,
+  which would show on a slope and while the building rises. Fixed with a
+  proper half-arch mesh.
+- Reading my own new code with the owner's keyboard in mind. **Bug 3: the
+  speed keys went by key position**, and on a Nordic keyboard the key
+  printed "+" sits where a US keyboard has "-", so "+" would have slowed
+  the game down. They now go by the character on the key.
+- Save and reload in the middle of a match for all eight factions, with
+  and without Watch and a chosen region: 16 round trips, each identical to
+  the original two and a half minutes later.
+- Three whole matches of the new factions through the real battle scene
+  and HUD with no script errors.
+- Also fixed in passing: the minimap kept its fog of war in Watch mode.
+- **Not covered:** anything that needs eyes or hands on a real machine
+  (sound, feel, the frame rate, how the interface behaves at other window
+  sizes), and the interface under random input. Session 2's branch has a
+  random-input "monkey" driver for the HUD that is not merged here.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
