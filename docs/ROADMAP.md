@@ -567,6 +567,23 @@ Crimson Tally, Umbral Veil), a Watch option (the AI plays every side),
   sizes), and the interface under random input. Session 2's branch has a
   random-input "monkey" driver for the HUD that is not merged here.
 
+**13:45 UTC — balance pass (M26), in progress.**
+
+- First eight-faction league, 168 AI-vs-AI games (seeds 1-6, every pairing,
+  both seats): Nomad 76%, Foundry 71%, Verdigris 57%, Vesper 55%, Tally
+  48%, Veil 48%, Aegis 29%, Zephyr 12%. One standard error at 42 games a
+  faction is about 8 points, so the middle four are even and the ends are
+  not. Median match 15.0 minutes, 84% between 12 and 25, 2 of 168 undecided
+  after an hour.
+- The Nomad figure was measured with the overfilled-Skiff bug still in.
+- **Decision: fix the Accord by design first, then tune prices.** A faction
+  at 12% is not a pricing problem. Its aircraft are cheaper and tougher and
+  the Lanner hits harder (committed locally, being measured). Aegis's Dark
+  penalty goes from 60% to 65%.
+- `tools/balance_tune.py` is running two more league rounds on that, seeded
+  with the first league's result. Each round is about half an hour here.
+  Prices will be written into `data/units.json` when it settles.
+
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
 for whoever is next: the real-GPU frame rate, and the two session branches
