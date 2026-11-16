@@ -11,7 +11,7 @@ const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
 const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
-const REINFORCE_TICKS: int = 20 * 240  ## a wave out this long is joined by whatever has gathered at home
+const REINFORCE_TICKS: int = 20 * 240  ## a wave out this long no longer holds back the next one
 ## How an AI likes to fight. Normal and Hard opponents draw one from the
 ## seed, so two matches against the same difficulty need not feel alike.
 const DOCTRINES: Array[String] = ["balanced", "aggressor", "fortifier", "raider"]
@@ -876,8 +876,13 @@ func _run_military(w: SimWorld) -> void:
 		Wave.ASSAULT:
 			if retreats and _should_retreat(w):
 				_retreat(w, rally)
-			elif threat == null and home.size() >= maxi(4, wave_size / 2) and _wave_spent(w):
-				_reinforce(w, home)
+			elif threat == null and _wave_spent(w) and _next_wave_ready(w, home.size()):
+				# What is left of the old wave falls in with the new one.
+				var both: Array[SimEntity] = home.duplicate()
+				for id: int in wave_ids:
+					both.append(w.get_entity(id))
+				_end_wave(w)
+				_launch_wave(w, both)
 			else:
 				_assault(w, false)
 
@@ -913,7 +918,7 @@ func _should_retreat(w: SimWorld) -> bool:
 ## True when the wave out there is no longer much of an attack: worn down
 ## to a third of what set out, or out for four minutes. A handful of
 ## survivors (or one unit that cannot hurt what it was sent against) must
-## not keep the rest of the army waiting at home.
+## not keep the next wave waiting at home for ever.
 func _wave_spent(w: SimWorld) -> bool:
 	if w.tick_count - wave_tick > REINFORCE_TICKS:
 		return true
@@ -923,17 +928,16 @@ func _wave_spent(w: SimWorld) -> bool:
 	return left * 3 <= wave_launch_power
 
 
-## Sends everything gathered at home after the wave, as part of it.
-func _reinforce(w: SimWorld, units: Array[SimEntity]) -> void:
-	for e: SimEntity in units:
-		wave_ids.append(e.id)
-	wave_launch_power = 0
-	for id: int in wave_ids:
-		wave_launch_power += w.get_entity(id).def.cost
-	wave_tick = w.tick_count
-	waves_sent += 1
-	wave_size = mini(max_wave, wave_size + wave_growth)
-	_assault(w, true)
+## Whether enough has gathered at home to set out as a wave while the last
+## one is still in the field: a full wave, or, when the last one has been
+## out a long time, whatever a starved economy has managed.
+func _next_wave_ready(w: SimWorld, at_home: int) -> bool:
+	if at_home >= wave_size:
+		return true
+	if w.tick_count - wave_tick >= REINFORCE_TICKS + STALL_TICKS and at_home >= maxi(4, wave_size / 4):
+		wave_size = maxi(first_wave, at_home)
+		return true
+	return false
 
 
 ## Calls the wave home. The next one will be bigger.
