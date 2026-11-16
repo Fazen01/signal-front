@@ -1,0 +1,126 @@
+{
+	"aegis": {
+		"name": "Aegis Directorate",
+		"desc": "Disciplined, precise, networked. Long-range relays, aircraft and artillery. Linked units gain weapon range; Dark hits them hardest.",
+		"hq": "hq",
+		"start_units": ["field_engineer", "field_engineer", "hauler", "hauler", "trooper", "trooper"],
+		"linked_range_bonus": 0.15,
+		"dark_rof_mult": 0.65,
+		"drop_squad": ["trooper", "trooper", "trooper", "lancer", "lancer"],
+		"roles": {
+			"builder": "field_engineer", "hauler": "hauler", "relay": "relay", "barracks": "barracks",
+			"works": "vehicle_works", "depot": "depot", "turret_ground": "sentry_turret",
+			"turret_armor": "lance_battery", "turret_air": "flak_post", "tier3": "command_lab",
+			"airpad": "airpad"
+		},
+		"playable": true
+	},
+	"foundry": {
+		"name": "Foundry Pact",
+		"desc": "Slow heavy industry. Cheap armored Pylons, mobile Crawler factories, mines and the toughest tanks. Linked vehicles repair themselves.",
+		"hq": "foundry_core",
+		"start_units": ["sapper", "sapper", "scow", "scow", "levy", "levy", "levy"],
+		"linked_vehicle_repair": 0.012,
+		"drop_squad": ["levy", "levy", "levy", "levy", "breaker", "breaker"],
+		"roles": {
+			"builder": "sapper", "hauler": "scow", "relay": "pylon", "barracks": "muster_hall",
+			"mobile_unit": "crawler", "mobile_factory": "crawler_factory", "depot": "scrapyard",
+			"turret_ground": "bastion", "turret_armor": "bastion", "turret_air": "skyspike",
+			"tier3": "arsenal"
+		},
+		"playable": true
+	},
+	"nomad": {
+		"name": "Nomad Circuit",
+		"desc": "Fast, light, elusive. No fixed relays: Beacon Rigs deploy and pack up, and even the headquarters can relocate. Jammers, hijackers, forest cloaking and half again as much salvage from wrecks.",
+		"hq": "caravan_hub",
+		"start_units": ["tinker", "tinker", "skiff", "skiff", "drifter", "drifter", "beacon_rig"],
+		"forest_cloak": true,
+		"wreck_salvage_mult": 1.5,
+		"drop_squad": ["drifter", "drifter", "drifter", "drifter", "splicer"],
+		"roles": {
+			"builder": "tinker", "hauler": "skiff", "relay": "beacon", "relay_unit": "beacon_rig",
+			"barracks": "camp", "works": "chop_shop", "depot": "cache",
+			"turret_ground": "snare_turret", "turret_armor": "snare_turret", "turret_air": "snare_turret",
+			"tier3": "signal_loom"
+		},
+		"playable": true
+	},
+	"vesper": {
+		"name": "Vesper Array",
+		"desc": "An automated legion of drone frames: cheap, quick and many, but fragile. Linked frames move faster along the grid, and frames that go Dark keep nearly all of their rate of fire.",
+		"hq": "nexus",
+		"start_units": ["weaver", "weaver", "porter", "porter", "mote", "mote", "mote"],
+		"dark_rof_mult": 0.92,
+		"linked_speed_bonus": 0.15,
+		"drop_squad": ["mote", "mote", "mote", "mote", "shard", "shard"],
+		"roles": {
+			"builder": "weaver", "hauler": "porter", "relay": "spire",
+			"barracks": "cradle", "works": "assembler", "depot": "cistern",
+			"turret_ground": "ward_node", "turret_armor": "ward_node", "turret_air": "ward_node",
+			"tier3": "oracle"
+		},
+		"playable": true
+	},
+	"verdigris": {
+		"name": "Verdigris Order",
+		"desc": "Few, costly and hard to kill: armored knights and walking war machines. Linked units shrug off part of every hit, but the Order's machines draw on the grid and fire far slower when Dark.",
+		"hq": "keep",
+		"start_units": ["mason", "mason", "dray", "dray", "vigil", "vigil"],
+		"linked_damage_resist": 0.15,
+		"dark_rof_mult": 0.55,
+		"drop_squad": ["vigil", "vigil", "vigil", "pike", "pike"],
+		"roles": {
+			"builder": "mason", "hauler": "dray", "relay": "lantern",
+			"barracks": "chapterhouse", "works": "armoury", "depot": "tithe_barn",
+			"turret_ground": "rampart", "turret_armor": "rampart", "turret_air": "watchfire",
+			"tier3": "reliquary"
+		},
+		"playable": true
+	},
+	"zephyr": {
+		"name": "Zephyr Accord",
+		"desc": "Rules the sky. A thin ground force screens a fleet of gunships, strike craft and bombers that fly over any terrain. Linked units see a quarter further. Flak is its bane.",
+		"hq": "aerie",
+		"start_units": ["rigger", "rigger", "tender", "tender", "ranger", "ranger"],
+		"linked_sight_bonus": 0.25,
+		"drop_squad": ["ranger", "ranger", "ranger", "flare", "flare"],
+		"roles": {
+			"builder": "rigger", "hauler": "tender", "relay": "mast",
+			"barracks": "roost", "works": "flight_deck", "depot": "hangar",
+			"turret_ground": "gun_pit", "turret_armor": "gun_pit", "turret_air": "gun_pit",
+			"tier3": "control_tower"
+		},
+		"playable": true
+	},
+	"tally": {
+		"name": "Crimson Tally",
+		"desc": "Mercenaries who fight for pay: everything they destroy pays a bounty in salvage, so an army that keeps attacking pays for itself. Tough, fast-firing vehicles and little subtlety.",
+		"hq": "counting_house",
+		"start_units": ["tallyman", "tallyman", "strongbox", "strongbox", "gunhand", "gunhand"],
+		"kill_bounty": 0.15,
+		"drop_squad": ["gunhand", "gunhand", "gunhand", "petard", "petard"],
+		"roles": {
+			"builder": "tallyman", "hauler": "strongbox", "relay": "signal_post",
+			"barracks": "billet", "works": "motor_pool", "depot": "vault",
+			"turret_ground": "gun_nest", "turret_armor": "gun_nest", "turret_air": "gun_nest",
+			"tier3": "exchange"
+		},
+		"playable": true
+	},
+	"veil": {
+		"name": "Umbral Veil",
+		"desc": "Ambushers. Inside their own coverage Veil units vanish whenever they stand still, and their Sentinel turrets stay hidden until they fire. Fragile and costly, with the longest guns on the field.",
+		"hq": "sanctum",
+		"start_units": ["veilwright", "veilwright", "gleaner", "gleaner", "shade", "shade"],
+		"linked_cloak": true,
+		"drop_squad": ["shade", "shade", "shade", "needle", "needle"],
+		"roles": {
+			"builder": "veilwright", "hauler": "gleaner", "relay": "obelisk",
+			"barracks": "hollow", "works": "shroudworks", "depot": "reservoir",
+			"turret_ground": "sentinel", "turret_armor": "sentinel", "turret_air": "sentinel",
+			"tier3": "occulus"
+		},
+		"playable": true
+	}
+}

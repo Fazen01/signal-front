@@ -1,0 +1,182 @@
+class_name BattleOverlay
+extends Control
+## Screen-space drawing over the 3D view: health bars, the orders of the
+## selected units, the selection drag box and order cursors. Purely visual;
+## ignores the mouse.
+
+const ORDER_LINES_MAX: int = 60  ## selected units whose orders are drawn
+
+var battle: BattleScene = null
+
+
+func setup(scene: BattleScene) -> void:
+	battle = scene
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+func _process(_delta: float) -> void:
+	queue_redraw()
+
+
+func _draw() -> void:
+	if battle == null or battle.world == null:
+		return
+	var ctl: SelectionController = battle.controller
+	var cam3d: Camera3D = battle.cam.cam
+	var world: SimWorld = battle.world
+	var right: Vector3 = cam3d.global_transform.basis.x
+	var view_rect: Rect2 = get_viewport_rect().grow(40.0)
+	_draw_orders(ctl, cam3d, world)
+	for e: SimEntity in world.entities:
+		if e.alive and e.kind == SimEntity.Kind.UPLINK and e.capture_progress > 0.0 and battle.world_view.is_shown(e.id):
+			var at3: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 4.4, e.pos.y)
+			if not cam3d.is_position_behind(at3):
+				var c2: Vector2 = cam3d.unproject_position(at3)
+				var frac_c: float = clampf(e.capture_progress / world.data.uplink_capture_seconds, 0.0, 1.0)
+				draw_rect(Rect2(c2.x - 31.0, c2.y - 4.0, 62.0, 8.0), Color(0.0, 0.0, 0.0, 0.75))
+				draw_rect(Rect2(c2.x - 30.0, c2.y - 3.0, 60.0 * frac_c, 6.0), Color(0.9, 0.9, 1.0))
+		if not e.alive or e.def == null or not battle.world_view.is_shown(e.id):
+			continue
+		var is_selected: bool = ctl.selected_set.has(e.id)
+		var show_bar: bool = is_selected or e.hp < e.max_hp - 0.5 or not e.constructed
+		var dark: bool = e.owner >= 0 and not e.linked and e.constructed
+		if not show_bar and not dark and e.rank == 0:
+			continue
+		var top: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + _bar_height(e), e.pos.y)
+		if cam3d.is_position_behind(top):
+			continue
+		var sp: Vector2 = cam3d.unproject_position(top)
+		if not view_rect.has_point(sp):
+			continue
+		if dark:
+			_draw_dark_icon(sp + Vector2(0.0, -14.0))
+		if e.rank > 0:
+			_draw_rank(sp + Vector2(0.0, -9.0 if not dark else -27.0), e.rank)
+		if not show_bar:
+			continue
+		var edge: Vector2 = cam3d.unproject_position(top + right * e.radius)
+		var half: float = clampf(sp.distance_to(edge), 12.0, 70.0)
+		var bar: Rect2 = Rect2(sp.x - half, sp.y - 3.0, half * 2.0, 5.0)
+		draw_rect(bar.grow(1.0), Color(0.0, 0.0, 0.0, 0.75))
+		var frac: float = e.hp_fraction()
+		var col: Color = Color(0.3, 0.9, 0.35)
+		if frac < 0.3:
+			col = Color(0.95, 0.25, 0.2)
+		elif frac < 0.6:
+			col = Color(0.95, 0.8, 0.2)
+		draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), col)
+		if not e.constructed:
+			var prog: Rect2 = Rect2(bar.position + Vector2(0.0, 7.0), Vector2(bar.size.x * e.build_progress, 3.0))
+			draw_rect(Rect2(bar.position + Vector2(-1.0, 6.0), Vector2(bar.size.x + 2.0, 5.0)), Color(0.0, 0.0, 0.0, 0.75))
+			draw_rect(prog, Color(0.4, 0.75, 1.0))
+		elif e.kind == SimEntity.Kind.BUILDING and not e.queue.is_empty() and e.owner == battle.local_player:
+			var total: float = world.data.entity(e.queue[0]).build_time
+			var pf: float = clampf(e.prod_progress / maxf(total, 0.01), 0.0, 1.0)
+			draw_rect(Rect2(bar.position + Vector2(-1.0, 6.0), Vector2(bar.size.x + 2.0, 5.0)), Color(0.0, 0.0, 0.0, 0.75))
+			draw_rect(Rect2(bar.position + Vector2(0.0, 7.0), Vector2(bar.size.x * pf, 3.0)), Color(1.0, 0.85, 0.3))
+	if ctl.dragging and ctl.drag_start.distance_to(ctl.drag_now) >= SelectionController.DRAG_THRESHOLD:
+		var box: Rect2 = Rect2(ctl.drag_start, ctl.drag_now - ctl.drag_start).abs()
+		draw_rect(box, Color(0.4, 1.0, 0.5, 0.12))
+		draw_rect(box, Color(0.4, 1.0, 0.5, 0.9), false, 1.5)
+	if ctl.mode == SelectionController.Mode.ATTACK_MOVE:
+		var m: Vector2 = get_viewport().get_mouse_position()
+		draw_arc(m, 14.0, 0.0, TAU, 24, Color(1.0, 0.35, 0.3), 2.0)
+		draw_line(m - Vector2(20.0, 0.0), m + Vector2(20.0, 0.0), Color(1.0, 0.35, 0.3), 2.0)
+		draw_line(m - Vector2(0.0, 20.0), m + Vector2(0.0, 20.0), Color(1.0, 0.35, 0.3), 2.0)
+
+
+## Where the selected units are going: a line from each through its queued
+## orders, coloured by what it will do there, and the rally point of a
+## selected building.
+func _draw_orders(ctl: SelectionController, cam3d: Camera3D, world: SimWorld) -> void:
+	var drawn: int = 0
+	for id: int in ctl.selected:
+		var e: SimEntity = world.get_entity(id)
+		if e == null or e.owner != battle.local_player:
+			continue
+		if e.kind == SimEntity.Kind.BUILDING:
+			if e.has_rally:
+				var flag: Color = Color(0.5, 0.9, 1.0, 0.8)
+				_order_leg(cam3d, world, e.pos, e.rally, flag)
+				_order_mark(cam3d, world, e.rally, flag)
+			continue
+		if e.kind != SimEntity.Kind.UNIT or e.orders.is_empty() or drawn >= ORDER_LINES_MAX:
+			continue
+		drawn += 1
+		var from: Vector2 = e.pos
+		for o: SimOrder in e.orders:
+			if o.type == SimOrder.Type.HOLD:
+				continue
+			var to: Vector2 = o.pos
+			var target: SimEntity = world.get_entity(o.target_id) if o.target_id != 0 else null
+			if target != null:
+				to = target.pos
+			var col: Color = _order_color(o.type)
+			_order_leg(cam3d, world, from, to, col)
+			from = to
+		_order_mark(cam3d, world, from, _order_color(e.orders[e.orders.size() - 1].type))
+
+
+func _order_color(order_type: int) -> Color:
+	match order_type:
+		SimOrder.Type.ATTACK:
+			return Color(1.0, 0.3, 0.25, 0.75)
+		SimOrder.Type.ATTACK_MOVE:
+			return Color(1.0, 0.6, 0.25, 0.7)
+		SimOrder.Type.HARVEST:
+			return Color(1.0, 0.82, 0.35, 0.6)
+		SimOrder.Type.BUILD, SimOrder.Type.REPAIR, SimOrder.Type.DEPLOY:
+			return Color(0.45, 0.85, 1.0, 0.7)
+		SimOrder.Type.CAPTURE:
+			return Color(0.95, 0.95, 1.0, 0.7)
+	return Color(0.4, 1.0, 0.5, 0.6)
+
+
+func _ground_point(cam3d: Camera3D, world: SimWorld, p: Vector2) -> Vector3:
+	return Vector3(p.x, world.map.height_at(p) + 0.3, p.y)
+
+
+func _order_leg(cam3d: Camera3D, world: SimWorld, a: Vector2, b: Vector2, col: Color) -> void:
+	var a3: Vector3 = _ground_point(cam3d, world, a)
+	var b3: Vector3 = _ground_point(cam3d, world, b)
+	if cam3d.is_position_behind(a3) or cam3d.is_position_behind(b3):
+		return
+	draw_line(cam3d.unproject_position(a3), cam3d.unproject_position(b3), col, 1.5, true)
+
+
+func _order_mark(cam3d: Camera3D, world: SimWorld, at: Vector2, col: Color) -> void:
+	var at3: Vector3 = _ground_point(cam3d, world, at)
+	if cam3d.is_position_behind(at3):
+		return
+	var sp: Vector2 = cam3d.unproject_position(at3)
+	draw_circle(sp, 4.0, Color(0.0, 0.0, 0.0, 0.5))
+	draw_circle(sp, 2.6, col)
+
+
+## Veterancy: one gold chevron per rank.
+func _draw_rank(at: Vector2, rank: int) -> void:
+	var gold: Color = Color(1.0, 0.85, 0.3)
+	for i: int in rank:
+		var x: float = at.x + (float(i) - float(rank - 1) * 0.5) * 7.0
+		var pts: PackedVector2Array = PackedVector2Array([Vector2(x - 3.0, at.y + 2.0), Vector2(x, at.y - 2.0), Vector2(x + 3.0, at.y + 2.0)])
+		draw_polyline(pts, Color(0.0, 0.0, 0.0, 0.8), 3.5)
+		draw_polyline(pts, gold, 1.8)
+
+
+## "No signal": an antenna with a slash through it.
+func _draw_dark_icon(at: Vector2) -> void:
+	draw_circle(at, 8.0, Color(0.0, 0.0, 0.0, 0.7))
+	var col: Color = Color(1.0, 0.45, 0.2)
+	draw_line(at + Vector2(0.0, 5.0), at + Vector2(0.0, -2.0), col, 1.5)
+	draw_arc(at + Vector2(0.0, -2.0), 3.0, PI * 1.15, PI * 1.85, 6, col, 1.5)
+	draw_arc(at + Vector2(0.0, -2.0), 5.5, PI * 1.15, PI * 1.85, 8, col, 1.5)
+	draw_line(at + Vector2(-5.5, -5.5), at + Vector2(5.5, 5.5), Color(1.0, 0.2, 0.15), 2.0)
+
+
+func _bar_height(e: SimEntity) -> float:
+	if e.kind == SimEntity.Kind.BUILDING:
+		return 3.2 + e.radius * 0.9
+	if e.def.is_air():
+		return 2.0 + e.def.altitude()
+	return 1.9 if e.def.is_infantry() else 2.1

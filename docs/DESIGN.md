@@ -114,6 +114,27 @@ short radius, so the network is a dense, tough web. Linked vehicles self-repair.
   Mauler (heavy tank), Anvil (siege mortar carrier), Ratchet (repair truck),
   Levy (cheap massed infantry), Sapper (builder, lays mines).
 
+**Added on 16 November at the owner's request**, each with one rule of its
+own on top of the shared Signal Grid:
+
+- **Verdigris Order** — few, costly, armored knights and walkers. Linked
+  units take 15% less damage; Dark ones fire at 55%.
+- **Zephyr Accord** — air power: gunships, strike craft and bombers over a
+  thin ground force. Linked units see 25% further.
+- **Crimson Tally** — mercenaries paid a bounty of 15% of the value of
+  everything they destroy.
+- **Umbral Veil** — ambushers: Linked ground units are hidden while they
+  stand still, and their turrets are hidden until they fire.
+
+**Vesper Array** (added 16 November at the owner's request) — an automated
+legion of drone frames: cheap, quick and many, but fragile. Linked frames
+move 15% faster; Dark frames keep 92% of their rate of fire. No aircraft and
+no heavy tank; its relay, the Spire, is cheaper than a Relay and reaches less
+far.
+
+- Signature: Mote (cheap walking drone), Halberd (battle skimmer), Prism
+  (siege skimmer); everything with wheels elsewhere hovers here.
+
 **Nomad Circuit** — fast, light, elusive. No fixed relays: signal comes from
 mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 
@@ -126,7 +147,9 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Flat-to-rolling terrain with impassable rock and water, forest patches,
   Salvage Fields near each start and richer contested fields mid-map, Uplink
   Sites on the flanks.
-- Sizes: 128×128 world units (2 players), 192×192 (up to 4).
+- Sizes: 176×176 world units (2 players; a compact 128×128 option for
+  shorter matches), 192×192 (up to 4). The hand-made two-player layouts are
+  128×128.
 - A seeded, mirrored procedural generator plus three hand-tuned layouts stored
   as data. Start positions are always symmetric.
 
@@ -139,9 +162,12 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Ctrl+1..9 set control groups, 1..9 recall, double-tap centers the camera.
 - HUD: salvage and bandwidth at the top, minimap bottom-left (click to move
   the camera, right-click to order), selection panel and command card with
-  hotkeys bottom-center/right, Directive bar, alerts feed.
+  hotkeys bottom-center/right, the Directives between them, alerts feed.
+  Each faction has an interface of its own (`ui/ui_skin.gd`): colours,
+  panel and button shapes, lettering and an emblem.
 - Build placement shows a ghost tinted valid/invalid, plus the coverage overlay.
-- Screens: main menu, skirmish setup (map, faction, AI difficulty, seed),
+- Screens: main menu, skirmish setup (map, region, seed, and a line per
+  seat: who plays it, faction, team, AI difficulty),
   pause menu, settings, victory/defeat summary with stats.
 
 ### Skirmish AI
