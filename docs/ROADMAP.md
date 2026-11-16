@@ -241,8 +241,14 @@ over three or four seeds per faction pairing, Normal vs Normal:
   minutes; with both economies stopped, turrets and headquarters guns beat
   the trickle of free Reinforcement Drop squads for ever. Fields 10,000 /
   16,000 -> 14,000 / 22,000, so the salvage outlasts a normal match. Both
-  seeds then end at 20 and 26 minutes. In progress (11:25 UTC): batches on
-  seeds 1-4 and 9-12 again before committing.
+  seeds then end at 20 and 26 minutes. 72 games on seeds 1-4 and 9-12:
+  no draws, 21.4 minutes on average; Aegis 62%, Foundry 40%, Nomad 47%.
+  Committed as `92a7ea0`.
+- Foundry vs Aegis was now 4 of 16 for Foundry. Value killed per value
+  lost by unit type over 12 such games: Aegis Marksman 1.85 (every other
+  non-artillery unit 0.4-1.0), Foundry Breaker 0.52 with about 1,000
+  built. The Marksman's 14 range outreaches all Foundry infantry. In
+  progress (12:10 UTC): Marksman damage 48 -> 40, batches running.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
