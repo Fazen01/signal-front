@@ -151,7 +151,10 @@ func _trace_line(w: SimWorld) -> String:
 		var turrets: int = 0
 		var hq: float = 0.0
 		var haulers: int = 0
+		var uplinks: int = 0
 		for e: SimEntity in w.entities:
+			if e.kind == SimEntity.Kind.UPLINK and e.owner == p.id and e.linked:
+				uplinks += 1
 			if not e.alive or e.owner != p.id or e.def == null:
 				continue
 			if e.is_building():
@@ -173,13 +176,23 @@ func _trace_line(w: SimWorld) -> String:
 		for ai: SimAI in w.ais:
 			if ai.player_id == p.id:
 				wave = "w%d:%d/%d" % [ai.waves_sent, ai.wave_ids.size(), ai.wave_size]
-		parts.append("$%d haul %d bw %d/%d army %d(%d) bld %d dark %d emit %d tur %d hq %d%% lost %d %s" % [
-			p.salvage, haulers, p.bandwidth_used, p.bandwidth_cap, army, value, buildings, dark, emitters, turrets,
+				if not ai.wave_ids.is_empty():
+					var lead: SimEntity = w.get_entity(ai.wave_ids[0])
+					var target: SimEntity = w.get_entity(ai.wave_target)
+					var what: String = target.def.id if target != null and target.def != null else "-"
+					var dist: float = lead.pos.distance_to(ai.wave_target_pos) if lead != null else -1.0
+					wave += " st%d ->%s %.0f" % [ai.wave_state, what, dist]
+		parts.append("$%d up %d haul %d bw %d/%d army %d(%d) bld %d dark %d emit %d tur %d hq %d%% lost %d %s" % [
+			p.salvage, uplinks, haulers, p.bandwidth_used, p.bandwidth_cap, army, value, buildings, dark, emitters, turrets,
 			int(hq * 100.0), p.stat_units_lost, wave,
 		])
 	var left: int = 0
 	for e: SimEntity in w.entities:
 		if e.alive and e.is_harvestable():
 			left += e.salvage
-	parts.append("salvage left %d" % left)
+	var sites: int = 0
+	for e: SimEntity in w.entities:
+		if e.kind == SimEntity.Kind.UPLINK:
+			sites += 1
+	parts.append("salvage left %d, uplink sites %d" % [left, sites])
 	return " | ".join(parts)

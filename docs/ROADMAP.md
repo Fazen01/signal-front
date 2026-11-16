@@ -177,6 +177,10 @@ Working on (after the tick): held-out seeds 4-6 gave median 16.0 but 3 of
 What remains is a starved endgame: both sides out of salvage, one with only
 infantry against a Bastion and a double-health HQ that is repaired for free.
 A human on either side can still finish it; left as is.
+With these fixes, seeds 1-6 across all nine pairings (54 games): average
+17.8, median 16.6, range 11-45, 2 draws (4%), 53% inside 15-25. Win rates:
+Aegis 54%, Foundry 54%, Nomad 33% (24 non-mirror games each, about +/-10
+points of noise), so the Nomads are now clearly behind.
 
 How it was found (27 games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
 12.2; HQ health x2.5 with tougher buildings and turrets -> 10.4. Traces show

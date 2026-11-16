@@ -10,6 +10,7 @@ enum Wave { NONE, STAGING, ASSAULT }
 const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
+const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
 
 var player_id: int = 0
 var level: int = 1  ## 0 easy, 1 normal, 2 hard
@@ -250,7 +251,8 @@ func _best_resource(w: SimWorld) -> SimEntity:
 		if score < best_score:
 			best_score = score
 			best = e
-	if best_score > 90.0:
+	# Too far to be worth the trip: 90 units on a 128-unit map, scaled with it.
+	if best_score > w.map.world_size().x * 0.7:
 		return null
 	return best
 
@@ -389,33 +391,22 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 	return ""
 
 
-## Salvage fields, in order of distance, that our signal does not reach yet.
+## The nearest salvage field or uplink site on our half of the map that our
+## signal does not reach yet. Uplinks matter most late, when fields run dry.
 func _relay_goal(w: SimWorld) -> Vector2:
 	var best: Vector2 = Vector2.INF
 	var best_d: float = INF
 	for e: SimEntity in w.entities:
-		if e.kind != SimEntity.Kind.FIELD or not e.is_harvestable():
-			continue
-		if SimSignal.is_covered(w, player_id, e.pos):
+		var wanted: bool = e.kind == SimEntity.Kind.UPLINK or (e.kind == SimEntity.Kind.FIELD and e.is_harvestable())
+		if not wanted or SimSignal.is_covered(w, player_id, e.pos):
 			continue
 		var d: float = e.pos.distance_to(_hq.pos)
-		# Leave the enemy's home fields alone.
+		# Leave the enemy's half alone.
 		if e.pos.distance_to(_enemy_hq_pos(w)) < d:
 			continue
 		if d < best_d:
 			best_d = d
 			best = e.pos
-	if best == Vector2.INF:
-		# Then the nearest uplink site on our half of the map.
-		for e: SimEntity in w.entities:
-			if e.kind != SimEntity.Kind.UPLINK or SimSignal.is_covered(w, player_id, e.pos):
-				continue
-			var d: float = e.pos.distance_to(_hq.pos)
-			if e.pos.distance_to(_enemy_hq_pos(w)) < d:
-				continue
-			if d < best_d:
-				best_d = d
-				best = e.pos
 	if best == Vector2.INF and _count(_r("relay")) < 4:
 		# Nothing left to claim: push the network towards the middle.
 		var mid: Vector2 = w.map.world_size() * 0.5
@@ -979,6 +970,9 @@ func _pick_target(w: SimWorld) -> SimEntity:
 		var lead: SimEntity = w.get_entity(wave_ids[0])
 		if lead != null:
 			from = lead.pos
+	# Late in a long match, go for the headquarters: picking off outlying
+	# buildings can drag on until both sides run out of salvage.
+	var go_for_hq: bool = w.tick_count > LATE_GAME_TICKS
 	var best: SimEntity = null
 	var best_score: float = -INF
 	for b: SimEntity in _enemy_buildings:
@@ -986,7 +980,7 @@ func _pick_target(w: SimWorld) -> SimEntity:
 			continue
 		var score: float = -from.distance_to(b.pos) * 0.05
 		if b.def.signal_root:
-			score += 1.5
+			score += 12.0 if go_for_hq else 1.5
 		elif hunts_relays and b.def.signal_radius > 0.0 and b.constructed:
 			score += 2.0 + 2.5 * float(_downstream_count(w, b))
 		elif b.def.is_armed():
