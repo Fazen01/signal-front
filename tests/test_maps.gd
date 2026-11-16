@@ -144,7 +144,7 @@ func _reaches(m: SimMap, from: Vector2, to: Vector2) -> bool:
 func test_generated_maps_come_in_several_kinds() -> void:
 	var kinds: Dictionary[String, int] = {}
 	for seed_value: int in range(1, 25):
-		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2)
+		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2, "temperate")
 		kinds[_kind_of(m)] = int(kinds.get(_kind_of(m), 0)) + 1
 		check_eq(_symmetry_mismatches(m, 2), 0, "seed %d (%s): half-turn symmetric" % [seed_value, m.name])
 		check(_all_reachable(m), "seed %d (%s): every start and field is reachable" % [seed_value, m.name])
@@ -175,7 +175,7 @@ func test_same_seed_gives_the_same_map() -> void:
 func test_a_river_can_be_crossed_in_more_than_one_place() -> void:
 	var found: int = 0
 	for seed_value: int in range(1, 40):
-		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2)
+		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2, "temperate")
 		if _kind_of(m) != "River Valley":
 			continue
 		found += 1
@@ -199,22 +199,65 @@ func test_a_river_can_be_crossed_in_more_than_one_place() -> void:
 func test_four_player_maps_never_get_a_river() -> void:
 	for seed_value: int in range(1, 13):
 		var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.LARGE_CELLS, 4)
-		check(_kind_of(m) != "River Valley", "seed %d: %s" % [seed_value, m.name])
+		check(not ["River Valley", "Long Ridge", "Ice River", "Lava River"].has(_kind_of(m)), "seed %d: %s" % [seed_value, m.name])
 		check_eq(_symmetry_mismatches(m, 4), 0, "seed %d: quarter-turn symmetric" % seed_value)
 		check(_all_reachable(m), "seed %d: every start and field is reachable" % seed_value)
 
 
-func test_a_region_changes_the_look_and_nothing_else() -> void:
-	var plain: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2)
-	check(SimMapGen.REGIONS.has(plain.region), "a generated map lies in a known region (%s)" % plain.region)
+func test_every_region_has_its_own_kinds_of_country() -> void:
 	for region: String in SimMapGen.REGIONS:
-		var m: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, region)
-		check_eq(m.region, region, "the region asked for is the region given")
-		check(m.terrain == plain.terrain, "%s: the terrain is the same" % region)
-		check(m.heights == plain.heights, "%s: the heights are the same" % region)
-		check(m.field_spots == plain.field_spots and m.uplink_spots == plain.uplink_spots, "%s: fields and uplinks are the same" % region)
-		check(SimMapGen.REGION_NAMES.has(region), "%s has a name" % region)
-	check_eq(SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, "nowhere").region, plain.region, "an unknown region falls back to the seed's")
+		var kinds: Dictionary[String, int] = {}
+		var open_total: float = 0.0
+		for seed_value: int in range(1, 25):
+			var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2, region)
+			check_eq(m.region, region, "the region asked for is the region given")
+			kinds[_kind_of(m)] = int(kinds.get(_kind_of(m), 0)) + 1
+			check_eq(_symmetry_mismatches(m, 2), 0, "%s seed %d (%s): half-turn symmetric" % [region, seed_value, m.name])
+			check(_all_reachable(m), "%s seed %d (%s): every start and field is reachable" % [region, seed_value, m.name])
+			for u: Vector2 in m.uplink_spots:
+				check(_reaches(m, m.starts[0], u), "%s seed %d: uplink sites are reachable" % [region, seed_value])
+			for s: Vector2 in m.starts:
+				check(_hq_fits(m, s), "%s seed %d: an HQ fits on every start" % [region, seed_value])
+			var open: int = 0
+			for t: int in m.terrain:
+				if t == SimMap.Terrain.GROUND:
+					open += 1
+			var share: float = float(open) / float(m.w * m.h)
+			open_total += share / 24.0
+			check(share > 0.72 and share < 0.96, "%s seed %d (%s): %d%% open ground" % [region, seed_value, m.name, int(share * 100.0)])
+		for id: Variant in SimMapGen.REGION_KINDS[region]:
+			var label: String = SimMapGen.THEME_NAMES[str(id)]
+			check(kinds.has(label), "%s: %s turns up among 24 seeds" % [region, label])
+		check(not kinds.has("Open Ground"), "%s: no seed needed the open-ground fallback" % region)
+		check(open_total > 0.80 and open_total < 0.92, "%s: %d%% open ground on average" % [region, int(open_total * 100.0)])
+	var a: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, "desert")
+	var b: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, "tundra")
+	check(a.terrain != b.terrain, "the same seed is a different battlefield in another region")
+	check(a.terrain == SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, "desert").terrain, "and always the same one in the same region")
+	check(a.starts == b.starts, "the bases stand in the same places")
+	var seeded: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2)
+	check_eq(SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, "nowhere").region, seeded.region, "an unknown region falls back to the seed's")
+
+
+func test_the_barrier_kinds_can_be_crossed() -> void:
+	for region: String in SimMapGen.REGIONS:
+		var barrier: String = SimMapGen.THEME_NAMES[str(SimMapGen.REGION_KINDS[region][0])]
+		var found: int = 0
+		for seed_value: int in range(1, 40):
+			var m: SimMap = SimMapGen.generate(seed_value, SimMapGen.STANDARD_CELLS, 2, region)
+			if _kind_of(m) != barrier:
+				continue
+			found += 1
+			# Block the crossing in the middle of the map: the bases must still connect.
+			var mid: Vector2i = Vector2i(m.w / 2, m.h / 2)
+			for dy: int in range(-5, 6):
+				for dx: int in range(-5, 6):
+					m.set_terrain(mid + Vector2i(dx, dy), SimMap.Terrain.ROCK)
+			m.finalize()
+			check(_reaches(m, m.starts[0], m.starts[1]), "%s seed %d (%s): another way across besides the middle" % [region, seed_value, barrier])
+			if found >= 3:
+				break
+		check(found >= 2, "%s: %s turns up (%d found)" % [region, barrier, found])
 
 
 func test_seeds_spread_over_all_regions() -> void:

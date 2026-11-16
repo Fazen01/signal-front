@@ -43,6 +43,10 @@ var _directive_buttons: Array[Button] = []
 var _key_labels: Array[Label] = []  ## hotkey badge on each command card button
 var _cost_labels: Array[Label] = []  ## salvage cost on each command card button
 var _bandwidth_bar: ProgressBar = null
+var _income: Label = null  ## salvage collected per minute, over the last half minute
+var _income_at: PackedFloat32Array = PackedFloat32Array()
+var _income_total: PackedInt32Array = PackedInt32Array()
+var _speed: Label = null  ## shown when the game is not running at normal speed
 var _directive_defs: Array[DirectiveDef] = []
 var _queue_sig: String = ""
 var minimap_slot: Control = null
@@ -123,6 +127,11 @@ func _build_top_bar() -> void:
 	row.add_theme_constant_override("separation", 30)
 	bar.add_child(row)
 	_salvage = _stat(row, "salvage", "SALVAGE", GOLD)
+	_income = UiTheme.label("", 13, Color(GOLD.r, GOLD.g, GOLD.b, 0.75))
+	_income.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_income.tooltip_text = "Salvage your haulers brought in per minute, over the last half minute."
+	_income.mouse_filter = Control.MOUSE_FILTER_STOP
+	_salvage.get_parent().add_child(_income)
 	_bandwidth = _stat(row, "bandwidth", "BANDWIDTH", CYAN)
 	_bandwidth_bar = ProgressBar.new()
 	_bandwidth_bar.custom_minimum_size = Vector2(96.0, 8.0)
@@ -135,6 +144,10 @@ func _build_top_bar() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(spacer)
+	_speed = UiTheme.label("", 15, CYAN)
+	_speed.add_theme_font_override("font", UiTheme.strong_font())
+	_speed.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(_speed)
 	_clock = _stat(row, "clock", "", TEXT)
 	var menu: Button = Button.new()
 	menu.text = "Menu  Esc"
@@ -428,7 +441,7 @@ func rebuild_card() -> void:
 					produces.append(id)
 		for id: String in produces:
 			var def: EntityDef = world.data.entity(id)
-			_add_entry("train", def, "", def.hotkey, def.name, "%s\nCost %d   Bandwidth %d   %s" % [def.name, def.cost, def.bandwidth, def.desc])
+			_add_entry("train", def, "", def.hotkey, def.name, "%s\nCost %d   Bandwidth %d   %s\nHold Shift to queue five." % [def.name, def.cost, def.bandwidth, def.desc])
 		for e: SimEntity in buildings:
 			if e.constructed and e.def.packs_to != "":
 				_add_entry("pack", null, "", "Y", "Pack up", "Pack up into a %s so the factory can move. Queued units are refunded." % world.data.entity(e.def.packs_to).name)
@@ -506,11 +519,12 @@ func _on_card_hover(index: int) -> void:
 func _on_card_pressed(index: int) -> void:
 	battle.audio.play_ui("click")
 	if index >= 0 and index < _entries.size():
-		activate(_entries[index])
+		activate(_entries[index], 5 if Input.is_key_pressed(KEY_SHIFT) else 1)
 
 
 ## Runs a card entry. Returns false when it is not available right now.
-func activate(entry: CardEntry) -> bool:
+## `times` above one repeats a training order (Shift queues five).
+func activate(entry: CardEntry, times: int = 1) -> bool:
 	var blocked: String = _entry_blocked(entry)
 	if blocked != "":
 		push_alert(blocked, RED)
@@ -522,7 +536,8 @@ func activate(entry: CardEntry) -> bool:
 		"train":
 			var producer: SimEntity = _best_producer(entry.def)
 			if producer != null:
-				world.push_command(SimCommand.train(player, producer.id, entry.def.id))
+				for i: int in maxi(1, times):
+					world.push_command(SimCommand.train(player, producer.id, entry.def.id))
 		"deploy":
 			battle.begin_placement(world.data.entity(entry.order), true)
 		"pack":
@@ -553,7 +568,7 @@ func handle_hotkey(key: InputEventKey) -> bool:
 	var letter: String = String.chr(code)
 	for entry: CardEntry in _entries:
 		if entry.kind != "order" and entry.hotkey == letter:
-			activate(entry)
+			activate(entry, 5 if key.shift_pressed else 1)
 			return true
 	return false
 
@@ -590,6 +605,18 @@ func _refresh() -> void:
 	_bandwidth.add_theme_color_override("font_color", RED if p.bandwidth_used >= p.bandwidth_cap else CYAN)
 	var secs: int = int(world.seconds())
 	_clock.text = "%d:%02d" % [secs / 60, secs % 60]
+	_speed.text = "" if is_equal_approx(battle.time_scale, 1.0) else "SPEED x%s" % str(battle.time_scale)
+	# Income: what came in over the last thirty seconds of game time.
+	var now: float = world.seconds()
+	if _income_at.is_empty() or now - _income_at[_income_at.size() - 1] >= 1.0:
+		_income_at.append(now)
+		_income_total.append(p.stat_salvage_collected)
+		while _income_at.size() > 2 and now - _income_at[1] >= 30.0:
+			_income_at.remove_at(0)
+			_income_total.remove_at(0)
+	var span: float = now - _income_at[0]
+	if span >= 5.0:
+		_income.text = "+%d / min" % int(float(p.stat_salvage_collected - _income_total[0]) * 60.0 / span)
 	_update_card_state()
 	_refresh_directives()
 	_refresh_selection()

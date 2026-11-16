@@ -25,6 +25,7 @@ var _view_scale: float = 1.0
 var _walks: bool = false  ## infantry bob as they move
 var _stride: float = 0.0
 var _scaffold: Node3D = null  ## stands around a building until it is finished
+var _range_ring: MeshInstance3D = null  ## how far its weapons reach, while it is selected
 var _fire: CPUParticles3D = null  ## flames on something close to destruction
 var _smoke: CPUParticles3D = null  ## rises from badly damaged vehicles and buildings
 var _selected: bool = false
@@ -81,6 +82,31 @@ func set_shown(on: bool) -> void:
 	if on != shown:
 		shown = on
 		visible = on
+
+
+## The longest reach among a definition's weapons, 0 if it has none.
+static func weapon_reach(def: EntityDef) -> float:
+	var reach: float = 0.0
+	if def != null:
+		for wd: WeaponDef in def.weapons:
+			reach = maxf(reach, wd.max_range)
+	return reach
+
+
+## Shows or hides a ring at the reach of this entity's weapons.
+func set_range_shown(on: bool, e: SimEntity) -> void:
+	if on and _range_ring == null and e != null:
+		var reach: float = weapon_reach(e.def)
+		if reach <= 0.0:
+			return
+		_range_ring = ModelFactory.ring(self, reach - 0.06, reach + 0.06, Vector3(0.0, 0.25, 0.0), ModelFactory.mat(Color(1.0, 0.55, 0.3), 1.0))
+		_range_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if _range_ring != null:
+		_range_ring.visible = on
+
+
+func has_range_ring() -> bool:
+	return _range_ring != null and _range_ring.visible
 
 
 func set_selected(on: bool) -> void:

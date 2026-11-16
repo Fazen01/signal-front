@@ -130,13 +130,28 @@ void fragment() {
 	float band = smoothstep(0.72, 1.0, sin(depth * 24.0 - TIME * 1.2 + n1.g * 5.0)) * (1.0 - smoothstep(0.10, 0.42, depth));
 	float foam = clamp(edge + band * 0.4, 0.0, 1.0);
 	ALBEDO = mix(col, foam_color, foam);
-	// Lava gives off its own light and is not see-through.
-	EMISSION = ALBEDO * glow * (0.75 + 0.5 * n1.g);
-	ALPHA = mix(mix(mix(0.55, 0.92, d), 0.95, foam), 1.0, clamp(glow, 0.0, 1.0));
-	ROUGHNESS = 0.12;
-	SPECULAR = 0.7;
-	vec3 nw = normalize(vec3((n1.r + n2.g - 1.0) * 0.45, 1.0, (n1.b + n2.r - 1.0) * 0.45));
-	NORMAL = normalize((VIEW_MATRIX * vec4(nw, 0.0)).xyz);
+	ALPHA = mix(mix(0.55, 0.92, d), 0.95, foam);
+	if (glow > 0.0) {
+		// Lava: a dark crust broken into slowly drifting plates, glowing in
+		// the cracks between them and cooling to black at the shore.
+		float plates = texture(noise_tex, p * 0.075 + TIME * vec2(0.0016, 0.0009)).r;
+		float small = texture(noise_tex, p * 0.21 - TIME * vec2(0.0022, 0.0013)).g;
+		float grain = texture(noise_tex, p * 0.9).b;
+		float seam = 1.0 - smoothstep(0.012, 0.075, abs(plates - 0.5) + (small - 0.5) * 0.05);
+		float vein = 1.0 - smoothstep(0.006, 0.03, abs(small - 0.5));
+		float heat = clamp(seam + vein * 0.45, 0.0, 1.0) * smoothstep(0.03, 0.3, depth);
+		vec3 crust = vec3(0.075, 0.06, 0.06) * (0.7 + 0.6 * grain);
+		vec3 molten = mix(deep, shallow, heat * heat);
+		ALBEDO = mix(crust, molten, heat);
+		EMISSION = molten * heat * glow;
+		ALPHA = 1.0;
+	}
+	ROUGHNESS = glow > 0.0 ? 0.9 : 0.12;
+	SPECULAR = glow > 0.0 ? 0.1 : 0.7;
+	if (glow <= 0.0) {
+		vec3 nw = normalize(vec3((n1.r + n2.g - 1.0) * 0.45, 1.0, (n1.b + n2.r - 1.0) * 0.45));
+		NORMAL = normalize((VIEW_MATRIX * vec4(nw, 0.0)).xyz);
+	}
 }
 """
 

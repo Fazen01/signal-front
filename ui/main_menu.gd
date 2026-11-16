@@ -33,6 +33,7 @@ SELECTION AND ORDERS
   Right click                        move, attack, harvest, repair or set a rally point
   A then left click                  attack-move
   S / H                              stop / hold position
+  Ctrl+A or F2                       select the whole army
   Ctrl+1..9, then 1..9               set and recall control groups (double-tap centres)
   Shift + order                      queue the order
   G                                  toggle the signal coverage overlay
@@ -40,10 +41,14 @@ SELECTION AND ORDERS
   Ctrl+F5..F8, then F5..F8           save and recall camera bookmarks
   Minimap                            left click moves the camera, right click orders
   Alt+1..6 or the Directive bar      unlock / use a Directive
+  Shift + train                      queue five of a unit
+  Space                              look at the latest warning
+  + / -                              game speed (x0.5 to x3)
   Esc                                cancel, or open the pause menu
 
 The command card at the bottom right shows what the selection can build or
-train; the letter in brackets is its hotkey."""
+train, with its hotkey in the corner. Lines show where selected units are
+going; a ring shows how far a selected unit or turret can shoot."""
 
 const MENU_LEFT: float = 96.0  ## left edge of the main menu column
 

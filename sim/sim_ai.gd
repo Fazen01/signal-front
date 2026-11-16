@@ -11,6 +11,9 @@ const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
 const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
+## How an AI likes to fight. Normal and Hard opponents draw one from the
+## seed, so two matches against the same difficulty need not feel alike.
+const DOCTRINES: Array[String] = ["balanced", "aggressor", "fortifier", "raider"]
 
 var player_id: int = 0
 var level: int = 1  ## 0 easy, 1 normal, 2 hard
@@ -30,6 +33,12 @@ var max_works: int = 1
 var builds_turrets: bool = true
 var uses_directives: bool = true
 var hunts_relays: bool = true
+var doctrine: String = "balanced"
+var retreats: bool = true  ## pulls a beaten wave back instead of losing it to the last unit
+var scouts: bool = true  ## keeps one unit out looking for the enemy's buildings
+var raids: bool = false  ## raider: goes for depots and relays before anything else
+var max_turrets: int = 5
+var turret_salvage: int = 1500  ## spare salvage above which more turrets go up
 
 # Army state
 var wave_state: int = Wave.NONE
@@ -41,6 +50,11 @@ var wave_tick: int = 0
 var wave_size: int = 7
 var waves_sent: int = 0
 var last_wave_end: int = -100000
+var wave_launch_power: int = 0  ## salvage value of the wave when it set out
+var retreats_made: int = 0
+var scouts_sent: int = 0
+var _scout_id: int = 0
+var _scout_leg: int = 0
 
 # Per-think scratch lists
 var _f: FactionDef = null  ## this player's faction; roles map jobs to its definitions
@@ -88,6 +102,28 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			max_works = 2
 		_:
 			pass
+	if difficulty == 0:
+		retreats = false
+		scouts = false
+	else:
+		doctrine = DOCTRINES[rng.range_i(0, DOCTRINES.size() - 1)]
+		match doctrine:
+			"aggressor":
+				# Strikes early and often with smaller forces.
+				first_wave = maxi(4, first_wave - 2)
+				wave_growth = maxi(2, wave_growth - 1)
+				wave_cooldown_ticks = int(float(wave_cooldown_ticks) * 0.75)
+			"fortifier":
+				# Digs in behind turrets, then comes with a big army.
+				first_wave += 3
+				wave_growth += 1
+				max_turrets = 8
+				turret_salvage = 1000
+			"raider":
+				# Goes for the enemy's relays and depots rather than its guns.
+				raids = true
+			_:
+				pass
 	wave_size = first_wave
 	next_think = 10
 
@@ -110,6 +146,7 @@ func update(w: SimWorld) -> void:
 	_run_mobile_factory(w, me)
 	_run_mobile_relays(w, me)
 	_run_production(w, me)
+	_run_scout(w)
 	_run_military(w)
 	_run_hijackers(w)
 	_run_directives(w, me)
@@ -386,7 +423,7 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 		return barracks
 	if works != "" and me.salvage > 1200 and _count(works) < max_works + spare and has_barracks:
 		return works
-	if builds_turrets and me.salvage > 1500 and turrets < 5:
+	if builds_turrets and me.salvage > turret_salvage and turrets < max_turrets:
 		return armor if _can(w, me, armor) and rng.chance(0.5) else (ground if _can(w, me, ground) else "")
 	return ""
 
@@ -782,7 +819,7 @@ func _run_military(w: SimWorld) -> void:
 
 	var home: Array[SimEntity] = []
 	for e: SimEntity in _army:
-		if not wave_ids.has(e.id):
+		if not wave_ids.has(e.id) and e.id != _scout_id:
 			home.append(e)
 
 	# Defence comes first.
@@ -830,7 +867,91 @@ func _run_military(w: SimWorld) -> void:
 				wave_tick = w.tick_count
 				_assault(w, true)
 		Wave.ASSAULT:
-			_assault(w, false)
+			if retreats and _should_retreat(w):
+				_retreat(w, rally)
+			else:
+				_assault(w, false)
+
+
+## True when the wave has lost more than half of what it set out with and
+## what it faces is clearly stronger: time to save what is left. Late in a
+## long match the AI commits instead, so that games still end.
+func _should_retreat(w: SimWorld) -> bool:
+	if wave_ids.is_empty() or wave_launch_power <= 0 or w.tick_count > LATE_GAME_TICKS:
+		return false
+	var mine: int = 0
+	var centre: Vector2 = Vector2.ZERO
+	for id: int in wave_ids:
+		var e: SimEntity = w.get_entity(id)
+		mine += e.def.cost
+		centre += e.pos
+	centre /= float(wave_ids.size())
+	if mine * 2 > wave_launch_power:
+		return false
+	var theirs: int = 0
+	for e: SimEntity in _enemies:
+		if e.def.is_armed() and e.pos.distance_to(centre) < 18.0:
+			theirs += e.def.cost
+	for b: SimEntity in _enemy_buildings:
+		if b.def.is_armed() and b.constructed and not b.def.is_mine() and b.pos.distance_to(centre) < 16.0:
+			theirs += b.def.cost
+	return theirs * 10 > mine * 14
+
+
+## Calls the wave home. The next one will be bigger.
+func _retreat(w: SimWorld, rally: Vector2) -> void:
+	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), rally))
+	retreats_made += 1
+	_end_wave(w)
+
+
+## Keeps one unit out looking: it tours the fields on the enemy's side, the
+## uplink sites and the approach to the enemy base, so that the AI learns
+## where the enemy's relays and depots are before it has to attack them.
+func _run_scout(w: SimWorld) -> void:
+	if not scouts:
+		return
+	var scout: SimEntity = w.get_entity(_scout_id) if _scout_id != 0 else null
+	if scout != null and (scout.owner != player_id or wave_ids.has(scout.id)):
+		scout = null
+	if scout != null and scout.def.ai_role != "scout" and not _known_buildings.is_empty():
+		# A soldier pressed into scouting has done its job: back to the ranks.
+		w.push_command(SimCommand.stop(player_id, PackedInt32Array([scout.id])))
+		scout = null
+	if scout == null:
+		_scout_id = 0
+		for e: SimEntity in _army:
+			if e.def.ai_role == "scout" and not wave_ids.has(e.id) and (scout == null or e.def.speed > scout.def.speed):
+				scout = e
+		if scout == null and _known_buildings.is_empty() and w.tick_count > 20 * 75:
+			# No proper scout and nothing known yet: send the quickest soldier.
+			for e: SimEntity in _army:
+				if not wave_ids.has(e.id) and not e.def.is_air() and (scout == null or e.def.speed > scout.def.speed):
+					scout = e
+		if scout == null:
+			return
+		_scout_id = scout.id
+		scouts_sent += 1
+		w.push_command(SimCommand.stop(player_id, PackedInt32Array([scout.id])))
+		return
+	if not scout.orders.is_empty():
+		return
+	var route: Array[Vector2] = _scout_route(w)
+	_scout_leg = (_scout_leg + 1) % route.size()
+	w.push_command(SimCommand.move(player_id, PackedInt32Array([scout.id]), w.map.nearest_free_pos(route[_scout_leg])))
+
+
+func _scout_route(w: SimWorld) -> Array[Vector2]:
+	var enemy: Vector2 = _enemy_hq_pos(w)
+	var out: Array[Vector2] = [w.map.world_size() * 0.5]
+	for f: Vector3 in w.map.field_spots:
+		var at: Vector2 = Vector2(f.x, f.y)
+		if at.distance_to(enemy) < at.distance_to(_hq.pos):
+			out.append(at)
+	for u: Vector2 in w.map.uplink_spots:
+		out.append(u)
+	out.append(enemy + (_hq.pos - enemy).normalized() * 12.0)
+	return out
 
 
 func _count_near(list: Array[SimEntity], pos: Vector2, radius: float) -> int:
@@ -852,6 +973,9 @@ func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 	wave_state = Wave.STAGING
 	wave_tick = w.tick_count
 	waves_sent += 1
+	wave_launch_power = 0
+	for e: SimEntity in units:
+		wave_launch_power += e.def.cost
 	var back: Vector2 = (_hq.pos - wave_target_pos).normalized()
 	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(wave_target_pos + back * STAGE_DISTANCE))
 	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), wave_stage))
@@ -960,8 +1084,9 @@ func _run_directives(w: SimWorld, me: SimPlayer) -> void:
 
 
 ## What to hit next. Normal and Hard AIs go for the relay whose loss would
-## black out the most of the enemy network; otherwise the nearest building,
-## and the HQ once the outlying network is gone.
+## black out the most of the enemy network (raiders most of all, and they
+## go for depots too); otherwise the nearest building, and the HQ once the
+## outlying network is gone.
 func _pick_target(w: SimWorld) -> SimEntity:
 	if _enemy_buildings.is_empty():
 		return null
@@ -982,7 +1107,9 @@ func _pick_target(w: SimWorld) -> SimEntity:
 		if b.def.signal_root:
 			score += 12.0 if go_for_hq else 1.5
 		elif hunts_relays and b.def.signal_radius > 0.0 and b.constructed:
-			score += 2.0 + 2.5 * float(_downstream_count(w, b))
+			score += (2.0 + 2.5 * float(_downstream_count(w, b))) * (1.6 if raids else 1.0)
+		elif raids and b.def.depot:
+			score += 3.0
 		elif b.def.is_armed():
 			score -= 1.0
 		if score > best_score:

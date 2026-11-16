@@ -61,5 +61,21 @@
 			"tier3": "oracle"
 		},
 		"playable": true
+	},
+	"verdigris": {
+		"name": "Verdigris Order",
+		"desc": "Few, costly and hard to kill: armored knights and walking war machines. Linked units shrug off part of every hit, but the Order's machines draw on the grid and fire far slower when Dark.",
+		"hq": "keep",
+		"start_units": ["mason", "mason", "dray", "dray", "vigil", "vigil"],
+		"linked_damage_resist": 0.15,
+		"dark_rof_mult": 0.55,
+		"drop_squad": ["vigil", "vigil", "vigil", "pike", "pike"],
+		"roles": {
+			"builder": "mason", "hauler": "dray", "relay": "lantern",
+			"barracks": "chapterhouse", "works": "armoury", "depot": "tithe_barn",
+			"turret_ground": "rampart", "turret_armor": "rampart", "turret_air": "watchfire",
+			"tier3": "reliquary"
+		},
+		"playable": true
 	}
 }

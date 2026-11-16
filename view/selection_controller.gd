@@ -297,6 +297,10 @@ func _on_key(key: InputEventKey) -> void:
 		select_next_idle_builder()
 		get_viewport().set_input_as_handled()
 		return
+	if (code == KEY_A and key.ctrl_pressed) or code == KEY_F2:
+		select_army()
+		get_viewport().set_input_as_handled()
+		return
 	if key.ctrl_pressed or key.alt_pressed:
 		return
 	if battle.on_hotkey(key):
@@ -319,6 +323,15 @@ func _on_key(key: InputEventKey) -> void:
 			if mode != Mode.NORMAL:
 				mode = Mode.NORMAL
 				get_viewport().set_input_as_handled()
+
+
+## Selects every fighting unit the player owns: no haulers, no builders.
+func select_army() -> void:
+	var ids: Array[int] = []
+	for e: SimEntity in world.entities:
+		if e.alive and e.owner == player and e.kind == SimEntity.Kind.UNIT and e.def.is_armed():
+			ids.append(e.id)
+	set_selection(ids)
 
 
 ## Selects the next builder that has nothing to do and looks at it.

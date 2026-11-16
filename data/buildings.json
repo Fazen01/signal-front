@@ -221,5 +221,56 @@
 		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"directive_cooldown_mult": 0.75, "model": "oracle",
 		"hotkey": "C", "requires": ["assembler"]
+	},
+	"keep": {
+		"name": "Keep", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "verdigris", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 7000, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["mason", "dray"], "model": "keep", "buildable": false
+	},
+	"lantern": {
+		"name": "Lantern", "desc": "Extends your signal grid and adds bandwidth. Costly and stoutly built, with the longest reach of any relay. Must link back to the Keep.",
+		"faction": "verdigris", "tier": 1, "cost": 190, "build_time": 18.0,
+		"hp": 800, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 21.0, "bandwidth_provided": 10, "model": "lantern", "hotkey": "R"
+	},
+	"tithe_barn": {
+		"name": "Tithe Barn", "desc": "Drop-off point for salvage. Builds Drays.",
+		"faction": "verdigris", "tier": 1, "cost": 270, "build_time": 27.0,
+		"hp": 1450, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["dray"], "model": "tithe_barn", "hotkey": "P"
+	},
+	"chapterhouse": {
+		"name": "Chapterhouse", "desc": "Musters the Order's knights: Vigils, Pikes and Masons.",
+		"faction": "verdigris", "tier": 1, "cost": 220, "build_time": 25.0,
+		"hp": 1550, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["vigil", "pike", "mason"], "model": "chapterhouse", "hotkey": "B"
+	},
+	"armoury": {
+		"name": "Armoury", "desc": "Builds the Order's walkers. Unlocks tier 2.",
+		"faction": "verdigris", "tier": 2, "cost": 430, "build_time": 38.0,
+		"hp": 2000, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["dray", "outrider", "thresher", "castellan", "canopy", "mangonel"], "model": "armoury",
+		"hotkey": "V", "requires": ["chapterhouse"]
+	},
+	"rampart": {
+		"name": "Rampart", "desc": "Stone gun tower. Shells ground targets.",
+		"faction": "verdigris", "tier": 2, "cost": 200, "build_time": 19.5,
+		"hp": 1200, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["rampart_gun"], "turret": true, "model": "rampart", "hotkey": "T", "requires": ["chapterhouse"]
+	},
+	"watchfire": {
+		"name": "Watchfire", "desc": "Anti-air tower. Cannot fire at ground targets.",
+		"faction": "verdigris", "tier": 2, "cost": 200, "build_time": 18.0,
+		"hp": 850, "armor": "structure", "footprint": [1, 1], "sight": 13.0,
+		"weapons": ["watchfire_flak"], "turret": true, "model": "watchfire", "hotkey": "K", "requires": ["armoury"]
+	},
+	"reliquary": {
+		"name": "Reliquary", "desc": "Tier 3: unlocks the Mangonel. Directives recharge 25% faster.",
+		"faction": "verdigris", "tier": 3, "cost": 520, "build_time": 40.0,
+		"hp": 1700, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "reliquary",
+		"hotkey": "C", "requires": ["armoury"]
 	}
 }

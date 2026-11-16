@@ -26,7 +26,7 @@ const DIRECTIVE_KEYS: Array[String] = [
 const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
 	"linked_vehicle_repair", "roles", "drop_squad", "forest_cloak", "wreck_salvage_mult",
-	"linked_speed_bonus",
+	"linked_speed_bonus", "linked_damage_resist",
 ]
 const AI_ROLES: Array[String] = [
 	"", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air", "hijacker",
@@ -351,6 +351,7 @@ func _load_factions(d: Dictionary) -> void:
 		f.forest_cloak = bool(src.get("forest_cloak", false))
 		f.wreck_salvage_mult = float(src.get("wreck_salvage_mult", 1.0))
 		f.linked_speed_bonus = float(src.get("linked_speed_bonus", 0.0))
+		f.linked_damage_resist = float(src.get("linked_damage_resist", 0.0))
 		if src.has("roles"):
 			var raw_roles: Dictionary = src["roles"]
 			for rk: Variant in raw_roles.keys():

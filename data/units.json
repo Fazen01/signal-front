@@ -272,5 +272,61 @@
 		"hp": 270, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["prism_ray"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "prism", "hotkey": "L",
 		"requires": ["oracle"]
+	},
+	"vigil": {
+		"name": "Vigil", "desc": "Armored foot knight with a carbine and a shield. Slow, costly, and tougher than any other infantry.",
+		"faction": "verdigris", "tier": 1, "cost": 75, "build_time": 9.5, "bandwidth": 1,
+		"hp": 135, "armor": "infantry", "move": "infantry", "speed": 2.3, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["vigil_carbine"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "vigil", "hotkey": "T"
+	},
+	"pike": {
+		"name": "Pike", "desc": "Knight with a homing lance. Slow to fire, deadly to vehicles.",
+		"faction": "verdigris", "tier": 1, "cost": 130, "build_time": 12.5, "bandwidth": 1,
+		"hp": 115, "armor": "infantry", "move": "infantry", "speed": 2.2, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["pike_lance"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "pike", "hotkey": "L"
+	},
+	"mason": {
+		"name": "Mason", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "verdigris", "tier": 1, "cost": 90, "build_time": 10.0, "bandwidth": 1,
+		"hp": 100, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "mason", "hotkey": "F",
+		"builds": ["tithe_barn", "lantern", "chapterhouse", "armoury", "rampart", "watchfire", "reliquary"]
+	},
+	"dray": {
+		"name": "Dray", "desc": "Four-legged hauler. Slow, armored, and it carries a great deal.",
+		"faction": "verdigris", "tier": 1, "cost": 150, "build_time": 15.0, "bandwidth": 2,
+		"hp": 380, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.6,
+		"radius": 1.05, "sight": 8.0, "harvester": true, "capacity": 130, "model": "dray", "hotkey": "U"
+	},
+	"outrider": {
+		"name": "Outrider", "desc": "Two-legged scout walker with a light gun.",
+		"faction": "verdigris", "tier": 2, "cost": 125, "build_time": 12.0, "bandwidth": 1,
+		"hp": 250, "armor": "light", "move": "vehicle", "speed": 5.4, "turn_rate": 3.6,
+		"radius": 0.85, "sight": 15.0, "weapons": ["outrider_gun"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "outrider", "hotkey": "C"
+	},
+	"thresher": {
+		"name": "Thresher", "desc": "Two-legged walker with twin cannons. Cuts down infantry and light vehicles.",
+		"faction": "verdigris", "tier": 2, "cost": 260, "build_time": 20.0, "bandwidth": 3,
+		"hp": 500, "armor": "light", "move": "vehicle", "speed": 3.7, "turn_rate": 2.8,
+		"radius": 1.05, "sight": 11.0, "weapons": ["thresher_cannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "thresher", "hotkey": "R"
+	},
+	"castellan": {
+		"name": "Castellan", "desc": "The Order's great walker: the thickest armor and the heaviest gun on the field, at a price and a pace to match.",
+		"faction": "verdigris", "tier": 2, "cost": 450, "build_time": 30.0, "bandwidth": 5,
+		"hp": 880, "armor": "heavy", "move": "vehicle", "speed": 2.9, "turn_rate": 2.0,
+		"radius": 1.25, "sight": 11.0, "weapons": ["castellan_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.5, "model": "castellan", "hotkey": "B"
+	},
+	"canopy": {
+		"name": "Canopy", "desc": "Anti-air walker. Its flak tears up aircraft and does little to armor.",
+		"faction": "verdigris", "tier": 2, "cost": 270, "build_time": 20.0, "bandwidth": 3,
+		"hp": 440, "armor": "light", "move": "vehicle", "speed": 3.5, "turn_rate": 2.8,
+		"radius": 1.05, "sight": 12.0, "weapons": ["canopy_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "canopy", "hotkey": "K"
+	},
+	"mangonel": {
+		"name": "Mangonel", "desc": "Siege walker. Hurls heavy shot a long way; it cannot hit close targets and needs spotters.",
+		"faction": "verdigris", "tier": 3, "cost": 470, "build_time": 31.0, "bandwidth": 4,
+		"hp": 340, "armor": "light", "move": "vehicle", "speed": 2.5, "turn_rate": 2.0,
+		"radius": 1.15, "sight": 10.0, "weapons": ["mangonel_shot"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "mangonel", "hotkey": "L",
+		"requires": ["reliquary"]
 	}
 }

@@ -5,9 +5,13 @@ extends RefCounted
 ## the centre; four-player maps are rotated in quarter turns, so every start
 ## is identical.
 ##
-## The seed also picks the kind of country: open plains, highlands crossed by
-## rock ridges with passes through them, lakeland, or (two players only) a
-## river valley with fords. Whatever the kind, about the same share of the
+## The seed picks a region and, within it, a kind of country. Every region
+## has four kinds of its own: the Greenwood has river valleys, highlands,
+## lakeland and plains; the Dustlands have a long ridge, mesa country, oases
+## and dunes; the Frostline has an ice river, crags, frozen lakes and
+## pinewood; the Cinder Wastes have a lava river, fissures, calderas and
+## burnt plain. The first kind of each (a barrier across the middle with
+## fords or passes) only suits two players. Whatever the kind, most of the
 ## map stays open ground, so matches run to a similar length on all of them.
 
 const START_MARGIN_CELLS: int = 13  ## start position, in cells from the corner
@@ -26,24 +30,36 @@ const REGION_NAMES: Dictionary[String, String] = {
 }
 const THEME_NAMES: Dictionary[String, String] = {
 	"plains": "Plains", "river": "River Valley", "highlands": "Highlands", "lakes": "Lakeland", "open": "Open Ground",
+	"longridge": "Long Ridge", "mesas": "Mesa Country", "oasis": "Oasis", "dunes": "Dunes",
+	"iceriver": "Ice River", "crags": "Crags", "frozenlakes": "Frozen Lakes", "pinewood": "Pinewood",
+	"lavariver": "Lava River", "fissures": "Fissures", "calderas": "Calderas", "burntplain": "Burnt Plain",
+}
+## The kinds of country in each region. The first of each is the one with a
+## barrier across the middle, which is left out for more than two players.
+const REGION_KINDS: Dictionary[String, Array] = {
+	"temperate": ["river", "highlands", "lakes", "plains"],
+	"desert": ["longridge", "mesas", "oasis", "dunes"],
+	"tundra": ["iceriver", "crags", "frozenlakes", "pinewood"],
+	"ashland": ["lavariver", "fissures", "calderas", "burntplain"],
 }
 
 
 ## Generates a map for `players` starts (2 or 4) on a square of `size_cells`.
 static func generate(seed_value: int, size_cells: int = SMALL_CELLS, players: int = 2, region: String = "") -> SimMap:
 	var order: int = 4 if players > 2 else 2
+	var where: String = pick_region(seed_value, region)
 	var attempt: int = 0
 	while attempt < 24:
-		var m: SimMap = _generate_once(seed_value + attempt * 7919, size_cells, order, attempt >= 16)
+		var m: SimMap = _generate_once(seed_value + attempt * 7919, size_cells, order, attempt >= 16, where)
 		if _starts_connected(m):
 			m.name = "%s %d" % [m.name, seed_value]
-			m.region = pick_region(seed_value, region)
+			m.region = where
 			return m
 		attempt += 1
 	# Fall back to open ground; always playable.
-	var plain: SimMap = _generate_once(seed_value, size_cells, order, true)
+	var plain: SimMap = _generate_once(seed_value, size_cells, order, true, where)
 	plain.name = "Open Ground %d" % seed_value
-	plain.region = pick_region(seed_value, region)
+	plain.region = where
 	return plain
 
 
@@ -96,7 +112,7 @@ static func point_images(m: SimMap, p: Vector2, order: int) -> Array[Vector2]:
 
 # ------------------------------------------------------------ generator
 
-static func _generate_once(seed_value: int, n: int, order: int, sparse: bool) -> SimMap:
+static func _generate_once(seed_value: int, n: int, order: int, sparse: bool, region: String) -> SimMap:
 	var rng: SimRng = SimRng.new(seed_value)
 	var m: SimMap = SimMap.new()
 	m.setup(n, n)
@@ -107,40 +123,111 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool) ->
 		# Opposite corners first, so two players on a four-start map face each other.
 		m.starts = [m.starts[0], m.starts[2], m.starts[1], m.starts[3]]
 
-	var theme: String = _pick_theme(rng, order, sparse)
+	var theme: String = _pick_theme(rng, order, sparse, region)
 	m.name = THEME_NAMES[theme]
 	# Feature counts are per symmetric copy, so divide by the symmetry order.
 	var scale: float = float(n * n) / float(SMALL_CELLS * SMALL_CELLS) * 2.0 / float(order)
+	var rock: int = SimMap.Terrain.ROCK
+	var water: int = SimMap.Terrain.WATER
+	var wood: int = SimMap.Terrain.FOREST
 	# Rock and water go down first; woods only grow on what is still open.
 	match theme:
+		# ---- Greenwood: well watered and wooded.
 		"river":
-			_river(m, rng)
-			_scatter(m, rng, order, 4.0 * scale, SimMap.Terrain.ROCK, 1.4, 2.6)
-			_ridges(m, rng, order, 0.8 * scale, 5.0, 8.0)
-			_scatter(m, rng, order, 5.0 * scale, SimMap.Terrain.FOREST, 2.6, 4.6)
-			_scatter(m, rng, order, 6.0 * scale, SimMap.Terrain.FOREST, 1.2, 2.2)
+			_river(m, rng, water)
+			_scatter(m, rng, order, 3.2 * scale, rock, 1.4, 2.6)
+			_ridges(m, rng, order, 0.6 * scale, 5.0, 8.0)
+			_scatter(m, rng, order, 6.0 * scale, wood, 2.6, 4.8)
+			_scatter(m, rng, order, 7.0 * scale, wood, 1.2, 2.2)
 		"highlands":
-			_ridges(m, rng, order, 3.2 * scale, 7.0, 13.0)
-			_scatter(m, rng, order, 4.0 * scale, SimMap.Terrain.ROCK, 1.3, 2.4)
-			_scatter(m, rng, order, 1.0 * scale, SimMap.Terrain.WATER, 1.8, 2.8)
-			_scatter(m, rng, order, 4.0 * scale, SimMap.Terrain.FOREST, 2.6, 4.6)
-			_scatter(m, rng, order, 6.0 * scale, SimMap.Terrain.FOREST, 1.2, 2.2)
+			_ridges(m, rng, order, 3.0 * scale, 7.0, 13.0)
+			_scatter(m, rng, order, 3.5 * scale, rock, 1.3, 2.4)
+			_scatter(m, rng, order, 1.0 * scale, water, 1.8, 2.8)
+			_scatter(m, rng, order, 5.0 * scale, wood, 2.6, 4.8)
+			_scatter(m, rng, order, 7.0 * scale, wood, 1.2, 2.2)
 		"lakes":
-			_scatter(m, rng, order, 2.2 * scale, SimMap.Terrain.WATER, 3.0, 5.0)
-			_scatter(m, rng, order, 1.6 * scale, SimMap.Terrain.WATER, 1.6, 2.4)
-			_scatter(m, rng, order, 4.5 * scale, SimMap.Terrain.ROCK, 1.4, 2.6)
-			_scatter(m, rng, order, 5.0 * scale, SimMap.Terrain.FOREST, 2.6, 5.0)
-			_scatter(m, rng, order, 6.0 * scale, SimMap.Terrain.FOREST, 1.2, 2.2)
+			_scatter(m, rng, order, 2.2 * scale, water, 3.0, 5.0)
+			_scatter(m, rng, order, 1.6 * scale, water, 1.6, 2.4)
+			_scatter(m, rng, order, 3.5 * scale, rock, 1.4, 2.6)
+			_scatter(m, rng, order, 6.0 * scale, wood, 2.6, 5.0)
+			_scatter(m, rng, order, 7.0 * scale, wood, 1.2, 2.2)
 		"plains":
-			_scatter(m, rng, order, 5.5 * scale, SimMap.Terrain.ROCK, 1.5, 3.0)
-			_ridges(m, rng, order, 1.0 * scale, 5.0, 9.0)
-			_scatter(m, rng, order, 1.4 * scale, SimMap.Terrain.WATER, 2.2, 3.6)
-			_scatter(m, rng, order, 5.0 * scale, SimMap.Terrain.FOREST, 3.0, 5.6)
-			_scatter(m, rng, order, 7.0 * scale, SimMap.Terrain.FOREST, 1.3, 2.3)
+			_scatter(m, rng, order, 4.5 * scale, rock, 1.5, 3.0)
+			_ridges(m, rng, order, 0.8 * scale, 5.0, 9.0)
+			_scatter(m, rng, order, 1.4 * scale, water, 2.2, 3.6)
+			_scatter(m, rng, order, 6.0 * scale, wood, 3.0, 5.6)
+			_scatter(m, rng, order, 8.0 * scale, wood, 1.3, 2.3)
+		# ---- Dustlands: rock everywhere, water rare, green only round it.
+		"longridge":
+			_river(m, rng, rock)
+			_scatter(m, rng, order, 6.5 * scale, rock, 1.6, 3.0)
+			_oases(m, rng, order, 0.8 * scale)
+			_scatter(m, rng, order, 2.0 * scale, wood, 1.3, 2.2)
+		"mesas":
+			_scatter(m, rng, order, 3.8 * scale, rock, 3.2, 4.8)
+			_ridges(m, rng, order, 2.2 * scale, 8.0, 14.0)
+			_scatter(m, rng, order, 4.5 * scale, rock, 1.2, 2.0)
+			_oases(m, rng, order, 0.6 * scale)
+			_scatter(m, rng, order, 2.0 * scale, wood, 1.3, 2.2)
+		"oasis":
+			_oases(m, rng, order, 2.6 * scale)
+			_scatter(m, rng, order, 8.0 * scale, rock, 1.3, 2.4)
+			_ridges(m, rng, order, 1.4 * scale, 5.0, 9.0)
+		"dunes":
+			_scatter(m, rng, order, 9.0 * scale, rock, 1.4, 2.6)
+			_ridges(m, rng, order, 2.0 * scale, 5.0, 9.0)
+			_oases(m, rng, order, 0.5 * scale)
+			_scatter(m, rng, order, 2.5 * scale, wood, 1.3, 2.2)
+		# ---- Frostline: frozen water and big stands of pine.
+		"iceriver":
+			_river(m, rng, water)
+			_scatter(m, rng, order, 3.0 * scale, rock, 1.4, 2.6)
+			_scatter(m, rng, order, 4.0 * scale, wood, 3.5, 6.0)
+			_scatter(m, rng, order, 5.0 * scale, wood, 1.3, 2.3)
+		"crags":
+			_ridges(m, rng, order, 3.2 * scale, 7.0, 13.0)
+			_scatter(m, rng, order, 4.5 * scale, rock, 1.3, 2.6)
+			_scatter(m, rng, order, 1.2 * scale, water, 1.8, 3.0)
+			_scatter(m, rng, order, 3.0 * scale, wood, 3.0, 5.0)
+			_scatter(m, rng, order, 4.0 * scale, wood, 1.3, 2.3)
+		"frozenlakes":
+			_scatter(m, rng, order, 3.0 * scale, water, 3.0, 5.5)
+			_scatter(m, rng, order, 2.0 * scale, water, 1.6, 2.6)
+			_scatter(m, rng, order, 3.0 * scale, rock, 1.4, 2.6)
+			_scatter(m, rng, order, 3.5 * scale, wood, 3.0, 5.0)
+			_scatter(m, rng, order, 4.0 * scale, wood, 1.3, 2.3)
+		"pinewood":
+			_scatter(m, rng, order, 3.0 * scale, rock, 1.4, 2.6)
+			_scatter(m, rng, order, 1.2 * scale, water, 2.0, 3.2)
+			_scatter(m, rng, order, 4.0 * scale, wood, 4.5, 7.0)
+			_scatter(m, rng, order, 7.0 * scale, wood, 1.4, 2.6)
+		# ---- Cinder Wastes: black rock and burnt woods, with lava as the rare,
+		# large feature of a map rather than something scattered all over it.
+		"lavariver":
+			_river(m, rng, water)
+			_scatter(m, rng, order, 8.0 * scale, rock, 1.4, 2.8)
+			_ridges(m, rng, order, 1.6 * scale, 5.0, 9.0)
+			_scatter(m, rng, order, 3.5 * scale, wood, 1.8, 3.4)
+		"fissures":
+			# A few long cracks, not a field of puddles.
+			_ridges(m, rng, order, 1.1 * scale, 15.0, 24.0, water, 0.75, 1.0)
+			_scatter(m, rng, order, 9.5 * scale, rock, 1.4, 2.8)
+			_ridges(m, rng, order, 1.6 * scale, 5.0, 9.0)
+			_scatter(m, rng, order, 3.5 * scale, wood, 1.8, 3.4)
+		"calderas":
+			_calderas(m, rng, order, 0.8 * scale)
+			_scatter(m, rng, order, 9.0 * scale, rock, 1.4, 2.6)
+			_ridges(m, rng, order, 2.0 * scale, 5.0, 9.0)
+			_scatter(m, rng, order, 3.5 * scale, wood, 1.8, 3.4)
+		"burntplain":
+			_scatter(m, rng, order, 10.0 * scale, rock, 1.4, 3.0)
+			_ridges(m, rng, order, 2.6 * scale, 5.0, 10.0)
+			_scatter(m, rng, order, 0.5 * scale, water, 2.4, 3.4)
+			_scatter(m, rng, order, 4.5 * scale, wood, 1.8, 3.6)
 		_:
 			# Open ground: the fallback when nothing denser stays connected.
-			_scatter(m, rng, order, 2.0 * scale, SimMap.Terrain.ROCK, 1.6, 3.0)
-			_scatter(m, rng, order, 7.0 * scale, SimMap.Terrain.FOREST, 2.4, 5.0)
+			_scatter(m, rng, order, 2.0 * scale, rock, 1.6, 3.0)
+			_scatter(m, rng, order, 7.0 * scale, wood, 2.4, 5.0)
 
 	# Salvage near each start, on the side facing the map centre.
 	var centre: Vector2 = size * 0.5
@@ -178,25 +265,44 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool) ->
 	return m
 
 
-## Which kind of country a seed gives. A river only suits two players: it
-## cannot be laid symmetrically between four.
-static func _pick_theme(rng: SimRng, order: int, sparse: bool) -> String:
+## Which kind of country a seed gives within its region. The barrier kind
+## only suits two players: it cannot be laid symmetrically between four.
+static func _pick_theme(rng: SimRng, order: int, sparse: bool, region: String) -> String:
+	var roll: float = rng.next_float()
 	if sparse:
 		return "open"
-	var roll: float = rng.next_float()
-	if order == 2:
-		if roll < 0.30:
-			return "river"
-		if roll < 0.55:
-			return "highlands"
-		if roll < 0.78:
-			return "lakes"
-		return "plains"
-	if roll < 0.40:
-		return "highlands"
-	if roll < 0.70:
-		return "lakes"
-	return "plains"
+	var kinds: Array = REGION_KINDS.get(region, REGION_KINDS["temperate"])
+	if order == 2 and roll < 0.28:
+		return str(kinds[0])
+	var rest: float = (roll - 0.28) / 0.72 if order == 2 else roll
+	return str(kinds[1 + clampi(int(rest * 3.0), 0, 2)])
+
+
+## Oases: a pool with a ring of green round it.
+static func _oases(m: SimMap, rng: SimRng, order: int, count: float) -> void:
+	for i: int in int(round(count)):
+		var at: Vector2 = Vector2(rng.range_f(5.0, float(m.w) - 5.0), rng.range_f(5.0, float(m.h) - 5.0))
+		var pool: float = rng.range_f(2.0, 3.2)
+		_blob(m, rng, order, SimMap.Terrain.WATER, pool, at)
+		var first: float = rng.range_f(0.0, TAU)
+		for k: int in 5:
+			var ang: float = first + float(k) * TAU / 5.0 + rng.range_f(-0.3, 0.3)
+			_blob(m, rng, order, SimMap.Terrain.FOREST, rng.range_f(1.3, 2.1), at + Vector2(cos(ang), sin(ang)) * (pool + 2.0))
+
+
+## Calderas: a lake of lava with a broken wall of rock round it.
+static func _calderas(m: SimMap, rng: SimRng, order: int, count: float) -> void:
+	for i: int in int(round(count)):
+		var at: Vector2 = Vector2(rng.range_f(6.0, float(m.w) - 6.0), rng.range_f(6.0, float(m.h) - 6.0))
+		var pool: float = rng.range_f(2.6, 3.8)
+		var first: float = rng.range_f(0.0, TAU)
+		# Rock first, so the lava cuts a clean edge into it; two gaps in the wall.
+		for k: int in 7:
+			if k == 2 or k == 5:
+				continue
+			var ang: float = first + float(k) * TAU / 7.0
+			_blob(m, rng, order, SimMap.Terrain.ROCK, rng.range_f(1.4, 2.0), at + Vector2(cos(ang), sin(ang)) * (pool + 1.6))
+		_blob(m, rng, order, SimMap.Terrain.WATER, pool, at)
 
 
 ## `count` irregular blobs of one terrain at random places.
@@ -246,15 +352,16 @@ static func _disc(m: SimMap, order: int, at: Vector2, radius_cells: float, terra
 				_paint(m, order, c, terrain)
 
 
-## Rock ridges: long, slightly bent walls. The longer ones have a pass cut
-## through them, so a ridge shapes the fighting without sealing anything off.
-static func _ridges(m: SimMap, rng: SimRng, order: int, count: float, len_min: float, len_max: float) -> void:
+## Ridges: long, slightly bent walls of rock (or, as fissures, of lava). The
+## longer ones have a pass cut through them, so a ridge shapes the fighting
+## without sealing anything off.
+static func _ridges(m: SimMap, rng: SimRng, order: int, count: float, len_min: float, len_max: float, terrain: int = SimMap.Terrain.ROCK, girth_min: float = 1.2, girth_max: float = 1.9) -> void:
 	for i: int in int(round(count)):
 		var mid: Vector2 = Vector2(rng.range_f(5.0, float(m.w) - 5.0), rng.range_f(5.0, float(m.h) - 5.0))
 		var length: float = rng.range_f(len_min, len_max)
 		var along: Vector2 = Vector2.RIGHT.rotated(rng.range_f(0.0, PI))
 		var bend: float = rng.range_f(-0.3, 0.3) * length
-		var girth: float = rng.range_f(1.2, 1.9)
+		var girth: float = rng.range_f(girth_min, girth_max)
 		var pass_at: float = rng.range_f(0.35, 0.65) if length >= 8.0 else -1.0
 		var steps: int = int(length / 0.7)
 		for k: int in steps + 1:
@@ -262,14 +369,15 @@ static func _ridges(m: SimMap, rng: SimRng, order: int, count: float, len_min: f
 			if pass_at >= 0.0 and absf(t - pass_at) * length < 1.9:
 				continue
 			var at: Vector2 = mid + along * (t - 0.5) * length + along.orthogonal() * bend * sin(t * PI)
-			_disc(m, order, at, girth * rng.range_f(0.75, 1.15), SimMap.Terrain.ROCK)
+			_disc(m, order, at, girth * rng.range_f(0.75, 1.15), terrain)
 
 
-## A river across the middle of a two-player map, running between the two
+## A barrier across the middle of a two-player map: a river, a river of lava
+## or a long ridge of rock, depending on the region. It runs between the two
 ## far corners so it lies square across the way from one base to the other.
 ## It can be crossed at the centre of the map, at two fords on each arm, and
 ## round both ends, where it runs out into a small lake short of the corner.
-static func _river(m: SimMap, rng: SimRng) -> void:
+static func _river(m: SimMap, rng: SimRng, terrain: int) -> void:
 	var n: float = float(m.w)
 	var centre: Vector2 = Vector2(n * 0.5, n * 0.5)
 	var along: Vector2 = Vector2(1.0, -1.0).normalized()
@@ -286,12 +394,12 @@ static func _river(m: SimMap, rng: SimRng) -> void:
 		var t: float = float(k) / float(steps)
 		# The meander dies away towards the centre, where the two arms meet.
 		var at: Vector2 = centre + along * t * length + across * swing * sin(t * waves * PI + phase) * minf(1.0, t * 4.0)
-		_disc(m, 2, at, rng.range_f(1.5, 2.1), SimMap.Terrain.WATER)
+		_disc(m, 2, at, rng.range_f(1.5, 2.1), terrain)
 		for want: float in ford_at:
 			if absf(t - want) < 0.5 / float(steps):
 				fords.append(at)
 		mouth = at
-	_blob(m, rng, 2, SimMap.Terrain.WATER, rng.range_f(2.6, 3.4), mouth)
+	_blob(m, rng, 2, terrain, rng.range_f(2.6, 3.4), mouth)
 	_disc(m, 2, centre, 3.2, SimMap.Terrain.GROUND)
 	for ford: Vector2 in fords:
 		_disc(m, 2, ford, 2.8, SimMap.Terrain.GROUND)

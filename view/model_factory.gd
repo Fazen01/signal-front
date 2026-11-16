@@ -40,6 +40,14 @@ const SHELL: Color = Color(0.56, 0.58, 0.68)
 const SHELL_DARK: Color = Color(0.32, 0.34, 0.45)
 const FRAME: Color = Color(0.11, 0.12, 0.17)
 const VIOLET: Color = Color(0.66, 0.46, 1.0)
+# Verdigris Order palette: weathered copper plate, bronze, pale stone, amber light.
+const COPPER: Color = Color(0.25, 0.47, 0.43)
+const COPPER_DARK: Color = Color(0.13, 0.28, 0.27)
+const BRONZE: Color = Color(0.50, 0.36, 0.19)
+const BRONZE_DARK: Color = Color(0.25, 0.18, 0.11)
+const STONE: Color = Color(0.60, 0.58, 0.52)
+const STONE_DARK: Color = Color(0.36, 0.35, 0.33)
+const AMBER: Color = Color(1.0, 0.70, 0.22)
 const SKIN: Color = Color(0.76, 0.58, 0.45)
 const LAMP: Color = Color(1.0, 0.93, 0.72)
 const LAMP_RED: Color = Color(1.0, 0.25, 0.18)
@@ -428,6 +436,49 @@ static func _assemble(model: String, team: Color) -> Node3D:
 			_ward_node(root, team)
 		"oracle":
 			_oracle(root, team)
+		"vigil":
+			_knight(root, team, true)
+			box(root, Vector3(0.62, 0.09, 0.1), Vector3(0.3, 0.95, 0.36), mat(GUNMETAL))
+			box(root, Vector3(0.2, 0.12, 0.08), Vector3(-0.02, 0.93, 0.36), mat(BRONZE_DARK))
+		"pike":
+			_knight(root, team, true)
+			barrel(root, 0.075, 1.35, Vector3(-0.5, 1.3, 0.36), mat(BRONZE))
+			cyl(root, 0.1, 0.1, 0.12, Vector3(0.88, 1.3, 0.36), mat(AMBER, 1.5), 8, Vector3(0.0, 0.0, -PI * 0.5))
+			box(root, Vector3(0.2, 0.2, 0.2), Vector3(-0.5, 1.3, 0.36), mat(BRONZE_DARK))
+		"mason":
+			_knight(root, team, false)
+			box(root, Vector3(0.22, 0.44, 0.44), Vector3(-0.28, 0.95, 0.0), mat(BRONZE_DARK))
+			box(root, Vector3(0.06, 0.7, 0.06), Vector3(0.26, 0.95, 0.38), mat(BRONZE_DARK))
+			box(root, Vector3(0.3, 0.16, 0.16), Vector3(0.26, 1.32, 0.38), mat(BRONZE))
+			box(root, Vector3(0.24, 0.3, 0.06), Vector3(0.2, 0.9, -0.36), mat(HAZARD))
+		"dray":
+			_dray(root, team)
+		"outrider":
+			_outrider(root, team)
+		"thresher":
+			_thresher(root, team)
+		"castellan":
+			_castellan(root, team)
+		"canopy":
+			_canopy(root, team)
+		"mangonel":
+			_mangonel(root, team)
+		"keep":
+			_keep(root, team)
+		"lantern":
+			_lantern(root, team)
+		"tithe_barn":
+			_tithe_barn(root, team)
+		"chapterhouse":
+			_chapterhouse(root, team)
+		"armoury":
+			_armoury(root, team)
+		"rampart":
+			_rampart(root, team)
+		"watchfire":
+			_watchfire(root, team)
+		"reliquary":
+			_reliquary(root, team)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -1533,6 +1584,357 @@ static func _oracle(root: Node3D, team: Color) -> void:
 	wedge(crystal, Vector3(0.9, 1.1, 0.9), Vector3(0.0, 0.55, 0.0), mat(VIOLET, 1.4), 0.5)
 	wedge(crystal, Vector3(0.9, 1.1, 0.9), Vector3(0.0, -0.55, 0.0), mat(VIOLET, 1.4), 0.5, Vector3(PI, 0.0, 0.0))
 	_pole_lamp(root, Vector3(-2.2, 0.2, 1.4), 1.6, VIOLET)
+
+
+# ---------------------------------------------------------- Verdigris Order
+
+## An armored foot knight: greaves, a broad cuirass with a team tabard,
+## bronze pauldrons, a crested helm with a lit visor and, usually, a shield.
+static func _knight(root: Node3D, team: Color, shield: bool) -> void:
+	for z: float in [-0.12, 0.12]:
+		box(root, Vector3(0.27, 0.14, 0.18), Vector3(0.03, 0.07, z), mat(BRONZE_DARK))
+		box(root, Vector3(0.19, 0.5, 0.18), Vector3(0.0, 0.38, z), mat(COPPER_DARK))
+		box(root, Vector3(0.21, 0.1, 0.2), Vector3(0.02, 0.5, z), mat(BRONZE))
+	box(root, Vector3(0.36, 0.08, 0.52), Vector3(0.0, 0.66, 0.0), mat(BRONZE))
+	box(root, Vector3(0.34, 0.5, 0.5), Vector3(0.0, 0.93, 0.0), mat(COPPER))
+	box(root, Vector3(0.05, 0.56, 0.28), Vector3(0.19, 0.82, 0.0), team_mat(team))
+	for z: float in [-0.34, 0.34]:
+		box(root, Vector3(0.3, 0.14, 0.22), Vector3(0.0, 1.15, z), mat(BRONZE))
+		box(root, Vector3(0.14, 0.36, 0.14), Vector3(0.05, 0.92, z * 0.97), mat(COPPER_DARK), Vector3(0.0, 0.0, 0.3))
+	var helm: MeshInstance3D = ball(root, 0.17, Vector3(0.02, 1.34, 0.0), mat(COPPER), 6)
+	helm.scale = Vector3(1.0, 0.92, 1.0)
+	box(root, Vector3(0.3, 0.12, 0.05), Vector3(-0.02, 1.5, 0.0), team_mat(team))
+	box(root, Vector3(0.05, 0.045, 0.2), Vector3(0.17, 1.35, 0.0), mat(AMBER, 1.7))
+	if shield:
+		box(root, Vector3(0.06, 0.5, 0.36), Vector3(0.2, 0.92, -0.42), team_mat(team))
+		box(root, Vector3(0.05, 0.56, 0.42), Vector3(0.18, 0.92, -0.42), mat(BRONZE))
+		box(root, Vector3(0.06, 0.12, 0.12), Vector3(0.23, 0.94, -0.42), mat(BRONZE))
+
+
+## One pair of legs for a walking machine: a hip joint, a thigh raked back,
+## a shin raked forward, a knee plate and a broad foot, either side.
+static func _legs(root: Node3D, x: float, half_width: float, hip: float) -> void:
+	for side: float in [-1.0, 1.0]:
+		var z: float = side * half_width
+		box(root, Vector3(0.34, 0.3, 0.28), Vector3(x, hip, z), mat(BRONZE_DARK))
+		box(root, Vector3(0.24, hip * 0.62, 0.22), Vector3(x - 0.13, hip * 0.72, z), mat(COPPER), Vector3(0.0, 0.0, -0.45))
+		box(root, Vector3(0.19, hip * 0.66, 0.19), Vector3(x - 0.04, hip * 0.31, z), mat(BRONZE), Vector3(0.0, 0.0, 0.36))
+		box(root, Vector3(0.2, 0.2, 0.26), Vector3(x - 0.24, hip * 0.52, z), mat(COPPER_DARK))
+		box(root, Vector3(0.52, 0.1, 0.36), Vector3(x + 0.1, 0.05, z), mat(BRONZE_DARK))
+		box(root, Vector3(0.16, 0.08, 0.38), Vector3(x + 0.3, 0.1, z), mat(BRONZE))
+
+
+## The body of a walker on `pairs` pairs of legs: a bronze keel, a copper
+## hull with a raked prow, a team shield hung on each flank and two smoking
+## stacks at the back. The deck is at hip + 0.65.
+static func _strider(root: Node3D, team: Color, length: float, width: float, hip: float, pairs: int) -> void:
+	if pairs >= 2:
+		_legs(root, length * 0.3, width * 0.5 + 0.12, hip)
+		_legs(root, -length * 0.3, width * 0.5 + 0.12, hip)
+	else:
+		_legs(root, 0.0, width * 0.5 + 0.12, hip)
+	box(root, Vector3(length * 0.96, 0.3, width * 0.8), Vector3(0.0, hip + 0.05, 0.0), mat(BRONZE_DARK))
+	box(root, Vector3(length * 0.86, 0.46, width), Vector3(-length * 0.04, hip + 0.42, 0.0), mat(COPPER))
+	wedge(root, Vector3(length * 0.26, 0.46, width), Vector3(length * 0.52, hip + 0.42, 0.0), mat(COPPER), 0.0)
+	box(root, Vector3(length * 0.9, 0.08, width + 0.05), Vector3(-length * 0.03, hip + 0.22, 0.0), mat(BRONZE))
+	box(root, Vector3(length * 0.5, 0.05, width * 0.6), Vector3(-length * 0.1, hip + 0.66, 0.0), mat(COPPER_DARK))
+	for side: float in [-1.0, 1.0]:
+		var z: float = side * (width * 0.5 + 0.05)
+		box(root, Vector3(length * 0.46, 0.44, 0.06), Vector3(-length * 0.06, hip + 0.42, z), team_mat(team))
+		box(root, Vector3(length * 0.5, 0.06, 0.08), Vector3(-length * 0.06, hip + 0.66, z), mat(BRONZE))
+		box(root, Vector3(0.16, 0.16, 0.08), Vector3(-length * 0.06, hip + 0.42, z + side * 0.02), mat(BRONZE))
+		cyl(root, 0.07, 0.09, 0.5, Vector3(-length * 0.42, hip + 0.9, side * width * 0.26), mat(BRONZE_DARK), 6)
+		cyl(root, 0.08, 0.08, 0.05, Vector3(-length * 0.42, hip + 1.16, side * width * 0.26), mat(AMBER, 1.3), 6)
+		lamp(root, Vector3(length * 0.6, hip + 0.3, side * width * 0.3), AMBER, 0.1)
+
+
+## A round bronze-banded turret for the walkers.
+static func _drum_turret(t: Node3D, team: Color, radius: float, height: float) -> void:
+	cyl(t, radius * 0.9, radius, height, Vector3(0.0, height * 0.5, 0.0), mat(COPPER_DARK), 8)
+	cyl(t, radius * 1.03, radius * 1.03, 0.08, Vector3(0.0, height * 0.3, 0.0), mat(BRONZE), 8)
+	cyl(t, radius * 0.55, radius * 0.62, 0.1, Vector3(-radius * 0.15, height + 0.05, 0.0), team_mat(team), 8)
+	box(t, Vector3(0.07, height * 0.26, radius * 0.8), Vector3(radius * 0.86, height * 0.66, 0.0), mat(AMBER, 1.6))
+
+
+static func _dray(root: Node3D, team: Color) -> void:
+	_strider(root, team, 2.3, 1.2, 0.55, 2)
+	box(root, Vector3(0.6, 0.46, 1.0), Vector3(0.72, 1.43, 0.0), mat(COPPER_DARK))
+	box(root, Vector3(0.05, 0.14, 0.8), Vector3(1.03, 1.47, 0.0), mat(AMBER, 1.2))
+	box(root, Vector3(0.64, 0.06, 1.06), Vector3(0.72, 1.68, 0.0), mat(BRONZE))
+	box(root, Vector3(1.3, 0.3, 1.24), Vector3(-0.4, 1.33, 0.0), mat(BRONZE_DARK))
+	_cargo(root, Vector3(-0.4, 1.42, 0.0), Vector3(1.15, 0.5, 1.05))
+
+
+static func _outrider(root: Node3D, team: Color) -> void:
+	_strider(root, team, 1.4, 0.8, 0.75, 1)
+	aerial(root, Vector3(-0.5, 1.4, 0.25), 0.8, AMBER)
+	var t: Node3D = _turret(root, Vector3(0.05, 1.4, 0.0))
+	_drum_turret(t, team, 0.26, 0.2)
+	barrel(t, 0.035, 0.66, Vector3(0.18, 0.11, 0.0), mat(GUNMETAL))
+
+
+static func _thresher(root: Node3D, team: Color) -> void:
+	_strider(root, team, 1.8, 1.1, 0.8, 1)
+	var t: Node3D = _turret(root, Vector3(-0.05, 1.45, 0.0))
+	_drum_turret(t, team, 0.46, 0.34)
+	for z: float in [-0.56, 0.56]:
+		box(t, Vector3(0.5, 0.26, 0.24), Vector3(0.1, 0.2, z), mat(COPPER))
+		box(t, Vector3(0.52, 0.06, 0.26), Vector3(0.1, 0.35, z), mat(BRONZE))
+		for k: float in [-0.06, 0.06]:
+			barrel(t, 0.04, 0.9, Vector3(0.3, 0.2 + k, z), mat(GUNMETAL))
+
+
+static func _castellan(root: Node3D, team: Color) -> void:
+	_strider(root, team, 2.8, 1.5, 0.7, 2)
+	hatch(root, Vector3(0.9, 1.37, 0.42), 0.17, COPPER_DARK)
+	var t: Node3D = _turret(root, Vector3(-0.15, 1.35, 0.0))
+	box(t, Vector3(1.25, 0.5, 1.15), Vector3(0.0, 0.25, 0.0), mat(COPPER_DARK))
+	wedge(t, Vector3(0.45, 0.5, 1.15), Vector3(0.85, 0.25, 0.0), mat(COPPER_DARK), 0.0)
+	box(t, Vector3(1.29, 0.08, 1.19), Vector3(0.0, 0.14, 0.0), mat(BRONZE))
+	for z: float in [-0.62, 0.62]:
+		box(t, Vector3(0.7, 0.36, 0.08), Vector3(-0.1, 0.3, z), mat(BRONZE))
+	box(t, Vector3(0.36, 0.36, 0.5), Vector3(0.95, 0.26, 0.0), mat(BRONZE_DARK))
+	barrel(t, 0.11, 1.9, Vector3(1.05, 0.26, 0.0), mat(GUNMETAL))
+	cyl(t, 0.16, 0.16, 0.24, Vector3(2.95, 0.26, 0.0), mat(BRONZE), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	cyl(t, 0.14, 0.14, 0.08, Vector3(1.6, 0.26, 0.0), mat(BRONZE), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	box(t, Vector3(0.6, 0.1, 0.5), Vector3(-0.25, 0.55, 0.0), team_mat(team))
+	cyl(t, 0.17, 0.2, 0.14, Vector3(-0.3, 0.57, 0.36), mat(COPPER), 8)
+	box(t, Vector3(0.05, 0.05, 0.16), Vector3(-0.12, 0.6, 0.36), mat(AMBER, 1.6))
+	aerial(t, Vector3(-0.55, 0.5, -0.45), 0.9, AMBER)
+
+
+static func _canopy(root: Node3D, team: Color) -> void:
+	_strider(root, team, 2.2, 1.25, 0.65, 2)
+	var t: Node3D = _turret(root, Vector3(-0.1, 1.3, 0.0))
+	_drum_turret(t, team, 0.5, 0.36)
+	for side: float in [-1.0, 1.0]:
+		box(t, Vector3(0.5, 0.3, 0.26), Vector3(0.15, 0.58, side * 0.52), mat(COPPER), Vector3(0.0, 0.0, 0.62))
+		for k: float in [-0.07, 0.07]:
+			cyl(t, 0.04, 0.04, 1.05, Vector3(0.58, 0.9, side * 0.52 + k), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.95))
+	cyl(t, 0.26, 0.12, 0.14, Vector3(-0.32, 0.5, 0.0), mat(BRONZE), 8)
+	ball(t, 0.13, Vector3(-0.32, 0.62, 0.0), mat(AMBER, 1.6), 6)
+
+
+static func _mangonel(root: Node3D, team: Color) -> void:
+	_strider(root, team, 2.6, 1.35, 0.65, 2)
+	for z: float in [-0.9, 0.9]:
+		box(root, Vector3(0.5, 0.1, 0.16), Vector3(-1.1, 0.5, z), mat(BRONZE_DARK), Vector3(0.0, 0.0, 0.5))
+	var t: Node3D = _turret(root, Vector3(-0.3, 1.3, 0.0))
+	_drum_turret(t, team, 0.56, 0.4)
+	cyl(t, 0.14, 0.24, 2.3, Vector3(0.8, 1.02, 0.0), mat(BRONZE), 8, Vector3(0.0, 0.0, -0.95))
+	for d: float in [0.5, 1.1, 1.7]:
+		cyl(t, 0.23, 0.23, 0.07, Vector3(-0.13 + d * 0.81, 0.36 + d * 0.58, 0.0), mat(COPPER), 8, Vector3(0.0, 0.0, -0.95))
+	cyl(t, 0.17, 0.17, 0.1, Vector3(1.76, 1.71, 0.0), mat(AMBER, 1.4), 8, Vector3(0.0, 0.0, -0.95))
+	box(t, Vector3(0.5, 0.5, 0.8), Vector3(-0.6, 0.3, 0.0), mat(BRONZE_DARK))
+	for z: float in [-0.3, 0.3]:
+		box(t, Vector3(1.2, 0.07, 0.07), Vector3(0.5, 0.74, z), mat(COPPER_DARK), Vector3(0.0, 0.0, 0.5))
+
+
+## The paved stone slab the Order builds on, with a lit bollard at each corner.
+static func _stone_base(root: Node3D, w: float, d: float, h: float = 0.4) -> void:
+	box(root, Vector3(w, h, d), Vector3(0.0, 0.0, 0.0), mat(STONE_DARK))
+	box(root, Vector3(w - 0.8, 0.05, d - 0.8), Vector3(0.0, h * 0.5 + 0.02, 0.0), mat(STONE))
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			var at: Vector3 = Vector3(sx * (w * 0.5 - 0.24), h * 0.5, sz * (d * 0.5 - 0.24))
+			box(root, Vector3(0.3, 0.5, 0.3), at + Vector3(0.0, 0.25, 0.0), mat(STONE))
+			box(root, Vector3(0.36, 0.07, 0.36), at + Vector3(0.0, 0.52, 0.0), mat(BRONZE))
+			box(root, Vector3(0.16, 0.14, 0.16), at + Vector3(0.0, 0.62, 0.0), mat(AMBER, 1.6))
+
+
+## Merlons along the top of a square wall, `half` out from (cx, cz).
+static func _battlements(root: Node3D, cx: float, cz: float, half: float, y: float) -> void:
+	var count: int = maxi(3, int(round(half * 2.0 / 0.72)))
+	for i: int in count:
+		var along: float = lerpf(-half + 0.18, half - 0.18, float(i) / float(count - 1))
+		for side: float in [-1.0, 1.0]:
+			box(root, Vector3(0.34, 0.34, 0.26), Vector3(cx + along, y + 0.17, cz + side * (half - 0.13)), mat(STONE))
+			box(root, Vector3(0.26, 0.34, 0.34), Vector3(cx + side * (half - 0.13), y + 0.17, cz + along), mat(STONE))
+
+
+## A copper gable roof with a bronze ridge.
+static func _copper_roof(root: Node3D, length: float, height: float, width: float, pos: Vector3) -> void:
+	roof(root, length, height, width, pos, mat(COPPER, 0.0, 0.4, 0.6))
+	box(root, Vector3(length + 0.1, 0.1, 0.14), pos + Vector3(0.0, height * 0.5, 0.0), mat(BRONZE))
+
+
+## A banner in the team colour hanging from a bronze pole.
+static func _banner(root: Node3D, pos: Vector3, team: Color, height: float = 2.4) -> void:
+	cyl(root, 0.045, 0.05, height, pos + Vector3(0.0, height * 0.5, 0.0), mat(BRONZE), 5)
+	box(root, Vector3(0.5, 0.05, 0.05), pos + Vector3(0.2, height - 0.1, 0.0), mat(BRONZE))
+	box(root, Vector3(0.44, 0.9, 0.04), pos + Vector3(0.24, height - 0.6, 0.0), team_mat(team))
+	box(root, Vector3(0.1, 0.1, 0.1), pos + Vector3(0.0, height + 0.05, 0.0), mat(AMBER, 1.4))
+
+
+static func _keep(root: Node3D, team: Color) -> void:
+	_stone_base(root, 7.7, 7.7, 0.5)
+	box(root, Vector3(4.8, 2.5, 4.8), Vector3(0.0, 1.5, 0.0), mat(STONE))
+	box(root, Vector3(4.9, 0.3, 4.9), Vector3(0.0, 2.2, 0.0), team_mat(team))
+	_battlements(root, 0.0, 0.0, 2.4, 2.75)
+	box(root, Vector3(2.9, 1.8, 2.9), Vector3(0.0, 3.6, 0.0), mat(STONE))
+	box(root, Vector3(3.0, 0.14, 3.0), Vector3(0.0, 3.2, 0.0), mat(BRONZE))
+	_battlements(root, 0.0, 0.0, 1.45, 4.5)
+	# Round corner towers under copper caps.
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			var at: Vector3 = Vector3(sx * 2.75, 0.0, sz * 2.75)
+			cyl(root, 0.8, 0.9, 3.0, at + Vector3(0.0, 1.7, 0.0), mat(STONE), 8)
+			cyl(root, 0.92, 0.92, 0.12, at + Vector3(0.0, 3.2, 0.0), mat(BRONZE), 8)
+			cyl(root, 0.05, 0.95, 1.1, at + Vector3(0.0, 3.8, 0.0), mat(COPPER, 0.0, 0.4, 0.6), 8)
+			box(root, Vector3(0.1, 0.1, 0.1), at + Vector3(0.0, 4.4, 0.0), mat(AMBER, 1.5))
+			box(root, Vector3(0.14, 0.46, 0.14), at + Vector3(sx * 0.86, 2.1, sz * 0.0), mat(AMBER, 1.0))
+	var pane: Vector3 = Vector3(0.34, 0.6, 0.06)
+	var pane_x: Vector3 = Vector3(0.06, 0.6, 0.34)
+	for side: float in [-1.0, 1.0]:
+		windows(root, Vector3(-1.2, 1.35, side * 2.42), Vector3(0.8, 0.0, 0.0), 4, pane, WINDOW_WARM)
+		windows(root, Vector3(side * 2.42, 1.35, -1.2), Vector3(0.0, 0.0, 0.8), 4, pane_x, WINDOW_WARM)
+		windows(root, Vector3(-0.7, 3.75, side * 1.47), Vector3(0.7, 0.0, 0.0), 3, Vector3(0.28, 0.5, 0.06), WINDOW_WARM)
+		windows(root, Vector3(side * 1.47, 3.75, -0.7), Vector3(0.0, 0.0, 0.7), 3, Vector3(0.06, 0.5, 0.28), WINDOW_WARM)
+	# The gate, with a banner either side.
+	box(root, Vector3(0.16, 1.5, 1.5), Vector3(2.46, 1.0, 0.0), mat(GUNMETAL))
+	box(root, Vector3(0.2, 0.2, 1.9), Vector3(2.48, 1.85, 0.0), mat(BRONZE))
+	box(root, Vector3(0.9, 0.16, 2.2), Vector3(3.2, 0.33, 0.0), mat(STONE))
+	_banner(root, Vector3(2.6, 0.25, 1.25), team, 2.6)
+	_banner(root, Vector3(2.6, 0.25, -1.25), team, 2.6)
+	# Command spire: the root of the signal grid.
+	cyl(root, 0.16, 0.3, 3.4, Vector3(0.9, 6.2, 0.9), mat(BRONZE, 0.0, 0.6, 0.4), 6)
+	ring(root, 0.75, 0.9, Vector3(0.9, 6.5, 0.9), team_mat(team))
+	ring(root, 0.45, 0.58, Vector3(0.9, 7.2, 0.9), mat(AMBER, 1.0))
+	ball(root, 0.24, Vector3(0.9, 8.0, 0.9), mat(team, 1.4))
+	_spin_arms(root, Vector3(0.9, 5.5, 0.9), 0.6, BRONZE)
+	var t: Node3D = _turret(root, Vector3(-0.9, 4.5, -0.9))
+	box(t, Vector3(0.8, 0.4, 0.7), Vector3(0.0, 0.2, 0.0), mat(COPPER_DARK))
+	barrel(t, 0.06, 0.9, Vector3(0.35, 0.25, 0.14), mat(GUNMETAL))
+	barrel(t, 0.06, 0.9, Vector3(0.35, 0.25, -0.14), mat(GUNMETAL))
+
+
+static func _lantern(root: Node3D, team: Color) -> void:
+	cyl(root, 0.75, 0.9, 0.4, Vector3(0.0, 0.2, 0.0), mat(STONE_DARK), 8)
+	cyl(root, 0.3, 0.5, 0.7, Vector3(0.0, 0.7, 0.0), mat(STONE), 8)
+	cyl(root, 0.2, 0.28, 2.6, Vector3(0.0, 2.3, 0.0), mat(STONE), 8)
+	ring(root, 0.5, 0.62, Vector3(0.0, 2.9, 0.0), team_mat(team))
+	# The lamp itself: a glowing drum in a bronze cage under a copper cap.
+	cyl(root, 0.5, 0.5, 0.08, Vector3(0.0, 3.62, 0.0), mat(BRONZE), 8)
+	cyl(root, 0.34, 0.34, 0.6, Vector3(0.0, 3.96, 0.0), mat(AMBER, 1.3), 8)
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0 + 0.78
+		box(root, Vector3(0.06, 0.62, 0.06), Vector3(cos(ang) * 0.42, 3.96, sin(ang) * 0.42), mat(BRONZE))
+	cyl(root, 0.5, 0.5, 0.08, Vector3(0.0, 4.3, 0.0), mat(BRONZE), 8)
+	cyl(root, 0.04, 0.55, 0.5, Vector3(0.0, 4.6, 0.0), mat(COPPER, 0.0, 0.4, 0.6), 8)
+	ball(root, 0.12, Vector3(0.0, 4.92, 0.0), mat(team, 1.4))
+	_spin_arms(root, Vector3(0.0, 2.2, 0.0), 0.45, BRONZE)
+
+
+static func _tithe_barn(root: Node3D, team: Color) -> void:
+	_stone_base(root, 5.7, 5.7)
+	box(root, Vector3(4.2, 1.6, 2.8), Vector3(0.0, 1.0, -0.9), mat(STONE))
+	box(root, Vector3(4.25, 0.22, 2.85), Vector3(0.0, 1.55, -0.9), team_mat(team))
+	_copper_roof(root, 4.5, 1.1, 3.1, Vector3(0.0, 2.35, -0.9))
+	box(root, Vector3(1.7, 1.25, 0.1), Vector3(0.0, 0.83, 0.52), mat(GUNMETAL))
+	box(root, Vector3(2.0, 0.14, 0.16), Vector3(0.0, 1.5, 0.54), mat(BRONZE))
+	windows(root, Vector3(-1.6, 1.1, 0.52), Vector3(3.2, 0.0, 0.0), 2, Vector3(0.36, 0.44, 0.06), WINDOW_WARM)
+	for i: int in 3:
+		cyl(root, 0.28, 0.28, 0.6, Vector3(-1.9 + 0.62 * float(i), 0.5, 1.7), mat(BRONZE), 8)
+		cyl(root, 0.29, 0.29, 0.06, Vector3(-1.9 + 0.62 * float(i), 0.6, 1.7), mat(BRONZE_DARK), 8)
+	box(root, Vector3(1.3, 0.12, 0.8), Vector3(1.4, 0.62, 1.6), mat(BRONZE_DARK))
+	box(root, Vector3(1.1, 0.4, 0.7), Vector3(1.4, 0.88, 1.6), mat(RUST, 0.0, 0.4, 0.7))
+	wheel(root, 0.3, 0.14, Vector3(1.4, 0.5, 2.06))
+	wheel(root, 0.3, 0.14, Vector3(1.4, 0.5, 1.14))
+	_banner(root, Vector3(2.3, 0.2, -2.3), team)
+
+
+static func _chapterhouse(root: Node3D, team: Color) -> void:
+	_stone_base(root, 5.7, 5.7)
+	box(root, Vector3(4.2, 1.7, 2.8), Vector3(0.3, 1.05, -0.8), mat(STONE))
+	box(root, Vector3(4.25, 0.22, 2.85), Vector3(0.3, 1.6, -0.8), team_mat(team))
+	_copper_roof(root, 4.5, 1.1, 3.1, Vector3(0.3, 2.45, -0.8))
+	box(root, Vector3(1.0, 1.3, 0.1), Vector3(0.6, 0.85, 0.62), mat(GUNMETAL))
+	box(root, Vector3(1.3, 0.14, 0.16), Vector3(0.6, 1.55, 0.64), mat(BRONZE))
+	windows(root, Vector3(-0.6, 1.1, 0.62), Vector3(2.4, 0.0, 0.0), 2, Vector3(0.34, 0.5, 0.06), WINDOW_WARM)
+	windows(root, Vector3(2.42, 1.1, -1.6), Vector3(0.0, 0.0, 0.8), 3, Vector3(0.06, 0.5, 0.34), WINDOW_WARM)
+	# Bell tower.
+	box(root, Vector3(1.1, 3.4, 1.1), Vector3(-2.0, 1.9, 1.3), mat(STONE))
+	box(root, Vector3(1.2, 0.12, 1.2), Vector3(-2.0, 2.9, 1.3), mat(BRONZE))
+	for sx: float in [-1.0, 1.0]:
+		box(root, Vector3(0.06, 0.5, 0.5), Vector3(-2.0 + sx * 0.56, 3.25, 1.3), mat(AMBER, 1.0))
+		box(root, Vector3(0.5, 0.5, 0.06), Vector3(-2.0, 3.25, 1.3 + sx * 0.56), mat(AMBER, 1.0))
+	cyl(root, 0.05, 0.95, 1.0, Vector3(-2.0, 4.1, 1.3), mat(COPPER, 0.0, 0.4, 0.6), 4, Vector3(0.0, PI * 0.25, 0.0))
+	_banner(root, Vector3(1.5, 0.2, 1.2), team)
+	_banner(root, Vector3(-0.3, 0.2, 1.2), team)
+
+
+static func _armoury(root: Node3D, team: Color) -> void:
+	_stone_base(root, 5.7, 5.7)
+	box(root, Vector3(4.6, 2.2, 3.0), Vector3(0.0, 1.3, -0.8), mat(STONE))
+	box(root, Vector3(4.65, 0.26, 3.05), Vector3(0.0, 2.0, -0.8), team_mat(team))
+	_copper_roof(root, 4.9, 1.0, 3.3, Vector3(0.0, 2.9, -0.8))
+	# The great door, framed in bronze.
+	box(root, Vector3(2.4, 1.7, 0.1), Vector3(0.0, 1.05, 0.72), mat(GUNMETAL))
+	box(root, Vector3(2.8, 0.2, 0.2), Vector3(0.0, 2.0, 0.74), mat(BRONZE))
+	for sx: float in [-1.0, 1.0]:
+		box(root, Vector3(0.22, 1.8, 0.22), Vector3(sx * 1.32, 1.1, 0.74), mat(BRONZE))
+		lamp(root, Vector3(sx * 1.32, 2.2, 0.82), AMBER, 0.14)
+	windows(root, Vector3(-2.32, 1.3, -1.7), Vector3(0.0, 0.0, 0.9), 3, Vector3(0.06, 0.5, 0.4), WINDOW_WARM)
+	windows(root, Vector3(2.32, 1.3, -1.7), Vector3(0.0, 0.0, 0.9), 3, Vector3(0.06, 0.5, 0.4), WINDOW_WARM)
+	# Forge chimney, a hoist and a walker's leg on the bench.
+	cyl(root, 0.3, 0.4, 2.4, Vector3(-1.7, 3.2, -1.7), mat(STONE_DARK), 6)
+	cyl(root, 0.32, 0.32, 0.08, Vector3(-1.7, 4.42, -1.7), mat(AMBER, 1.4), 6)
+	cyl(root, 0.1, 0.1, 2.5, Vector3(2.2, 1.45, 1.8), mat(BRONZE), 5)
+	box(root, Vector3(1.5, 0.14, 0.14), Vector3(1.55, 2.65, 1.8), mat(BRONZE))
+	box(root, Vector3(0.3, 0.3, 0.3), Vector3(0.9, 2.4, 1.8), mat(BRONZE_DARK))
+	box(root, Vector3(1.3, 0.3, 0.8), Vector3(-1.4, 0.55, 1.8), mat(BRONZE_DARK))
+	box(root, Vector3(0.24, 0.7, 0.22), Vector3(-1.5, 0.95, 1.8), mat(COPPER), Vector3(0.0, 0.0, 0.9))
+
+
+static func _rampart(root: Node3D, team: Color) -> void:
+	cyl(root, 0.85, 0.95, 0.5, Vector3(0.0, 0.25, 0.0), mat(STONE_DARK), 8)
+	cyl(root, 0.62, 0.72, 0.9, Vector3(0.0, 0.95, 0.0), mat(STONE), 8)
+	ring(root, 0.82, 0.9, Vector3(0.0, 0.5, 0.0), team_mat(team))
+	for i: int in 6:
+		var ang: float = float(i) * TAU / 6.0
+		box(root, Vector3(0.24, 0.24, 0.24), Vector3(cos(ang) * 0.58, 1.5, sin(ang) * 0.58), mat(STONE), Vector3(0.0, -ang, 0.0))
+	var t: Node3D = _turret(root, Vector3(0.0, 1.42, 0.0))
+	_drum_turret(t, team, 0.4, 0.36)
+	box(t, Vector3(0.3, 0.26, 0.36), Vector3(0.4, 0.2, 0.0), mat(BRONZE_DARK))
+	barrel(t, 0.09, 1.0, Vector3(0.45, 0.2, 0.0), mat(GUNMETAL))
+	cyl(t, 0.13, 0.13, 0.16, Vector3(1.45, 0.2, 0.0), mat(BRONZE), 8, Vector3(0.0, 0.0, -PI * 0.5))
+
+
+static func _watchfire(root: Node3D, team: Color) -> void:
+	cyl(root, 0.85, 0.95, 0.5, Vector3(0.0, 0.25, 0.0), mat(STONE_DARK), 8)
+	cyl(root, 0.45, 0.6, 1.3, Vector3(0.0, 1.15, 0.0), mat(STONE), 8)
+	ring(root, 0.82, 0.9, Vector3(0.0, 0.5, 0.0), team_mat(team))
+	cyl(root, 0.62, 0.5, 0.14, Vector3(0.0, 1.85, 0.0), mat(BRONZE), 8)
+	# The fire that gives it its name.
+	cyl(root, 0.22, 0.12, 0.16, Vector3(0.0, 0.62, 0.72), mat(BRONZE), 8)
+	ball(root, 0.13, Vector3(0.0, 0.76, 0.72), mat(AMBER, 1.7), 6)
+	var t: Node3D = _turret(root, Vector3(0.0, 1.92, 0.0))
+	_drum_turret(t, team, 0.36, 0.3)
+	for z: float in [-0.24, -0.08, 0.08, 0.24]:
+		cyl(t, 0.04, 0.04, 1.2, Vector3(0.42, 0.66, z), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.8))
+
+
+static func _reliquary(root: Node3D, team: Color) -> void:
+	_stone_base(root, 5.7, 5.7)
+	cyl(root, 2.1, 2.2, 0.3, Vector3(0.0, 0.35, 0.0), mat(STONE), 8)
+	cyl(root, 1.5, 1.6, 1.3, Vector3(0.0, 1.1, 0.0), mat(STONE), 8)
+	cyl(root, 1.62, 1.62, 0.16, Vector3(0.0, 1.5, 0.0), team_mat(team), 8)
+	for i: int in 8:
+		var ang: float = float(i) * TAU / 8.0 + 0.39
+		cyl(root, 0.1, 0.12, 1.5, Vector3(cos(ang) * 1.95, 1.25, sin(ang) * 1.95), mat(STONE), 6)
+		box(root, Vector3(0.1, 0.5, 0.3), Vector3(cos(ang + 0.39) * 1.52, 1.0, sin(ang + 0.39) * 1.52), mat(AMBER, 0.9), Vector3(0.0, -ang - 0.39, 0.0))
+	cyl(root, 2.15, 2.15, 0.14, Vector3(0.0, 2.05, 0.0), mat(BRONZE), 8)
+	var dome: MeshInstance3D = ball(root, 1.7, Vector3(0.0, 2.1, 0.0), mat(COPPER, 0.0, 0.4, 0.6), 8)
+	dome.scale = Vector3(1.0, 0.6, 1.0)
+	# An armillary turning slowly above the dome.
+	var sphere: Node3D = group(root, "Spin", Vector3(0.0, 3.7, 0.0))
+	ball(sphere, 0.34, Vector3.ZERO, mat(AMBER, 1.5), 8)
+	ring(sphere, 0.62, 0.7, Vector3.ZERO, mat(BRONZE, 0.0, 0.6, 0.4))
+	var hoop: MeshInstance3D = ring(sphere, 0.78, 0.86, Vector3.ZERO, mat(BRONZE, 0.0, 0.6, 0.4))
+	hoop.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+	cyl(root, 0.06, 0.08, 0.6, Vector3(0.0, 3.2, 0.0), mat(BRONZE), 5)
+	_banner(root, Vector3(2.2, 0.2, 2.2), team)
+	_banner(root, Vector3(-2.2, 0.2, 2.2), team)
 
 
 # ------------------------------------------------------------------ detail

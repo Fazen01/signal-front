@@ -136,5 +136,41 @@
 	"ward_pulse": {
 		"name": "Ward Pulse", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
 		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"vigil_carbine": {
+		"name": "Vigil Carbine", "damage_type": "ballistic", "damage": 8.0, "range": 8.0,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"pike_lance": {
+		"name": "Pike Lance", "damage_type": "piercing", "damage": 46.0, "range": 10.0,
+		"cooldown": 2.8, "projectile_speed": 16.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"outrider_gun": {
+		"name": "Outrider Gun", "damage_type": "ballistic", "damage": 6.0, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"thresher_cannon": {
+		"name": "Thresher Cannons", "damage_type": "ballistic", "damage": 16.0, "range": 9.0,
+		"cooldown": 0.45, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"castellan_cannon": {
+		"name": "Castellan Cannon", "damage_type": "piercing", "damage": 72.0, "range": 10.5,
+		"cooldown": 2.5, "projectile_speed": 32.0, "splash": 0.9, "fx": "shell"
+	},
+	"canopy_flak": {
+		"name": "Canopy Flak", "damage_type": "flak", "damage": 17.0, "range": 11.5,
+		"cooldown": 0.36, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"mangonel_shot": {
+		"name": "Mangonel Shot", "damage_type": "explosive", "damage": 100.0, "range": 21.0,
+		"min_range": 7.0, "cooldown": 5.8, "projectile_speed": 15.0, "splash": 3.0, "scatter": 2.0, "fx": "artillery"
+	},
+	"rampart_gun": {
+		"name": "Rampart Gun", "damage_type": "explosive", "damage": 44.0, "range": 11.0,
+		"cooldown": 1.5, "projectile_speed": 24.0, "splash": 1.4, "fx": "shell"
+	},
+	"watchfire_flak": {
+		"name": "Watchfire Flak", "damage_type": "flak", "damage": 24.0, "range": 13.5,
+		"cooldown": 0.5, "hits_air": true, "hits_ground": false, "fx": "tracer_heavy"
 	}
 }

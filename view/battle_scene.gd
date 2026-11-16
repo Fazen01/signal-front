@@ -8,6 +8,9 @@ var world: SimWorld = null
 var local_player: int = 0
 var paused: bool = false
 var time_scale: float = 1.0
+const SPEEDS: Array[float] = [0.5, 1.0, 1.5, 2.0, 3.0]  ## what the + and - keys step through
+var last_alert_pos: Vector2 = Vector2.ZERO  ## where the latest warning came from; Space looks there
+var _has_alert: bool = false
 
 var terrain: TerrainView = null
 var world_view: WorldView = null
@@ -253,6 +256,52 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	gkey.pressed = true
 	driver.expect(on_hotkey(gkey) and not signal_view.is_overlay_visible(), "G hides the coverage overlay")
 	driver.expect(on_hotkey(gkey) and signal_view.is_overlay_visible(), "G shows it again")
+	# Game speed, the army key, the alert key and queueing five at once.
+	var plus: InputEventKey = InputEventKey.new()
+	plus.physical_keycode = KEY_EQUAL
+	plus.pressed = true
+	driver.expect(on_hotkey(plus) and is_equal_approx(time_scale, 1.5), "+ speeds the game up")
+	var minus: InputEventKey = InputEventKey.new()
+	minus.physical_keycode = KEY_MINUS
+	minus.pressed = true
+	on_hotkey(minus)
+	driver.expect(on_hotkey(minus) and is_equal_approx(time_scale, 0.5), "- slows it down")
+	on_hotkey(plus)
+	driver.expect(is_equal_approx(time_scale, 1.0), "and back to normal speed")
+	var space: InputEventKey = InputEventKey.new()
+	space.physical_keycode = KEY_SPACE
+	space.pressed = true
+	driver.expect(not jump_to_alert(), "Space does nothing before the first warning")
+	world.alert(local_player, "Smoke warning", hq.pos + Vector2(9.0, 0.0))
+	for ev: SimEvent in world.events:
+		_handle_event(ev)
+	world.events.clear()
+	cam.center_on(world.map.world_size() * 0.5)
+	driver.expect(on_hotkey(space) and cam.focus.distance_to(hq.pos + Vector2(9.0, 0.0)) < 1.0, "Space looks at the latest warning")
+	controller.clear_selection()
+	var army_key: InputEventKey = InputEventKey.new()
+	army_key.physical_keycode = KEY_A
+	army_key.pressed = true
+	army_key.ctrl_pressed = true
+	controller._unhandled_input(army_key)
+	var soldiers: int = 0
+	for e: SimEntity in controller.selected_entities():
+		if e.def.is_armed() and e.kind == SimEntity.Kind.UNIT:
+			soldiers += 1
+	driver.expect(soldiers > 0 and soldiers == controller.selected.size(), "Ctrl+A selects the army and nothing else (%d)" % soldiers)
+	controller.set_selection([hq.id])
+	var before: int = hq.queue.size()
+	var many: Hud.CardEntry = hud.find_entry("train", "hauler")
+	world.players[local_player].salvage += 2000
+	driver.expect(many != null and hud.activate(many, 5), "the HQ takes an order for five")
+	world.tick()
+	driver.expect(hq.queue.size() > before + 1, "and queues more than one (%d -> %d)" % [before, hq.queue.size()])
+	# Put the queue and the purse back as they were for the checks that follow.
+	while hq.queue.size() > before:
+		world.push_command(SimCommand.cancel_train(local_player, hq.id, hq.queue.size() - 1))
+		world.tick()
+	world.players[local_player].salvage -= 2000
+	driver.expect(world_view.views[hq.id].has_range_ring(), "a selected building with a gun shows its range")
 
 
 ## `-- --spectate=aegis,nomad [--speed=30]` turns the scene into an AI-vs-AI
@@ -326,6 +375,8 @@ func _handle_event(ev: SimEvent) -> void:
 				audio.play_ui("alert", -6.0)
 				if ev.pos != Vector2.ZERO:
 					hud.minimap.ping(ev.pos)
+					last_alert_pos = ev.pos
+					_has_alert = true
 		SimEvent.Type.BUILDING_DONE:
 			if ev.player == local_player:
 				var done: SimEntity = world.get_entity(ev.id)
@@ -363,8 +414,14 @@ func _handle_event(ev: SimEvent) -> void:
 
 
 func _on_selection_changed() -> void:
+	# Weapon range is drawn for a small selection only: one ring per unit of
+	# a whole army would cover the screen.
+	var few: bool = controller.selected.size() <= 3
 	for id: int in world_view.views.keys():
-		world_view.views[id].set_selected(controller.selected_set.has(id))
+		var picked: bool = controller.selected_set.has(id)
+		var v: EntityView = world_view.views[id]
+		v.set_selected(picked)
+		v.set_range_shown(picked and few and v.owner_id == local_player, world.get_entity(id))
 	if placing != null and _selected_builders(placing.id).is_empty():
 		cancel_placement()
 	if hud != null:
@@ -420,9 +477,36 @@ func on_right_click(_screen: Vector2) -> bool:
 	return false
 
 
+## Steps the game speed up or down through SPEEDS.
+func change_speed(step: int) -> void:
+	var now: int = 1
+	for i: int in SPEEDS.size():
+		if absf(SPEEDS[i] - time_scale) < absf(SPEEDS[now] - time_scale):
+			now = i
+	time_scale = SPEEDS[clampi(now + step, 0, SPEEDS.size() - 1)]
+	hud.push_alert("Game speed x%s" % str(time_scale), Hud.CYAN)
+
+
+## Looks at the place the latest warning came from. False if there was none.
+func jump_to_alert() -> bool:
+	if not _has_alert:
+		return false
+	cam.center_on(last_alert_pos)
+	return true
+
+
 func on_hotkey(key: InputEventKey) -> bool:
 	if key.physical_keycode == KEY_G:
 		signal_view.set_overlay_visible(not signal_view.is_overlay_visible())
+		return true
+	if key.physical_keycode == KEY_EQUAL or key.physical_keycode == KEY_KP_ADD:
+		change_speed(1)
+		return true
+	if key.physical_keycode == KEY_MINUS or key.physical_keycode == KEY_KP_SUBTRACT:
+		change_speed(-1)
+		return true
+	if key.physical_keycode == KEY_SPACE:
+		jump_to_alert()
 		return true
 	if key.physical_keycode == KEY_ESCAPE:
 		if targeting != null:
@@ -602,6 +686,12 @@ func begin_placement(def: EntityDef, deploy: bool = false) -> void:
 		var reach: MeshInstance3D = ModelFactory.ring(ghost, def.signal_radius - 0.15, def.signal_radius + 0.15, Vector3(0.0, 0.3, 0.0), ModelFactory.mat(Color(0.5, 0.9, 1.0), 1.0))
 		reach.name = "ReachRing"
 		reach.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var gun: float = EntityView.weapon_reach(def)
+	if gun > 0.0:
+		# Show how far a turret placed here will shoot.
+		var fire: MeshInstance3D = ModelFactory.ring(ghost, gun - 0.1, gun + 0.1, Vector3(0.0, 0.3, 0.0), ModelFactory.mat(Color(1.0, 0.55, 0.3), 1.0))
+		fire.name = "ReachRing"
+		fire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_ghost_shown_ok = -1
 	_update_placement()
 

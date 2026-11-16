@@ -277,6 +277,8 @@ static func apply_damage(w: SimWorld, t: SimEntity, amount: float, damage_type: 
 	var mult: float = w.data.damage_multiplier(damage_type, t.def.armor)
 	if t.def.is_infantry() and w.map.terrain_at(t.pos) == SimMap.Terrain.FOREST:
 		mult *= w.data.forest_infantry_damage_mult
+	if t.kind == SimEntity.Kind.UNIT and t.linked and t.owner >= 0:
+		mult *= 1.0 - w.players[t.owner].faction.linked_damage_resist
 	var dmg: float = amount * mult
 	if dmg <= 0.0:
 		return

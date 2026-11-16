@@ -1,7 +1,10 @@
 class_name BattleOverlay
 extends Control
-## Screen-space drawing over the 3D view: health bars, the selection drag
-## box and order cursors. Purely visual; ignores the mouse.
+## Screen-space drawing over the 3D view: health bars, the orders of the
+## selected units, the selection drag box and order cursors. Purely visual;
+## ignores the mouse.
+
+const ORDER_LINES_MAX: int = 60  ## selected units whose orders are drawn
 
 var battle: BattleScene = null
 
@@ -24,6 +27,7 @@ func _draw() -> void:
 	var world: SimWorld = battle.world
 	var right: Vector3 = cam3d.global_transform.basis.x
 	var view_rect: Rect2 = get_viewport_rect().grow(40.0)
+	_draw_orders(ctl, cam3d, world)
 	for e: SimEntity in world.entities:
 		if e.alive and e.kind == SimEntity.Kind.UPLINK and e.capture_progress > 0.0 and battle.world_view.is_shown(e.id):
 			var at3: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 4.4, e.pos.y)
@@ -80,6 +84,74 @@ func _draw() -> void:
 		draw_arc(m, 14.0, 0.0, TAU, 24, Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(20.0, 0.0), m + Vector2(20.0, 0.0), Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(0.0, 20.0), m + Vector2(0.0, 20.0), Color(1.0, 0.35, 0.3), 2.0)
+
+
+## Where the selected units are going: a line from each through its queued
+## orders, coloured by what it will do there, and the rally point of a
+## selected building.
+func _draw_orders(ctl: SelectionController, cam3d: Camera3D, world: SimWorld) -> void:
+	var drawn: int = 0
+	for id: int in ctl.selected:
+		var e: SimEntity = world.get_entity(id)
+		if e == null or e.owner != battle.local_player:
+			continue
+		if e.kind == SimEntity.Kind.BUILDING:
+			if e.has_rally:
+				var flag: Color = Color(0.5, 0.9, 1.0, 0.8)
+				_order_leg(cam3d, world, e.pos, e.rally, flag)
+				_order_mark(cam3d, world, e.rally, flag)
+			continue
+		if e.kind != SimEntity.Kind.UNIT or e.orders.is_empty() or drawn >= ORDER_LINES_MAX:
+			continue
+		drawn += 1
+		var from: Vector2 = e.pos
+		for o: SimOrder in e.orders:
+			if o.type == SimOrder.Type.HOLD:
+				continue
+			var to: Vector2 = o.pos
+			var target: SimEntity = world.get_entity(o.target_id) if o.target_id != 0 else null
+			if target != null:
+				to = target.pos
+			var col: Color = _order_color(o.type)
+			_order_leg(cam3d, world, from, to, col)
+			from = to
+		_order_mark(cam3d, world, from, _order_color(e.orders[e.orders.size() - 1].type))
+
+
+func _order_color(order_type: int) -> Color:
+	match order_type:
+		SimOrder.Type.ATTACK:
+			return Color(1.0, 0.3, 0.25, 0.75)
+		SimOrder.Type.ATTACK_MOVE:
+			return Color(1.0, 0.6, 0.25, 0.7)
+		SimOrder.Type.HARVEST:
+			return Color(1.0, 0.82, 0.35, 0.6)
+		SimOrder.Type.BUILD, SimOrder.Type.REPAIR, SimOrder.Type.DEPLOY:
+			return Color(0.45, 0.85, 1.0, 0.7)
+		SimOrder.Type.CAPTURE:
+			return Color(0.95, 0.95, 1.0, 0.7)
+	return Color(0.4, 1.0, 0.5, 0.6)
+
+
+func _ground_point(cam3d: Camera3D, world: SimWorld, p: Vector2) -> Vector3:
+	return Vector3(p.x, world.map.height_at(p) + 0.3, p.y)
+
+
+func _order_leg(cam3d: Camera3D, world: SimWorld, a: Vector2, b: Vector2, col: Color) -> void:
+	var a3: Vector3 = _ground_point(cam3d, world, a)
+	var b3: Vector3 = _ground_point(cam3d, world, b)
+	if cam3d.is_position_behind(a3) or cam3d.is_position_behind(b3):
+		return
+	draw_line(cam3d.unproject_position(a3), cam3d.unproject_position(b3), col, 1.5, true)
+
+
+func _order_mark(cam3d: Camera3D, world: SimWorld, at: Vector2, col: Color) -> void:
+	var at3: Vector3 = _ground_point(cam3d, world, at)
+	if cam3d.is_position_behind(at3):
+		return
+	var sp: Vector2 = cam3d.unproject_position(at3)
+	draw_circle(sp, 4.0, Color(0.0, 0.0, 0.0, 0.5))
+	draw_circle(sp, 2.6, col)
 
 
 ## Veterancy: one gold chevron per rank.

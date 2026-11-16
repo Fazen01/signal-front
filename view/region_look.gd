@@ -141,13 +141,13 @@ static func of(region: String) -> RegionLook:
 			k.litter_light = Color(0.19, 0.17, 0.16)
 			k.stone_dark = Color(0.10, 0.10, 0.11)
 			k.stone_light = Color(0.30, 0.28, 0.28)
-			k.sand_dark = Color(0.30, 0.13, 0.07)
-			k.sand_light = Color(0.50, 0.22, 0.09)
-			k.bed = Color(0.60, 0.20, 0.04)
-			k.water_shallow = Color(1.0, 0.55, 0.12)
-			k.water_deep = Color(0.85, 0.22, 0.04)
-			k.water_foam = Color(1.0, 0.85, 0.4)
-			k.water_glow = 1.3
+			k.sand_dark = Color(0.12, 0.09, 0.08)
+			k.sand_light = Color(0.20, 0.13, 0.10)
+			k.bed = Color(0.08, 0.06, 0.06)
+			k.water_shallow = Color(1.0, 0.62, 0.18)
+			k.water_deep = Color(0.80, 0.16, 0.03)
+			k.water_foam = Color(0.08, 0.06, 0.06)
+			k.water_glow = 1.5
 			k.trees = "dead"
 			k.bark_low = Color(0.07, 0.06, 0.06)
 			k.bark_high = Color(0.20, 0.17, 0.15)
@@ -165,6 +165,6 @@ static func of(region: String) -> RegionLook:
 			k.map_ground = Color(0.20, 0.19, 0.19)
 			k.map_forest = Color(0.11, 0.10, 0.10)
 			k.map_rock = Color(0.33, 0.31, 0.31)
-			k.map_water = Color(0.90, 0.40, 0.10)
+			k.map_water = Color(0.70, 0.27, 0.08)
 	_looks[region] = k
 	return k

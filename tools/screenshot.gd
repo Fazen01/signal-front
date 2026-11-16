@@ -41,7 +41,7 @@ func _ready() -> void:
 		var tgame: GameState = get_node_or_null("/root/Game") as GameState
 		if tgame != null:
 			tgame.pending_config = SimTutorial.config_for(_script_name.trim_prefix("tutorial_"))
-	if _script_name == "foundry" or _script_name == "nomad" or _script_name == "vesper":
+	if _script_name == "foundry" or _script_name == "nomad" or _script_name == "vesper" or _script_name == "verdigris":
 		# Play as another faction for this capture.
 		var config: MatchConfig = MatchConfig.skirmish(1)
 		config.factions = [_script_name, "aegis"]
@@ -62,8 +62,10 @@ func _ready() -> void:
 		# "region_<id>": seed 4 in that region, seen whole.
 		var rgame: GameState = get_node_or_null("/root/Game") as GameState
 		if rgame != null:
-			var rconfig: MatchConfig = MatchConfig.skirmish(4)
-			rconfig.region = _script_name.trim_prefix("region_")
+			# "region_<id>" is seed 4; "region_<id>_<seed>" any other.
+			var rparts: PackedStringArray = _script_name.trim_prefix("region_").split("_")
+			var rconfig: MatchConfig = MatchConfig.skirmish(int(rparts[1]) if rparts.size() > 1 else 4)
+			rconfig.region = rparts[0]
 			rgame.pending_config = rconfig
 	if _script_name.begins_with("seed_"):
 		# "seed_<n>": the generated two-player map for that seed, seen whole.
@@ -188,6 +190,24 @@ func _run_script(battle: BattleScene) -> void:
 				battle.controller.set_selection([cr.id])
 				battle.cam.set_distance(52.0)
 				battle.cam.center_on(core + Vector2(8.0, 6.0))
+		"verdigris":
+			if _count == 3:
+				var ow: SimWorld = battle.world
+				var ome: int = battle.local_player
+				var okeep: Vector2 = ow.players[ome].start_pos
+				var ocell: Vector2i = ow.map.cell_of(okeep)
+				ow.spawn_building("chapterhouse", ome, ocell + Vector2i(5, -2), true)
+				ow.spawn_building("armoury", ome, ocell + Vector2i(-1, 5), true)
+				ow.spawn_building("tithe_barn", ome, ocell + Vector2i(-6, -1), true)
+				ow.spawn_building("reliquary", ome, ocell + Vector2i(5, 4), true)
+				ow.spawn_building("lantern", ome, ocell + Vector2i(10, 8), true)
+				ow.spawn_building("rampart", ome, ocell + Vector2i(8, 2), true)
+				ow.spawn_building("watchfire", ome, ocell + Vector2i(9, 5), true)
+				var okinds: Array[String] = ["castellan", "thresher", "canopy", "mangonel", "outrider", "pike"]
+				for k: int in okinds.size():
+					ow.spawn_unit(okinds[k], ome, okeep + Vector2(-9.0 + float(k % 3) * 3.6, 12.0 + float(k / 3) * 3.8))
+				battle.cam.set_distance(52.0)
+				battle.cam.center_on(okeep + Vector2(5.0, 5.0))
 		"vesper":
 			if _count == 3:
 				var vw: SimWorld = battle.world

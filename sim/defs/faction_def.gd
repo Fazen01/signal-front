@@ -13,6 +13,7 @@ var linked_vehicle_repair: float = 0.0  ## fraction of max hp per second for Lin
 var forest_cloak: bool = false  ## ground units are hidden while standing still in forest
 var wreck_salvage_mult: float = 1.0  ## bonus on salvage hauled from wrecks
 var linked_speed_bonus: float = 0.0  ## extra move speed for Linked units (0.15 = 15% faster)
+var linked_damage_resist: float = 0.0  ## share of damage Linked units shrug off (0.15 = 15% less)
 var drop_squad: Array[String] = []  ## units delivered by Reinforcement Drop
 var roles: Dictionary[String, String] = {}  ## what the AI builds for each job (see SimAI)
 var playable: bool = true
