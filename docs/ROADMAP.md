@@ -251,16 +251,17 @@ map generation itself to be improved.
 - [x] Whole matches of the new factions through the real battle scene
 - [x] Fixed what these found (three bugs, listed in the session log)
 
+## M28 — An interface of its own for each faction (owner request)
+
+- [ ] Each faction's HUD has its own accent colours, panel and button
+      shapes, lettering and emblem
+- [ ] The skirmish setup previews the chosen faction's style
+
 ## Ideas for later (proposed by session 1, not yet asked for)
 
-These are suggestions; nothing here has been started.
-
-### M28 — A campaign
-
-- [ ] Six to eight linked missions that teach one faction's tricks each,
-      with a briefing screen and objectives beyond "destroy the HQ"
-      (hold an uplink for five minutes, escort a Caravan, cut a relay chain)
-- [ ] A world map that shows the four regions and what has been won
+These are suggestions; nothing here has been started. The owner struck
+three of the first list: a campaign (M28), play against other people (M31)
+and a map editor. They are not to be built.
 
 ### M29 — Depth in a fight
 
@@ -278,18 +279,10 @@ These are suggestions; nothing here has been started.
 - [ ] Weather per region that touches the Signal Grid: dust storms shorten
       relay reach in the Dustlands, blizzards slow vehicles on the Frostline
 
-### M31 — Other people
-
-- [ ] Two players on one network (the simulation is already deterministic
-      and command-driven, which is what lockstep play needs)
-- [ ] Replays: save the seed and the command stream, play it back, scrub
-- [ ] Teams: two against two with shared coverage
-
 ### M32 — Comfort
 
 - [ ] Rebindable keys; a colour-blind palette for team colours
 - [ ] Autosave every few minutes, and more than one save slot
-- [ ] A map editor for the hand-made layouts (they are JSON already)
 - [ ] An in-game encyclopedia of every unit with its counters
 
 ## Session log
@@ -583,6 +576,19 @@ Crimson Tally, Umbral Veil), a Watch option (the AI plays every side),
 - `tools/balance_tune.py` is running two more league rounds on that, seeded
   with the first league's result. Each round is about half an hour here.
   Prices will be written into `data/units.json` when it settles.
+
+**14:55 UTC — after a break of about an hour (the session's worker was
+restarted three times; the background tuner died with it).**
+
+- Tuner round 1, 168 games, with prices seeded from the first league (Aegis
+  x0.925, Foundry x1.075, Nomad x1.07, Zephyr x0.92) and the Accord's
+  aircraft strengthened: Nomad 71%, Foundry 57%, Aegis 55%, Vesper 52%,
+  Tally 52%, Verdigris 48%, Veil 40%, Zephyr 19%. Aegis is back in the
+  pack; Nomad and Zephyr are still far out. The multipliers after that
+  round are kept in `.godot-bin/balance_state.json`.
+- The owner struck two proposed milestones (a campaign; play against other
+  people) and the map editor from the ideas list, and asked for a different
+  interface design for each faction (M28 now).
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
