@@ -539,6 +539,30 @@ static func update(w: SimWorld) -> void:
 		recompute_bandwidth(w)
 	if w.tick_count % SimWorld.TICK_RATE == 0:
 		_pay_uplinks(w)
+		_pay_emergency(w)
+
+
+## Once a second: a player with no hauler, none on order and too little salvage
+## to buy one gets a trickle until a hauler is affordable. Without it, losing
+## every hauler while broke would end the match in all but name.
+static func _pay_emergency(w: SimWorld) -> void:
+	if w.data.emergency_income_per_second <= 0:
+		return
+	for p: SimPlayer in w.players:
+		if p.defeated or p.faction == null:
+			continue
+		var hauler_id: String = p.faction.role("hauler")
+		if hauler_id == "" or p.salvage >= w.data.entity(hauler_id).cost:
+			continue
+		var has_hauler: bool = false
+		for e: SimEntity in w.entities:
+			if not e.alive or e.owner != p.id or e.def == null:
+				continue
+			if e.def.harvester or e.queue.has(hauler_id):
+				has_hauler = true
+				break
+		if not has_hauler:
+			p.salvage += w.data.emergency_income_per_second
 
 
 ## Once a second: every owned uplink inside its owner's coverage pays out.

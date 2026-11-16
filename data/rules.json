@@ -17,6 +17,7 @@
 	"unload_seconds": 1.0,
 	"repair_rate": 0.04,
 	"uplink_income_per_second": 3,
+	"emergency_income_per_second": 4,
 	"uplink_capture_seconds": 8.0,
 	"hijack_seconds": 4.0,
 	"command_point_value": 300,

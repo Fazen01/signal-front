@@ -123,9 +123,28 @@ Status: **in progress**, started 05:50 UTC from `f728680` (session 2's last
 commit, 43 minutes old with no later push, so session 2 was taken as cut
 off). Godot 4.7.2 downloaded; software GL to be confirmed below.
 
-Working on, in order:
-1. Session 2's unfinished list: screenshots of every screen, then the open
-   M13 item on 1v1 match length (defender-side levers).
+Godot verification: **available**, including software-GL screenshots.
+
+Done so far:
+- Looked at screenshots of every screen (menu, setup, tutorials, settings,
+  help, battle, builder and HQ command cards, signal overlay, directives,
+  combat, result, pause, Foundry, Nomad, tutorial panel) after session 2's
+  HUD commit: nothing clipped, overlapping or missing.
+- Softlock fix: a player whose haulers were all killed while they had less
+  salvage than a hauler costs could never recover (seen in AI matches: a side
+  sat at 35 salvage for three minutes until it died). Such a player now gets
+  `emergency_income_per_second` (4) until a hauler is affordable, and the AI
+  replaces haulers before soldiers when it is under half its hauler target.
+- `tools/pace_batch.gd`: plays batches with pacing knobs scaled in memory
+  (build times, harvest time, structure health, turret damage, AI wave
+  timing) and has a `--trace=1` timeline. Baseline on seeds 1-3, all nine
+  pairings: average 10.0 minutes, median 9.4.
+
+Working on: the open M13 item on 1v1 match length. Findings so far (27
+games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
+12.2; HQ health x2.5 with tougher buildings and turrets -> 10.4. Traces show
+matches are decided by minute 3-6 when one army is wiped out; the rest is
+mopping up.
 
 ### 2026-11-16 — session 2 (branch `claude/relay-session-1116-0451`)
 

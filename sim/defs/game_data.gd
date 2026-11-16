@@ -61,6 +61,7 @@ var harvest_seconds: float = 4.0
 var unload_seconds: float = 1.0
 var repair_rate: float = 0.04
 var uplink_income_per_second: int = 3
+var emergency_income_per_second: int = 4  ## trickle while a player has no hauler and cannot buy one
 var uplink_capture_seconds: float = 8.0
 var hijack_seconds: float = 4.0
 var command_point_value: int = 300
@@ -194,6 +195,7 @@ func _load_rules(d: Dictionary) -> void:
 	unload_seconds = float(d.get("unload_seconds", unload_seconds))
 	repair_rate = float(d.get("repair_rate", repair_rate))
 	uplink_income_per_second = int(d.get("uplink_income_per_second", uplink_income_per_second))
+	emergency_income_per_second = int(d.get("emergency_income_per_second", emergency_income_per_second))
 	uplink_capture_seconds = float(d.get("uplink_capture_seconds", uplink_capture_seconds))
 	hijack_seconds = float(d.get("hijack_seconds", hijack_seconds))
 	command_point_value = int(d.get("command_point_value", command_point_value))

@@ -274,3 +274,19 @@ func test_enemy_can_retake_uplink() -> void:
 	w.push_command(SimCommand.capture(1, PackedInt32Array([raider.id]), site.id))
 	SimTestUtil.run(w, 20 * 14)
 	check_eq(site.owner, 1, "enemy engineer flipped the site")
+
+
+func test_emergency_trickle_when_no_hauler_can_be_afforded() -> void:
+	var w: SimWorld = _world_with_hq()
+	var me: SimPlayer = w.players[0]
+	var cost: int = w.data.entity(me.faction.role("hauler")).cost
+	me.salvage = 0
+	SimTestUtil.run(w, 20 * 5)
+	check_eq(me.salvage, 0, "no trickle while haulers are alive")
+	for h: SimEntity in _own(w, 0, "hauler"):
+		w.remove_entity(h)
+	SimTestUtil.run(w, 20 * 10)
+	check_eq(me.salvage, 10 * w.data.emergency_income_per_second, "trickle with no hauler and no salvage")
+	me.salvage = cost
+	SimTestUtil.run(w, 20 * 5)
+	check_eq(me.salvage, cost, "trickle stops once a hauler is affordable")

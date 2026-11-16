@@ -7,6 +7,7 @@ extends SceneTree
 ##          [--unit-build=1.5] [--bld-build=1.5] [--harvest=6.0]
 ##          [--hq-hp=2.0] [--bld-hp=1.5] [--turret-dmg=1.5] [--damage=0.8]
 ##          [--wave-cd=1.5] [--first-wave=10] [--start-salvage=400]
+##          [--trace=1]  a status line for every 30 seconds of each match
 ## Prints one "PACE" line per pairing and a "PACE TOTAL" line.
 
 
@@ -65,6 +66,8 @@ func _init() -> void:
 					ai.wave_size = ai.first_wave
 			while not w.game_over and w.tick_count < max_ticks:
 				w.tick()
+				if knobs.has("trace") and w.tick_count % (SimWorld.TICK_RATE * 30) == 0:
+					print(_trace_line(w))
 			var m: float = w.seconds() / 60.0
 			minutes += m
 			total_minutes += m
@@ -115,3 +118,49 @@ func _apply(data: GameData, knobs: Dictionary[String, float]) -> void:
 		data.harvest_seconds = knobs["harvest"]
 	if knobs.has("start-salvage"):
 		data.start_salvage = int(knobs["start-salvage"])
+
+
+func _trace_line(w: SimWorld) -> String:
+	var secs: int = int(w.seconds())
+	var parts: Array[String] = ["%d:%02d" % [secs / 60, secs % 60]]
+	for p: SimPlayer in w.players:
+		var army: int = 0
+		var value: int = 0
+		var buildings: int = 0
+		var dark: int = 0
+		var emitters: int = 0
+		var turrets: int = 0
+		var hq: float = 0.0
+		var haulers: int = 0
+		for e: SimEntity in w.entities:
+			if not e.alive or e.owner != p.id or e.def == null:
+				continue
+			if e.is_building():
+				buildings += 1
+				if not e.linked:
+					dark += 1
+				if e.def.signal_radius > 0.0:
+					emitters += 1
+				if e.def.is_armed() and not e.def.signal_root:
+					turrets += 1
+				if e.def.signal_root:
+					hq = e.hp_fraction()
+			elif e.def.harvester:
+				haulers += 1
+			elif e.def.is_armed():
+				army += 1
+				value += e.def.cost
+		var wave: String = ""
+		for ai: SimAI in w.ais:
+			if ai.player_id == p.id:
+				wave = "w%d:%d/%d" % [ai.waves_sent, ai.wave_ids.size(), ai.wave_size]
+		parts.append("$%d haul %d bw %d/%d army %d(%d) bld %d dark %d emit %d tur %d hq %d%% lost %d %s" % [
+			p.salvage, haulers, p.bandwidth_used, p.bandwidth_cap, army, value, buildings, dark, emitters, turrets,
+			int(hq * 100.0), p.stat_units_lost, wave,
+		])
+	var left: int = 0
+	for e: SimEntity in w.entities:
+		if e.alive and e.is_harvestable():
+			left += e.salvage
+	parts.append("salvage left %d" % left)
+	return " | ".join(parts)

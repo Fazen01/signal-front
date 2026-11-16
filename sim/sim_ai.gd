@@ -57,6 +57,7 @@ var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have see
 var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
 var _wish: Dictionary[int, String] = {}  ## building id -> unit it is saving up for
 var _wish_tick: Dictionary[int, int] = {}
+var _want_haulers: int = 3  ## how many haulers the economy is aiming for
 var _spent: int = 0  ## salvage committed by commands issued this think
 var _bandwidth_committed: int = 0  ## bandwidth of units ordered this think
 
@@ -226,8 +227,8 @@ func _run_economy(w: SimWorld, me: SimPlayer) -> void:
 		if res != null:
 			w.push_command(SimCommand.harvest(player_id, idle, res.id))
 	# Train haulers and engineers from the HQ (or a depot).
-	var want_haulers: int = mini(max_haulers, 3 + _count(_r("depot"), false) * 2 + (1 if w.tick_count > 20 * 120 else 0))
-	if _haulers.size() + _queued(_r("hauler")) < want_haulers and _best_resource(w) != null:
+	_want_haulers = mini(max_haulers, 3 + _count(_r("depot"), false) * 2 + (1 if w.tick_count > 20 * 120 else 0))
+	if _haulers.size() + _queued(_r("hauler")) < _want_haulers and _best_resource(w) != null:
 		_train_at_any(w, me, _r("hauler"))
 	if _engineers.size() + _queued(_r("builder")) < max_engineers:
 		_train_at_any(w, me, _r("builder"))
@@ -636,7 +637,9 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 		reserve = w.data.entity(next).cost
 	# Never spend the last salvage on soldiers while there is nobody to
 	# collect more or to build anything.
-	if _haulers.size() + _queued(_r("hauler")) < 2 and _best_resource(w) != null:
+	# The same goes for an economy that has been raided down to under half
+	# of the haulers it wants: replace them before buying more soldiers.
+	if _haulers.size() + _queued(_r("hauler")) < maxi(2, (_want_haulers + 1) / 2) and _best_resource(w) != null:
 		reserve = maxi(reserve, w.data.entity(_r("hauler")).cost)
 	if _engineers.size() + _queued(_r("builder")) == 0:
 		reserve = maxi(reserve, w.data.entity(_r("builder")).cost)
