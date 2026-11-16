@@ -117,9 +117,20 @@ decision in the session log at the bottom.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
+
+Status: **in progress**, started 05:50 UTC from `f728680` (session 2's last
+commit, 43 minutes old with no later push, so session 2 was taken as cut
+off). Godot 4.7.2 downloaded; software GL to be confirmed below.
+
+Working on, in order:
+1. Session 2's unfinished list: screenshots of every screen, then the open
+   M13 item on 1v1 match length (defender-side levers).
+
 ### 2026-11-16 — session 2 (branch `claude/relay-session-1116-0451`)
 
-Status: **in progress**, started 04:51 UTC from `3a43a9e` (session 1's last
+Status: **cut off** after one HUD commit (`f728680`, 05:07 UTC); nothing
+else was pushed. Started 04:51 UTC from `3a43a9e` (session 1's last
 commit; `tools/check.sh` passes on it here, Godot and software GL available).
 
 Working on, in order:
