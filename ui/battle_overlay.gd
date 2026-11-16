@@ -25,7 +25,7 @@ func _draw() -> void:
 	var right: Vector3 = cam3d.global_transform.basis.x
 	var view_rect: Rect2 = get_viewport_rect().grow(40.0)
 	for e: SimEntity in world.entities:
-		if not e.alive or e.def == null:
+		if not e.alive or e.def == null or not battle.world_view.is_shown(e.id):
 			continue
 		var is_selected: bool = ctl.selected.has(e.id)
 		var show_bar: bool = is_selected or e.hp < e.max_hp - 0.5 or not e.constructed

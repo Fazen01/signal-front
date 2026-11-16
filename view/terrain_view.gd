@@ -8,6 +8,9 @@ const WATER_LEVEL: float = -0.45
 
 var map: SimMap = null
 var _rng: SimRng = null
+var _prop_meshes: Array[MultiMesh] = []
+var _prop_cells: Array[PackedInt32Array] = []  ## map cell index of each instance
+var _prop_state: Array[PackedByteArray] = []  ## last fog state applied per instance
 
 
 func build(sim_map: SimMap, seed_value: int) -> void:
@@ -104,7 +107,7 @@ func _build_skirt() -> void:
 	var plane: PlaneMesh = PlaneMesh.new()
 	plane.size = size * 4.0
 	var mat: StandardMaterial3D = StandardMaterial3D.new()
-	mat.albedo_color = Color(0.09, 0.11, 0.10)
+	mat.albedo_color = Color(0.03, 0.04, 0.05)
 	mat.roughness = 1.0
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "Skirt"
@@ -160,9 +163,11 @@ func _build_trees() -> void:
 	var bark: StandardMaterial3D = StandardMaterial3D.new()
 	bark.albedo_color = Color(0.30, 0.22, 0.15)
 	bark.roughness = 1.0
+	bark.vertex_color_use_as_albedo = true
 	var leaf: StandardMaterial3D = StandardMaterial3D.new()
 	leaf.albedo_color = Color(0.16, 0.36, 0.18)
 	leaf.roughness = 1.0
+	leaf.vertex_color_use_as_albedo = true
 	mesh.surface_set_material(0, bark)
 	mesh.surface_set_material(1, leaf)
 	_add_multimesh("Trees", mesh, spots, true)
@@ -194,17 +199,45 @@ func _build_rocks() -> void:
 	var mat: StandardMaterial3D = StandardMaterial3D.new()
 	mat.albedo_color = Color(0.47, 0.45, 0.43)
 	mat.roughness = 1.0
+	mat.vertex_color_use_as_albedo = true
 	rock.material = mat
 	_add_multimesh("Rocks", rock, spots, true)
+
+
+## Darkens trees and boulders that stand in fog so they do not glow out of
+## it. `vis` and `seen` are the local player's visible / explored grids.
+func apply_fog(vis: PackedByteArray, seen: PackedByteArray) -> void:
+	for m: int in _prop_meshes.size():
+		var mm: MultiMesh = _prop_meshes[m]
+		var cells: PackedInt32Array = _prop_cells[m]
+		var state: PackedByteArray = _prop_state[m]
+		for i: int in cells.size():
+			var cell: int = cells[i]
+			var now: int = 2 if vis[cell] != 0 else (1 if seen[cell] != 0 else 0)
+			if now != state[i]:
+				state[i] = now
+				var b: float = 1.0 if now == 2 else (0.5 if now == 1 else 0.13)
+				mm.set_instance_color(i, Color(b, b, b))
+		_prop_state[m] = state
 
 
 func _add_multimesh(node_name: String, mesh: Mesh, spots: Array[Transform3D], shadows: bool) -> void:
 	var mm: MultiMesh = MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
 	mm.mesh = mesh
 	mm.instance_count = spots.size()
+	var cells: PackedInt32Array = PackedInt32Array()
+	var state: PackedByteArray = PackedByteArray()
 	for i: int in spots.size():
 		mm.set_instance_transform(i, spots[i])
+		mm.set_instance_color(i, Color.WHITE)
+		var c: Vector2i = map.cell_of(Vector2(spots[i].origin.x, spots[i].origin.z))
+		cells.append(clampi(c.y, 0, map.h - 1) * map.w + clampi(c.x, 0, map.w - 1))
+		state.append(2)
+	_prop_meshes.append(mm)
+	_prop_cells.append(cells)
+	_prop_state.append(state)
 	var mmi: MultiMeshInstance3D = MultiMeshInstance3D.new()
 	mmi.name = node_name
 	mmi.multimesh = mm

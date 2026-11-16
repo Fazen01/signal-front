@@ -16,6 +16,7 @@ var salvage: int = 0
 var bandwidth_used: int = 0
 var bandwidth_cap: int = 0
 var command_points: int = 0
+var last_attack_alert: int = -100000  ## tick of the last "under attack" alert
 var signal_radius_mult: float = 1.0  ## raised temporarily by Signal Surge
 
 # Completed building counts by def id; drives tech requirements.

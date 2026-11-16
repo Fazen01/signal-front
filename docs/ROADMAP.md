@@ -58,8 +58,8 @@ decision in the session log at the bottom.
 
 ## M6 — Battlefield awareness
 
-- [ ] Fog of war and shared vision through coverage
-- [ ] Minimap with camera box, click-to-move, alerts
+- [x] Fog of war and shared vision through coverage
+- [x] Minimap with camera box, click-to-move, alerts
 - [ ] Uplink Sites; capture by Field Engineer
 - [ ] Double-click select, idle-builder key, camera bookmarks
 
@@ -250,11 +250,9 @@ Notes on this session's pushes:
   branch (`send-pack: unexpected disconnect`). The tag exists only in this
   session's clone. The M5 commit to tag is `457055b`.
 
-Half-done / next: M6 — fog of war is in the simulation (`sim/sim_vision.gd`:
-coverage plus unit sight reveal cells, explored memory, Marksman stealth,
-targeting and attack orders respect it, the AI only uses what it has seen).
-Still to do for M6: draw the fog and hide unseen enemies in the view, the
-minimap, Uplink Sites, idle-builder key and camera bookmarks.
+Half-done / next: M6 — fog of war (simulation and view) and the minimap are
+done. Still to do for M6: Uplink Sites with engineer capture, idle-builder
+key and camera bookmarks.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -265,3 +263,9 @@ Fog decisions:
   an enemy within 5 units.
 - An attack order on a unit you cannot see becomes an attack-move to where it
   was; buildings can be targeted once explored.
+- In the view, enemy units show only while seen; enemy buildings and neutral
+  objects stay drawn once seen (a building destroyed out of sight stays as a
+  ghost until the spot is seen again). Trees and boulders are darkened per
+  instance so they do not glow out of the fog.
+- "X under attack" alerts fire at most every 15 s per player, for buildings
+  and haulers, and ping the minimap.

@@ -12,12 +12,16 @@ var model: Node3D = null
 var turret: Node3D = null
 var select_ring: MeshInstance3D = null
 var base_y: float = 0.0
+var shown: bool = true  ## false while hidden by fog of war
+var seen_once: bool = false  ## the local player has seen this at least once
+var owner_id: int = -1
 var _selected: bool = false
 
 
 func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	entity_id = e.id
 	kind = e.kind
+	owner_id = e.owner
 	name = "E%d" % e.id
 	match e.kind:
 		SimEntity.Kind.UNIT, SimEntity.Kind.BUILDING:
@@ -43,6 +47,14 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	select_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	select_ring.visible = false
 	sync(e, world.map, 1.0)
+
+
+func set_shown(on: bool) -> void:
+	if on:
+		seen_once = true
+	if on != shown:
+		shown = on
+		visible = on
 
 
 func set_selected(on: bool) -> void:

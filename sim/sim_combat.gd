@@ -251,6 +251,11 @@ static func apply_damage(w: SimWorld, t: SimEntity, amount: float, damage_type: 
 	t.hp -= dmg
 	t.last_hit_tick = w.tick_count
 	t.last_attacker = attacker.id if attacker != null else 0
+	if t.owner >= 0 and (t.kind == SimEntity.Kind.BUILDING or t.def.harvester):
+		var victim: SimPlayer = w.players[t.owner]
+		if w.tick_count - victim.last_attack_alert > 300:
+			victim.last_attack_alert = w.tick_count
+			w.alert(t.owner, "%s under attack" % t.def.name, t.pos)
 	if t.hp <= 0.0:
 		kill(w, t, attacker, attacker_owner)
 

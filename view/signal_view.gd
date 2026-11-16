@@ -35,9 +35,9 @@ func is_overlay_visible() -> bool:
 	return _overlay.visible
 
 
-func _build_overlay() -> void:
-	var map: SimMap = world.map
-	var size: Vector2 = map.world_size()
+## A mesh that hugs the terrain `lift` above it, with UVs spanning the map,
+## for ground overlays driven by a map-sized texture.
+static func build_overlay_mesh(map: SimMap, lift: float) -> ArrayMesh:
 	var st: SurfaceTool = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var row: int = map.w + 1
@@ -45,7 +45,7 @@ func _build_overlay() -> void:
 		for x: int in range(0, map.w + 1):
 			st.set_uv(Vector2(float(x) / float(map.w), float(y) / float(map.h)))
 			st.set_normal(Vector3.UP)
-			st.add_vertex(Vector3(float(x) * SimMap.CELL, map.heights[y * row + x] + 0.12, float(y) * SimMap.CELL))
+			st.add_vertex(Vector3(float(x) * SimMap.CELL, map.heights[y * row + x] + lift, float(y) * SimMap.CELL))
 	for y: int in map.h:
 		for x: int in map.w:
 			var i: int = y * row + x
@@ -55,6 +55,11 @@ func _build_overlay() -> void:
 			st.add_index(i)
 			st.add_index(i + row + 1)
 			st.add_index(i + row)
+	return st.commit()
+
+
+func _build_overlay() -> void:
+	var map: SimMap = world.map
 	_image = Image.create(map.w, map.h, false, Image.FORMAT_RGBA8)
 	_texture = ImageTexture.create_from_image(_image)
 	var mat: StandardMaterial3D = StandardMaterial3D.new()
@@ -63,14 +68,13 @@ func _build_overlay() -> void:
 	mat.albedo_texture = _texture
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.render_priority = 1
 	_overlay = MeshInstance3D.new()
 	_overlay.name = "CoverageOverlay"
-	_overlay.mesh = st.commit()
+	_overlay.mesh = build_overlay_mesh(map, 0.12)
 	_overlay.material_override = mat
 	_overlay.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_overlay)
-	# Unused but keeps the overlay aligned if the map is ever not at the origin.
-	_overlay.position = Vector3.ZERO * size.x
 
 
 func _process(delta: float) -> void:
@@ -114,7 +118,7 @@ func refresh() -> void:
 				bytes[o] = 0
 				bytes[o + 1] = 0
 				bytes[o + 2] = 0
-				bytes[o + 3] = 70
+				bytes[o + 3] = 34
 	_image = Image.create_from_data(map.w, map.h, false, Image.FORMAT_RGBA8, bytes)
 	_texture.update(_image)
 	_rebuild_links()

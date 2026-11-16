@@ -6,6 +6,8 @@ extends Node3D
 var world: SimWorld = null
 var local_player: int = 0
 var views: Dictionary[int, EntityView] = {}
+var fog_enabled: bool = true
+var _ghosts: Array[EntityView] = []  ## remembered enemy buildings that died unseen
 var fx: FxLayer = null
 var _proj_views: Dictionary[int, MeshInstance3D] = {}
 var _proj_mesh: BoxMesh = null
@@ -27,6 +29,26 @@ func view_of(id: int) -> EntityView:
 	return views.get(id, null)
 
 
+## Whether the local player can currently see this entity's visual.
+func is_shown(id: int) -> bool:
+	var v: EntityView = views.get(id, null)
+	return v != null and v.shown
+
+
+## Fog-of-war rule for one entity: own things always; enemy units only while
+## seen; enemy buildings and neutral objects stay once they have been seen.
+func _should_show(e: SimEntity, v: EntityView) -> bool:
+	if not fog_enabled or e.owner == local_player:
+		return true
+	if e.owner < 0:
+		if e.kind == SimEntity.Kind.WRECK:
+			return v.seen_once or SimVision.is_visible(world, local_player, e.pos)
+		return SimVision.is_explored(world, local_player, e.pos)
+	if SimVision.can_see(world, local_player, e):
+		return true
+	return e.kind == SimEntity.Kind.BUILDING and v.seen_once
+
+
 ## Brings every visual up to date. alpha is how far we are between the last
 ## two simulation ticks (0..1).
 func sync(alpha: float) -> void:
@@ -36,16 +58,33 @@ func sync(alpha: float) -> void:
 			v = EntityView.new()
 			add_child(v)
 			v.setup(e, world, local_player)
+			v.shown = true
 			views[e.id] = v
-		v.sync(e, world.map, alpha)
+		v.set_shown(_should_show(e, v))
+		if v.shown:
+			v.sync(e, world.map, alpha)
 	if views.size() != world.entities.size():
 		var gone: Array[int] = []
 		for id: int in views.keys():
 			if not world.by_id.has(id):
 				gone.append(id)
 		for id: int in gone:
-			views[id].queue_free()
+			var v: EntityView = views[id]
 			views.erase(id)
+			var ground: Vector2 = Vector2(v.position.x, v.position.z)
+			if fog_enabled and v.kind == SimEntity.Kind.BUILDING and v.owner_id != local_player and v.seen_once and not SimVision.is_visible(world, local_player, ground):
+				# Destroyed out of sight: the player keeps seeing it until they look again.
+				_ghosts.append(v)
+			else:
+				v.queue_free()
+	if not _ghosts.is_empty():
+		var kept: Array[EntityView] = []
+		for g: EntityView in _ghosts:
+			if SimVision.is_visible(world, local_player, Vector2(g.position.x, g.position.z)):
+				g.queue_free()
+			else:
+				kept.append(g)
+		_ghosts = kept
 	_sync_projectiles(alpha)
 
 
@@ -62,6 +101,7 @@ func _sync_projectiles(alpha: float) -> void:
 			add_child(node)
 			_proj_views[p.id] = node
 		var flat: Vector2 = p.prev_pos.lerp(p.pos, alpha)
+		node.visible = not fog_enabled or SimVision.is_visible(world, local_player, flat)
 		var total: float = maxf(p.start_pos.distance_to(p.target_pos), 0.01)
 		var done: float = clampf(p.start_pos.distance_to(flat) / total, 0.0, 1.0)
 		var arc: float = 1.6 if p.weapon.homing else 0.5
@@ -102,6 +142,9 @@ func _ground(p: Vector2, lift: float) -> Vector3:
 
 ## Called by the battle scene for every sim event after a tick.
 func handle_event(ev: SimEvent) -> void:
+	if fog_enabled and not SimVision.is_visible(world, local_player, ev.pos):
+		if ev.type != SimEvent.Type.SHOT or not SimVision.is_visible(world, local_player, ev.pos2):
+			return
 	match ev.type:
 		SimEvent.Type.SHOT:
 			fx.tracer(_ground(ev.pos, 1.0), _ground(ev.pos2, 0.8), ev.text == "tracer_heavy")

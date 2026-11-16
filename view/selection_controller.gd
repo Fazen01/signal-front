@@ -116,7 +116,7 @@ func pick_entity(screen: Vector2) -> SimEntity:
 	var best_d: float = INF
 	var right: Vector3 = cam.cam.global_transform.basis.x
 	for e: SimEntity in world.entities:
-		if not e.alive or e.kind != SimEntity.Kind.UNIT:
+		if not e.alive or e.kind != SimEntity.Kind.UNIT or not battle.world_view.is_shown(e.id):
 			continue
 		var wp: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + 0.6, e.pos.y)
 		if cam.cam.is_position_behind(wp):
@@ -132,10 +132,10 @@ func pick_entity(screen: Vector2) -> SimEntity:
 		return best
 	var g: Vector2 = ground_point(screen)
 	var occupant: SimEntity = world.get_entity(world.map.occupant_at(world.map.cell_of(g)))
-	if occupant != null:
+	if occupant != null and battle.world_view.is_shown(occupant.id):
 		return occupant
 	for e: SimEntity in world.entities:
-		if e.alive and e.kind != SimEntity.Kind.UNIT and e.pos.distance_to(g) <= e.radius + 0.3:
+		if e.alive and e.kind != SimEntity.Kind.UNIT and e.pos.distance_to(g) <= e.radius + 0.3 and battle.world_view.is_shown(e.id):
 			return e
 	return null
 
@@ -322,6 +322,19 @@ func order_attack_move(at: Vector2, queued: bool) -> void:
 		return
 	world.push_command(SimCommand.attack_move(player, ids, at, queued))
 	battle.show_order_marker(at, Color(1.0, 0.35, 0.3))
+
+
+## An order given on the minimap: move (or attack-move while A is armed).
+func order_at_world(at: Vector2, queued: bool) -> void:
+	var ids: PackedInt32Array = own_unit_ids()
+	if ids.is_empty():
+		return
+	if mode == Mode.ATTACK_MOVE:
+		order_attack_move(at, queued)
+		mode = Mode.NORMAL
+		return
+	world.push_command(SimCommand.move(player, ids, at, queued))
+	battle.show_order_marker(at, Color(0.4, 1.0, 0.5))
 
 
 ## Right-click: decide what the selection should do with whatever is there.

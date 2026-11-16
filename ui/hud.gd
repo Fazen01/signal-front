@@ -40,6 +40,7 @@ var _alert_age: Array[float] = []
 var _refresh_in: float = 0.0
 var _queue_sig: String = ""
 var minimap_slot: Control = null
+var minimap: Minimap = null
 
 
 func setup(scene: BattleScene) -> void:
@@ -115,8 +116,12 @@ func _build_bottom_bar() -> void:
 
 	minimap_slot = Control.new()
 	minimap_slot.name = "MinimapSlot"
-	minimap_slot.custom_minimum_size = Vector2(160.0, 160.0)
+	minimap_slot.custom_minimum_size = Vector2(172.0, 172.0)
 	row.add_child(minimap_slot)
+	minimap = Minimap.new()
+	minimap.name = "Minimap"
+	minimap_slot.add_child(minimap)
+	minimap.setup(battle)
 
 	var sel: VBoxContainer = VBoxContainer.new()
 	sel.size_flags_horizontal = Control.SIZE_EXPAND_FILL

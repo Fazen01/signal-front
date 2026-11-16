@@ -12,6 +12,7 @@ var time_scale: float = 1.0
 var terrain: TerrainView = null
 var world_view: WorldView = null
 var signal_view: SignalView = null
+var fog_view: FogView = null
 var cam: RtsCamera = null
 var controller: SelectionController = null
 var overlay: BattleOverlay = null
@@ -56,6 +57,12 @@ func _ready() -> void:
 	signal_view.name = "Signal"
 	add_child(signal_view)
 	signal_view.setup(world, local_player)
+
+	fog_view = FogView.new()
+	fog_view.name = "FogOfWar"
+	add_child(fog_view)
+	fog_view.terrain = terrain
+	fog_view.setup(world, local_player)
 
 	cam = RtsCamera.new()
 	cam.name = "CameraRig"
@@ -134,6 +141,22 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	key.pressed = true
 	driver.expect(hud.handle_hotkey(key), "card hotkey F trains an engineer")
 	hud.push_alert("Smoke alert", Hud.GOLD)
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = hud.minimap.size * 0.5
+	hud.minimap._gui_input(click)
+	driver.expect(cam.focus.distance_to(world.map.world_size() * 0.5) < 2.0, "minimap click centres the camera")
+	click.pressed = false
+	hud.minimap._gui_input(click)
+	controller.set_selection([eng.id])
+	var rclick: InputEventMouseButton = InputEventMouseButton.new()
+	rclick.button_index = MOUSE_BUTTON_RIGHT
+	rclick.pressed = true
+	rclick.position = hud.minimap.size * 0.25
+	hud.minimap._gui_input(rclick)
+	hud.minimap.ping(hq.pos)
+	cam.center_on(hq.pos)
 	var gkey: InputEventKey = InputEventKey.new()
 	gkey.physical_keycode = KEY_G
 	gkey.pressed = true
@@ -190,6 +213,8 @@ func _handle_event(ev: SimEvent) -> void:
 		SimEvent.Type.ALERT:
 			if ev.player == local_player:
 				hud.push_alert(ev.text, Hud.RED)
+				if ev.pos != Vector2.ZERO:
+					hud.minimap.ping(ev.pos)
 		SimEvent.Type.BUILDING_DONE:
 			if ev.player == local_player:
 				var done: SimEntity = world.get_entity(ev.id)
