@@ -191,6 +191,12 @@ over three or four seeds per faction pairing, Normal vs Normal:
   Foundry is now lowest but inside the noise. Average length 20.7 minutes.
   Foundry's weak matchup is Aegis (6 of 16).
 
+In progress (08:55 UTC): difficulty levels under the new pacing. Hard beat
+Easy 18 of 18, but Hard lost to Normal (7 of 18, one draw): its first wave
+at 2:30 and 25-second wave gaps fed small waves into the tougher
+defences. First attack moved to 4:00: 10 of 18, still 1 of 6 in mirrors.
+Trying Hard with Normal's patience (first wave 8, 35 s gaps, 30% guard).
+
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
 Status: **finished** at about 04:00 UTC, M0 through M14 (two split-out M13
