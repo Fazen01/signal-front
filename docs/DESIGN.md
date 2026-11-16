@@ -125,6 +125,10 @@ own on top of the shared Signal Grid:
   everything they destroy.
 - **Umbral Veil** — ambushers: Linked ground units are hidden while they
   stand still, and their turrets are hidden until they fire.
+- Six of the later factions have a tenth unit no other has, built on
+  auras (a unit affects everything within a radius: Tether keeps units
+  Linked, Almoner heals infantry, Paymaster quickens guns, Mantle hides,
+  Dragline slows enemies) or on a weapon that destroys its bearer (Burster).
 - **Brackenfold** — grown war beasts and buildings like flowers:
   everything it owns mends 1.2% of its health a second once it has not
   been hit for six seconds. Cheap, plentiful, soft-hitting.

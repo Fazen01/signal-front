@@ -18,6 +18,7 @@ const ENTITY_KEYS: Array[String] = [
 	"radius", "blocks", "needs_coverage", "packs_to", "deploys_to", "mine_trigger", "mine_damage",
 	"mine_splash", "detect_range", "repair_rate", "repair_radius", "ai_role", "ai_weight",
 	"jam_radius", "hijacker", "aura_radius", "aura_rof", "aura_cloak", "aura_slow", "aura_link",
+	"aura_heal",
 ]
 const DIRECTIVE_KEYS: Array[String] = [
 	"name", "desc", "cost", "cooldown", "radius", "duration", "target", "damage", "shells",
@@ -330,6 +331,7 @@ func _load_entities(d: Dictionary, building: bool) -> void:
 		e.aura_cloak = bool(src.get("aura_cloak", false))
 		e.aura_slow = float(src.get("aura_slow", 0.0))
 		e.aura_link = bool(src.get("aura_link", false))
+		e.aura_heal = float(src.get("aura_heal", 0.0))
 		e.ai_role = str(src.get("ai_role", ""))
 		e.ai_weight = float(src.get("ai_weight", 0.0))
 		if not AI_ROLES.has(e.ai_role):

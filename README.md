@@ -145,7 +145,8 @@ network. It has no aircraft and no heavy tank.
   repairs, captures).
 - Skimmers (hover vehicles): Porter (hauler), Glint (scout), Lash (twin
   repeaters), Halberd (battle skimmer), Aureole (anti-air), Prism (siege,
-  tier 3).
+  tier 3), and the **Tether**: unarmed, but every Array unit within nine of
+  it counts as Linked, wherever it is.
 - Buildings: Nexus, Cistern, **Spire** (a cheaper relay with a shorter
   reach), Cradle, Assembler, Ward Node (fires at ground and air), Oracle
   (tier 3).
@@ -155,7 +156,9 @@ network. It has no aircraft and no heavy tank.
 best on ground it has wired.
 
 - Knights: Vigil (armored rifleman with a shield), Pike (anti-armor lance),
-  Mason (builds, repairs, captures).
+  Mason (builds, repairs, captures), and the **Almoner**: unarmed, heals
+  the infantry near it by seven points a second. No other army can heal
+  its soldiers.
 - Walkers: Dray (four-legged hauler), Outrider (scout), Thresher (twin
   cannons), Castellan (the heaviest gun and armor on the field), Canopy
   (anti-air), Mangonel (siege, tier 3).
@@ -181,7 +184,8 @@ itself.
 - Infantry: Gunhand, Petard (rockets), Tallyman (builder).
 - Vehicles: Strongbox (armored hauler), Jackal (raider), Brigand (gun
   truck), Ravager (quick-firing tank), Flakjack (anti-air), Ransom (rocket
-  artillery, tier 3).
+  artillery, tier 3), and the **Paymaster**: an armored pay wagon,
+  unarmed; Tally guns within eight of it fire a fifth faster.
 - Buildings: Counting House, Vault, Signal Post, Billet, Motor Pool, Gun
   Nest, Exchange (tier 3).
 
@@ -191,7 +195,9 @@ until they fire. Fragile and costly, with the longest guns on the field.
 
 - Infantry: Shade, Needle (anti-armor sharpshooter), Veilwright (builder).
 - Vehicles: Gleaner (hauler), Wisp (the fastest scout), Mirage (gun car),
-  Stalker (tank hunter), Pall (anti-air), Eclipse (siege mortar, tier 3).
+  Stalker (tank hunter), Pall (anti-air), Eclipse (siege mortar, tier 3),
+  and the **Mantle**: unarmed; Veil ground units within eight of it are
+  hidden while they stand still, even far outside your coverage.
 - Buildings: Sanctum, Reservoir, Obelisk, Hollow, Shroudworks, Sentinel,
   Occulus (tier 3).
 
@@ -201,7 +207,9 @@ a second) once it has been left alone for six seconds, so an army that
 pulls back comes back whole. Cheap and plentiful; nothing in it hits very
 hard.
 
-- Infantry: Thornling, Lasher (anti-armor spine), Grafter (builder).
+- Infantry: Thornling, Lasher (anti-armor spine), Grafter (builder), and
+  the **Burster**: it runs at the enemy and bursts, wrecking everything
+  around it, once.
 - Beasts: Forager (hauler), Quillhound (scout), Quillback (anti-infantry),
   Barkhide (the tank), Whipvine (anti-air), Sporemortar (siege, tier 3).
 - Buildings: Heartroot, Mulch Pit, Tendril, Seedbed, Bloomworks, Spine
@@ -216,7 +224,8 @@ hard than most.
   (builder).
 - Vehicles: Lodecart (hauler with a lifting magnet), Compass (scout),
   Dynamo (arc projector), Armature (coilgun tank), Stator (anti-air),
-  Solenoid (coil mortar, tier 3).
+  Solenoid (coil mortar, tier 3), and the **Dragline**: unarmed; every
+  enemy unit within nine of it moves two fifths slower.
 - Buildings: Lode Hall, Magnet Yard, Conductor, Ring Hall, Winding Shed,
   Arc Pole (fires at ground and air), Resonator (tier 3).
 

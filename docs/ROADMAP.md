@@ -288,11 +288,14 @@ map generation itself to be improved.
 
 ## M32 — Stronger faction design (owner request)
 
-- [ ] Every faction has at least one unit or building no other has in any
-      form, and plays visibly differently in the first five minutes
-- [ ] The three plainest rosters (Vesper, Tally, Veil share one template
-      with Aegis) get units that break the template
-- [ ] Faction descriptions, the How to Play screen and the tutorials say
+- [x] Every faction has at least one unit or building no other has in any
+      form (see the log for the list). "Plays visibly differently in the
+      first five minutes" is only partly true: five of the six new units
+      come from the vehicle works, which is up at about four minutes
+- [x] The three plainest rosters (Vesper, Tally, Veil share one template
+      with Aegis) get units that break the template (and so do the
+      Brackenfold, the Lodestone Circle and the Verdigris Order)
+- [x] Faction descriptions, the How to Play screen and the tutorials say
       what is special about each
 
 ## M33 — Maps and map generation, round three (owner request)
@@ -487,29 +490,22 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (22:03 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
-read.** This session's worker was down from about 16:45 to 20:54 UTC and
-again from 21:10 to 22:00; the owner has told it to continue both times.
-Each restart kills the check that is running, which is why the work below
-is still local: `tools/check.sh` takes a quarter of an hour and has not
-yet been allowed to finish. It is running again now. Nothing was lost:
+**Working now (22:25 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
+read.** M28 to M31 are pushed and `tools/check.sh` passed on them (32
+steps, with session 5's monkey test for all ten factions). Session 7's
+branch is merged in. M32 (a unit of its own for six factions, the factions
+page in How to Play) is committed locally and being checked. After that:
+the balance league over ten factions (M26), then M33 (maps) and M34 (look).
 
-- **M31 exists here**, committed locally (faction tricks, allied AIs,
-  waves that come round the side, a beaten AI concedes, repairs slow under
-  fire, repair orders on Dark buildings end). `tools/check.sh` was cut off
-  by the outage two thirds of the way through with every step passing; it
-  is being run again and the commit goes up when it passes.
-- **M32 is half done here** (auras and a bursting weapon in the sim, one
-  signature unit each for Vesper, Tally, Veil, Lodestone and Brackenfold,
-  models and tests).
-- **Session 7** (`claude/relay-session-1116-1950`): your branch has been
-  merged into this one locally (monkey test, wave leash rule, your log;
-  one conflict in `sim/sim_ai.gd`, both sides kept; 183 tests pass). Please
-  do not push a second M31 over this one; if yours has behaviour this one
-  lacks, leave it on your branch and say which in your log, and it can be
-  ported. The balance league over ten factions (M26) is free to take.
+- **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
+  if yours has behaviour this one lacks, leave it on your branch and say
+  which in your log, and it can be ported. Please do not push a second M31
+  or M32 over these.
 - Session 6's branch (`-1550`, a second M29 and the Ember Rite) stays
   unmerged, as session 7 decided.
+- This session's worker was down from about 16:45 to 20:54 UTC and again
+  from 21:10 to 22:00. Each restart kills a running check; it is now
+  started in its own process session (`setsid`), which survived.
 
 Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
@@ -935,6 +931,33 @@ restarted three times; the background tuner died with it).**
   team). This is a rule of the AI, not of the game: a person can still
   fight to the last building. All eight matches I use for testing now end
   between 9 and 21 minutes.
+
+- **M32: what each faction has that no other does.** Before today: Aegis
+  (Marksman, Kestrel and Scout Drone, three kinds of turret, the Airpad),
+  Foundry (Crawler, mines, Ratchet), Nomad (Caravan, Beacon Rig, Splicer,
+  jammer, snare turret), Zephyr (its aircraft). The other six shared one
+  roster. Each now has a tenth unit built on two small additions to the
+  sim: **auras** (`aura_radius` plus one of `aura_rof`, `aura_cloak`,
+  `aura_slow`, `aura_link`, `aura_heal` on a unit; laid every five ticks
+  on everything in reach, lapsing twelve ticks after the unit leaves or
+  dies) and a **bursting weapon** (`burst`: the unit is its own bomb).
+  - Vesper **Tether**: units within 9 count as Linked.
+  - Verdigris **Almoner**: infantry within 6 mend 7 points a second.
+  - Tally **Paymaster**: guns within 8 fire 20% faster. (First built as a
+    "Wardrum", a truck with a great drum; the owner did not like it, so
+    the same rule now rides on an armored pay wagon with its strongroom
+    door open on the gold: mercenaries shoot faster with the pay in sight.)
+  - Veil **Mantle**: ground units within 8 are hidden while still.
+  - Brackenfold **Burster**: 120 explosive damage over 2.8, once.
+  - Lodestone **Dragline**: enemies within 9 move 40% slower.
+  All but the Burster are unarmed "support" units; the AI keeps up to two.
+  The selection ring shows an aura's reach. How to Play has a second page,
+  The Factions (emblem, name in the faction's colour, what is its alone);
+  faction descriptions name the new unit; the Tutorials panel points
+  there. Not done: nothing in the first five minutes of a match looks
+  different between these six beyond the models and the interface.
+  **None of this has been through a league**: the support units are
+  priced by eye.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

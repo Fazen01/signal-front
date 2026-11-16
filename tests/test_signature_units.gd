@@ -1,7 +1,7 @@
 extends TestCase
-## One unit for each of five factions that no other faction has: the Tether
-## (Vesper), the Wardrum (Tally), the Mantle (Veil), the Dragline
-## (Lodestone) and the Burster (Brackenfold).
+## One unit for each of six factions that no other faction has: the Tether
+## (Vesper), the Paymaster (Tally), the Mantle (Veil), the Dragline
+## (Lodestone), the Burster (Brackenfold) and the Almoner (Verdigris).
 
 
 func _world(faction: String) -> SimWorld:
@@ -37,19 +37,19 @@ func test_the_tether_carries_the_signal() -> void:
 	check(not mote.linked, "once the Tether is gone the Mote is Dark again")
 
 
-func test_the_wardrum_quickens_the_guns() -> void:
+func test_the_paymaster_quickens_the_guns() -> void:
 	var w: SimWorld = _world("tally")
 	var at: Vector2 = w.map.nearest_free_pos(w.players[0].start_pos + Vector2(12.0, 0.0))
 	var gun: SimEntity = w.spawn_unit("gunhand", 0, at)
 	SimTestUtil.run(w, 20)
 	check(is_equal_approx(SimCombat.rof_mult(w, gun), 1.0), "a Gunhand at home fires at its usual rate")
-	var drum: SimEntity = w.spawn_unit("wardrum", 0, w.map.nearest_free_pos(at + Vector2(3.0, 0.0)))
+	var wagon: SimEntity = w.spawn_unit("paymaster", 0, w.map.nearest_free_pos(at + Vector2(3.0, 0.0)))
 	SimTestUtil.run(w, 20)
-	check(is_equal_approx(SimCombat.rof_mult(w, gun), 1.2), "within earshot of a Wardrum it fires a fifth faster (%.2f)" % SimCombat.rof_mult(w, gun))
-	check(drum.boost_until <= w.tick_count, "the drum does not quicken itself")
+	check(is_equal_approx(SimCombat.rof_mult(w, gun), 1.2), "with a Paymaster in sight it fires a fifth faster (%.2f)" % SimCombat.rof_mult(w, gun))
+	check(wagon.boost_until <= w.tick_count, "the wagon does not quicken itself")
 	var far: SimEntity = w.spawn_unit("gunhand", 0, w.map.nearest_free_pos(at + Vector2(0.0, 20.0)))
 	SimTestUtil.run(w, 20)
-	check(far.boost_until <= w.tick_count, "a Gunhand out of earshot is not quickened")
+	check(far.boost_until <= w.tick_count, "a Gunhand too far off is not quickened")
 
 
 func test_the_mantle_hides_what_stands_near_it() -> void:
@@ -106,8 +106,30 @@ func test_the_burster_bursts_once() -> void:
 	check(hurt >= 2 or w.players[0].stat_kills >= 1, "and took a good part of the squad with it (%d of 4 hurt)" % hurt)
 
 
+func test_the_almoner_heals_infantry() -> void:
+	var w: SimWorld = _world("verdigris")
+	var at: Vector2 = w.map.nearest_free_pos(w.players[0].start_pos + Vector2(12.0, 0.0))
+	var knight: SimEntity = w.spawn_unit("vigil", 0, at)
+	var walker: SimEntity = w.spawn_unit("outrider", 0, w.map.nearest_free_pos(at + Vector2(0.0, 3.0)))
+	var far: SimEntity = w.spawn_unit("vigil", 0, w.map.nearest_free_pos(at + Vector2(0.0, 16.0)))
+	knight.hp = 40.0
+	walker.hp = 100.0
+	far.hp = 40.0
+	SimTestUtil.run(w, 40)
+	check_near(knight.hp, 40.0, 0.01, "nothing heals a Vigil on its own")
+	var almoner: SimEntity = w.spawn_unit("almoner", 0, w.map.nearest_free_pos(at + Vector2(2.0, 0.0)))
+	almoner.hp = 60.0
+	SimTestUtil.run(w, 20 * 5)
+	check(knight.hp > 65.0 and knight.hp < 85.0, "an Almoner beside it mends about seven points a second (%.0f after five seconds)" % knight.hp)
+	check_near(walker.hp, 100.0, 0.01, "it does nothing for machines")
+	check_near(far.hp, 40.0, 0.01, "nor for a knight out of reach")
+	check_near(almoner.hp, 60.0, 0.01, "nor for itself")
+	SimTestUtil.run(w, 20 * 30)
+	check_near(knight.hp, knight.max_hp, 0.01, "it stops at full health")
+
+
 func test_the_ai_fields_its_signature_unit() -> void:
-	var units: Dictionary[String, String] = {"vesper": "tether", "tally": "wardrum", "veil": "mantle", "lodestone": "dragline", "bracken": "burster"}
+	var units: Dictionary[String, String] = {"vesper": "tether", "tally": "paymaster", "veil": "mantle", "lodestone": "dragline", "bracken": "burster", "verdigris": "almoner"}
 	for faction: String in units:
 		var config: MatchConfig = MatchConfig.ai_vs_ai(4)
 		config.factions = [faction, "aegis"]

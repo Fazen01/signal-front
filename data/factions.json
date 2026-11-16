@@ -48,7 +48,7 @@
 	},
 	"vesper": {
 		"name": "Vesper Array",
-		"desc": "An automated legion of drone frames: cheap, quick and many, but fragile. Linked frames move faster along the grid, and frames that go Dark keep nearly all of their rate of fire.",
+		"desc": "An automated legion of drone frames: cheap, quick and many, but fragile. Linked frames move faster along the grid, frames that go Dark keep nearly all of their rate of fire, and a Tether carries the signal with the swarm.",
 		"hq": "nexus",
 		"start_units": ["weaver", "weaver", "porter", "porter", "mote", "mote", "mote"],
 		"dark_rof_mult": 0.92,
@@ -64,7 +64,7 @@
 	},
 	"verdigris": {
 		"name": "Verdigris Order",
-		"desc": "Few, costly and hard to kill: armored knights and walking war machines. Linked units shrug off part of every hit, but the Order's machines draw on the grid and fire far slower when Dark.",
+		"desc": "Few, costly and hard to kill: armored knights and walking war machines. Linked units shrug off part of every hit, and Almoners heal the infantry, which no other army can; but the Order's machines draw on the grid and fire far slower when Dark.",
 		"hq": "keep",
 		"start_units": ["mason", "mason", "dray", "dray", "vigil", "vigil"],
 		"linked_damage_resist": 0.15,
@@ -95,7 +95,7 @@
 	},
 	"tally": {
 		"name": "Crimson Tally",
-		"desc": "Mercenaries who fight for pay: everything they destroy pays a bounty in salvage, so an army that keeps attacking pays for itself. Tough, fast-firing vehicles and little subtlety.",
+		"desc": "Mercenaries who fight for pay: everything they destroy pays a bounty in salvage, so an army that keeps attacking pays for itself. Tough, fast-firing vehicles that fire faster still with a Paymaster's wagon in sight.",
 		"hq": "counting_house",
 		"start_units": ["tallyman", "tallyman", "strongbox", "strongbox", "gunhand", "gunhand"],
 		"kill_bounty": 0.15,
@@ -110,7 +110,7 @@
 	},
 	"veil": {
 		"name": "Umbral Veil",
-		"desc": "Ambushers. Inside their own coverage Veil units vanish whenever they stand still, and their Sentinel turrets stay hidden until they fire. Fragile and costly, with the longest guns on the field.",
+		"desc": "Ambushers. Inside their own coverage Veil units vanish whenever they stand still, a Mantle hides them anywhere else, and their Sentinel turrets stay hidden until they fire. Fragile and costly, with the longest guns on the field.",
 		"hq": "sanctum",
 		"start_units": ["veilwright", "veilwright", "gleaner", "gleaner", "shade", "shade"],
 		"linked_cloak": true,
@@ -125,7 +125,7 @@
 	},
 	"bracken": {
 		"name": "Brackenfold",
-		"desc": "Grown, not built. Everything the Brackenfold owns mends itself once it has been left alone for a few seconds, so an army that pulls back comes back whole. Cheap and plentiful; nothing in it hits very hard.",
+		"desc": "Grown, not built. Everything the Brackenfold owns mends itself once it has been left alone for a few seconds, so an army that pulls back comes back whole. Cheap and plentiful; nothing in it hits very hard, except a Burster, once.",
 		"hq": "heartroot",
 		"start_units": ["grafter", "grafter", "forager", "forager", "thornling", "thornling"],
 		"regrowth": 0.012,
@@ -140,7 +140,7 @@
 	},
 	"lodestone": {
 		"name": "Lodestone Circle",
-		"desc": "Masters of magnetic drag. Whatever a Circle weapon hits moves a third slower for a moment: nothing gets away from them and nothing closes with them quickly. Their guns hit a little less hard than most.",
+		"desc": "Masters of magnetic drag. Whatever a Circle weapon hits moves a third slower for a moment, and a Dragline slows everything near it: nothing gets away from them and nothing closes with them quickly. Their guns hit a little less hard than most.",
 		"hq": "lode_hall",
 		"start_units": ["coilwright", "coilwright", "lodecart", "lodecart", "keeper", "keeper"],
 		"hit_slow": 0.35,

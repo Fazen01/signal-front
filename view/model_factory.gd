@@ -731,10 +731,20 @@ static func _assemble(model: String, team: Color) -> Node3D:
 			_arc_pole(root, team)
 		"resonator":
 			_resonator(root, team)
+		"almoner":
+			# A knight without a shield, a pale tabard over the armor and a
+			# lantern on a staff.
+			_knight(root, team, false)
+			box(root, Vector3(0.06, 0.62, 0.34), Vector3(0.2, 0.86, 0.0), mat(STONE))
+			box(root, Vector3(0.07, 0.14, 0.34), Vector3(0.21, 0.98, 0.0), team_mat(team))
+			cyl(root, 0.03, 0.03, 1.5, Vector3(0.24, 0.78, 0.4), mat(BRONZE), 5)
+			box(root, Vector3(0.2, 0.04, 0.2), Vector3(0.24, 1.56, 0.4), mat(BRONZE))
+			box(root, Vector3(0.14, 0.2, 0.14), Vector3(0.24, 1.42, 0.4), mat(AMBER, 1.8))
+			box(root, Vector3(0.2, 0.04, 0.2), Vector3(0.24, 1.3, 0.4), mat(BRONZE))
 		"tether":
 			_tether(root, team)
-		"wardrum":
-			_wardrum(root, team)
+		"paymaster":
+			_paymaster(root, team)
 		"mantle":
 			_mantle(root, team)
 		"dragline":
@@ -3629,22 +3639,33 @@ static func _tether(root: Node3D, team: Color) -> void:
 	ball(root, 0.17, Vector3(-0.1, 2.82, 0.0), mat(VIOLET, 1.8), 6)
 
 
-## Crimson Tally: a rig with a great drum slung across its back.
-static func _wardrum(root: Node3D, team: Color) -> void:
-	_war_rig(root, team, 2.3, 1.2, 3, 0.3)
-	box(root, Vector3(0.6, 0.5, 1.0), Vector3(0.72, 1.17, 0.0), mat(SLATE))
-	box(root, Vector3(0.05, 0.14, 0.8), Vector3(1.03, 1.24, 0.0), mat(WINDOW_WARM, 0.9, 0.2, 0.3))
-	for z: float in [-0.52, 0.52]:
-		box(root, Vector3(1.0, 0.5, 0.08), Vector3(-0.42, 1.15, z), mat(PITCH))
-	cyl(root, 0.62, 0.62, 0.9, Vector3(-0.42, 1.62, 0.0), mat(OXBLOOD), 12, Vector3(PI * 0.5, 0.0, 0.0))
-	cyl(root, 0.64, 0.64, 0.14, Vector3(-0.42, 1.62, 0.0), team_mat(team), 12, Vector3(PI * 0.5, 0.0, 0.0))
-	for side: float in [-1.0, 1.0]:
-		cyl(root, 0.67, 0.67, 0.07, Vector3(-0.42, 1.62, side * 0.46), mat(GILT, 0.0, 0.7, 0.4), 12, Vector3(PI * 0.5, 0.0, 0.0))
-		cyl(root, 0.56, 0.56, 0.03, Vector3(-0.42, 1.62, side * 0.5), mat(Color(0.88, 0.82, 0.68)), 12, Vector3(PI * 0.5, 0.0, 0.0))
-		# A beater on each side, raised.
-		box(root, Vector3(0.06, 0.7, 0.06), Vector3(-1.0, 1.9, side * 0.62), mat(GILT, 0.0, 0.7, 0.4), Vector3(0.0, 0.0, -0.5))
-		ball(root, 0.1, Vector3(-0.82, 2.2, side * 0.62), mat(OXBLOOD), 6)
-	aerial(root, Vector3(0.7, 1.42, -0.4), 1.0, GILT)
+## Crimson Tally: an armored pay wagon. A black strongroom banded in gilt
+## rides on the back with its round door swung open on stacked gold, under
+## a tall banner in the team's colour.
+static func _paymaster(root: Node3D, team: Color) -> void:
+	_war_rig(root, team, 2.4, 1.25, 3, 0.3)
+	box(root, Vector3(0.6, 0.5, 1.0), Vector3(0.78, 1.17, 0.0), mat(SLATE))
+	box(root, Vector3(0.05, 0.14, 0.8), Vector3(1.09, 1.24, 0.0), mat(WINDOW_WARM, 0.9, 0.2, 0.3))
+	# The strongroom.
+	box(root, Vector3(1.3, 0.9, 1.16), Vector3(-0.4, 1.38, 0.0), mat(PITCH))
+	for x: float in [-0.92, -0.4, 0.12]:
+		box(root, Vector3(0.1, 0.94, 1.2), Vector3(x, 1.38, 0.0), mat(GILT, 0.0, 0.7, 0.4))
+	box(root, Vector3(1.34, 0.08, 1.2), Vector3(-0.4, 1.85, 0.0), mat(OXBLOOD))
+	# Its door stands open at the back: a round slab on a hinge, and the gold behind it.
+	cyl(root, 0.4, 0.4, 0.1, Vector3(-1.08, 1.38, 0.0), mat(CHARRED), 12, Vector3(0.0, 0.0, -PI * 0.5))
+	cyl(root, 0.42, 0.42, 0.12, Vector3(-1.2, 1.38, 0.62), mat(SLATE, 0.0, 0.6, 0.4), 12, Vector3(PI * 0.5, 0.0, 0.0))
+	cyl(root, 0.14, 0.14, 0.16, Vector3(-1.2, 1.38, 0.62), mat(GILT, 0.0, 0.7, 0.4), 8, Vector3(PI * 0.5, 0.0, 0.0))
+	for i: int in 3:
+		cyl(root, 0.1, 0.1, 0.14 + 0.07 * float(i), Vector3(-1.14, 1.12 + 0.035 * float(i), -0.2 + 0.2 * float(i)), mat(GILT, 0.5, 0.8, 0.3), 8)
+	# A chest of coin on the roof and the Tally's banner above it.
+	box(root, Vector3(0.5, 0.26, 0.4), Vector3(-0.1, 2.02, 0.0), mat(OXBLOOD))
+	box(root, Vector3(0.54, 0.06, 0.44), Vector3(-0.1, 2.16, 0.0), mat(GILT, 0.0, 0.7, 0.4))
+	box(root, Vector3(0.4, 0.1, 0.3), Vector3(-0.1, 2.22, 0.0), mat(GILT, 0.6, 0.8, 0.3))
+	cyl(root, 0.035, 0.045, 1.9, Vector3(-0.78, 2.8, -0.4), mat(GILT, 0.0, 0.7, 0.4), 5)
+	box(root, Vector3(0.05, 1.0, 0.6), Vector3(-0.78, 3.15, -0.08), team_mat(team))
+	box(root, Vector3(0.06, 0.1, 0.64), Vector3(-0.78, 3.67, -0.08), mat(GILT, 0.0, 0.7, 0.4))
+	wedge(root, Vector3(0.6, 0.24, 0.05), Vector3(-0.78, 2.54, -0.08), team_mat(team), 0.5, Vector3(PI, PI * 0.5, 0.0))
+	box(root, Vector3(0.1, 0.1, 0.1), Vector3(-0.78, 3.8, -0.4), mat(GILT, 1.2, 0.8, 0.3))
 
 
 ## Umbral Veil: a low car under a cowl of two leaning fins; a ball of

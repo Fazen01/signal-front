@@ -133,6 +133,9 @@ func _process(_delta: float) -> void:
 		menu.open_settings()
 	if menu != null and _script_name == "help" and _count == 3:
 		menu.call("_show", menu.get("_help"))
+	if menu != null and _script_name == "helpfactions" and _count == 3:
+		menu.show_help_page(true)
+		menu.call("_show", menu.get("_help"))
 	if _count == _frames:
 		_save(_shot_name)
 		get_tree().quit(0)

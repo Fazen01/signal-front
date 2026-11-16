@@ -55,7 +55,7 @@ func test_everything_the_order_owns_can_be_made() -> void:
 			check(built.has(def.id) or def.id == "keep", "%s can be built by a Mason" % def.name)
 		else:
 			check(made.has(def.id), "%s is produced somewhere" % def.name)
-	check_eq(count, 17, "nine units and eight buildings")
+	check_eq(count, 18, "ten units (the Almoner is the tenth) and eight buildings")
 	var f: FactionDef = data.faction("verdigris")
 	for role: String in ["builder", "hauler", "relay", "barracks", "works", "depot", "turret_ground", "turret_armor", "turret_air", "tier3"]:
 		check(data.entities.has(f.role(role)), "the AI has a %s (%s)" % [role, f.role(role)])

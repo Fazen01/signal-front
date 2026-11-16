@@ -50,6 +50,20 @@ The command card at the bottom right shows what the selection can build or
 train, with its hotkey in the corner. Lines show where selected units are
 going; a ring shows how far a selected unit or turret can shoot."""
 
+## What each faction does that no other can: the second page of How to Play.
+const FACTION_NOTES: Dictionary[String, String] = {
+	"aegis": "Linked units shoot further. Marksmen that hide while they stand still, Kestrel gunships, and a turret for every kind of target.",
+	"foundry": "Linked vehicles repair themselves. Crawlers are factories that drive to the front; Sappers lay mines; the heaviest tanks.",
+	"nomad": "Hidden in forest, and half again as much salvage from wrecks. The headquarters and the relays pack up and move; Splicers steal Dark vehicles.",
+	"vesper": "Cheap, quick drones that are faster while Linked. A Tether keeps the swarm Linked wherever it goes.",
+	"verdigris": "Linked units shrug off 15% of every hit. Almoners heal infantry, which no other army can; the Lantern is the relay with the longest reach.",
+	"zephyr": "Linked units see a quarter further. The only real air force: gunships, strike craft and bombers that fly over anything.",
+	"tally": "Paid 15% of the value of everything it destroys. Guns within sight of a Paymaster fire a fifth faster.",
+	"veil": "Hidden while standing still inside its own coverage, and anywhere near a Mantle. Sentinel turrets stay hidden until they fire.",
+	"bracken": "Everything mends itself once it has been left alone for six seconds. Bursters run in and blow up, once.",
+	"lodestone": "Whatever its weapons hit moves a third slower for a moment. A Dragline slows every enemy near it.",
+}
+
 const MENU_LEFT: float = 96.0  ## left edge of the main menu column
 
 var _main_box: VBoxContainer = null
@@ -80,6 +94,10 @@ var _time: float = 0.0
 var _backdrop: MenuBackdrop = null
 var _shade: GradientTexture2D = null  ## dark on the left, clear on the right
 var _live: Label = null  ## says which match is playing in the background
+var _help_text: Label = null
+var _help_page: Button = null
+var _help_roster: VBoxContainer = null
+var _help_factions: bool = false
 var _setup_title: Label = null
 var _setup_plate: Label = null
 var _setup_emblem: HudIcon = null
@@ -412,7 +430,7 @@ func _build_tutorials() -> void:
 	box.add_theme_constant_override("separation", 12)
 	_tutorials.add_child(box)
 	box.add_child(UiTheme.title("TUTORIALS", 28))
-	box.add_child(Hud.make_label("Three short missions with the Aegis Directorate. Nothing can go wrong in them.", 15, Hud.DIM))
+	box.add_child(Hud.make_label("Three short missions with the Aegis Directorate. Nothing can go wrong in them.\nThe other nine factions each have a rule and a unit of their own: see How to Play, The Factions.", 15, Hud.DIM))
 	for id: String in SimTutorial.IDS:
 		var b: Button = Button.new()
 		b.text = "%s\n%s" % [SimTutorial.TITLES[id], SimTutorial.BLURBS[id]]
@@ -445,14 +463,63 @@ func _build_help() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	_help.add_child(box)
-	var text: Label = Hud.make_label(HELP_TEXT, 15, Hud.TEXT)
-	box.add_child(text)
+	_help_text = Hud.make_label(HELP_TEXT, 15, Hud.TEXT)
+	_help_text.custom_minimum_size = Vector2(760.0, 0.0)
+	box.add_child(_help_text)
+	# The second page: every faction with its emblem, in its own colour.
+	_help_roster = VBoxContainer.new()
+	_help_roster.add_theme_constant_override("separation", 12)
+	_help_roster.visible = false
+	box.add_child(_help_roster)
+	_help_roster.add_child(UiTheme.title("THE FACTIONS", 24))
+	_help_roster.add_child(Hud.make_label("What each does that no other can. Select a unit in a match to see a ring at the reach of its guns, or of its aura.", 15, Hud.DIM))
+	var grid: GridContainer = GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 12)
+	_help_roster.add_child(grid)
+	for f: FactionDef in GameData.shared().factions.values():
+		if not f.playable:
+			continue
+		var skin: UiSkin = UiSkin.of(f.id)
+		var mark: HudIcon = HudIcon.new()
+		mark.kind = skin.emblem
+		mark.color = skin.accent
+		mark.custom_minimum_size = Vector2(28.0, 28.0)
+		mark.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		grid.add_child(mark)
+		var who: Label = UiTheme.label(f.name, 17, skin.accent)
+		who.add_theme_font_override("font", UiTheme.strong_font())
+		who.custom_minimum_size = Vector2(190.0, 0.0)
+		who.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		grid.add_child(who)
+		var what: Label = Hud.make_label(str(FACTION_NOTES.get(f.id, f.desc)), 15, Hud.TEXT)
+		what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		what.custom_minimum_size = Vector2(620.0, 0.0)
+		grid.add_child(what)
+	var buttons: HBoxContainer = HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 12)
+	buttons.alignment = BoxContainer.ALIGNMENT_END
+	box.add_child(buttons)
+	# Two pages: how to play, and what is special about each faction.
+	_help_page = Button.new()
+	_help_page.text = "The Factions"
+	_help_page.custom_minimum_size = Vector2(180.0, 44.0)
+	_help_page.pressed.connect(func() -> void: show_help_page(not _help_factions))
+	buttons.add_child(_help_page)
 	var back: Button = Button.new()
 	back.text = "Back"
 	back.custom_minimum_size = Vector2(120.0, 44.0)
-	back.size_flags_horizontal = Control.SIZE_SHRINK_END
 	back.pressed.connect(func() -> void: _show(_main_box))
-	box.add_child(back)
+	buttons.add_child(back)
+
+
+## The How to Play panel has two pages: the game, and the factions.
+func show_help_page(factions: bool) -> void:
+	_help_factions = factions
+	_help_text.visible = not factions
+	_help_roster.visible = factions
+	_help_page.text = "How to Play" if factions else "The Factions"
 
 
 ## Shows the chosen map's description and closes the seats it has no room for.

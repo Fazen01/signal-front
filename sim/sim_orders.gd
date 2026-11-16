@@ -172,6 +172,8 @@ static func _spread_aura(w: SimWorld, e: SimEntity) -> void:
 				n.cloak_until = until
 			if def.aura_link:
 				n.link_until = until
+			if def.aura_heal > 0.0 and n != e and n.def.is_infantry() and n.hp < n.max_hp:
+				n.hp = minf(n.max_hp, n.hp + def.aura_heal * float(AURA_INTERVAL) * SimWorld.DT)
 		elif def.aura_slow > 0.0 and w.are_enemies(e.owner, n.owner):
 			n.slow_amount = maxf(def.aura_slow, n.slow_amount if w.tick_count < n.slow_until else 0.0)
 			n.slow_until = maxi(n.slow_until, until)

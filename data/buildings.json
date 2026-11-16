@@ -245,7 +245,7 @@
 		"name": "Chapterhouse", "desc": "Musters the Order's knights: Vigils, Pikes and Masons.",
 		"faction": "verdigris", "tier": 1, "cost": 220, "build_time": 25.0,
 		"hp": 1550, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
-		"produces": ["vigil", "pike", "mason"], "model": "chapterhouse", "hotkey": "B"
+		"produces": ["vigil", "pike", "mason", "almoner"], "model": "chapterhouse", "hotkey": "B"
 	},
 	"armoury": {
 		"name": "Armoury", "desc": "Builds the Order's walkers. Unlocks tier 2.",
@@ -347,7 +347,7 @@
 		"name": "Motor Pool", "desc": "Builds the Tally's vehicles. Unlocks tier 2.",
 		"faction": "tally", "tier": 2, "cost": 400, "build_time": 36.5,
 		"hp": 1800, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
-		"produces": ["strongbox", "jackal", "brigand", "ravager", "flakjack", "ransom", "wardrum"], "model": "motor_pool",
+		"produces": ["strongbox", "jackal", "brigand", "ravager", "flakjack", "ransom", "paymaster"], "model": "motor_pool",
 		"hotkey": "V", "requires": ["billet"]
 	},
 	"gun_nest": {

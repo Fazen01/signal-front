@@ -49,6 +49,7 @@ var aura_rof: float = 0.0  ## friends fire this much faster (0.2 = a fifth)
 var aura_cloak: bool = false  ## friendly ground units are hidden while they stand still
 var aura_slow: float = 0.0  ## enemy units move this much slower
 var aura_link: bool = false  ## friendly units count as Linked, wherever they are
+var aura_heal: float = 0.0  ## friendly infantry mend this many points a second
 var ai_role: String = ""  ## how the skirmish AI classes this unit
 var ai_weight: float = 0.0  ## base production weight for the AI (0 = never built for the army)
 var capacity: int = 0

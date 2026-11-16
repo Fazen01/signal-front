@@ -45,3 +45,15 @@ func test_a_skin_builds_a_whole_theme() -> void:
 		check(skin.dim.get_luminance() - skin.section_fill.get_luminance() > 0.25, "%s: small print can be read" % id)
 		var strip: StyleBoxFlat = skin.strip(true)
 		check(strip.border_width_top >= 1 and strip.border_width_bottom == 0, "%s: a bottom bar is ruled along its top" % id)
+
+
+
+func test_how_to_play_says_what_is_special_about_every_faction() -> void:
+	var data: GameData = GameData.shared()
+	for f: FactionDef in data.factions.values():
+		if not f.playable:
+			continue
+		check(MainMenu.FACTION_NOTES.has(f.id), "%s: has a line on the factions page" % f.name)
+		check(str(MainMenu.FACTION_NOTES.get(f.id, "")).length() > 40, "%s: and it says something" % f.name)
+	for id: String in MainMenu.FACTION_NOTES:
+		check(data.factions.has(id), "%s: every line is about a faction that exists" % id)
