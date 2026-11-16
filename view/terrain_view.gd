@@ -863,7 +863,7 @@ func _build_litter() -> void:
 					stump_tints.append(Color.WHITE * _rng.range_f(0.75, 1.0))
 			# Flowers come in patches of one colour.
 			var patch: float = sin(float(x) * 0.23 + s1) * cos(float(y) * 0.29 + s2)
-			if patch > 0.55 and _rng.chance(0.55):
+			if patch > 0.55 and _rng.chance(0.4):
 				var hue: Color = petals[posmod(int(float(x) * 0.05 + float(y) * 0.07 + s1 * 3.0), petals.size())]
 				for i: int in _rng.range_i(1, 3):
 					var bloom: Transform3D = _spot(x, y, 0.05, 0.8, 1.4, 0.2, 0.0)
@@ -871,7 +871,7 @@ func _build_litter() -> void:
 						continue
 					flowers.append(bloom)
 					flower_tints.append(hue * _rng.range_f(0.85, 1.0))
-	_add_scatter("Flowers", _flower(), _prop_material(0.1, true, 0.25), flowers, flower_tints, false)
+	_add_scatter("Flowers", _flower(), _prop_material(0.1, true, 0.06), flowers, flower_tints, false)
 	_add_scatter("Reeds", _reed(), _prop_material(0.1, true), reeds, reed_tints, false)
 	var wood: ShaderMaterial = _prop_material(0.0, false)
 	_add_scatter("Logs", _log(), wood, logs, wood_tints, true)

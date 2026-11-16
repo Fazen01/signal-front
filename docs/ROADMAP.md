@@ -313,6 +313,19 @@ then for more work on the map (M17).**
   `tools/check.sh` plays its five matches on the new maps; all end with a
   winner (the three-way one in 22 minutes, it used to take 55).
 
+**11:10 UTC — the owner asked for a further design pass on units and
+buildings. It was tried and withdrawn.**
+
+- What was tried, all in one go: three-tone camouflage on vehicles and
+  troops and rain streaks on buildings (in the model shader), a rim of sky
+  light, a paved yard with kerbs and corner lamps round every building, and
+  extra kit on vehicles (fenders, grilles, cupolas, bedrolls).
+- **The owner saw it and did not like it, so none of it was committed.**
+  Units and buildings look as they did at `46dcdf2`. Only the flowers were
+  kept toned down (they read as confetti in a fight).
+- For whoever tries again: change one thing at a time and show it before
+  building on it. Which of the four parts was disliked is not known.
+
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
 for whoever is next: the real-GPU frame rate, and the two session branches
