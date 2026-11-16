@@ -514,3 +514,14 @@ Fog decisions:
   preset and it holds no credentials. The preset adds `data/*.json` and
   `data/maps/*.json` to the export, which Godot would otherwise leave out,
   and leaves out `tools/`, `tests/` and `docs/`.
+- Second match-length experiment (also reverted): making every AI level wait
+  for a larger first wave (7 -> 11 units on Normal) with longer gaps between
+  waves left the average at about 9.6 minutes and swung the win rates to
+  Aegis 75% / Foundry 17% / Nomad 58%. Neither income nor wave timing moves
+  match length much; games end soon after the first army breaks through.
+  What is left to try is the defender's side: headquarters and turret
+  durability, and how quickly a base falls once its army is gone.
+- `check.sh` gained a `spectate` step: the real battle scene plays a whole
+  Nomad-vs-Foundry AI match at 30x speed (`-- --spectate=nomad,foundry`), so
+  every view, HUD, effect and sound path runs through a full match, not just
+  the first seconds.

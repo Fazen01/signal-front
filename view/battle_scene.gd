@@ -39,6 +39,7 @@ var ghost_ok: bool = false
 var _ghost_shown_ok: int = -1
 
 var _accum: float = 0.0
+var spectating: bool = false  ## an AI-vs-AI match run for checking, not played
 var perf_enabled: bool = false  ## tools/frame_bench.gd: time the stages of _process
 var perf: Dictionary[String, int] = {}  ## stage -> microseconds, plus "frames"
 var _markers: Array[MeshInstance3D] = []
@@ -49,6 +50,7 @@ func _ready() -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	config = game.take_config() if game != null else MatchConfig.skirmish(1)
 	world = game.take_world() if game != null else null
+	_read_spectate_args()
 	if world == null:
 		world = SimSetup.create_match(config)
 	local_player = 0
@@ -253,6 +255,27 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	driver.expect(on_hotkey(gkey) and signal_view.is_overlay_visible(), "G shows it again")
 
 
+## `-- --spectate=aegis,nomad [--speed=30]` turns the scene into an AI-vs-AI
+## match watched from player one's side and run fast. tools/check.sh uses it
+## to put every view, HUD and effect path through a whole match.
+func _read_spectate_args() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--spectate="):
+			var c: MatchConfig = MatchConfig.ai_vs_ai(7)
+			c.factions.clear()
+			c.is_ai.clear()
+			c.ai_levels.clear()
+			c.names.clear()
+			for fname: String in arg.trim_prefix("--spectate=").split(","):
+				c.add_ai(fname, 1, "%s AI" % fname.capitalize())
+			config = c
+			world = null
+			spectating = true
+			time_scale = 30.0
+		elif arg.begins_with("--speed="):
+			time_scale = float(arg.trim_prefix("--speed="))
+
+
 func _build_environment() -> void:
 	var sun: DirectionalLight3D = DirectionalLight3D.new()
 	sun.name = "Sun"
@@ -348,6 +371,12 @@ func _handle_event(ev: SimEvent) -> void:
 			cancel_placement()
 			cancel_directive()
 			menus.show_result(world, local_player)
+			if spectating:
+				var secs: int = int(world.seconds())
+				print("Spectate finished: winner %d at %d:%02d, %d views, %d sounds played" % [
+					world.winner, secs / 60, secs % 60, world_view.views.size(), audio.played_count,
+				])
+				get_tree().quit(0)
 
 
 func _on_selection_changed() -> void:
