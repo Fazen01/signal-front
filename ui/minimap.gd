@@ -75,13 +75,13 @@ func _process(delta: float) -> void:
 func _terrain_color(t: int) -> Color:
 	match t:
 		SimMap.Terrain.FOREST:
-			return Color(0.16, 0.30, 0.16)
+			return Color(0.13, 0.28, 0.13)
 		SimMap.Terrain.ROCK:
-			return Color(0.45, 0.44, 0.42)
+			return Color(0.44, 0.44, 0.45)
 		SimMap.Terrain.WATER:
-			return Color(0.16, 0.32, 0.48)
+			return Color(0.17, 0.42, 0.56)
 		_:
-			return Color(0.33, 0.41, 0.23)
+			return Color(0.31, 0.42, 0.21)
 
 
 func _refresh_texture() -> void:

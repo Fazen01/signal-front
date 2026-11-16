@@ -132,7 +132,7 @@ only (`view/`): nothing here changes the simulation or the data.
 - [x] Effects: glowing tracers, muzzle flashes, shock rings, scorch marks,
       flashes that light their surroundings; effects fade out properly
 - [x] A live AI-versus-AI match plays behind the main menu
-- [ ] Minimap and coverage overlay colours retuned for the new ground
+- [x] Minimap and coverage overlay colours retuned for the new ground
 
 ## Session log
 
@@ -141,7 +141,7 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-Status: **in progress**. The owner wrote in at about 09:05 UTC asking for
+Status: **M15 done**; carrying on with polish. The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
 
 - This branch was fast-forwarded to `claude/relay-session-1116-0550` (the
@@ -199,7 +199,13 @@ better graphics (units, buildings, map) and to carry on; that is M15 above.
 - `claude/relay-session-1116-0550` (session 3, finished) was merged again at
   09:48 UTC, cleanly.
 
-Working on: M15 is in except the minimap and overlay colours.
+- The coverage tint inside your own network is lighter than it was (so the
+  ground shows through) and uncovered ground is dimmed a little more; the
+  bright rim is unchanged.
+
+Status at 10:05 UTC: M15 is complete and pushed; `tools/check.sh` passes.
+Nothing is half-finished. What nobody has seen yet is all of this on a real
+GPU — the captures here are software-rendered.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 

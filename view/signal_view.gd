@@ -113,12 +113,12 @@ func refresh() -> void:
 				bytes[o] = team_r
 				bytes[o + 1] = team_g
 				bytes[o + 2] = team_b
-				bytes[o + 3] = 120 if rim else 38
+				bytes[o + 3] = 120 if rim else 24
 			else:
 				bytes[o] = 0
 				bytes[o + 1] = 0
 				bytes[o + 2] = 0
-				bytes[o + 3] = 34
+				bytes[o + 3] = 44
 	_image = Image.create_from_data(map.w, map.h, false, Image.FORMAT_RGBA8, bytes)
 	_texture.update(_image)
 	_rebuild_links()
