@@ -7,9 +7,10 @@ extends RefCounted
 
 const START_MARGIN_CELLS: int = 13  ## start position, in cells from the corner
 const START_CLEAR_CELLS: int = 11  ## radius kept free of obstacles around a start
-const NEAR_FIELD_AMOUNT: int = 5000
-const MID_FIELD_AMOUNT: int = 9000
-const SMALL_CELLS: int = 64  ## 128 x 128 world units, two players
+const NEAR_FIELD_AMOUNT: int = 7500
+const MID_FIELD_AMOUNT: int = 13500
+const SMALL_CELLS: int = 64  ## 128 x 128 world units: the compact two-player map and the layouts
+const STANDARD_CELLS: int = 88  ## 176 x 176 world units: the default two-player map
 const LARGE_CELLS: int = 96  ## 192 x 192 world units, up to four players
 const LAYOUT_DIR: String = "res://data/maps"
 

@@ -13,7 +13,7 @@
 	"dark_turret_rof_mult": 0.5,
 	"forest_infantry_damage_mult": 0.6,
 	"forest_vehicle_speed_mult": 0.5,
-	"harvest_seconds": 4.0,
+	"harvest_seconds": 6.0,
 	"unload_seconds": 1.0,
 	"repair_rate": 0.04,
 	"uplink_income_per_second": 3,

@@ -4,6 +4,8 @@ extends TestCase
 
 func _world() -> SimWorld:
 	var config: MatchConfig = MatchConfig.skirmish(6)
+	# The spots used below were picked on the compact map's terrain.
+	config.map_cells = SimMapGen.SMALL_CELLS
 	config.factions = ["foundry", "aegis"]
 	config.is_ai = [false, false]
 	var w: SimWorld = SimSetup.create_match(config)

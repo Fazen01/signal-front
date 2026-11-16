@@ -54,6 +54,8 @@ var _seed: SpinBox = null
 var _faction: OptionButton = null
 var _level: OptionButton = null
 var _enemy_faction: OptionButton = null
+const COMPACT_MAP: String = "@compact"  ## map list entry for the small generated map
+
 var _map: OptionButton = null
 var _map_ids: Array[String] = []  ## "" = generated
 var _map_players: Array[int] = []
@@ -179,6 +181,9 @@ func _build_setup() -> void:
 	_map.add_item("Generated from the seed")
 	_map_ids.append("")
 	_map_players.append(4)
+	_map.add_item("Generated, compact (shorter match)")
+	_map_ids.append(COMPACT_MAP)
+	_map_players.append(2)
 	for id: String in SimMapGen.layout_ids():
 		var info: Dictionary = SimMapGen.layout_info(id)
 		_map.add_item("%s (%d players)" % [str(info["name"]), int(info["players"])])
@@ -310,7 +315,9 @@ func _update_map() -> void:
 	var index: int = maxi(_map.selected, 0)
 	var capacity: int = _map_players[index]
 	if _map_ids[index] == "":
-		_map_blurb.text = "A new battlefield from the seed: 128 x 128 for two players, 192 x 192 for three or four."
+		_map_blurb.text = "A new battlefield from the seed: 176 x 176 for two players, 192 x 192 for three or four."
+	elif _map_ids[index] == COMPACT_MAP:
+		_map_blurb.text = "A small 128 x 128 battlefield from the seed. The armies meet early; expect a match of about ten minutes."
 	else:
 		_map_blurb.text = str(SimMapGen.layout_info(_map_ids[index])["desc"])
 	for i: int in 3:
@@ -369,6 +376,9 @@ func is_setup_open() -> bool:
 func start_skirmish() -> void:
 	var config: MatchConfig = MatchConfig.skirmish(int(_seed.value), _level.selected)
 	config.map_id = _map_ids[maxi(_map.selected, 0)]
+	if config.map_id == COMPACT_MAP:
+		config.map_id = ""
+		config.map_cells = SimMapGen.SMALL_CELLS
 	config.factions = [_faction_ids[maxi(_faction.selected, 0)]]
 	config.is_ai = [false]
 	config.ai_levels = [1]

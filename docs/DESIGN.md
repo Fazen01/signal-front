@@ -126,7 +126,9 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Flat-to-rolling terrain with impassable rock and water, forest patches,
   Salvage Fields near each start and richer contested fields mid-map, Uplink
   Sites on the flanks.
-- Sizes: 128×128 world units (2 players), 192×192 (up to 4).
+- Sizes: 176×176 world units (2 players; a compact 128×128 option for
+  shorter matches), 192×192 (up to 4). The hand-made two-player layouts are
+  128×128.
 - A seeded, mirrored procedural generator plus three hand-tuned layouts stored
   as data. Start positions are always symmetric.
 

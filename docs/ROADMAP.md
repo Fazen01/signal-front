@@ -103,8 +103,9 @@ decision in the session log at the bottom.
       spots (`tools/perf_bench.gd`, `tools/frame_bench.tscn`)
 - [ ] Confirm 60 fps with 300 units on real hardware (this needs a GPU: the
       sessions only have software rendering, so the draw cost is unmeasured)
-- [ ] Bring 1v1 match length up to the 15–25 minute target (AI-vs-AI matches
-      average about 9 minutes after tuning)
+- [x] Bring 1v1 match length up to the 15–25 minute target (AI-vs-AI matches
+      averaged about 9-10 minutes; now median 16.6 on the default map, see
+      session 3)
 
 ## M14 — Finish
 
@@ -140,8 +141,29 @@ Done so far:
   timing) and has a `--trace=1` timeline. Baseline on seeds 1-3, all nine
   pairings: average 10.0 minutes, median 9.4.
 
-Working on: the open M13 item on 1v1 match length. Findings so far (27
-games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
+- M13 match length (ticked): AI-vs-AI 1v1 on the default map now averages
+  17.1 minutes, median 16.6, range 11-31, no stalemates; 59% of games fall
+  inside 15-25 (seeds 1-3, all nine faction pairings, 27 games; it was
+  average 10.0, median 9.4). Win rates in that sample: Aegis 50%, Foundry
+  58%, Nomad 41% (noise is about +/-15 points at this size).
+
+Match-length decisions:
+- The default generated two-player map is 88 cells (176 x 176 world units),
+  up from 64. The old size stays as "Generated, compact (shorter match)" in
+  the skirmish map list; the hand-made layouts are unchanged (128 x 128) and
+  so play shorter. Tests that picked spots on the old terrain pin
+  `map_cells` to the compact size.
+- Harvesting a load takes 6 s (was 4); generated fields hold 50% more
+  (7,500 near, 13,500 mid) so the map does not run dry before the end.
+- Every unit and building takes 30% longer to build (rounded to 0.5 s).
+- Headquarters have double health (Aegis 6,000, Foundry Core 7,200, Caravan
+  Hub and Caravan 5,200); every other building has 25% more, mines excepted.
+  Turret damage is unchanged: buffing it caused stalemates.
+- AI wave gaps are 50% longer (Easy 110 s, Normal 60 s, Hard 38 s).
+- Save files keep the map size they were made with, so older saves still
+  load on the old map size.
+
+How it was found (27 games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
 12.2; HQ health x2.5 with tougher buildings and turrets -> 10.4. Traces show
 matches are decided by minute 3-6 when one army is wiped out; the rest is
 mopping up. Slower macro plus tougher defences together -> average 13.9; a
@@ -152,7 +174,9 @@ minute 24, after which both sides live on trickles and armies of basic
 infantry cannot crack buffed turrets and a double-health HQ that is repaired
 for free. Without the turret and building buffs, with fields x1.5, harvest
 6 s, build times x1.3, HQ x1.5 and AI wave gaps x1.5 on an 88-cell map:
-average 16.2, median 15.2, no stalemates (candidate "X1", being refined).
+average 16.2, median 15.2, no stalemates (candidate "X1"). Variation "X3"
+(the same but HQ health x2 and other buildings x1.25) was better still:
+median 16.1, 66% of games inside 15-25, no stalemates, so it was baked in.
 Tried and dropped: waves that retreat when cut below 40% made matches
 shorter (8.4), because the survivors die running and the enemy follows.
 

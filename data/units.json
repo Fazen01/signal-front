@@ -1,220 +1,220 @@
 {
 	"trooper": {
 		"name": "Trooper", "desc": "Rifle infantry. Cheap, good against other infantry.",
-		"faction": "aegis", "tier": 1, "cost": 55, "build_time": 6.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 1, "cost": 55, "build_time": 8.0, "bandwidth": 1,
 		"hp": 90, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["rifle"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "trooper", "hotkey": "T"
 	},
 	"lancer": {
 		"name": "Lancer", "desc": "Anti-armor missile team. Slow to fire, deadly to vehicles.",
-		"faction": "aegis", "tier": 1, "cost": 110, "build_time": 9.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 1, "cost": 110, "build_time": 11.5, "bandwidth": 1,
 		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["lance_missile"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "lancer", "hotkey": "L"
 	},
 	"field_engineer": {
 		"name": "Field Engineer", "desc": "Builds and repairs structures. Unarmed.",
-		"faction": "aegis", "tier": 1, "cost": 80, "build_time": 7.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 1, "cost": 80, "build_time": 9.0, "bandwidth": 1,
 		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 10.0, "builder": true, "model": "engineer", "hotkey": "F",
 		"builds": ["depot", "relay", "barracks", "vehicle_works", "sentry_turret", "lance_battery", "flak_post", "command_lab", "airpad"]
 	},
 	"marksman": {
 		"name": "Marksman", "desc": "Long-sighted sharpshooter. Hidden while standing still unless an enemy is close.",
-		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 12.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 15.5, "bandwidth": 1,
 		"hp": 60, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 16.0, "weapons": ["marksman_rifle"], "stealth": true, "ai_role": "anti_infantry", "ai_weight": 0.8, "model": "marksman",
 		"hotkey": "M", "requires": ["vehicle_works"]
 	},
 	"hauler": {
 		"name": "Hauler", "desc": "Collects salvage from fields and wrecks and carries it to a Depot.",
-		"faction": "aegis", "tier": 1, "cost": 120, "build_time": 10.0, "bandwidth": 2,
+		"faction": "aegis", "tier": 1, "cost": 120, "build_time": 13.0, "bandwidth": 2,
 		"hp": 280, "armor": "light", "move": "vehicle", "speed": 3.4, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 8.0, "harvester": true, "capacity": 100, "model": "hauler", "hotkey": "U"
 	},
 	"courser": {
 		"name": "Courser", "desc": "Fast scout car with a light machine gun.",
-		"faction": "aegis", "tier": 2, "cost": 100, "build_time": 8.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 2, "cost": 100, "build_time": 10.5, "bandwidth": 1,
 		"hp": 180, "armor": "light", "move": "vehicle", "speed": 6.2, "turn_rate": 4.0,
 		"radius": 0.8, "sight": 15.0, "weapons": ["light_mg"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "courser", "hotkey": "C"
 	},
 	"warden": {
 		"name": "Warden", "desc": "Autocannon fighting vehicle. Shreds infantry and light vehicles.",
-		"faction": "aegis", "tier": 2, "cost": 220, "build_time": 14.0, "bandwidth": 3,
+		"faction": "aegis", "tier": 2, "cost": 220, "build_time": 18.0, "bandwidth": 3,
 		"hp": 400, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 11.0, "weapons": ["autocannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "warden", "hotkey": "R"
 	},
 	"bulwark": {
 		"name": "Bulwark", "desc": "Main battle tank. Heavy armor and a hard-hitting cannon.",
-		"faction": "aegis", "tier": 2, "cost": 380, "build_time": 20.0, "bandwidth": 4,
+		"faction": "aegis", "tier": 2, "cost": 380, "build_time": 26.0, "bandwidth": 4,
 		"hp": 720, "armor": "heavy", "move": "vehicle", "speed": 3.3, "turn_rate": 2.2,
 		"radius": 1.15, "sight": 11.0, "weapons": ["tank_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.5, "model": "bulwark", "hotkey": "B"
 	},
 	"tempest": {
 		"name": "Tempest", "desc": "Anti-air track. Shreds aircraft; its flak is weak against armor.",
-		"faction": "aegis", "tier": 2, "cost": 240, "build_time": 14.0, "bandwidth": 3,
+		"faction": "aegis", "tier": 2, "cost": 240, "build_time": 18.0, "bandwidth": 3,
 		"hp": 380, "armor": "light", "move": "vehicle", "speed": 4.0, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 12.0, "weapons": ["tempest_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "tempest", "hotkey": "T"
 	},
 	"longbow": {
 		"name": "Longbow", "desc": "Artillery. Huge range and splash, but it cannot hit close targets and needs spotters.",
-		"faction": "aegis", "tier": 3, "cost": 420, "build_time": 22.0, "bandwidth": 4,
+		"faction": "aegis", "tier": 3, "cost": 420, "build_time": 28.5, "bandwidth": 4,
 		"hp": 300, "armor": "light", "move": "vehicle", "speed": 2.8, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["longbow_shell"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "longbow",
 		"hotkey": "L", "requires": ["command_lab"]
 	},
 	"kestrel": {
 		"name": "Kestrel", "desc": "Gunship. Flies over any terrain and rockets ground targets; helpless against flak.",
-		"faction": "aegis", "tier": 3, "cost": 450, "build_time": 22.0, "bandwidth": 4,
+		"faction": "aegis", "tier": 3, "cost": 450, "build_time": 28.5, "bandwidth": 4,
 		"hp": 320, "armor": "air", "move": "air", "speed": 6.5, "turn_rate": 4.0,
 		"radius": 1.1, "sight": 12.0, "weapons": ["kestrel_rockets"], "turret": true, "ai_role": "air", "ai_weight": 2.5, "model": "kestrel", "hotkey": "K"
 	},
 	"scout_drone": {
 		"name": "Scout Drone", "desc": "Unarmed flying scout with very long sight. Spots for artillery.",
-		"faction": "aegis", "tier": 3, "cost": 90, "build_time": 8.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 3, "cost": 90, "build_time": 10.5, "bandwidth": 1,
 		"hp": 90, "armor": "air", "move": "air", "speed": 8.0, "turn_rate": 6.0,
 		"radius": 0.6, "sight": 18.0, "model": "scout_drone", "hotkey": "N"
 	},
 	"levy": {
 		"name": "Levy", "desc": "Cheap massed infantry. Weak alone, dangerous in numbers.",
-		"faction": "foundry", "tier": 1, "cost": 40, "build_time": 4.0, "bandwidth": 1,
+		"faction": "foundry", "tier": 1, "cost": 40, "build_time": 5.0, "bandwidth": 1,
 		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 2.5, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 10.0, "weapons": ["levy_carbine"], "ai_role": "anti_infantry", "ai_weight": 4.0,
 		"model": "levy", "hotkey": "L"
 	},
 	"sapper": {
 		"name": "Sapper", "desc": "Builds and repairs structures, captures uplinks and lays hidden mines.",
-		"faction": "foundry", "tier": 1, "cost": 90, "build_time": 8.0, "bandwidth": 1,
+		"faction": "foundry", "tier": 1, "cost": 90, "build_time": 10.5, "bandwidth": 1,
 		"hp": 90, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 10.0, "builder": true, "model": "sapper", "hotkey": "F",
 		"builds": ["pylon", "scrapyard", "muster_hall", "bastion", "skyspike", "arsenal", "mine"]
 	},
 	"breaker": {
 		"name": "Breaker", "desc": "Rocket infantry. Slow, tough, and bad news for vehicles and aircraft.",
-		"faction": "foundry", "tier": 1, "cost": 120, "build_time": 9.0, "bandwidth": 1,
+		"faction": "foundry", "tier": 1, "cost": 120, "build_time": 11.5, "bandwidth": 1,
 		"hp": 95, "armor": "infantry", "move": "infantry", "speed": 2.2, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["breaker_rocket"], "ai_role": "anti_armor", "ai_weight": 2.2,
 		"model": "breaker", "hotkey": "B"
 	},
 	"scow": {
 		"name": "Scow", "desc": "Armored salvage hauler. Slow, but carries more and survives raids.",
-		"faction": "foundry", "tier": 1, "cost": 130, "build_time": 11.0, "bandwidth": 2,
+		"faction": "foundry", "tier": 1, "cost": 130, "build_time": 14.5, "bandwidth": 2,
 		"hp": 360, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.6,
 		"radius": 1.05, "sight": 8.0, "harvester": true, "capacity": 120, "model": "scow", "hotkey": "U"
 	},
 	"ratchet": {
 		"name": "Ratchet", "desc": "Repair truck. Mends the most damaged friendly vehicle or building nearby.",
-		"faction": "foundry", "tier": 2, "cost": 180, "build_time": 12.0, "bandwidth": 2,
+		"faction": "foundry", "tier": 2, "cost": 180, "build_time": 15.5, "bandwidth": 2,
 		"hp": 320, "armor": "light", "move": "vehicle", "speed": 3.6, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 9.0, "repair_rate": 14.0, "repair_radius": 7.0,
 		"ai_role": "support", "ai_weight": 0.7, "model": "ratchet", "hotkey": "R"
 	},
 	"tusk": {
 		"name": "Tusk", "desc": "Assault gun. Its shells flatten infantry, light vehicles and buildings.",
-		"faction": "foundry", "tier": 2, "cost": 300, "build_time": 17.0, "bandwidth": 3,
+		"faction": "foundry", "tier": 2, "cost": 300, "build_time": 22.0, "bandwidth": 3,
 		"hp": 580, "armor": "heavy", "move": "vehicle", "speed": 2.8, "turn_rate": 2.0,
 		"radius": 1.15, "sight": 10.0, "weapons": ["tusk_gun"], "turret": true,
 		"ai_role": "anti_infantry", "ai_weight": 2.6, "model": "tusk", "hotkey": "T"
 	},
 	"harrow": {
 		"name": "Harrow", "desc": "Flak half-track. Clears the sky; weak against armor.",
-		"faction": "foundry", "tier": 2, "cost": 230, "build_time": 13.0, "bandwidth": 3,
+		"faction": "foundry", "tier": 2, "cost": 230, "build_time": 17.0, "bandwidth": 3,
 		"hp": 420, "armor": "light", "move": "vehicle", "speed": 3.6, "turn_rate": 2.8,
 		"radius": 1.0, "sight": 12.0, "weapons": ["harrow_flak"], "turret": true,
 		"ai_role": "anti_air", "ai_weight": 0.2, "model": "harrow", "hotkey": "K"
 	},
 	"anvil": {
 		"name": "Anvil", "desc": "Siege mortar carrier. Lobs shells over the front; needs spotters.",
-		"faction": "foundry", "tier": 2, "cost": 340, "build_time": 18.0, "bandwidth": 3,
+		"faction": "foundry", "tier": 2, "cost": 340, "build_time": 23.5, "bandwidth": 3,
 		"hp": 340, "armor": "light", "move": "vehicle", "speed": 2.8, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["anvil_mortar"], "turret": true,
 		"ai_role": "artillery", "ai_weight": 1.5, "model": "anvil", "hotkey": "N"
 	},
 	"mauler": {
 		"name": "Mauler", "desc": "Heavy tank. Slow, enormously tough, hits like a wrecking ball.",
-		"faction": "foundry", "tier": 3, "cost": 520, "build_time": 26.0, "bandwidth": 5,
+		"faction": "foundry", "tier": 3, "cost": 520, "build_time": 34.0, "bandwidth": 5,
 		"hp": 1100, "armor": "heavy", "move": "vehicle", "speed": 2.5, "turn_rate": 1.8,
 		"radius": 1.3, "sight": 11.0, "weapons": ["mauler_cannon"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 3.0, "model": "mauler", "hotkey": "M", "requires": ["arsenal"]
 	},
 	"crawler": {
 		"name": "Crawler", "desc": "Mobile factory. Deploys anywhere inside your coverage and can pack up and move on.",
-		"faction": "foundry", "tier": 2, "cost": 380, "build_time": 18.0, "bandwidth": 4,
+		"faction": "foundry", "tier": 2, "cost": 380, "build_time": 23.5, "bandwidth": 4,
 		"hp": 950, "armor": "heavy", "move": "vehicle", "speed": 2.0, "turn_rate": 1.6,
 		"radius": 1.5, "sight": 9.0, "deploys_to": "crawler_factory", "model": "crawler",
 		"hotkey": "Y", "requires": ["muster_hall"]
 	},
 	"drifter": {
 		"name": "Drifter", "desc": "Fast light infantry. Vanishes when it stands still in forest.",
-		"faction": "nomad", "tier": 1, "cost": 55, "build_time": 5.0, "bandwidth": 1,
+		"faction": "nomad", "tier": 1, "cost": 55, "build_time": 6.5, "bandwidth": 1,
 		"hp": 88, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["drifter_smg"], "ai_role": "anti_infantry", "ai_weight": 3.0,
 		"model": "drifter", "hotkey": "T"
 	},
 	"tinker": {
 		"name": "Tinker", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
-		"faction": "nomad", "tier": 1, "cost": 80, "build_time": 7.0, "bandwidth": 1,
+		"faction": "nomad", "tier": 1, "cost": 80, "build_time": 9.0, "bandwidth": 1,
 		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 10.0, "builder": true, "model": "tinker", "hotkey": "F",
 		"builds": ["cache", "camp", "chop_shop", "snare_turret", "signal_loom"]
 	},
 	"splicer": {
 		"name": "Splicer", "desc": "Hijacks enemy vehicles that are Dark: right-click one. The Splicer rides off inside it.",
-		"faction": "nomad", "tier": 1, "cost": 140, "build_time": 10.0, "bandwidth": 1,
+		"faction": "nomad", "tier": 1, "cost": 140, "build_time": 13.0, "bandwidth": 1,
 		"hp": 75, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "hijacker": true, "ai_role": "hijacker", "ai_weight": 0.5,
 		"model": "splicer", "hotkey": "L"
 	},
 	"skiff": {
 		"name": "Skiff", "desc": "Quick salvage runner. Small load, fast trips, and half again as much from wrecks.",
-		"faction": "nomad", "tier": 1, "cost": 100, "build_time": 8.0, "bandwidth": 2,
+		"faction": "nomad", "tier": 1, "cost": 100, "build_time": 10.5, "bandwidth": 2,
 		"hp": 200, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.6,
 		"radius": 0.9, "sight": 9.0, "harvester": true, "capacity": 80, "model": "skiff", "hotkey": "U"
 	},
 	"dart": {
 		"name": "Dart", "desc": "Raider bike. Very fast, very cheap, shoots on the move.",
-		"faction": "nomad", "tier": 2, "cost": 90, "build_time": 6.0, "bandwidth": 1,
+		"faction": "nomad", "tier": 2, "cost": 90, "build_time": 8.0, "bandwidth": 1,
 		"hp": 160, "armor": "light", "move": "vehicle", "speed": 7.5, "turn_rate": 5.0,
 		"radius": 0.6, "sight": 12.0, "weapons": ["dart_gun"], "turret": true,
 		"ai_role": "anti_infantry", "ai_weight": 2.6, "model": "dart", "hotkey": "R"
 	},
 	"sidewinder": {
 		"name": "Sidewinder", "desc": "Missile truck. Out-ranges tanks and cannot take a hit.",
-		"faction": "nomad", "tier": 2, "cost": 190, "build_time": 12.0, "bandwidth": 2,
+		"faction": "nomad", "tier": 2, "cost": 190, "build_time": 15.5, "bandwidth": 2,
 		"hp": 290, "armor": "light", "move": "vehicle", "speed": 5.0, "turn_rate": 3.4,
 		"radius": 0.95, "sight": 12.0, "weapons": ["sidewinder_missile"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 2.8, "model": "sidewinder", "hotkey": "B"
 	},
 	"gnat": {
 		"name": "Gnat", "desc": "Flak buggy. Keeps aircraft off the raiders.",
-		"faction": "nomad", "tier": 2, "cost": 170, "build_time": 10.0, "bandwidth": 2,
+		"faction": "nomad", "tier": 2, "cost": 170, "build_time": 13.0, "bandwidth": 2,
 		"hp": 220, "armor": "light", "move": "vehicle", "speed": 5.5, "turn_rate": 4.0,
 		"radius": 0.85, "sight": 12.0, "weapons": ["gnat_flak"], "turret": true,
 		"ai_role": "anti_air", "ai_weight": 0.2, "model": "gnat", "hotkey": "K"
 	},
 	"prowler": {
 		"name": "Prowler", "desc": "Light tank with an armor-piercing gun. The heaviest thing the Circuit builds, and still quick.",
-		"faction": "nomad", "tier": 2, "cost": 280, "build_time": 16.0, "bandwidth": 3,
+		"faction": "nomad", "tier": 2, "cost": 280, "build_time": 21.0, "bandwidth": 3,
 		"hp": 480, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.0,
 		"radius": 1.05, "sight": 11.0, "weapons": ["prowler_cannon"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 3.0, "model": "prowler", "hotkey": "P"
 	},
 	"jammer_buggy": {
 		"name": "Jammer Buggy", "desc": "Removes enemy signal coverage around itself. Drive it into a base and the defenders go Dark.",
-		"faction": "nomad", "tier": 2, "cost": 200, "build_time": 12.0, "bandwidth": 2,
+		"faction": "nomad", "tier": 2, "cost": 200, "build_time": 15.5, "bandwidth": 2,
 		"hp": 200, "armor": "light", "move": "vehicle", "speed": 5.5, "turn_rate": 4.0,
 		"radius": 0.85, "sight": 10.0, "jam_radius": 11.0, "ai_role": "support", "ai_weight": 0.8,
 		"model": "jammer_buggy", "hotkey": "J"
 	},
 	"beacon_rig": {
 		"name": "Beacon Rig", "desc": "Mobile relay. Deploy it within link range of your network to project signal; pack it up to move on.",
-		"faction": "nomad", "tier": 1, "cost": 140, "build_time": 10.0, "bandwidth": 2,
+		"faction": "nomad", "tier": 1, "cost": 140, "build_time": 13.0, "bandwidth": 2,
 		"hp": 300, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
 		"radius": 0.95, "sight": 9.0, "deploys_to": "beacon", "model": "beacon_rig", "hotkey": "N"
 	},
 	"caravan": {
 		"name": "Caravan", "desc": "The Circuit's headquarters on the move. Deploy it anywhere to restore your network. While it rolls, everything you own is Dark.",
-		"faction": "nomad", "tier": 1, "cost": 2000, "build_time": 60.0, "bandwidth": 1,
-		"hp": 2600, "armor": "heavy", "move": "vehicle", "speed": 2.2, "turn_rate": 1.6,
+		"faction": "nomad", "tier": 1, "cost": 2000, "build_time": 78.0, "bandwidth": 1,
+		"hp": 5200, "armor": "heavy", "move": "vehicle", "speed": 2.2, "turn_rate": 1.6,
 		"radius": 2.0, "sight": 12.0, "deploys_to": "caravan_hub", "model": "caravan", "hotkey": "Y"
 	}
 }

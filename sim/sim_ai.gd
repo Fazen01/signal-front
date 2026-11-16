@@ -23,7 +23,7 @@ var max_engineers: int = 2
 var first_wave: int = 7
 var wave_growth: int = 3
 var max_wave: int = 26
-var wave_cooldown_ticks: int = 20 * 40
+var wave_cooldown_ticks: int = 20 * 60
 var max_barracks: int = 1
 var max_works: int = 1
 var builds_turrets: bool = true
@@ -72,7 +72,7 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			max_haulers = 4
 			first_wave = 9
 			wave_growth = 4
-			wave_cooldown_ticks = 20 * 75
+			wave_cooldown_ticks = 20 * 110
 			builds_turrets = false
 			hunts_relays = false
 			uses_directives = false
@@ -82,7 +82,7 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			max_engineers = 3
 			first_wave = 6
 			wave_growth = 3
-			wave_cooldown_ticks = 20 * 25
+			wave_cooldown_ticks = 20 * 38
 			max_barracks = 2
 			max_works = 2
 		_:
