@@ -142,9 +142,9 @@ Done so far:
   Hard); a guard of 40% / 30% / 25% of the army stays home; Normal and Hard
   pull a wave back when it is down to a third or facing 1.5 times its value.
 
-In progress (07:25 UTC; the "07:35" in the previous version of this note was
-a mistake, it was 06:25): match length, the open M13 item. Averages over
-three or four seeds per faction pairing:
+Match length, the open M13 item (committed in `0c87091` at about 08:00 UTC;
+`check.sh` passes, its five AI matches now last 17-32 minutes). Averages
+over three or four seeds per faction pairing, Normal vs Normal:
 - baseline 10.0 minutes; first attack delayed to 4:00 alone 10.1; harvesting
   2.5 times slower on top 11.0; guard + retreat + the two fixes above 9.4.
   The first large clash decided the match whenever it happened.
@@ -154,14 +154,29 @@ three or four seeds per faction pairing:
   health +50% and a longer-ranged headquarters gun 17.3 but with two
   60-minute stalemates; richer fields and anti-stalemate rules 20-22 with
   one stalemate in 36 games.
-- Stalemates found and their causes: a 62-unit wave recalled by four free
-  Reinforcement Drop infantry; riflemen sent against splash turrets for
-  half an hour; a boxed-in AI sitting on 7,000 salvage because its only
-  relay spots were under fire. Each has a fix in the working tree.
-- Still to do before this lands: confirm no stalemates on fresh seeds,
-  rebalance the factions (Aegis wins too much under the slower economy),
-  run the full check. The working tree holds the changes; they are not
-  committed yet because the batch that validates them is still running.
+- Stalemates found, their causes and fixes:
+  - A 62-unit wave was recalled every time four free Reinforcement Drop
+    infantry reached the base. A wave is now recalled only when the raiders
+    outweigh 80% of the guard at home.
+  - Riflemen sent against splash turrets for half an hour. Visible enemy
+    turrets now weigh production toward anti-armour and artillery and away
+    from anti-infantry; once the enemy army is gone ("siege": two waves sent
+    and fewer than four enemy units seen) anti-infantry, scouts and
+    hijackers are nearly dropped.
+  - Two careful AIs each retreating for ever: after two retreats in a row
+    the next wave fights to the end.
+  - A boxed-in AI sitting on 7,000 salvage because its only relay spots were
+    under fire: relays fall back to a spot beside the base, which still adds
+    bandwidth.
+  - A wave stuck in its assault for 40 minutes with one unit left that never
+    arrived, so no new wave ever formed. Assaults now end after 3 minutes.
+  - A Nomad AI that had lost every beacon while its haulers filled the
+    20-bandwidth cap could never train a Beacon Rig again. Decision: units
+    that deploy into a relay can be finished over the cap. This applies to
+    human players too and is tested.
+- Other balance changes in the same commit: fields 10,000 / 16,000 (were
+  5,000 / 9,000), unloading 2 s (was 1 s), Bastion splash 1.6 -> 1.3.
+- Validation on seeds 5-8, which the tuning never saw, is running.
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
