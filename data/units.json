@@ -168,7 +168,7 @@
 		"name": "Skiff", "desc": "Quick salvage runner. Small load, fast trips, and half again as much from wrecks.",
 		"faction": "nomad", "tier": 1, "cost": 100, "build_time": 8.0, "bandwidth": 2,
 		"hp": 200, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.6,
-		"radius": 0.9, "sight": 9.0, "harvester": true, "capacity": 80, "model": "skiff", "hotkey": "U"
+		"radius": 0.9, "sight": 9.0, "harvester": true, "capacity": 100, "model": "skiff", "hotkey": "U"
 	},
 	"dart": {
 		"name": "Dart", "desc": "Raider bike. Very fast, very cheap, shoots on the move.",
