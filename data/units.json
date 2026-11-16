@@ -1,0 +1,52 @@
+{
+	"trooper": {
+		"name": "Trooper", "desc": "Rifle infantry. Cheap, good against other infantry.",
+		"faction": "aegis", "tier": 1, "cost": 60, "build_time": 6.0, "bandwidth": 1,
+		"hp": 90, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["rifle"], "model": "trooper", "hotkey": "T"
+	},
+	"lancer": {
+		"name": "Lancer", "desc": "Anti-armor missile team. Slow to fire, deadly to vehicles.",
+		"faction": "aegis", "tier": 1, "cost": 110, "build_time": 9.0, "bandwidth": 1,
+		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["lance_missile"], "model": "lancer", "hotkey": "L"
+	},
+	"field_engineer": {
+		"name": "Field Engineer", "desc": "Builds and repairs structures. Unarmed.",
+		"faction": "aegis", "tier": 1, "cost": 80, "build_time": 7.0, "bandwidth": 1,
+		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "engineer", "hotkey": "E",
+		"builds": ["depot", "relay", "barracks", "vehicle_works", "sentry_turret", "lance_battery"]
+	},
+	"marksman": {
+		"name": "Marksman", "desc": "Long-sighted sharpshooter. Picks off infantry from afar.",
+		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 12.0, "bandwidth": 1,
+		"hp": 60, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 16.0, "weapons": ["marksman_rifle"], "model": "marksman",
+		"hotkey": "M", "requires": ["vehicle_works"]
+	},
+	"hauler": {
+		"name": "Hauler", "desc": "Collects salvage from fields and wrecks and carries it to a Depot.",
+		"faction": "aegis", "tier": 1, "cost": 120, "build_time": 10.0, "bandwidth": 2,
+		"hp": 280, "armor": "light", "move": "vehicle", "speed": 3.4, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 8.0, "harvester": true, "capacity": 100, "model": "hauler", "hotkey": "H"
+	},
+	"courser": {
+		"name": "Courser", "desc": "Fast scout car with a light machine gun.",
+		"faction": "aegis", "tier": 2, "cost": 100, "build_time": 8.0, "bandwidth": 1,
+		"hp": 180, "armor": "light", "move": "vehicle", "speed": 6.2, "turn_rate": 4.0,
+		"radius": 0.8, "sight": 15.0, "weapons": ["light_mg"], "turret": true, "model": "courser", "hotkey": "C"
+	},
+	"warden": {
+		"name": "Warden", "desc": "Autocannon fighting vehicle. Shreds infantry and light vehicles.",
+		"faction": "aegis", "tier": 2, "cost": 220, "build_time": 14.0, "bandwidth": 3,
+		"hp": 400, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 11.0, "weapons": ["autocannon"], "turret": true, "model": "warden", "hotkey": "W"
+	},
+	"bulwark": {
+		"name": "Bulwark", "desc": "Main battle tank. Heavy armor and a hard-hitting cannon.",
+		"faction": "aegis", "tier": 2, "cost": 380, "build_time": 20.0, "bandwidth": 4,
+		"hp": 720, "armor": "heavy", "move": "vehicle", "speed": 3.3, "turn_rate": 2.2,
+		"radius": 1.15, "sight": 11.0, "weapons": ["tank_cannon"], "turret": true, "model": "bulwark", "hotkey": "B"
+	}
+}

@@ -17,12 +17,12 @@ decision in the session log at the bottom.
 
 ## M1 — Simulation core
 
-- [ ] Fixed-tick `SimWorld`, seeded RNG, entity registry, player state
-- [ ] Map grid with terrain types and passability
-- [ ] Grid pathfinding + steering and separation; move orders
-- [ ] Weapons, damage/armor table, projectiles, death, wrecks
-- [ ] Orders: move, attack, attack-move, stop, hold
-- [ ] Headless test: two mixed squads fight to a deterministic result
+- [x] Fixed-tick `SimWorld`, seeded RNG, entity registry, player state
+- [x] Map grid with terrain types and passability
+- [x] Grid pathfinding + steering and separation; move orders
+- [x] Weapons, damage/armor table, projectiles, death, wrecks
+- [x] Orders: move, attack, attack-move, stop, hold
+- [x] Headless test: two mixed squads fight to a deterministic result
 
 ## M2 — View and controls
 
@@ -140,4 +140,36 @@ Decisions:
 - `.uid` files that Godot generates next to scripts are committed (standard
   for Godot 4.4+); `.godot/` is not.
 
-Half-done / next: M1 simulation core is being written.
+- M1 Simulation core: `SimWorld` fixed 20 Hz tick, seeded `SimRng`, entity
+  registry, players, map grid with terrain, `AStarGrid2D` pathfinding with
+  string-pulling, steering/separation, formation move orders, weapons, damage
+  table, projectiles, death, wrecks, move / attack / attack-move / stop / hold,
+  and a deterministic mixed-squad battle test.
+
+More decisions:
+- One map cell is 2x2 world units and is shared by terrain, pathfinding,
+  building footprints and (later) signal coverage. A 2-player map is 64x64
+  cells = 128x128 world units.
+- Pathfinding uses Godot's built-in `AStarGrid2D` (a plain `RefCounted`, no
+  scene tree) with one grid for infantry and one for vehicles (forest costs
+  vehicles double).
+- Definitions are JSON in `data/` loaded into typed `EntityDef` / `WeaponDef`
+  / `FactionDef` objects by `sim/defs/game_data.gd`; unknown keys are errors.
+- Everything outside `sim/` changes the simulation only through
+  `SimWorld.push_command(SimCommand)`; commands apply at the next tick.
+- Infantry stop to shoot; turreted vehicles fire on the move. Units on a plain
+  move order only shoot what is already in range; attack-move and idle units
+  chase what they see (idle units give up 18 units from where they stood).
+- The HQ has a light point-defence gun (not in the design) so a couple of
+  early raiders cannot end a match on their own.
+- GDScript gotcha, now avoided: a method named like a global function
+  (`randf`, `randi_range`...) is shadowed by the global one when called
+  unqualified inside the class. `SimRng` uses `next_float` / `range_f` /
+  `range_i` for that reason.
+
+Notes:
+- Early in this session `git push` was refused (the Claude GitHub App had no
+  write access to the repository). The owner granted access and pushes work
+  now; if a later session sees a 403 on push, that is the cause.
+
+Half-done / next: M2 view and controls.

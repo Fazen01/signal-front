@@ -1,0 +1,11 @@
+{
+	"aegis": {
+		"name": "Aegis Directorate",
+		"desc": "Disciplined, precise, networked. Linked units gain weapon range; Dark hits them hardest.",
+		"hq": "hq",
+		"start_units": ["field_engineer", "field_engineer", "hauler", "hauler", "trooper", "trooper"],
+		"linked_range_bonus": 0.15,
+		"dark_rof_mult": 0.6,
+		"playable": true
+	}
+}

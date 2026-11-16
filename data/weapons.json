@@ -1,0 +1,38 @@
+{
+	"rifle": {
+		"name": "Service Rifle", "damage_type": "ballistic", "damage": 7.0, "range": 8.0,
+		"cooldown": 0.6, "fx": "tracer"
+	},
+	"lance_missile": {
+		"name": "Lance Missile", "damage_type": "piercing", "damage": 40.0, "range": 10.0,
+		"cooldown": 2.8, "projectile_speed": 16.0, "homing": true, "fx": "missile"
+	},
+	"marksman_rifle": {
+		"name": "Long Rifle", "damage_type": "ballistic", "damage": 48.0, "range": 14.0,
+		"cooldown": 2.8, "fx": "tracer_heavy"
+	},
+	"light_mg": {
+		"name": "Light Machine Gun", "damage_type": "ballistic", "damage": 5.0, "range": 7.5,
+		"cooldown": 0.3, "fx": "tracer"
+	},
+	"autocannon": {
+		"name": "Autocannon", "damage_type": "ballistic", "damage": 15.0, "range": 9.0,
+		"cooldown": 0.45, "fx": "tracer_heavy"
+	},
+	"tank_cannon": {
+		"name": "Tank Cannon", "damage_type": "piercing", "damage": 62.0, "range": 10.5,
+		"cooldown": 2.4, "projectile_speed": 34.0, "splash": 0.8, "fx": "shell"
+	},
+	"sentry_gun": {
+		"name": "Sentry Gun", "damage_type": "ballistic", "damage": 9.0, "range": 10.5,
+		"cooldown": 0.25, "fx": "tracer"
+	},
+	"battery_missile": {
+		"name": "Battery Missile", "damage_type": "piercing", "damage": 75.0, "range": 13.0,
+		"cooldown": 3.0, "projectile_speed": 18.0, "homing": true, "fx": "missile"
+	},
+	"hq_gun": {
+		"name": "Point Defence Gun", "damage_type": "ballistic", "damage": 8.0, "range": 9.0,
+		"cooldown": 0.4, "fx": "tracer"
+	}
+}

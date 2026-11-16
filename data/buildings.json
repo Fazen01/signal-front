@@ -1,0 +1,49 @@
+{
+	"hq": {
+		"name": "Headquarters", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "aegis", "tier": 1, "cost": 2000, "build_time": 60.0,
+		"hp": 3000, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true,
+		"produces": ["field_engineer", "hauler"], "model": "hq", "buildable": false
+	},
+	"depot": {
+		"name": "Depot", "desc": "Drop-off point for salvage. Builds Haulers.",
+		"faction": "aegis", "tier": 1, "cost": 250, "build_time": 20.0,
+		"hp": 1000, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["hauler"], "model": "depot", "hotkey": "D"
+	},
+	"relay": {
+		"name": "Relay", "desc": "Extends your signal grid and adds bandwidth. Must link back to the HQ.",
+		"faction": "aegis", "tier": 1, "cost": 150, "build_time": 12.0,
+		"hp": 500, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "relay", "hotkey": "R"
+	},
+	"barracks": {
+		"name": "Barracks", "desc": "Trains infantry.",
+		"faction": "aegis", "tier": 1, "cost": 200, "build_time": 18.0,
+		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["trooper", "lancer", "field_engineer", "marksman"], "model": "barracks", "hotkey": "B"
+	},
+	"vehicle_works": {
+		"name": "Vehicle Works", "desc": "Assembles vehicles. Unlocks tier 2.",
+		"faction": "aegis", "tier": 2, "cost": 400, "build_time": 28.0,
+		"hp": 1500, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
+		"produces": ["hauler", "courser", "warden", "bulwark"], "model": "vehicle_works",
+		"hotkey": "V", "requires": ["barracks"]
+	},
+	"sentry_turret": {
+		"name": "Sentry Turret", "desc": "Anti-infantry defensive gun.",
+		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 12.0,
+		"hp": 600, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["sentry_gun"], "turret": true, "model": "sentry_turret",
+		"hotkey": "S", "requires": ["barracks"]
+	},
+	"lance_battery": {
+		"name": "Lance Battery", "desc": "Anti-armor missile emplacement.",
+		"faction": "aegis", "tier": 2, "cost": 250, "build_time": 15.0,
+		"hp": 700, "armor": "structure", "footprint": [1, 1], "sight": 13.0,
+		"weapons": ["battery_missile"], "turret": true, "model": "lance_battery",
+		"hotkey": "L", "requires": ["vehicle_works"]
+	}
+}
