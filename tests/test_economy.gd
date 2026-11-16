@@ -7,7 +7,8 @@ func _world_with_hq() -> SimWorld:
 	for p: SimPlayer in w.players:
 		SimSetup.place_base(w, p)
 		p.salvage = 1000
-	SimEconomy.recompute_bandwidth(w)
+	SimSignal.recompute(w)
+	w.signal_next_tick = 0
 	return w
 
 

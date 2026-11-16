@@ -41,11 +41,11 @@ decision in the session log at the bottom.
 
 ## M4 — Signal Grid
 
-- [ ] Emitters, link graph back to HQ, coverage grid
-- [ ] Linked/Dark effects on units, turrets and production
-- [ ] Placement rules (buildings in coverage, relays in link range)
+- [x] Emitters, link graph back to HQ, coverage grid
+- [x] Linked/Dark effects on units, turrets and production
+- [x] Placement rules (buildings in coverage, relays in link range)
 - [ ] Overlay, link lines, blackout alert, Dark indicator
-- [ ] Tests: cutting a mid-chain relay unlinks everything downstream
+- [x] Tests: cutting a mid-chain relay unlinks everything downstream
 
 ## M5 — First playable (tag `v0.1`)
 
@@ -208,4 +208,5 @@ Economy and HUD decisions:
   headless check passed (`set_anchors_preset` keeps the old zero size; use
   `set_anchors_and_offsets_preset`). Look at screenshots after UI changes.
 
-Half-done / next: M4 Signal Grid.
+Half-done / next: M4 — the Signal Grid simulation is done and tested; the
+coverage overlay, link lines and Dark indicator are being written.

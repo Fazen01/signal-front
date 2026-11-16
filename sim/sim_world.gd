@@ -22,6 +22,13 @@ var collect_events: bool = true
 var commands: Array[SimCommand] = []
 var next_id: int = 1
 
+# Signal Grid (see SimSignal)
+var coverage: Array[PackedByteArray] = []  ## per player: 1 where covered, one byte per map cell
+var signal_links: Array[PackedInt32Array] = []  ## per player: flattened (from id, to id) pairs
+var signal_dirty: bool = true
+var signal_next_tick: int = 0
+var coverage_version: int = 0  ## bumps whenever coverage is rebuilt
+
 var game_over: bool = false
 var winner: int = -1  ## player id, -1 = nobody (yet)
 
@@ -60,6 +67,10 @@ func add_player(faction_id: String, color: Color, is_ai: bool, start_pos: Vector
 	p.name = player_name if player_name != "" else "Player %d" % (p.id + 1)
 	p.salvage = data.start_salvage
 	players.append(p)
+	var grid: PackedByteArray = PackedByteArray()
+	grid.resize(map.w * map.h)
+	coverage.append(grid)
+	signal_links.append(PackedInt32Array())
 	return p
 
 
@@ -145,6 +156,9 @@ func spawn_building(def_id: String, owner: int, cell: Vector2i, constructed: boo
 	e.aim = e.facing
 	_register(e)
 	e.scan_tick = tick_count + e.id % 5
+	# Emitters start unlinked until the grid is rebuilt; everything else is
+	# Linked or Dark according to the coverage it stands in.
+	e.linked = def.signal_radius <= 0.0 and SimSignal.is_covered(self, owner, e.pos)
 	map.set_occupied(Rect2i(cell, def.footprint), e.id)
 	e.rally = e.pos + Vector2(0.0, float(def.footprint.y) * SimMap.CELL * 0.5 + 3.0)
 	emit_event(SimEvent.Type.SPAWNED, e.id, owner, e.pos)
@@ -278,6 +292,7 @@ func tick() -> void:
 		e.prev_facing = e.facing
 		e.prev_aim = e.aim
 	_rebuild_buckets()
+	SimSignal.update(self)
 
 	var pending: Array[SimCommand] = commands
 	commands = []
