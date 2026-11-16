@@ -192,6 +192,10 @@ points of noise), so the Nomads are now clearly behind.
   at 55:25, against a 60-minute cap, which is too thin a margin: the cap for
   that step is now 90 game minutes. It still has to end with a winner and
   takes about four minutes of wall time.
+- Difficulty still ranks correctly with the new pacing (`balance_batch.gd
+  --levels`, seeds 1-3): Hard beat Easy 9-0, Normal beat Easy 9-0, Hard beat
+  Normal 7-2. A test now pins the generated map sizes (standard 88 cells,
+  compact 64) and checks haulers find fields on the larger map.
 - `tools/pace_batch.gd --scale=id.field:mult` scales one field of any unit,
   building or weapon for an experiment.
 - Frame cost on the larger default map with 300 units (CPU only): average
