@@ -253,7 +253,14 @@ over three or four seeds per faction pairing, Normal vs Normal:
     Reverted.
   - Breaker health 95 -> 115 and Levy range 7.5 -> 8 (a Trooper's range):
     72 games, no draws, 21.5 minutes; Aegis 53%, Foundry 56%, Nomad 41%
-    (was 62 / 40 / 47). Foundry vs Aegis 7 of 16 (was 4 of 16). Kept.
+    (was 62 / 40 / 47). Foundry vs Aegis 7 of 16 (was 4 of 16). Kept,
+    committed as `63f6191`.
+- Nomad's weak matchup is now Foundry (5 of 16). Over 12 such games the
+  Nomad AI lost about 23 Beacon Rigs a game (37,800 salvage in all) on the
+  way to deploy spots, and built 339 Splicers that lost 28,700 salvage. In
+  progress (13:20 UTC): rigs use the same safe-spot test as building
+  sites (a spot where a rig died is avoided for two minutes; otherwise
+  they deploy beside the base), and the AI keeps at most four Splicers.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
