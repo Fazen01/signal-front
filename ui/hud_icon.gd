@@ -108,5 +108,14 @@ func _draw() -> void:
 			var low: Vector2 = c + Vector2(0.0, r * 0.96)
 			draw_colored_polygon(PackedVector2Array([top, low, c + Vector2(-r * 0.7, 0.0)]), color)
 			draw_polyline(PackedVector2Array([top, c + Vector2(r * 0.7, 0.0), low]), color, 1.6, true)
+		"emblem_ember":
+			# A flame: a tall tongue with a smaller one inside its foot.
+			draw_colored_polygon(PackedVector2Array([
+				c + Vector2(0.0, -r), c + Vector2(r * 0.34, -r * 0.3), c + Vector2(r * 0.72, r * 0.3),
+				c + Vector2(r * 0.5, r * 0.82), c + Vector2(0.0, r), c + Vector2(-r * 0.5, r * 0.82),
+				c + Vector2(-r * 0.72, r * 0.3), c + Vector2(-r * 0.3, -r * 0.2), c + Vector2(-r * 0.22, -r * 0.55)]), color)
+			draw_colored_polygon(PackedVector2Array([
+				c + Vector2(0.04 * r, -r * 0.1), c + Vector2(r * 0.3, r * 0.5), c + Vector2(0.0, r * 0.84),
+				c + Vector2(-r * 0.3, r * 0.5)]), Color(0.0, 0.0, 0.0, 0.55))
 		_:
 			draw_circle(c, r * 0.6, color)

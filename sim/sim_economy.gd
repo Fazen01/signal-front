@@ -6,6 +6,7 @@ enum Job { TO_RESOURCE, LOADING, TO_DEPOT, UNLOADING }
 
 const RESOURCE_SEARCH: float = 30.0  ## how far a hauler looks for its next source
 const SQUARE: float = 1.45  ## footprint half-size to corner distance, with slack
+const MUSTER_RANGE: float = 8.0  ## how near a relay the rally point must be for units to arrive there
 
 
 # ---------------------------------------------------------------- commands
@@ -645,18 +646,44 @@ static func _check_mine(w: SimWorld, mine: SimEntity) -> void:
 	w.remove_entity(mine)
 
 
+## The relay a new unit of a mustering faction arrives at: the linked relay
+## of `owner` nearest to `rally`, if one stands within MUSTER_RANGE of it.
+## Null means the unit comes out of the building that made it, as usual.
+## Haulers and builders always do.
+static func muster_relay(w: SimWorld, owner: int, rally: Vector2) -> SimEntity:
+	var best: SimEntity = null
+	var best_d: float = MUSTER_RANGE
+	for e: SimEntity in w.query_radius(rally, MUSTER_RANGE + 1.0):
+		if e.owner != owner or e.kind != SimEntity.Kind.BUILDING or not e.constructed or not e.linked:
+			continue
+		if e.def.signal_radius <= 0.0 or e.def.signal_root:
+			continue
+		var d: float = e.pos.distance_to(rally)
+		if d <= best_d:
+			best_d = d
+			best = e
+	return best
+
+
 static func _deliver_unit(w: SimWorld, b: SimEntity, def: EntityDef) -> void:
-	var out_dir: Vector2 = b.rally - b.pos
-	if out_dir.length() < 0.01:
-		out_dir = Vector2.DOWN
-	out_dir = out_dir.normalized()
-	var exit: Vector2 = w.map.nearest_free_pos(b.pos + out_dir * (b.radius * SQUARE + def.radius + 0.6))
-	var u: SimEntity = w.spawn_unit(def.id, b.owner, exit, out_dir.angle())
 	var p: SimPlayer = w.players[b.owner]
+	var from: SimEntity = b
+	if p.faction.relay_muster and b.has_rally and not def.harvester and not def.builder:
+		# The network carries the new unit to the relay by the rally point.
+		var relay: SimEntity = muster_relay(w, b.owner, b.rally)
+		if relay != null:
+			from = relay
+	var out_dir: Vector2 = b.rally - from.pos
+	if out_dir.length() < 0.01:
+		out_dir = (from.pos - b.pos) if from != b else Vector2.DOWN
+	out_dir = out_dir.normalized()
+	var exit: Vector2 = w.map.nearest_free_pos(from.pos + out_dir * (from.radius * SQUARE + def.radius + 0.6))
+	var u: SimEntity = w.spawn_unit(def.id, b.owner, exit, out_dir.angle())
 	p.stat_units_built += 1
 	var ev: SimEvent = w.emit_event(SimEvent.Type.UNIT_READY, u.id, b.owner, u.pos)
 	ev.other_id = b.id
 	ev.text = def.id
+	ev.value = 1.0 if from != b else 0.0  # 1 = it arrived at a relay
 	if def.harvester and not b.has_rally:
 		var res: SimEntity = find_resource(w, b.pos, RESOURCE_SEARCH * 1.5)
 		if res != null:

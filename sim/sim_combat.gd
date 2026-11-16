@@ -5,6 +5,8 @@ extends RefCounted
 const TURRET_RATE: float = 4.5  ## radians per second
 const SCAN_INTERVAL: int = 5  ## ticks between target scans
 const BIG_RADIUS: float = 4.5  ## padding so large buildings are found by centre queries
+const BURN_INTERVAL: int = 10  ## ticks between bites of a fire
+const BURN_STRUCTURE_MULT: float = 0.5  ## buildings burn slower than vehicles and people
 
 
 static func update(w: SimWorld) -> void:
@@ -20,6 +22,8 @@ static func update(w: SimWorld) -> void:
 			continue
 		_update_combatant(w, e)
 	_update_projectiles(w)
+	if w.tick_count % BURN_INTERVAL == 0:
+		_update_burning(w)
 
 
 # ------------------------------------------------------------- modifiers
@@ -198,6 +202,7 @@ static func _fire(w: SimWorld, e: SimEntity, t: SimEntity, wd: WeaponDef, slot: 
 		ev.pos2 = t.pos
 		ev.text = wd.fx
 		apply_damage(w, t, damage, wd.damage_type, e, e.owner)
+		ignite(w, t, wd, e.owner)
 		return
 	var p: SimProjectile = SimProjectile.new()
 	p.id = w.next_id
@@ -265,10 +270,58 @@ static func _impact(w: SimWorld, p: SimProjectile) -> void:
 				continue
 			var falloff: float = 1.0 if d <= 0.0 else lerpf(1.0, 0.4, d / p.weapon.splash)
 			apply_damage(w, n, p.damage * falloff, p.weapon.damage_type, src, p.owner)
+			ignite(w, n, p.weapon, p.owner)
 	else:
 		var t: SimEntity = w.get_entity(p.target_id)
 		if t != null and (p.weapon.homing or p.pos.distance_to(t.pos) <= t.radius + 0.75):
 			apply_damage(w, t, p.damage, p.weapon.damage_type, src, p.owner)
+			ignite(w, t, p.weapon, p.owner)
+
+
+# ------------------------------------------------------------------ fire
+
+## An incendiary weapon sets what it hits alight. A fire does not stack: a
+## new one only makes the old one hotter or longer. Aircraft do not burn.
+static func ignite(w: SimWorld, t: SimEntity, wd: WeaponDef, by_owner: int) -> void:
+	if wd.burn_dps <= 0.0 or not t.alive or t.def == null or t.def.is_air():
+		return
+	t.burn_until = maxi(t.burn_until, w.tick_count + int(wd.burn_seconds * float(SimWorld.TICK_RATE)))
+	t.burn_dps = maxf(t.burn_dps, wd.burn_dps)
+	t.burn_owner = by_owner
+
+
+static func is_burning(w: SimWorld, e: SimEntity) -> bool:
+	return e.burn_until > w.tick_count
+
+
+## What a fire does to `t` each second right now: less to buildings, more to
+## anything Dark when the faction that lit it has that rule.
+static func burn_rate(w: SimWorld, t: SimEntity) -> float:
+	var rate: float = t.burn_dps
+	if t.kind == SimEntity.Kind.BUILDING:
+		rate *= BURN_STRUCTURE_MULT
+	if not t.linked and t.burn_owner >= 0:
+		rate *= w.players[t.burn_owner].faction.burn_dark_mult
+	return rate
+
+
+static func _update_burning(w: SimWorld) -> void:
+	var step: float = float(BURN_INTERVAL) * SimWorld.DT
+	# By index: a kill adds a wreck to the list being walked.
+	var n: int = w.entities.size()
+	for i: int in n:
+		var t: SimEntity = w.entities[i]
+		if t.burn_until == 0 or not t.alive:
+			continue
+		if w.tick_count >= t.burn_until:
+			t.burn_until = 0
+			t.burn_dps = 0.0
+			t.burn_owner = -1
+			continue
+		t.hp -= burn_rate(w, t) * step
+		t.last_hit_tick = w.tick_count
+		if t.hp <= 0.0:
+			kill(w, t, null, t.burn_owner)
 
 
 # ------------------------------------------------------- damage and death

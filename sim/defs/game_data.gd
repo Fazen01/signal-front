@@ -8,7 +8,7 @@ const MOVE_NAMES: Array[String] = ["none", "infantry", "vehicle", "air"]
 
 const WEAPON_KEYS: Array[String] = [
 	"name", "damage_type", "damage", "range", "min_range", "cooldown", "projectile_speed",
-	"homing", "splash", "scatter", "hits_ground", "hits_air", "fx",
+	"homing", "splash", "scatter", "hits_ground", "hits_air", "fx", "burn_dps", "burn_seconds",
 ]
 const ENTITY_KEYS: Array[String] = [
 	"name", "desc", "faction", "tier", "cost", "build_time", "bandwidth", "bandwidth_provided",
@@ -27,6 +27,7 @@ const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
 	"linked_vehicle_repair", "roles", "drop_squad", "forest_cloak", "wreck_salvage_mult",
 	"linked_speed_bonus", "linked_damage_resist", "linked_sight_bonus", "kill_bounty", "linked_cloak",
+	"burn_dark_mult", "relay_muster",
 ]
 const AI_ROLES: Array[String] = [
 	"", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air", "hijacker",
@@ -250,6 +251,10 @@ func _load_weapons(d: Dictionary) -> void:
 		w.hits_ground = bool(src.get("hits_ground", true))
 		w.hits_air = bool(src.get("hits_air", false))
 		w.fx = str(src.get("fx", "tracer"))
+		w.burn_dps = float(src.get("burn_dps", 0.0))
+		w.burn_seconds = float(src.get("burn_seconds", 0.0))
+		if (w.burn_dps > 0.0) != (w.burn_seconds > 0.0):
+			errors.append("weapon %s: burn_dps and burn_seconds go together" % id)
 		weapons[id] = w
 
 
@@ -355,6 +360,8 @@ func _load_factions(d: Dictionary) -> void:
 		f.linked_sight_bonus = float(src.get("linked_sight_bonus", 0.0))
 		f.kill_bounty = float(src.get("kill_bounty", 0.0))
 		f.linked_cloak = bool(src.get("linked_cloak", false))
+		f.burn_dark_mult = float(src.get("burn_dark_mult", 1.0))
+		f.relay_muster = bool(src.get("relay_muster", false))
 		if src.has("roles"):
 			var raw_roles: Dictionary = src["roles"]
 			for rk: Variant in raw_roles.keys():

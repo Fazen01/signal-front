@@ -496,5 +496,61 @@
 		"hp": 280, "armor": "light", "move": "vehicle", "speed": 2.9, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["eclipse_beam"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "eclipse", "hotkey": "L",
 		"requires": ["occulus"]
+	},
+	"brand": {
+		"name": "Brand", "desc": "Flame trooper. Must get close, but what it hits keeps burning after it has moved on.",
+		"faction": "ember", "tier": 1, "cost": 65, "build_time": 8.5, "bandwidth": 1,
+		"hp": 105, "armor": "infantry", "move": "infantry", "speed": 2.8, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "weapons": ["brand_flamer"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "brand", "hotkey": "T"
+	},
+	"scorch": {
+		"name": "Scorch", "desc": "Incendiary rocket team. Its rockets pierce armor and set the crew compartment alight.",
+		"faction": "ember", "tier": 1, "cost": 110, "build_time": 11.5, "bandwidth": 1,
+		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["scorch_rocket"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "scorch", "hotkey": "L"
+	},
+	"kindler": {
+		"name": "Kindler", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "ember", "tier": 1, "cost": 80, "build_time": 9.0, "bandwidth": 1,
+		"hp": 75, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "kindler", "hotkey": "F",
+		"builds": ["coalhouse", "torchpost", "firehall", "crucible", "brazier", "athanor"]
+	},
+	"coalcart": {
+		"name": "Coalcart", "desc": "Collects salvage from fields and wrecks and carries it to a Coalhouse.",
+		"faction": "ember", "tier": 1, "cost": 120, "build_time": 13.0, "bandwidth": 2,
+		"hp": 290, "armor": "light", "move": "vehicle", "speed": 3.4, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 8.0, "harvester": true, "capacity": 100, "model": "coalcart", "hotkey": "U"
+	},
+	"spark": {
+		"name": "Spark", "desc": "Fast scout trike with a light gun.",
+		"faction": "ember", "tier": 2, "cost": 100, "build_time": 10.5, "bandwidth": 1,
+		"hp": 185, "armor": "light", "move": "vehicle", "speed": 6.3, "turn_rate": 4.0,
+		"radius": 0.8, "sight": 14.0, "weapons": ["spark_gun"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "spark", "hotkey": "C"
+	},
+	"salamander": {
+		"name": "Salamander", "desc": "Flame tank. Short-ranged and well armored; it wades in and leaves infantry, light vehicles and buildings burning.",
+		"faction": "ember", "tier": 2, "cost": 260, "build_time": 19.5, "bandwidth": 3,
+		"hp": 560, "armor": "heavy", "move": "vehicle", "speed": 3.9, "turn_rate": 2.8,
+		"radius": 1.05, "sight": 10.0, "weapons": ["salamander_flamer"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.2, "model": "salamander", "hotkey": "R"
+	},
+	"slagger": {
+		"name": "Slagger", "desc": "Battle tank firing molten shot. Hits a little less hard than other tank guns, and the target burns.",
+		"faction": "ember", "tier": 2, "cost": 380, "build_time": 26.0, "bandwidth": 4,
+		"hp": 700, "armor": "heavy", "move": "vehicle", "speed": 3.4, "turn_rate": 2.4,
+		"radius": 1.15, "sight": 11.0, "weapons": ["slagger_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.5, "model": "slagger", "hotkey": "B"
+	},
+	"flashpan": {
+		"name": "Flashpan", "desc": "Anti-air gun carrier. Its flak is weak against armor, and aircraft do not burn.",
+		"faction": "ember", "tier": 2, "cost": 235, "build_time": 18.0, "bandwidth": 3,
+		"hp": 370, "armor": "light", "move": "vehicle", "speed": 4.1, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 12.0, "weapons": ["flashpan_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "flashpan", "hotkey": "K"
+	},
+	"pitchfall": {
+		"name": "Pitchfall", "desc": "Incendiary mortar carrier. Lobs burning pitch over a wide area from far away; it cannot hit close targets and needs spotters.",
+		"faction": "ember", "tier": 3, "cost": 420, "build_time": 28.5, "bandwidth": 4,
+		"hp": 300, "armor": "light", "move": "vehicle", "speed": 2.9, "turn_rate": 2.4,
+		"radius": 1.1, "sight": 10.0, "weapons": ["pitchfall_mortar"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "pitchfall", "hotkey": "L",
+		"requires": ["athanor"]
 	}
 }

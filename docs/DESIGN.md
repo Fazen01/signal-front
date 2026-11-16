@@ -125,6 +125,10 @@ own on top of the shared Signal Grid:
   everything they destroy.
 - **Umbral Veil** — ambushers: Linked ground units are hidden while they
   stand still, and their turrets are hidden until they fire.
+- **Ember Rite** — fire: its weapons carry `burn_dps` and `burn_seconds`
+  and set ground targets alight (`SimCombat.ignite`). Fires do not stack,
+  buildings burn at half rate, aircraft do not burn, and the faction's own
+  rule, `burn_dark_mult`, makes Dark targets burn 1.5 times as fast.
 
 **Vesper Array** (added 16 November at the owner's request) — an automated
 legion of drone frames: cheap, quick and many, but fragile. Linked frames

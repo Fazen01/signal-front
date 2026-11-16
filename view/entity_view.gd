@@ -214,7 +214,7 @@ func _update_damage_smoke(e: SimEntity) -> void:
 	if _smoke != null and _smoke.emitting != burning:
 		_smoke.emitting = burning
 	# Close to destruction, flames join the smoke.
-	var ablaze: bool = burning and e.hp < e.max_hp * 0.25
+	var ablaze: bool = (burning and e.hp < e.max_hp * 0.25) or (e.burn_until > 0 and e.def != null)
 	if ablaze and _fire == null:
 		_fire = CPUParticles3D.new()
 		var lick: SphereMesh = SphereMesh.new()

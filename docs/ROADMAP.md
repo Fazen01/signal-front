@@ -341,8 +341,10 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 6, 15:50 UTC (branch `claude/relay-session-1116-1550`)
 
-Status: **in progress** — M29 (teams) done; a balance league is being
-played for M26 in the background.
+Status: **in progress** — M29 (teams) done and pushed (pull request #5);
+M30 in hand: the ninth faction, the Ember Rite, is built and being checked,
+the tenth is next. A balance league is being played for M26 in the
+background.
 
 - Newest remote commit at the start was `720b5c0` on
   `claude/relay-session-1116-1450` (session 5), 31 minutes old, with nothing
@@ -409,6 +411,30 @@ played for M26 in the background.
   three, to a shared victory. `tools/screenshot.sh seats 30 seats
   res://scenes/main.tscn` shows the setup filled in for two against two; it
   was looked at and nothing overlaps.
+
+**M30 — two more factions (in progress).**
+
+- **Ninth: the Ember Rite.** Its rule is fire. Weapons can carry
+  `burn_dps` and `burn_seconds`; whatever they hit on the ground is set
+  alight and keeps losing health after the shooting stops
+  (`SimCombat.ignite`, `burn_rate`). A fire does not stack: a second one
+  only makes it hotter or longer. Buildings burn at half rate, aircraft do
+  not burn, and the faction's own rule `burn_dark_mult` makes Dark targets
+  burn 1.5 times as fast. A kill by fire goes to whoever lit it.
+- **Decision: short range, tough bodies.** The Brand (5.5) and the
+  Salamander (6.5) are outranged by every rifle and gun, so the flame tank
+  has heavy armor and the Brand more health than other riflemen. Whether
+  that balances is for the league to say; first three AI matches: beat
+  Aegis and Foundry, lost to Vesper.
+- Nine units, seven buildings, eight weapons, sixteen models in pale fired
+  clay, soot and vermilion with glowing grates and kiln domes, an interface
+  skin (round at the foot, a glowing sill) and a flame emblem. Flamers draw
+  a tongue of fire and have a sound of their own; anything alight shows
+  flames; the selection panel says "ON FIRE" and what a weapon sets alight.
+- `tools/screenshot.sh ember_units 10 only_ember_units
+  res://tools/gallery.tscn` (and `only_ember_buildings`) shows one faction's
+  models: the gallery tool takes `only_<faction>_units|buildings` now.
+  Both sheets were looked at.
 
 ### 2026-11-16 — session 5, 14:50 UTC (branch `claude/relay-session-1116-1450`)
 

@@ -789,11 +789,16 @@ func _entity_detail(e: SimEntity) -> String:
 		lines.append("Under construction: %d%%" % int(e.build_progress * 100.0))
 	elif e.owner >= 0 and not e.linked:
 		lines.append("DARK - outside the signal grid")
+	if SimCombat.is_burning(world, e):
+		lines.append("ON FIRE - losing %d health a second" % int(ceilf(SimCombat.burn_rate(world, e))))
 	if e.def.harvester:
 		lines.append("Cargo %d / %d" % [e.cargo, e.def.capacity])
 	if e.def.is_armed():
 		var wd: WeaponDef = e.def.weapons[0]
-		lines.append("%s: %d %s damage, range %d" % [wd.name, int(wd.damage), GameData.DAMAGE_TYPES[wd.damage_type], int(wd.max_range)])
+		var fire: String = ""
+		if wd.burn_dps > 0.0:
+			fire = ", sets fire for %d s" % int(wd.burn_seconds)
+		lines.append("%s: %d %s damage, range %d%s" % [wd.name, int(wd.damage), GameData.DAMAGE_TYPES[wd.damage_type], int(wd.max_range), fire])
 	if e.def.signal_radius > 0.0:
 		lines.append("Signal radius %d%s" % [int(e.def.signal_radius), "" if e.linked else " (unlinked)"])
 	var facts: Array[String] = ["%s armour" % world.data.armor_classes[e.def.armor].capitalize()]

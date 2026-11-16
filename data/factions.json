@@ -122,5 +122,20 @@
 			"tier3": "occulus"
 		},
 		"playable": true
+	},
+	"ember": {
+		"name": "Ember Rite",
+		"desc": "Fire-bringers. Their flamers, rockets and mortars set what they hit alight, and it goes on burning after the shooting stops; anything Dark burns half again as fast. Short-ranged and tough: they have to get close.",
+		"hq": "hearth",
+		"start_units": ["kindler", "kindler", "coalcart", "coalcart", "brand", "brand"],
+		"burn_dark_mult": 1.5,
+		"drop_squad": ["brand", "brand", "brand", "scorch", "scorch"],
+		"roles": {
+			"builder": "kindler", "hauler": "coalcart", "relay": "torchpost",
+			"barracks": "firehall", "works": "crucible", "depot": "coalhouse",
+			"turret_ground": "brazier", "turret_armor": "brazier", "turret_air": "brazier",
+			"tier3": "athanor"
+		},
+		"playable": true
 	}
 }

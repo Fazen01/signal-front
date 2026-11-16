@@ -236,6 +236,22 @@ func _can_afford(me: SimPlayer, cost: int) -> bool:
 	return me.salvage - _spent >= cost
 
 
+## The linked relay nearest the enemy that is not under attack, for a
+## faction whose new units arrive at relays. Null if there is none.
+func _muster_relay(w: SimWorld) -> SimEntity:
+	var enemy: Vector2 = _enemy_hq_pos(w)
+	var best: SimEntity = null
+	var best_d: float = _hq.pos.distance_to(enemy) - 6.0
+	for b: SimEntity in _buildings:
+		if b.def.signal_radius <= 0.0 or b.def.signal_root or not b.linked:
+			continue
+		var d: float = b.pos.distance_to(enemy)
+		if d < best_d and _threat_near(b.pos, 16.0) == null:
+			best_d = d
+			best = b
+	return best
+
+
 ## Where the nearest surviving enemy's headquarters is (or started).
 func _enemy_hq_pos(w: SimWorld) -> Vector2:
 	var from: Vector2 = _hq.pos if _hq != null else w.players[player_id].start_pos
@@ -813,6 +829,17 @@ func _base_threat(w: SimWorld) -> SimEntity:
 func _run_military(w: SimWorld) -> void:
 	var toward_enemy: Vector2 = (_enemy_hq_pos(w) - _hq.pos).normalized()
 	var rally: Vector2 = w.map.nearest_free_pos(_hq.pos + toward_enemy * (_hq.radius + 12.0))
+	if w.players[player_id].faction.relay_muster:
+		# A mustering faction gathers at its forward relay, and has its
+		# factories deliver there.
+		var forward: SimEntity = _muster_relay(w)
+		if forward != null:
+			rally = w.map.nearest_free_pos(forward.pos + (_hq.pos - forward.pos).normalized() * 4.0)
+			for b: SimEntity in _buildings:
+				if b.def.produces.is_empty() or b.def.signal_root or b.def.depot:
+					continue
+				if not b.has_rally or b.rally.distance_to(rally) > 1.0:
+					w.push_command(SimCommand.rally(player_id, b.id, rally))
 
 	# Drop dead units from the wave.
 	var alive_wave: Array[int] = []

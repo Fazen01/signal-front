@@ -408,5 +408,49 @@
 		"hp": 1400, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"directive_cooldown_mult": 0.75, "model": "occulus",
 		"hotkey": "C", "requires": ["shroudworks"]
+	},
+	"hearth": {
+		"name": "Hearth", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "ember", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 6000, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["kindler", "coalcart"], "model": "hearth", "buildable": false
+	},
+	"torchpost": {
+		"name": "Torchpost", "desc": "Extends your signal grid and adds bandwidth. Must link back to the Hearth.",
+		"faction": "ember", "tier": 1, "cost": 150, "build_time": 15.5,
+		"hp": 610, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "torchpost", "hotkey": "R"
+	},
+	"coalhouse": {
+		"name": "Coalhouse", "desc": "Drop-off point for salvage. Builds Coalcarts.",
+		"faction": "ember", "tier": 1, "cost": 250, "build_time": 26.0,
+		"hp": 1280, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["coalcart"], "model": "coalhouse", "hotkey": "P"
+	},
+	"firehall": {
+		"name": "Firehall", "desc": "Trains infantry: Brands, Scorches and Kindlers.",
+		"faction": "ember", "tier": 1, "cost": 200, "build_time": 23.5,
+		"hp": 1360, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["brand", "scorch", "kindler"], "model": "firehall", "hotkey": "B"
+	},
+	"crucible": {
+		"name": "Crucible", "desc": "Casts the Rite's vehicles. Unlocks tier 2.",
+		"faction": "ember", "tier": 2, "cost": 400, "build_time": 36.5,
+		"hp": 1850, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
+		"produces": ["coalcart", "spark", "salamander", "slagger", "flashpan", "pitchfall"], "model": "crucible", "hotkey": "V",
+		"requires": ["firehall"]
+	},
+	"brazier": {
+		"name": "Brazier", "desc": "Defensive gun that spits burning bolts at ground and air alike.",
+		"faction": "ember", "tier": 2, "cost": 165, "build_time": 15.0,
+		"hp": 740, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["brazier_bolt"], "turret": true, "model": "brazier", "hotkey": "T", "requires": ["firehall"]
+	},
+	"athanor": {
+		"name": "Athanor", "desc": "Tier 3: unlocks the Pitchfall mortar carrier. Directives recharge 25% faster.",
+		"faction": "ember", "tier": 3, "cost": 500, "build_time": 39.0,
+		"hp": 1600, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "athanor", "hotkey": "C", "requires": ["crucible"]
 	}
 }

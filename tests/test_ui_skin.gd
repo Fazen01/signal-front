@@ -28,7 +28,12 @@ func test_every_faction_has_its_own_skin() -> void:
 
 
 func test_a_skin_builds_a_whole_theme() -> void:
-	for id: String in ["", "aegis", "foundry", "nomad", "vesper", "verdigris", "zephyr", "tally", "veil"]:
+	var ids: Array[String] = [""]
+	for f: FactionDef in GameData.shared().factions.values():
+		if f.playable:
+			ids.append(f.id)
+	check(ids.size() >= 10, "every playable faction is tried (%d)" % (ids.size() - 1))
+	for id: String in ids:
 		var skin: UiSkin = UiSkin.of(id)
 		var t: Theme = skin.theme()
 		for kind: String in ["Button", "OptionButton"]:

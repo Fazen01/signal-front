@@ -47,6 +47,11 @@ var kills: int = 0
 var xp: float = 0.0
 var rank: int = 0
 
+# Fire (see SimCombat.ignite)
+var burn_until: int = 0  ## tick the fire goes out, 0 = not burning
+var burn_dps: float = 0.0
+var burn_owner: int = -1  ## who set it, for the credit if it kills
+
 # Signal
 var linked: bool = true  ## emitters: chained to the HQ; others: inside own coverage
 

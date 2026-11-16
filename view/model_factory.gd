@@ -62,6 +62,12 @@ const GILT: Color = Color(0.85, 0.65, 0.25)
 const UMBRA: Color = Color(0.16, 0.16, 0.22)
 const UMBRA_LIGHT: Color = Color(0.29, 0.29, 0.38)
 const GHOST: Color = Color(0.55, 1.0, 0.80)
+# Ember Rite: pale fired clay, soot, vermilion and the glow of the kiln.
+const ASH: Color = Color(0.66, 0.62, 0.57)
+const ASH_DARK: Color = Color(0.38, 0.35, 0.33)
+const SOOT: Color = Color(0.12, 0.11, 0.11)
+const VERMILION: Color = Color(0.70, 0.17, 0.10)
+const EMBER: Color = Color(1.0, 0.62, 0.18)
 const SKIN: Color = Color(0.76, 0.58, 0.45)
 const LAMP: Color = Color(1.0, 0.93, 0.72)
 const LAMP_RED: Color = Color(1.0, 0.25, 0.18)
@@ -645,6 +651,47 @@ static func _assemble(model: String, team: Color) -> Node3D:
 			_sentry_turret(root, team)
 		"lance_battery":
 			_lance_battery(root, team)
+		"brand":
+			_soldier(root, team, SOOT, ASH, ASH_DARK)
+			_fuel_pack(root, 0.16, 0.5)
+			barrel(root, 0.05, 0.7, Vector3(0.3, 0.9, 0.2), mat(SOOT))
+			lamp(root, Vector3(0.68, 0.9, 0.2), EMBER, 0.07)
+		"scorch":
+			_soldier(root, team, SOOT, ASH, ASH_DARK)
+			barrel(root, 0.11, 1.0, Vector3(-0.36, 1.24, 0.22), mat(ASH_DARK))
+			cyl(root, 0.14, 0.1, 0.14, Vector3(0.66, 1.24, 0.22), mat(VERMILION), 8, Vector3(0.0, 0.0, -PI * 0.5))
+			lamp(root, Vector3(0.75, 1.24, 0.22), EMBER, 0.06)
+		"kindler":
+			_soldier(root, team, VERMILION, ASH, ASH_DARK)
+			box(root, Vector3(0.22, 0.44, 0.42), Vector3(-0.27, 0.9, 0.0), mat(ASH_DARK))
+			box(root, Vector3(0.1, 0.5, 0.1), Vector3(0.25, 0.75, 0.24), mat(METAL))
+			lamp(root, Vector3(-0.27, 1.16, 0.0), EMBER, 0.08)
+		"coalcart":
+			_coalcart(root, team)
+		"spark":
+			_spark(root, team)
+		"salamander":
+			_salamander(root, team)
+		"slagger":
+			_slagger(root, team)
+		"flashpan":
+			_flashpan(root, team)
+		"pitchfall":
+			_pitchfall(root, team)
+		"hearth":
+			_hearth(root, team)
+		"torchpost":
+			_torchpost(root, team)
+		"coalhouse":
+			_coalhouse(root, team)
+		"firehall":
+			_firehall(root, team)
+		"crucible":
+			_crucible(root, team)
+		"brazier":
+			_brazier(root, team)
+		"athanor":
+			_athanor(root, team)
 		_:
 			# Unknown model key: a plain marker block so the entity is still visible.
 			box(root, Vector3(1.0, 1.0, 1.0), Vector3(0.0, 0.5, 0.0), team_mat(team))
@@ -3182,3 +3229,265 @@ static func _detail(model: String, root: Node3D, team: Color) -> void:
 				box(orbit, Vector3(0.1, 0.34, 0.34), Vector3(cos(ang) * 1.36, 0.0, sin(ang) * 1.36), mat(METAL, 0.0, 0.6, 0.4), Vector3(0.0, -ang, 0.0))
 				box(orbit, Vector3(0.07, 0.07, 0.07), Vector3(cos(ang) * 1.36, 0.22, sin(ang) * 1.36), mat(Color(0.6, 1.0, 0.9), 1.8))
 			_pole_lamp(root, Vector3(-2.4, 0.15, 2.4), 1.7, WINDOW_WARM)
+
+
+# ------------------------------------------------------------ Ember Rite
+
+## Fuel bottles on a soldier's back.
+static func _fuel_pack(root: Node3D, radius: float, height: float) -> void:
+	for z: float in [-0.12, 0.12]:
+		cyl(root, radius * 0.7, radius * 0.7, height, Vector3(-0.3, 0.92, z), mat(VERMILION, 0.0, 0.5, 0.5), 6)
+		ball(root, radius * 0.7, Vector3(-0.3, 0.92 + height * 0.5, z), mat(VERMILION, 0.0, 0.5, 0.5), 6)
+
+
+## The Rite's vehicle hull: a soot-black chassis under rounded clay plates,
+## with a glowing grate at the back where the burner sits.
+static func _kiln_hull(root: Node3D, team: Color, length: float, width: float, height: float, tracked: bool) -> void:
+	if tracked:
+		track(root, length + 0.3, width * 0.5 + 0.08, 0.56)
+		track(root, length + 0.3, -(width * 0.5 + 0.08), 0.56)
+	else:
+		box(root, Vector3(length, 0.2, width * 0.8), Vector3(0.0, 0.46, 0.0), mat(SOOT))
+		for x: float in [-length * 0.34, length * 0.34]:
+			wheel(root, 0.36, 0.28, Vector3(x, 0.36, width * 0.5))
+			wheel(root, 0.36, 0.28, Vector3(x, 0.36, -width * 0.5))
+	var y: float = 0.6 + height * 0.5
+	box(root, Vector3(length * 0.8, height, width), Vector3(-length * 0.06, y, 0.0), mat(ASH))
+	wedge(root, Vector3(length * 0.22, height, width), Vector3(length * 0.45, y, 0.0), mat(ASH), 0.0)
+	# Rounded shoulders along both sides, and the team stripe under them.
+	for side: float in [-1.0, 1.0]:
+		cyl(root, height * 0.36, height * 0.36, length * 0.78, Vector3(-length * 0.06, y + height * 0.3, side * width * 0.42), mat(ASH_DARK), 6, Vector3(0.0, 0.0, PI * 0.5))
+		box(root, Vector3(length * 0.8, 0.09, 0.06), Vector3(-length * 0.06, y - height * 0.2, side * (width * 0.5 + 0.02)), team_mat(team))
+	# Burner grate and stack.
+	box(root, Vector3(0.08, height * 0.6, width * 0.6), Vector3(-length * 0.47, y, 0.0), mat(EMBER, 1.5))
+	for k: int in 3:
+		box(root, Vector3(0.1, height * 0.66, 0.05), Vector3(-length * 0.475, y, (float(k) - 1.0) * width * 0.2), mat(SOOT))
+	cyl(root, 0.08, 0.1, 0.5, Vector3(-length * 0.36, y + height * 0.5 + 0.25, width * 0.3), mat(SOOT), 6)
+	lamp(root, Vector3(length * 0.5 + 0.02, y - 0.02, width * 0.32), WINDOW_WARM)
+	lamp(root, Vector3(length * 0.5 + 0.02, y - 0.02, -width * 0.32), WINDOW_WARM)
+
+
+static func _coalcart(root: Node3D, team: Color) -> void:
+	_kiln_hull(root, team, 2.3, 1.2, 0.36, false)
+	box(root, Vector3(0.6, 0.5, 1.05), Vector3(0.7, 1.2, 0.0), mat(ASH_DARK))
+	box(root, Vector3(0.05, 0.16, 0.84), Vector3(1.01, 1.26, 0.0), mat(WINDOW_WARM, 0.9, 0.2, 0.3))
+	box(root, Vector3(1.4, 0.3, 1.22), Vector3(-0.42, 1.1, 0.0), mat(SOOT))
+	for x: float in [-1.05, 0.2]:
+		box(root, Vector3(0.08, 0.4, 1.26), Vector3(x, 1.14, 0.0), mat(VERMILION))
+	_cargo(root, Vector3(-0.42, 1.26, 0.0), Vector3(1.2, 0.5, 1.02))
+
+
+static func _spark(root: Node3D, team: Color) -> void:
+	# A trike: one wheel ahead, two behind, the rider's tub between.
+	box(root, Vector3(1.5, 0.16, 0.5), Vector3(0.0, 0.46, 0.0), mat(SOOT))
+	wheel(root, 0.36, 0.22, Vector3(0.72, 0.36, 0.0))
+	wheel(root, 0.34, 0.26, Vector3(-0.6, 0.34, 0.46))
+	wheel(root, 0.34, 0.26, Vector3(-0.6, 0.34, -0.46))
+	box(root, Vector3(0.9, 0.36, 0.7), Vector3(-0.2, 0.74, 0.0), mat(ASH))
+	wedge(root, Vector3(0.5, 0.36, 0.7), Vector3(0.5, 0.74, 0.0), mat(ASH), 0.0)
+	box(root, Vector3(0.92, 0.08, 0.74), Vector3(-0.2, 0.6, 0.0), team_mat(team))
+	cyl(root, 0.11, 0.11, 0.5, Vector3(-0.72, 0.84, 0.0), mat(VERMILION, 0.0, 0.5, 0.5), 6, Vector3(PI * 0.5, 0.0, 0.0))
+	lamp(root, Vector3(0.78, 0.8, 0.0), WINDOW_WARM)
+	lamp(root, Vector3(-0.82, 0.62, 0.0), EMBER, 0.1)
+	var t: Node3D = _turret(root, Vector3(-0.25, 0.92, 0.0))
+	box(t, Vector3(0.3, 0.2, 0.3), Vector3(0.0, 0.1, 0.0), mat(SOOT))
+	barrel(t, 0.04, 0.7, Vector3(0.1, 0.16, 0.0), mat(GUNMETAL))
+	box(t, Vector3(0.05, 0.3, 0.46), Vector3(0.2, 0.2, 0.0), mat(VERMILION))
+
+
+static func _salamander(root: Node3D, team: Color) -> void:
+	_kiln_hull(root, team, 2.5, 1.3, 0.46, true)
+	# Two fuel drums on the engine deck.
+	for z: float in [-0.34, 0.34]:
+		cyl(root, 0.26, 0.26, 0.9, Vector3(-0.78, 1.3, z), mat(VERMILION, 0.0, 0.5, 0.5), 8, Vector3(0.0, 0.0, PI * 0.5))
+	var t: Node3D = _turret(root, Vector3(0.2, 1.06, 0.0))
+	cyl(t, 0.5, 0.6, 0.4, Vector3(0.0, 0.2, 0.0), mat(ASH_DARK), 8)
+	ball(t, 0.5, Vector3(0.0, 0.4, 0.0), mat(ASH), 8)
+	# The projector: a short fat tube with a flared, blackened mouth.
+	barrel(t, 0.12, 0.9, Vector3(0.5, 0.36, 0.0), mat(SOOT))
+	cyl(t, 0.22, 0.13, 0.26, Vector3(1.5, 0.36, 0.0), mat(SOOT), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	lamp(t, Vector3(1.62, 0.36, 0.0), EMBER, 0.1)
+	box(t, Vector3(0.3, 0.08, 0.5), Vector3(-0.2, 0.86, 0.0), team_mat(team))
+
+
+static func _slagger(root: Node3D, team: Color) -> void:
+	_kiln_hull(root, team, 2.8, 1.38, 0.5, true)
+	var t: Node3D = _turret(root, Vector3(-0.1, 1.1, 0.0))
+	cyl(t, 0.62, 0.7, 0.46, Vector3(0.0, 0.23, 0.0), mat(ASH), 8)
+	box(t, Vector3(0.7, 0.4, 0.9), Vector3(-0.5, 0.25, 0.0), mat(ASH_DARK))
+	cyl(t, 0.64, 0.64, 0.07, Vector3(0.0, 0.48, 0.0), mat(VERMILION), 8)
+	# A thick gun in a glowing sleeve: the shot is poured, not loaded.
+	barrel(t, 0.12, 1.5, Vector3(0.6, 0.26, 0.0), mat(SOOT))
+	cyl(t, 0.17, 0.17, 0.5, Vector3(1.0, 0.26, 0.0), mat(EMBER, 1.1), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	cyl(t, 0.18, 0.18, 0.2, Vector3(2.05, 0.26, 0.0), mat(SOOT), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	box(t, Vector3(0.5, 0.1, 0.6), Vector3(-0.45, 0.5, 0.0), team_mat(team))
+	hatch(t, Vector3(0.1, 0.54, 0.28), 0.17, ASH_DARK)
+	aerial(t, Vector3(-0.7, 0.45, -0.38), 0.9, EMBER)
+
+
+static func _flashpan(root: Node3D, team: Color) -> void:
+	_kiln_hull(root, team, 2.2, 1.25, 0.4, false)
+	box(root, Vector3(0.56, 0.36, 1.05), Vector3(0.7, 1.2, 0.0), mat(ASH_DARK))
+	var t: Node3D = _turret(root, Vector3(-0.4, 1.02, 0.0))
+	cyl(t, 0.5, 0.56, 0.28, Vector3(0.0, 0.14, 0.0), mat(SOOT), 8)
+	box(t, Vector3(0.46, 0.4, 0.46), Vector3(-0.1, 0.48, 0.0), mat(ASH))
+	for z: float in [-0.34, 0.34]:
+		box(t, Vector3(0.4, 0.2, 0.14), Vector3(0.1, 0.56, z), mat(VERMILION))
+		for k: float in [-0.05, 0.05]:
+			cyl(t, 0.04, 0.04, 1.3, Vector3(0.52, 0.92, z + k), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.9))
+	box(t, Vector3(0.3, 0.08, 0.5), Vector3(-0.2, 0.72, 0.0), team_mat(team))
+
+
+static func _pitchfall(root: Node3D, team: Color) -> void:
+	_kiln_hull(root, team, 2.5, 1.3, 0.38, true)
+	box(root, Vector3(0.6, 0.4, 1.1), Vector3(0.85, 1.18, 0.0), mat(ASH_DARK))
+	# The pitch kettle, kept hot.
+	cyl(root, 0.34, 0.4, 0.5, Vector3(-0.95, 1.24, 0.0), mat(SOOT), 8)
+	cyl(root, 0.3, 0.3, 0.04, Vector3(-0.95, 1.5, 0.0), mat(EMBER, 1.4), 8)
+	var t: Node3D = _turret(root, Vector3(-0.1, 1.0, 0.0))
+	cyl(t, 0.46, 0.5, 0.3, Vector3(0.0, 0.15, 0.0), mat(ASH_DARK), 8)
+	# A stubby wide mortar, pointed well up.
+	cyl(t, 0.26, 0.3, 1.3, Vector3(0.3, 0.76, 0.0), mat(SOOT), 8, Vector3(0.0, 0.0, -0.6))
+	cyl(t, 0.31, 0.31, 0.12, Vector3(0.62, 1.22, 0.0), mat(VERMILION), 8, Vector3(0.0, 0.0, -0.6))
+	box(t, Vector3(0.3, 0.08, 0.5), Vector3(-0.3, 0.34, 0.0), team_mat(team))
+
+
+## A domed kiln with a glowing mouth facing +Z and a chimney.
+static func _kiln(root: Node3D, at: Vector3, radius: float, height: float, team: Color) -> void:
+	cyl(root, radius, radius * 1.08, height, at + Vector3(0.0, height * 0.5, 0.0), mat(ASH), 10)
+	var dome: MeshInstance3D = ball(root, radius, at + Vector3(0.0, height, 0.0), mat(ASH), 10)
+	dome.scale = Vector3(1.0, 0.62, 1.0)
+	cyl(root, radius * 1.1, radius * 1.1, 0.16, at + Vector3(0.0, height * 0.72, 0.0), team_mat(team), 10)
+	# The mouth: a dark arch with fire inside.
+	box(root, Vector3(radius * 0.8, height * 0.56, 0.2), at + Vector3(0.0, height * 0.3, radius * 0.98), mat(SOOT))
+	box(root, Vector3(radius * 0.56, height * 0.4, 0.22), at + Vector3(0.0, height * 0.24, radius * 1.0), mat(EMBER, 1.6))
+	cyl(root, radius * 0.16, radius * 0.22, height * 0.9, at + Vector3(-radius * 0.5, height + radius * 0.5, -radius * 0.4), mat(ASH_DARK), 6)
+	cyl(root, radius * 0.2, radius * 0.2, 0.1, at + Vector3(-radius * 0.5, height + radius * 0.5 + height * 0.45, -radius * 0.4), mat(SOOT), 6)
+
+
+## The Rite's yard: a soot slab with a clay kerb.
+static func _ash_yard(root: Node3D, w: float, d: float, h: float = 0.4) -> void:
+	box(root, Vector3(w, h, d), Vector3(0.0, 0.0, 0.0), mat(SOOT))
+	box(root, Vector3(w - 0.5, 0.06, d - 0.5), Vector3(0.0, h * 0.5 + 0.02, 0.0), mat(ASH_DARK))
+	for side: float in [-1.0, 1.0]:
+		box(root, Vector3(w, 0.16, 0.22), Vector3(0.0, h * 0.5 + 0.08, side * (d * 0.5 - 0.11)), mat(ASH))
+		box(root, Vector3(0.22, 0.16, d), Vector3(side * (w * 0.5 - 0.11), h * 0.5 + 0.08, 0.0), mat(ASH))
+
+
+static func _hearth(root: Node3D, team: Color) -> void:
+	_ash_yard(root, 7.7, 7.7, 0.5)
+	# The great kiln, with four small ones at its feet.
+	_kiln(root, Vector3(0.0, 0.25, -0.3), 2.5, 2.6, team)
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			cyl(root, 0.62, 0.7, 1.3, Vector3(sx * 2.95, 0.9, sz * 2.95), mat(ASH_DARK), 8)
+			var cap: MeshInstance3D = ball(root, 0.62, Vector3(sx * 2.95, 1.55, sz * 2.95), mat(ASH), 8)
+			cap.scale = Vector3(1.0, 0.6, 1.0)
+			box(root, Vector3(0.3, 0.12, 0.3), Vector3(sx * 2.95, 1.96, sz * 2.95), mat(EMBER, 1.6))
+	# Command mast: the root of the signal grid, rising out of the dome.
+	cyl(root, 0.16, 0.3, 3.2, Vector3(0.9, 5.6, 0.2), mat(SOOT, 0.0, 0.5, 0.5), 6)
+	ring(root, 0.75, 0.9, Vector3(0.9, 5.9, 0.2), team_mat(team))
+	ring(root, 0.45, 0.58, Vector3(0.9, 6.6, 0.2), mat(VERMILION, 0.3, 0.5, 0.5))
+	ball(root, 0.24, Vector3(0.9, 7.35, 0.2), mat(team, 1.4))
+	_spin_arms(root, Vector3(0.9, 5.2, 0.2), 0.6, VERMILION)
+	var t: Node3D = _turret(root, Vector3(-1.0, 4.35, -0.9))
+	box(t, Vector3(0.8, 0.4, 0.7), Vector3(0.0, 0.2, 0.0), mat(SOOT))
+	barrel(t, 0.06, 0.9, Vector3(0.35, 0.25, 0.14), mat(GUNMETAL))
+	barrel(t, 0.06, 0.9, Vector3(0.35, 0.25, -0.14), mat(GUNMETAL))
+	for sx: float in [-1.0, 1.0]:
+		_pole_lamp(root, Vector3(sx * 1.6, 0.25, 3.3), 1.6, EMBER)
+
+
+static func _torchpost(root: Node3D, team: Color) -> void:
+	cyl(root, 0.8, 0.92, 0.4, Vector3(0.0, 0.2, 0.0), mat(SOOT), 8)
+	cyl(root, 0.36, 0.5, 0.9, Vector3(0.0, 0.8, 0.0), mat(ASH), 8)
+	cyl(root, 0.1, 0.18, 3.4, Vector3(0.0, 2.9, 0.0), mat(ASH_DARK, 0.0, 0.4, 0.6), 6)
+	for y: float in [1.9, 2.8, 3.7]:
+		cyl(root, 0.24, 0.24, 0.08, Vector3(0.0, y, 0.0), mat(VERMILION), 8)
+	ring(root, 0.6, 0.72, Vector3(0.0, 3.3, 0.0), team_mat(team))
+	ring(root, 0.38, 0.48, Vector3(0.0, 4.1, 0.0), team_mat(team))
+	# The torch itself: a bowl with the signal flame in it.
+	cyl(root, 0.34, 0.14, 0.3, Vector3(0.0, 4.7, 0.0), mat(SOOT), 8)
+	ball(root, 0.22, Vector3(0.0, 4.95, 0.0), mat(team, 1.5))
+	_spin_arms(root, Vector3(0.0, 2.4, 0.0), 0.5, VERMILION)
+
+
+static func _coalhouse(root: Node3D, team: Color) -> void:
+	_ash_yard(root, 5.7, 5.7)
+	# A vaulted store along one side of the yard.
+	box(root, Vector3(2.8, 1.7, 4.0), Vector3(-1.2, 1.05, -0.6), mat(ASH))
+	arch(root, 1.4, 4.0, Vector3(-1.2, 1.9, -0.6), mat(ASH_DARK))
+	box(root, Vector3(2.85, 0.22, 4.05), Vector3(-1.2, 1.8, -0.6), team_mat(team))
+	box(root, Vector3(1.8, 1.2, 0.1), Vector3(-1.2, 0.8, 1.42), mat(GUNMETAL))
+	# Bins of salvage and a heap of coal on the pad.
+	box(root, Vector3(1.2, 0.8, 1.0), Vector3(1.4, 0.6, -1.5), mat(RUST, 0.0, 0.4, 0.7))
+	box(root, Vector3(1.2, 0.8, 1.0), Vector3(1.5, 0.6, -0.2), mat(VERMILION))
+	var heap: MeshInstance3D = ball(root, 0.9, Vector3(1.5, 0.3, 1.5), mat(SOOT), 7)
+	heap.scale = Vector3(1.0, 0.55, 1.0)
+	cyl(root, 0.2, 0.26, 2.2, Vector3(0.6, 2.0, -2.3), mat(ASH_DARK), 6)
+	_pole_lamp(root, Vector3(-2.4, 0.2, 2.4), 1.6, EMBER)
+
+
+static func _firehall(root: Node3D, team: Color) -> void:
+	_ash_yard(root, 5.7, 5.7)
+	box(root, Vector3(4.8, 1.6, 3.0), Vector3(0.0, 1.0, -0.7), mat(ASH))
+	roof(root, 4.8, 1.0, 3.0, Vector3(0.0, 2.3, -0.7), mat(VERMILION.darkened(0.3)))
+	box(root, Vector3(4.85, 0.2, 3.05), Vector3(0.0, 1.7, -0.7), team_mat(team))
+	box(root, Vector3(1.0, 1.2, 0.1), Vector3(0.0, 0.8, 0.82), mat(GUNMETAL))
+	windows(root, Vector3(-1.8, 1.2, 0.82), Vector3(0.7, 0.0, 0.0), 2, Vector3(0.4, 0.4, 0.06), WINDOW_WARM)
+	windows(root, Vector3(1.1, 1.2, 0.82), Vector3(0.7, 0.0, 0.0), 2, Vector3(0.4, 0.4, 0.06), WINDOW_WARM)
+	# The drill fire in the yard, and the bell tower.
+	cyl(root, 0.5, 0.6, 0.3, Vector3(-1.5, 0.36, 1.8), mat(SOOT), 8)
+	ball(root, 0.3, Vector3(-1.5, 0.6, 1.8), mat(EMBER, 1.6), 6)
+	box(root, Vector3(0.8, 3.0, 0.8), Vector3(2.0, 1.7, 1.8), mat(ASH_DARK))
+	roof(root, 1.0, 0.6, 1.0, Vector3(2.0, 3.5, 1.8), mat(VERMILION))
+	box(root, Vector3(0.5, 0.4, 0.82), Vector3(2.0, 2.6, 1.8), mat(SOOT))
+
+
+static func _crucible(root: Node3D, team: Color) -> void:
+	_ash_yard(root, 7.7, 5.7)
+	box(root, Vector3(4.0, 2.2, 4.4), Vector3(-1.4, 1.3, -0.3), mat(ASH))
+	arch(root, 2.0, 4.4, Vector3(-1.4, 2.4, -0.3), mat(ASH_DARK))
+	box(root, Vector3(4.05, 0.28, 4.45), Vector3(-1.4, 2.2, -0.3), team_mat(team))
+	# The casting door, lit from inside.
+	box(root, Vector3(3.0, 1.8, 0.12), Vector3(-1.4, 1.1, 1.92), mat(SOOT))
+	box(root, Vector3(2.4, 0.3, 0.14), Vector3(-1.4, 0.4, 1.94), mat(EMBER, 1.5))
+	box(root, Vector3(3.3, 0.18, 0.2), Vector3(-1.4, 2.05, 1.95), mat(VERMILION))
+	# The crucible itself: a great tilted pot of molten metal beside the hall.
+	cyl(root, 0.9, 0.7, 1.3, Vector3(2.4, 1.2, -0.6), mat(SOOT), 10, Vector3(0.0, 0.0, 0.25))
+	cyl(root, 0.8, 0.8, 0.06, Vector3(2.24, 1.84, -0.6), mat(EMBER, 1.7), 10, Vector3(0.0, 0.0, 0.25))
+	for z: float in [-1.6, 0.4]:
+		cyl(root, 0.1, 0.1, 2.6, Vector3(2.4, 1.5, z), mat(ASH_DARK), 5)
+	box(root, Vector3(0.2, 0.2, 2.2), Vector3(2.4, 2.8, -0.6), mat(ASH_DARK))
+	cyl(root, 0.3, 0.4, 2.2, Vector3(1.0, 1.3, -2.2), mat(ASH_DARK), 6)
+	_pole_lamp(root, Vector3(3.4, 0.2, 2.4), 1.8, EMBER)
+
+
+static func _brazier(root: Node3D, team: Color) -> void:
+	cyl(root, 0.85, 0.95, 0.4, Vector3(0.0, 0.2, 0.0), mat(SOOT), 8)
+	cyl(root, 0.5, 0.7, 0.5, Vector3(0.0, 0.6, 0.0), mat(ASH), 8)
+	ring(root, 0.8, 0.88, Vector3(0.0, 0.42, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 0.85, 0.0))
+	# A fire bowl on a pivot, with two short spouts.
+	cyl(t, 0.5, 0.3, 0.4, Vector3(0.0, 0.2, 0.0), mat(SOOT), 8)
+	cyl(t, 0.42, 0.42, 0.05, Vector3(0.0, 0.41, 0.0), mat(EMBER, 1.6), 8)
+	box(t, Vector3(0.08, 0.3, 0.7), Vector3(0.3, 0.3, 0.0), mat(VERMILION))
+	barrel(t, 0.06, 0.8, Vector3(0.32, 0.24, 0.14), mat(GUNMETAL))
+	barrel(t, 0.06, 0.8, Vector3(0.32, 0.24, -0.14), mat(GUNMETAL))
+
+
+static func _athanor(root: Node3D, team: Color) -> void:
+	_ash_yard(root, 5.7, 5.7)
+	# A tall tower furnace in three shrinking stages with a fire at the top.
+	cyl(root, 1.8, 2.0, 1.4, Vector3(0.0, 0.9, 0.0), mat(ASH), 8)
+	cyl(root, 2.02, 2.02, 0.2, Vector3(0.0, 1.3, 0.0), team_mat(team), 8)
+	cyl(root, 1.3, 1.6, 1.4, Vector3(0.0, 2.3, 0.0), mat(ASH_DARK), 8)
+	cyl(root, 0.9, 1.2, 1.3, Vector3(0.0, 3.65, 0.0), mat(ASH), 8)
+	cyl(root, 1.0, 1.0, 0.14, Vector3(0.0, 4.3, 0.0), mat(VERMILION), 8)
+	ball(root, 0.5, Vector3(0.0, 4.6, 0.0), mat(EMBER, 1.7), 8)
+	box(root, Vector3(0.9, 0.9, 0.2), Vector3(0.0, 0.75, 1.9), mat(SOOT))
+	box(root, Vector3(0.6, 0.6, 0.22), Vector3(0.0, 0.65, 1.92), mat(EMBER, 1.5))
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0 + PI * 0.25
+		cyl(root, 0.12, 0.16, 2.0, Vector3(cos(ang) * 2.3, 1.2, sin(ang) * 2.3), mat(ASH_DARK), 6)
+		box(root, Vector3(0.2, 0.14, 0.2), Vector3(cos(ang) * 2.3, 2.26, sin(ang) * 2.3), mat(EMBER, 1.6))

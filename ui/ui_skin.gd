@@ -221,6 +221,30 @@ static func of(faction_id: String) -> UiSkin:
 			k.panel_edge = [1, 1, 1, 1]
 			k.letter_spacing = 7
 			k.embolden = 0.2
+		"ember":
+			# A kiln mouth: soot above, a glowing sill below, round at the foot.
+			k.plate = "EMBER RITE"
+			k.emblem = "emblem_ember"
+			k.accent = Color(1.0, 0.36, 0.22)
+			k.second = Color(1.0, 0.88, 0.46)
+			k.text = Color(0.95, 0.91, 0.87)
+			k.dim = Color(0.72, 0.64, 0.58)
+			k.faint = Color(0.48, 0.41, 0.37)
+			k.panel_fill = Color(0.075, 0.052, 0.048, 0.93)
+			k.strip_fill = Color(0.055, 0.038, 0.035, 0.90)
+			k.section_fill = Color(0.10, 0.07, 0.062, 0.93)
+			k.raised = Color(0.19, 0.125, 0.11, 0.98)
+			k.raised_hot = Color(0.36, 0.17, 0.11, 0.98)
+			k.pressed = Color(0.62, 0.22, 0.10, 1.0)
+			k.primary = Color(0.56, 0.17, 0.09, 1.0)
+			k.sunk = Color(0.035, 0.024, 0.022, 0.96)
+			k.line = Color(0.86, 0.33, 0.18, 0.8)
+			k.line_soft = Color(0.66, 0.30, 0.18, 0.45)
+			k.corners = [0, 0, 11, 11]
+			k.edges = [1, 1, 1, 3]
+			k.panel_edge = [1, 1, 1, 4]
+			k.letter_spacing = 4
+			k.embolden = 1.0
 		_:
 			pass
 	_skins[faction_id] = k

@@ -65,7 +65,7 @@ run_step boot_battle 600 "Battle scene exit at tick" --fixed-fps 60 --quit-after
 run_step smoke_battle 600 "Smoke driver finished" --fixed-fps 60 --quit-after 400 res://scenes/battle.tscn -- --smoke
 # Random input through the real interface, as each faction in turn.
 monkey_seed=0
-for faction in aegis foundry nomad vesper verdigris zephyr tally veil; do
+for faction in aegis foundry nomad vesper verdigris zephyr tally veil ember; do
 	monkey_seed=$((monkey_seed + 1))
 	run_step "monkey_${faction}" 600 "Monkey finished" --fixed-fps 60 --quit-after 3100 res://scenes/battle.tscn -- "--monkey=${monkey_seed}" "--faction=${faction}"
 done
@@ -79,6 +79,7 @@ run_step ai_match_verdigris 900 "MATCH RESULT" -s res://tools/headless_match.gd 
 run_step ai_match_zephyr 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=7 --max-minutes=45 --factions=zephyr,foundry
 run_step ai_match_tally 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=8 --max-minutes=45 --factions=tally,vesper
 run_step ai_match_veil 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=9 --max-minutes=45 --factions=veil,aegis
+run_step ai_match_ember 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=10 --max-minutes=45 --factions=ember,aegis
 run_step ai_match_layout 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=45 --map=twin_fords --factions=aegis,foundry
 # Three-way free-for-alls run 17-55 game minutes since the 1v1 pacing change
 # (this seed is the slowest measured); the cap only has to catch stalemates.

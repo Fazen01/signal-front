@@ -17,6 +17,8 @@ var linked_damage_resist: float = 0.0  ## share of damage Linked units shrug off
 var linked_sight_bonus: float = 0.0  ## extra sight for Linked units and buildings (0.25 = a quarter further)
 var kill_bounty: float = 0.0  ## share of the value of everything destroyed that is paid out in salvage
 var linked_cloak: bool = false  ## Linked ground units are hidden while they stand still
+var burn_dark_mult: float = 1.0  ## how much harder this faction's fires burn targets that are Dark
+var relay_muster: bool = false  ## new units arrive at the relay nearest the rally point
 var drop_squad: Array[String] = []  ## units delivered by Reinforcement Drop
 var roles: Dictionary[String, String] = {}  ## what the AI builds for each job (see SimAI)
 var playable: bool = true

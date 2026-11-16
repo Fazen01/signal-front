@@ -16,3 +16,5 @@ var scatter: float = 0.0  ## max miss distance for unguided shells
 var hits_ground: bool = true
 var hits_air: bool = false
 var fx: String = "tracer"
+var burn_dps: float = 0.0  ## damage a second to whatever it sets alight
+var burn_seconds: float = 0.0  ## how long that fire lasts

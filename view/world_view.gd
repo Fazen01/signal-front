@@ -232,10 +232,25 @@ func handle_event(ev: SimEvent) -> void:
 	match ev.type:
 		SimEvent.Type.DIRECTIVE:
 			_directive_fx(ev)
+		SimEvent.Type.UNIT_READY:
+			if ev.value >= 1.0:
+				# Delivered through the network to a relay.
+				fx.ground_ring(_ground(ev.pos, 0.25), 1.8, Color(0.75, 1.0, 0.8, 0.9), 0.7, true)
+				fx.flash(_ground(ev.pos, 1.0), 1.4, Color(0.75, 1.0, 0.8, 0.6), 0.3)
 		SimEvent.Type.RANK_UP:
 			fx.ground_ring(_ground(ev.pos, 0.2), 1.6, Color(1.0, 0.85, 0.3, 0.9), 0.8, true)
 		SimEvent.Type.SHOT:
 			_kick(ev.id)
+			if ev.text == "flame":
+				# A flamer: a tongue of fire from the muzzle to the target.
+				var from: Vector3 = _ground(ev.pos, 1.0 + _altitude_of(ev.id))
+				var to: Vector3 = _ground(ev.pos2, 0.6 + _altitude_of(ev.other_id))
+				fx.flames(from.lerp(to, 0.35), 0.7)
+				fx.flames(to, 1.0)
+				if (ev.id + world.tick_count) % 4 == 0:
+					fx.light(to, Color(1.0, 0.55, 0.2), 1.6, 5.0, 0.25)
+				_sound("flame", ev.pos, 220)
+				return
 			var heavy: bool = ev.text == "tracer_heavy"
 			var hit: Vector3 = _ground(ev.pos2, 0.8 + _altitude_of(ev.other_id))
 			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), hit, heavy)

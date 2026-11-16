@@ -30,7 +30,7 @@ From the main menu:
   **Watch**: the AI plays every side while you look on, with no fog of war,
   and + and - change the speed.
   The setup panel dresses itself in the interface of the faction you pick:
-  each of the eight has its own colours, shapes, lettering and emblem, and
+  each faction has its own colours, shapes, lettering and emblem, and
   the match's HUD wears the same.
 - **Continue Saved Game** — pick up the match you saved from the pause menu
   ("Save Game", or "Save and Quit to Menu"), exactly where it stopped.
@@ -197,6 +197,22 @@ until they fire. Fragile and costly, with the longest guns on the field.
 - Buildings: Sanctum, Reservoir, Obelisk, Hollow, Shroudworks, Sentinel,
   Occulus (tier 3).
 
+**Ember Rite** — fire-bringers. Their flamers, rockets, tank guns and
+mortars set what they hit **alight**, and it goes on burning for a few
+seconds after the shooting stops. A fire does not stack (a second one only
+makes it hotter or longer), buildings burn at half the rate, aircraft do
+not burn at all, and anything **Dark burns half again as fast**: cut a
+relay, then light what was behind it. Short-ranged and tough; they have to
+get close.
+
+- Infantry: Brand (flame trooper), Scorch (incendiary rockets), Kindler
+  (builder).
+- Vehicles: Coalcart (hauler), Spark (scout trike), Salamander (flame
+  tank), Slagger (tank firing molten shot), Flashpan (anti-air), Pitchfall
+  (incendiary mortar, tier 3).
+- Buildings: Hearth, Coalhouse, Torchpost, Firehall, Crucible, Brazier
+  (burning bolts at ground and air), Athanor (tier 3).
+
 ### The AI
 
 Up to three AI players, each at Easy, Normal or Hard, against you or on
@@ -242,7 +258,7 @@ game except through software-rendered screenshots, so:
   the latest table. One-on-one matches between AIs on the default map last
   about a quarter of an hour (the design aims for 15–25 minutes); the
   compact map gives about ten.
-- Five of the eight factions were added in one day. They share the AI and
+- All but the first three factions were added in one day. They share the AI and
   most rules with the first three, each with one rule of its own, and have
   had far less testing.
 

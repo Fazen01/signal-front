@@ -22,6 +22,19 @@ func _ready() -> void:
 			units.append(def)
 	# "page<N>" as the capture script shows eight models at a time, close up:
 	# tools/screenshot.sh gallery_p0 10 page0 res://tools/gallery.tscn
+	# "only_<faction>_units" / "only_<faction>_buildings" shows one faction's:
+	# tools/screenshot.sh ember_units 10 only_ember_units res://tools/gallery.tscn
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--script=only_"):
+			var parts: PackedStringArray = arg.trim_prefix("--script=only_").split("_")
+			var some: Array[EntityDef] = []
+			for def: EntityDef in (buildings if parts.size() > 1 and parts[1] == "buildings" else units):
+				if def.faction == parts[0]:
+					some.append(def)
+			_show_page(some, 0)
+			if some.size() > 8:
+				_put(ModelFactory.build(some[8].model, MatchConfig.TEAM_COLORS[0]), Vector3(0.0, 0.0, 7.5), some[8].name)
+			return
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--script=page"):
 			_show_page(units + buildings, int(arg.trim_prefix("--script=page")))

@@ -268,5 +268,40 @@
 	"sentinel_gun": {
 		"name": "Sentinel Gun", "damage_type": "ballistic", "damage": 11.0, "range": 11.0,
 		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"brand_flamer": {
+		"name": "Brand Flamer", "damage_type": "explosive", "damage": 4.5, "range": 5.5,
+		"cooldown": 0.3, "fx": "flame", "burn_dps": 5.0, "burn_seconds": 3.0
+	},
+	"scorch_rocket": {
+		"name": "Scorch Rocket", "damage_type": "piercing", "damage": 38.0, "range": 9.5,
+		"cooldown": 2.9, "projectile_speed": 15.0, "homing": true, "hits_air": true, "fx": "missile",
+		"burn_dps": 4.0, "burn_seconds": 4.0
+	},
+	"spark_gun": {
+		"name": "Spark Gun", "damage_type": "ballistic", "damage": 5.5, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"salamander_flamer": {
+		"name": "Salamander Projector", "damage_type": "explosive", "damage": 8.0, "range": 6.5,
+		"cooldown": 0.25, "fx": "flame", "burn_dps": 8.0, "burn_seconds": 4.0
+	},
+	"slagger_cannon": {
+		"name": "Slag Cannon", "damage_type": "piercing", "damage": 50.0, "range": 10.0,
+		"cooldown": 2.4, "projectile_speed": 30.0, "splash": 0.8, "fx": "shell",
+		"burn_dps": 5.0, "burn_seconds": 4.0
+	},
+	"flashpan_flak": {
+		"name": "Flashpan Guns", "damage_type": "flak", "damage": 16.0, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"pitchfall_mortar": {
+		"name": "Pitchfall Mortar", "damage_type": "explosive", "damage": 45.0, "range": 19.0,
+		"min_range": 6.0, "cooldown": 3.6, "projectile_speed": 16.0, "splash": 2.8, "scatter": 2.4, "fx": "artillery",
+		"burn_dps": 7.0, "burn_seconds": 6.0
+	},
+	"brazier_bolt": {
+		"name": "Brazier Bolts", "damage_type": "ballistic", "damage": 8.5, "range": 10.0,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer", "burn_dps": 4.0, "burn_seconds": 3.0
 	}
 }
