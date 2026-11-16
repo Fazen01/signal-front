@@ -8,6 +8,7 @@ static func make_world(seed_value: int = 1, size_cells: int = 32) -> SimWorld:
 	var data: GameData = GameData.shared()
 	var map: SimMap = SimMapGen.blank(size_cells)
 	var w: SimWorld = SimWorld.new(data, map, seed_value)
+	w.victory_enabled = false
 	w.add_player("aegis", Color(0.2, 0.5, 1.0), false, map.starts[0], "Blue")
 	w.add_player("aegis", Color(1.0, 0.3, 0.2), false, map.starts[1], "Red")
 	# Tests fund themselves generously unless they are about money.

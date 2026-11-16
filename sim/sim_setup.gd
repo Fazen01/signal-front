@@ -17,6 +17,8 @@ static func create_match(config: MatchConfig) -> SimWorld:
 		w.spawn_field(Vector2(f.x, f.y), int(f.z))
 	for p: SimPlayer in w.players:
 		place_base(w, p)
+		if p.is_ai:
+			w.ais.append(SimAI.new(p.id, p.ai_level, config.seed_value))
 	SimSignal.recompute(w)
 	w.signal_next_tick = 0
 	return w

@@ -29,6 +29,9 @@ var signal_dirty: bool = true
 var signal_next_tick: int = 0
 var coverage_version: int = 0  ## bumps whenever coverage is rebuilt
 
+var ais: Array[SimAI] = []
+
+var victory_enabled: bool = true  ## tests without bases switch this off
 var game_over: bool = false
 var winner: int = -1  ## player id, -1 = nobody (yet)
 
@@ -300,15 +303,61 @@ func tick() -> void:
 		SimOrders.apply_command(self, cmd)
 
 	if not game_over:
+		for ai: SimAI in ais:
+			ai.update(self)
 		for e: SimEntity in entities:
 			if e.alive and e.kind == SimEntity.Kind.UNIT:
 				SimOrders.update_unit(self, e)
 		SimEconomy.update(self)
 		SimMovement.update(self)
 		SimCombat.update(self)
+		if victory_enabled and tick_count % 10 == 0:
+			_check_victory()
 
 	_flush_dead()
 	tick_count += 1
+
+
+# ---------------------------------------------------------------- victory
+
+## A player whose HQ is gone is defeated; the last team standing wins.
+func _check_victory() -> void:
+	var has_hq: Dictionary[int, bool] = {}
+	for e: SimEntity in entities:
+		if e.alive and e.owner >= 0 and e.kind == SimEntity.Kind.BUILDING and e.def.signal_root and e.constructed:
+			has_hq[e.owner] = true
+	for p: SimPlayer in players:
+		if not p.defeated and not has_hq.has(p.id):
+			defeat_player(p.id)
+	if game_over:
+		return
+	var teams: Dictionary[int, bool] = {}
+	var last: int = -1
+	for p: SimPlayer in players:
+		if not p.defeated:
+			teams[p.team] = true
+			last = p.id
+	if teams.size() <= 1 and players.size() > 1:
+		game_over = true
+		winner = last if teams.size() == 1 else -1
+		var ev: SimEvent = emit_event(SimEvent.Type.MATCH_OVER, 0, winner, Vector2.ZERO)
+		ev.value = seconds()
+
+
+## Marks a player as out of the match and destroys everything they own.
+func defeat_player(id: int) -> void:
+	var p: SimPlayer = player(id)
+	if p == null or p.defeated:
+		return
+	p.defeated = true
+	for other: SimPlayer in players:
+		alert(other.id, "%s has been defeated" % p.name, p.start_pos)
+	var n: int = entities.size()
+	for i: int in n:
+		var e: SimEntity = entities[i]
+		if e.alive and e.owner == id:
+			SimCombat.kill(self, e, null, -1)
+	SimSignal.mark_dirty(self)
 
 
 func _flush_dead() -> void:

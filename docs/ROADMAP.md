@@ -50,10 +50,10 @@ decision in the session log at the bottom.
 ## M5 — First playable (tag `v0.1`)
 
 - [ ] Aegis Directorate roster complete through T2
-- [ ] Skirmish AI: economy, relay expansion, army, attack waves, defense
+- [x] Skirmish AI: economy, relay expansion, army, attack waves, defense
 - [ ] Win/lose conditions, victory screen with stats
 - [ ] Main menu → skirmish setup → match → back to menu
-- [ ] `tools/check.sh` runs a full headless AI-vs-AI match that ends with a winner
+- [x] `tools/check.sh` runs a full headless AI-vs-AI match that ends with a winner
 - [ ] README: how to run, controls, what is in the build
 
 ## M6 — Battlefield awareness
@@ -222,4 +222,6 @@ Signal decisions:
 - The overlay dims uncovered ground and tints covered ground in the team
   colour with a brighter rim; it shows only the local player's network.
 
-Half-done / next: M5 first playable (AI, win/lose, menus, headless match).
+Half-done / next: M5 — the skirmish AI, win/lose rules and the headless
+AI-vs-AI match in `check.sh` are done; menus, result screen and README are
+being written.

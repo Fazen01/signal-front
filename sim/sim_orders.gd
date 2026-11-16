@@ -24,6 +24,8 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 			for e: SimEntity in own_units(w, cmd):
 				clear_orders(e)
 				e.hold = true
+		SimCommand.Type.SURRENDER:
+			w.defeat_player(cmd.player)
 		_:
 			SimEconomy.apply_command(w, cmd)
 

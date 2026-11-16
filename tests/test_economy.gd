@@ -211,7 +211,9 @@ func test_new_hauler_goes_to_work_on_its_own() -> void:
 
 
 func test_match_setup_economy_runs() -> void:
-	var w: SimWorld = SimSetup.create_match(MatchConfig.skirmish(4))
+	var config: MatchConfig = MatchConfig.skirmish(4)
+	config.is_ai = [false, false]
+	var w: SimWorld = SimSetup.create_match(config)
 	var start: int = w.players[0].salvage
 	SimTestUtil.run(w, 20 * 60)
 	check(w.players[0].salvage > start, "starting haulers earn salvage in the first minute (%d)" % (w.players[0].salvage - start))
