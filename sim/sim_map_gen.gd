@@ -153,6 +153,19 @@ static func _build_heights(m: SimMap, rng: SimRng) -> void:
 				var d: float = sqrt(float(dx * dx + dy * dy))
 				var keep: float = clampf((d - 5.0) / 4.0, 0.0, 1.0)
 				m.heights[y * row + x] *= keep
+	# Rock rises and water sinks: each corner takes the average of the four
+	# cells around it, so cliffs and shores slope instead of stepping.
+	for y: int in range(0, m.h + 1):
+		for x: int in range(0, m.w + 1):
+			var lift: float = 0.0
+			for cy: int in [y - 1, y]:
+				for cx: int in [x - 1, x]:
+					var t: int = m.terrain_cell(Vector2i(clampi(cx, 0, m.w - 1), clampi(cy, 0, m.h - 1)))
+					if t == SimMap.Terrain.ROCK:
+						lift += 2.4
+					elif t == SimMap.Terrain.WATER:
+						lift -= 1.3
+			m.heights[y * row + x] += lift * 0.25
 
 
 static func _roll(x: float, y: float, p1: float, p2: float, p3: float) -> float:

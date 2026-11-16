@@ -26,11 +26,11 @@ decision in the session log at the bottom.
 
 ## M2 — View and controls
 
-- [ ] Terrain mesh, lighting, RTS camera (pan, zoom, rotate, bounds)
-- [ ] Procedural low-poly models for units and buildings with team colours
-- [ ] View layer interpolating sim state; health bars; selection rings
-- [ ] Click and box selection, context orders, control groups
-- [ ] Headless boot test of the battle scene for 600 frames with zero errors
+- [x] Terrain mesh, lighting, RTS camera (pan, zoom, rotate, bounds)
+- [x] Procedural low-poly models for units and buildings with team colours
+- [x] View layer interpolating sim state; health bars; selection rings
+- [x] Click and box selection, context orders, control groups
+- [x] Headless boot test of the battle scene for 600 frames with zero errors
 
 ## M3 — Economy and construction
 
@@ -172,4 +172,22 @@ Notes:
   write access to the repository). The owner granted access and pushes work
   now; if a later session sees a 403 on push, that is the cause.
 
-Half-done / next: M2 view and controls.
+- M2 View and controls: terrain mesh with trees/boulders/water, sun and
+  ambient light, RTS camera, procedural models for the whole T1/T2 Aegis
+  roster, interpolated entity views with turrets, projectile and tracer
+  effects, health bars, selection rings, click/box/double-click selection,
+  context orders, attack-move/stop/hold keys, control groups.
+- Verification tooling: `tools/screenshot.sh` (software-GL screenshots into
+  the git-ignored `screenshots/`), `tools/gallery.tscn` (every model on one
+  sheet) and a headless smoke driver (`--smoke`) that feeds synthetic mouse
+  and key events through the real input handlers; `check.sh` runs it.
+
+View decisions:
+- Models face +X and are built from cached primitive meshes in
+  `view/model_factory.gd`; a child named `Turret` follows the weapon aim.
+- Health bars and the drag box are drawn in 2D by `ui/battle_overlay.gd`
+  from projected positions; selection rings are 3D.
+- Map heights are cosmetic (units are simulated in 2D) but are baked into
+  `SimMap.heights` so the mesh and unit placement agree.
+
+Half-done / next: M3 economy and construction.

@@ -49,7 +49,9 @@ run_step() {
 
 run_step import 600 "" --import
 run_step tests 900 "TESTS PASSED" -s res://tests/run_tests.gd
-run_step boot_main 300 "Signal Front boot ok" --quit-after 300
+run_step boot_main 300 "Signal Front boot ok" --fixed-fps 60 --quit-after 300
+run_step boot_battle 600 "Battle scene exit at tick" --fixed-fps 60 --quit-after 600 res://scenes/battle.tscn
+run_step smoke_battle 600 "Smoke driver finished" --fixed-fps 60 --quit-after 400 res://scenes/battle.tscn -- --smoke
 
 if [ "${failed}" -ne 0 ]; then
 	echo "CHECK FAILED"
