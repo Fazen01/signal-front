@@ -166,8 +166,14 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
   Each faction has an interface of its own (`ui/ui_skin.gd`): colours,
   panel and button shapes, lettering and an emblem.
 - Build placement shows a ghost tinted valid/invalid, plus the coverage overlay.
-- Screens: main menu, skirmish setup (map, faction, AI difficulty, seed),
-  pause menu, settings, victory/defeat summary with stats.
+- Screens: main menu, skirmish setup (map, region, seed, and one row per
+  seat: played by, faction, team, AI skill), pause menu, settings,
+  victory/defeat summary with stats.
+- Teams: seats with the same team number are allies. Allies never target
+  each other, see everything the other sees (and what the other's
+  detectors reveal), start side by side, and win or lose together: the
+  match ends when one team is left. Each army still runs on its own signal
+  grid; coverage is not shared.
 
 ### Skirmish AI
 

@@ -17,12 +17,14 @@ static func create_match(config: MatchConfig) -> SimWorld:
 			cells = maxi(cells, SimMapGen.LARGE_CELLS)
 		map = SimMapGen.generate(config.seed_value, cells, config.starts_needed(), config.region)
 	var w: SimWorld = SimWorld.new(data, map, config.seed_value)
+	var starts: Array[Vector2] = assign_starts(config, map.starts)
 	for i: int in config.player_count():
 		var p: SimPlayer = w.add_player(
 			config.factions[i], MatchConfig.TEAM_COLORS[i % MatchConfig.TEAM_COLORS.size()],
-			config.is_ai[i], map.starts[i], config.names[i]
+			config.is_ai[i], starts[i], config.names[i]
 		)
 		p.ai_level = config.ai_levels[i]
+		p.team = config.team_of(i)
 	for f: Vector3 in map.field_spots:
 		w.spawn_field(Vector2(f.x, f.y), int(f.z))
 	for u: Vector2 in map.uplink_spots:
@@ -39,6 +41,44 @@ static func create_match(config: MatchConfig) -> SimWorld:
 	SimVision.recompute(w)
 	w.vision_next_tick = 0
 	return w
+
+
+## Which start each seat gets. Without teams, seat i takes start i. With
+## teams, allies are put next to each other and the sides apart.
+static func assign_starts(config: MatchConfig, starts: Array[Vector2]) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	var n: int = config.player_count()
+	if not config.has_teams():
+		for i: int in n:
+			out.append(starts[i])
+		return out
+	var free: Array[Vector2] = starts.duplicate()
+	for i: int in n:
+		var mates: Array[Vector2] = []
+		var foes: Array[Vector2] = []
+		for k: int in i:
+			if config.team_of(k) == config.team_of(i):
+				mates.append(out[k])
+			else:
+				foes.append(out[k])
+		var best: int = 0
+		var best_score: float = -INF
+		for s: int in free.size():
+			var score: float = -float(s)  # nobody placed yet: the first start
+			if not mates.is_empty():
+				score = 0.0
+				for at: Vector2 in mates:
+					score -= free[s].distance_to(at)
+			elif not foes.is_empty():
+				score = INF
+				for at: Vector2 in foes:
+					score = minf(score, free[s].distance_to(at))
+			if score > best_score + 0.001:
+				best_score = score
+				best = s
+		out.append(free[best])
+		free.remove_at(best)
+	return out
 
 
 ## Puts the faction's HQ on the player's start position with the starting

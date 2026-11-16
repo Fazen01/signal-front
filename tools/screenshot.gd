@@ -67,6 +67,20 @@ func _ready() -> void:
 			bconfig.factions = [_script_name.trim_prefix("base_"), "aegis"]
 			bconfig.region = "temperate"
 			bgame.pending_config = bconfig
+	if _script_name == "teams" or _script_name == "teams_result":
+		# Two against two, with an AI ally: the camera looks at the ally's base.
+		var tmgame: GameState = get_node_or_null("/root/Game") as GameState
+		if tmgame != null:
+			var tmconfig: MatchConfig = MatchConfig.skirmish(5)
+			tmconfig.factions = ["verdigris"]
+			tmconfig.is_ai = [false]
+			tmconfig.ai_levels = [1]
+			tmconfig.names = ["Commander"]
+			tmconfig.set_team(0, 0)
+			tmconfig.add_ai("foundry", 1, "Foundry Pact", 1)
+			tmconfig.add_ai("nomad", 1, "Nomad Circuit", 0)
+			tmconfig.add_ai("vesper", 1, "Vesper Array", 1)
+			tmgame.pending_config = tmconfig
 	if _script_name == "watch":
 		# A match nobody plays, as the Watch option in the skirmish setup starts it.
 		var wgame: GameState = get_node_or_null("/root/Game") as GameState
@@ -151,6 +165,13 @@ func _run_script(battle: BattleScene) -> void:
 	if _script_name.begins_with("base_") and _count == 8:
 		# Select a builder so the command card is filled in.
 		battle.controller.select_next_idle_builder()
+	if _script_name == "teams" and _count == 4:
+		# Look at the ally's base: it is in view without any unit of ours there.
+		battle.cam.center_on(battle.world.players[2].start_pos)
+		battle.cam.set_distance(58.0)
+	if _script_name == "teams_result" and _count == 5:
+		battle.world.defeat_player(1)
+		battle.world.defeat_player(3)
 	if _script_name == "watch" and _count == 2:
 		battle.time_scale = 30.0
 	if _script_name == "watch" and _count == _frames - 20:

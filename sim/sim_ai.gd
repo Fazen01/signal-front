@@ -11,6 +11,7 @@ const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
 const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
+const REINFORCE_TICKS: int = 20 * 240  ## a wave out this long is joined by whatever has gathered at home
 ## How an AI likes to fight. Normal and Hard opponents draw one from the
 ## seed, so two matches against the same difficulty need not feel alike.
 const DOCTRINES: Array[String] = ["balanced", "aggressor", "fortifier", "raider"]
@@ -356,7 +357,7 @@ func _run_construction(w: SimWorld, me: SimPlayer) -> void:
 	# A spare engineer claims any uplink site our network already reaches.
 	if free.size() >= 2 or w.tick_count > 20 * 90:
 		for e: SimEntity in w.entities:
-			if e.kind == SimEntity.Kind.UPLINK and e.owner != player_id and SimSignal.is_covered(w, player_id, e.pos):
+			if e.kind == SimEntity.Kind.UPLINK and e.owner != player_id and not w.are_allies(player_id, e.owner) and SimSignal.is_covered(w, player_id, e.pos):
 				if _threat_near(e.pos, 16.0) == null:
 					var one: Array[SimEntity] = [free[free.size() - 1]]
 					w.push_command(SimCommand.capture(player_id, _ids(one), e.id))
@@ -875,6 +876,8 @@ func _run_military(w: SimWorld) -> void:
 		Wave.ASSAULT:
 			if retreats and _should_retreat(w):
 				_retreat(w, rally)
+			elif threat == null and home.size() >= maxi(4, wave_size / 2) and _wave_spent(w):
+				_reinforce(w, home)
 			else:
 				_assault(w, false)
 
@@ -905,6 +908,32 @@ func _should_retreat(w: SimWorld) -> bool:
 		if b.def.is_armed() and b.constructed and not b.def.is_mine() and b.pos.distance_to(centre) < 16.0:
 			theirs += b.def.cost
 	return theirs * 10 > mine * 16
+
+
+## True when the wave out there is no longer much of an attack: worn down
+## to a third of what set out, or out for four minutes. A handful of
+## survivors (or one unit that cannot hurt what it was sent against) must
+## not keep the rest of the army waiting at home.
+func _wave_spent(w: SimWorld) -> bool:
+	if w.tick_count - wave_tick > REINFORCE_TICKS:
+		return true
+	var left: int = 0
+	for id: int in wave_ids:
+		left += w.get_entity(id).def.cost
+	return left * 3 <= wave_launch_power
+
+
+## Sends everything gathered at home after the wave, as part of it.
+func _reinforce(w: SimWorld, units: Array[SimEntity]) -> void:
+	for e: SimEntity in units:
+		wave_ids.append(e.id)
+	wave_launch_power = 0
+	for id: int in wave_ids:
+		wave_launch_power += w.get_entity(id).def.cost
+	wave_tick = w.tick_count
+	waves_sent += 1
+	wave_size = mini(max_wave, wave_size + wave_growth)
+	_assault(w, true)
 
 
 ## Calls the wave home. The next one will be bigger.

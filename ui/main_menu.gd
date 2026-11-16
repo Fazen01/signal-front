@@ -58,18 +58,22 @@ var _help: PanelContainer = null
 var _settings: SettingsPanel = null
 var _tutorials: PanelContainer = null
 var _seed: SpinBox = null
-var _faction: OptionButton = null
-var _level: OptionButton = null
-var _enemy_faction: OptionButton = null
+# One row for each seat of the match: who plays it, as which faction, on
+# which team and (for an AI) how well.
+const SEATS: int = 4
+var _seat_who: Array[OptionButton] = []
+var _seat_faction: Array[OptionButton] = []
+var _seat_team: Array[OptionButton] = []
+var _seat_level: Array[OptionButton] = []
+var _seat_note: Label = null  ## the line-up in words, or why it cannot start
+var _start: Button = null
 const COMPACT_MAP: String = "@compact"  ## map list entry for the small generated map
 
 var _map: OptionButton = null
 var _map_ids: Array[String] = []  ## "" = generated
 var _map_players: Array[int] = []
 var _map_blurb: Label = null
-var _opponents: OptionButton = null
 var _region: OptionButton = null
-var _role: OptionButton = null
 var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
@@ -241,7 +245,7 @@ func _build_setup() -> void:
 	_setup = PanelContainer.new()
 	_setup.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.LINE, 22.0))
 	_setup.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_setup.custom_minimum_size = Vector2(560.0, 0.0)
+	_setup.custom_minimum_size = Vector2(820.0, 0.0)
 	_setup.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_setup.grow_vertical = Control.GROW_DIRECTION_BOTH
 	add_child(_setup)
@@ -278,64 +282,104 @@ func _build_setup() -> void:
 	_row(box, "Map", _map)
 	_map_blurb = Hud.make_label("", 14, Hud.DIM)
 	_map_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_map_blurb.custom_minimum_size = Vector2(520.0, 22.0)
+	_map_blurb.custom_minimum_size = Vector2(760.0, 22.0)
 	box.add_child(_map_blurb)
 	_map.item_selected.connect(func(_i: int) -> void: _update_map())
-	_role = OptionButton.new()
-	_role.add_item("Play as the commander")
-	_role.add_item("Watch: the AI plays every side")
-	_role.tooltip_text = "Watching shows the whole battlefield with no fog of war. Use + and - to change the speed."
-	_row(box, "You", _role)
+	# Region and seed share a line.
+	var land: HBoxContainer = HBoxContainer.new()
+	land.add_theme_constant_override("separation", 10)
 	_region = OptionButton.new()
 	_region.add_item("From the seed")
 	for id: String in SimMapGen.REGIONS:
 		_region.add_item(SimMapGen.REGION_NAMES[id])
 	_region.tooltip_text = "Where the battlefield lies. It changes the look of the land, not how it plays."
-	_row(box, "Region", _region)
-	_opponents = OptionButton.new()
-	for n: int in [1, 2, 3]:
-		_opponents.add_item("%d opponent%s" % [n, "" if n == 1 else "s (free-for-all, larger map)"])
-	_row(box, "Opponents", _opponents)
-
-	var seed_row: HBoxContainer = HBoxContainer.new()
-	seed_row.add_theme_constant_override("separation", 8)
+	_region.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	land.add_child(_region)
+	land.add_child(Hud.make_label("Seed", 18, Hud.TEXT))
 	_seed = SpinBox.new()
 	_seed.min_value = 1.0
 	_seed.max_value = 999999.0
 	_seed.value = float(randi_range(1, 99999))
-	_seed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	seed_row.add_child(_seed)
+	_seed.custom_minimum_size = Vector2(130.0, 0.0)
+	land.add_child(_seed)
 	var dice: Button = Button.new()
 	dice.text = "Random"
 	dice.pressed.connect(func() -> void: _seed.value = float(randi_range(1, 999999)))
-	seed_row.add_child(dice)
-	_row(box, "Map seed", seed_row)
+	land.add_child(dice)
+	_row(box, "Region", land)
 
-	_faction = OptionButton.new()
+	# The seats.
+	box.add_child(UiTheme.rule(UiTheme.LINE_SOFT, 1.0))
 	var data: GameData = GameData.shared()
 	for f: FactionDef in data.factions.values():
 		if f.playable:
 			_faction_ids.append(f.id)
-			_faction.add_item(f.name)
-	_row(box, "Your faction", _faction)
+	var table: GridContainer = GridContainer.new()
+	table.columns = 5
+	table.add_theme_constant_override("h_separation", 10)
+	table.add_theme_constant_override("v_separation", 7)
+	box.add_child(table)
+	for word: String in ["SEAT", "PLAYED BY", "FACTION", "TEAM", "AI SKILL"]:
+		table.add_child(UiTheme.caption(word))
+	for seat: int in SEATS:
+		var tag: HBoxContainer = HBoxContainer.new()
+		tag.add_theme_constant_override("separation", 8)
+		tag.custom_minimum_size = Vector2(58.0, 0.0)
+		var chip: ColorRect = ColorRect.new()
+		chip.color = MatchConfig.TEAM_COLORS[seat]
+		chip.custom_minimum_size = Vector2(14.0, 14.0)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		chip.tooltip_text = "The colour this seat's army wears."
+		tag.add_child(chip)
+		tag.add_child(Hud.make_label(str(seat + 1), 18, Hud.TEXT))
+		table.add_child(tag)
+		var who: OptionButton = OptionButton.new()
+		if seat == 0:
+			who.add_item("You")
+			who.add_item("AI (you watch)")
+			who.tooltip_text = "Give your seat to the AI to watch the match: the whole battlefield, no fog of war, + and - change the speed."
+		elif seat == 1:
+			who.add_item("AI")
+			who.disabled = true
+		else:
+			who.add_item("Closed")
+			who.add_item("AI")
+		who.custom_minimum_size = Vector2(160.0, 0.0)
+		who.item_selected.connect(func(_i: int) -> void: _update_seats())
+		table.add_child(who)
+		_seat_who.append(who)
+		var faction: OptionButton = OptionButton.new()
+		if seat > 0:
+			faction.add_item("Random")
+		for id: String in _faction_ids:
+			faction.add_item(data.faction(id).name)
+		faction.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		faction.item_selected.connect(func(_i: int) -> void: _update_blurb())
+		table.add_child(faction)
+		_seat_faction.append(faction)
+		var team: OptionButton = OptionButton.new()
+		for t: int in SEATS:
+			team.add_item("Team %d" % (t + 1))
+		team.select(seat)
+		team.tooltip_text = "Seats on the same team are allies: they do not fight each other, share what they see, and win or lose together."
+		team.item_selected.connect(func(_i: int) -> void: _update_seats())
+		table.add_child(team)
+		_seat_team.append(team)
+		var level: OptionButton = OptionButton.new()
+		for n: String in LEVEL_NAMES:
+			level.add_item(n)
+		level.select(1)
+		level.custom_minimum_size = Vector2(120.0, 0.0)
+		table.add_child(level)
+		_seat_level.append(level)
 	_faction_blurb = Hud.make_label("", 14, Hud.DIM)
 	_faction_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_faction_blurb.custom_minimum_size = Vector2(520.0, 44.0)
+	_faction_blurb.custom_minimum_size = Vector2(760.0, 44.0)
 	box.add_child(_faction_blurb)
-	_faction.item_selected.connect(func(_i: int) -> void: _update_blurb())
-	_enemy_faction = OptionButton.new()
-	_enemy_faction.add_item("Random")
-	for id: String in _faction_ids:
-		_enemy_faction.add_item(data.faction(id).name)
-	_row(box, "Enemy faction", _enemy_faction)
-	_update_blurb()
-	_update_map()
-
-	_level = OptionButton.new()
-	for n: String in LEVEL_NAMES:
-		_level.add_item(n)
-	_level.select(1)
-	_row(box, "Difficulty", _level)
+	_seat_note = Hud.make_label("", 15, Hud.TEXT)
+	_seat_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_seat_note.custom_minimum_size = Vector2(760.0, 22.0)
+	box.add_child(_seat_note)
 
 	var buttons: HBoxContainer = HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 12)
@@ -345,14 +389,16 @@ func _build_setup() -> void:
 	back.custom_minimum_size = Vector2(120.0, 44.0)
 	back.pressed.connect(func() -> void: _show(_main_box))
 	buttons.add_child(back)
-	var start: Button = Button.new()
-	start.text = "Start Match"
-	start.theme_type_variation = "PrimaryButton"
-	start.custom_minimum_size = Vector2(180.0, 44.0)
-	start.add_theme_font_size_override("font_size", 20)
-	start.pressed.connect(start_skirmish)
-	buttons.add_child(start)
+	_start = Button.new()
+	_start.text = "Start Match"
+	_start.theme_type_variation = "PrimaryButton"
+	_start.custom_minimum_size = Vector2(180.0, 44.0)
+	_start.add_theme_font_size_override("font_size", 20)
+	_start.pressed.connect(start_skirmish)
+	buttons.add_child(_start)
 	box.add_child(buttons)
+	_update_blurb()
+	_update_map()
 
 
 func _build_tutorials() -> void:
@@ -409,33 +455,89 @@ func _build_help() -> void:
 	box.add_child(back)
 
 
-## Shows the chosen map's description and limits the opponent count to it.
+## Shows the chosen map's description and closes the seats it has no room for.
 func _update_map() -> void:
 	var index: int = maxi(_map.selected, 0)
-	var capacity: int = _map_players[index]
 	if _map_ids[index] == "":
-		_map_blurb.text = "A new battlefield from the seed, in one of four regions with four kinds of country each. 176 x 176 for two players, 192 x 192 for three or four."
+		_map_blurb.text = "A new battlefield from the seed, in one of four regions with four kinds of country each. 176 x 176 for two seats, 192 x 192 for three or four."
 	elif _map_ids[index] == COMPACT_MAP:
-		_map_blurb.text = "A small 128 x 128 battlefield from the seed. The armies meet early; expect a match of about ten minutes."
+		_map_blurb.text = "A small 128 x 128 battlefield from the seed, for two seats. The armies meet early; expect a match of about ten minutes."
 	else:
 		_map_blurb.text = str(SimMapGen.layout_info(_map_ids[index])["desc"])
-	for i: int in 3:
-		_opponents.set_item_disabled(i, i + 2 > capacity)
-	if _opponents.selected + 2 > capacity:
-		_opponents.select(capacity - 2)
+	_update_seats()
+
+
+## How many seats the chosen map has room for.
+func _capacity() -> int:
+	return _map_players[maxi(_map.selected, 0)]
+
+
+func _seat_open(seat: int) -> bool:
+	if seat >= _capacity():
+		return false
+	return seat < 2 or _seat_who[seat].selected == 1
+
+
+func _watching() -> bool:
+	return _seat_who[0].selected == 1
+
+
+## Greys out what does not apply and says what the line-up amounts to.
+func _update_seats() -> void:
+	var sizes: Dictionary[int, int] = {}
+	for seat: int in SEATS:
+		var open: bool = _seat_open(seat)
+		if seat >= 2:
+			_seat_who[seat].disabled = seat >= _capacity()
+			if seat >= _capacity():
+				_seat_who[seat].select(0)
+		_seat_faction[seat].disabled = not open
+		_seat_team[seat].disabled = not open
+		_seat_level[seat].disabled = not open or (seat == 0 and not _watching())
+		if open:
+			var team: int = _seat_team[seat].selected
+			sizes[team] = int(sizes.get(team, 0)) + 1
+	var teams: Array[int] = []
+	teams.assign(sizes.keys())
+	teams.sort()
+	var problem: bool = teams.size() < 2
+	_start.disabled = problem
+	var note: String = ""
+	if problem:
+		note = "Every seat is on Team %d. Put at least one seat on another team to have a match." % (teams[0] + 1)
+	else:
+		var counts: Array[String] = []
+		var allied: bool = false
+		for team: int in teams:
+			counts.append(str(sizes[team]))
+			allied = allied or sizes[team] > 1
+		if allied:
+			note = "%s. Allies do not fight each other, share what they see, and win or lose together." % " against ".join(counts)
+			var mine: int = _seat_team[0].selected
+			if not _watching() and sizes[mine] > 1:
+				note += " The AI on Team %d fights at your side." % (mine + 1)
+		elif teams.size() > 2:
+			note = "A free-for-all of %d: everyone against everyone." % teams.size()
+		else:
+			note = "One against one."
+		if _watching():
+			note += " You watch: the AI plays every seat and nothing is hidden."
+	_seat_note.text = note
+	_seat_note.add_theme_color_override("font_color", Hud.RED if problem else Hud.TEXT)
 
 
 ## For automated runs: pick a map by id ("" = generated) and opponent count.
 func choose_map(map_id: String, opponents: int) -> void:
 	_map.select(maxi(_map_ids.find(map_id), 0))
 	_update_map()
-	_opponents.select(clampi(opponents, 1, 3) - 1)
-	_update_map()
+	for seat: int in range(2, SEATS):
+		_seat_who[seat].select(1 if seat <= clampi(opponents, 1, 3) and seat < _capacity() else 0)
+	_update_seats()
 
 
 func _update_blurb() -> void:
-	var f: FactionDef = GameData.shared().faction(_faction_ids[maxi(_faction.selected, 0)])
-	_faction_blurb.text = f.desc
+	var f: FactionDef = GameData.shared().faction(_faction_ids[maxi(_seat_faction[0].selected, 0)])
+	_faction_blurb.text = "%s: %s" % [f.name, f.desc]
 	_dress_setup(f.id)
 
 
@@ -459,14 +561,27 @@ func _dress_setup(faction_id: String) -> void:
 
 ## For automated runs: watch the match instead of playing it.
 func choose_watch(on: bool) -> void:
-	_role.select(1 if on else 0)
+	_seat_who[0].select(1 if on else 0)
+	_update_seats()
 
 
-## For automated runs: pick factions by id before starting.
+## For automated runs: pick factions by id before starting ("" = random
+## for the other seats).
 func choose_factions(mine: String, theirs: String) -> void:
-	_faction.select(maxi(_faction_ids.find(mine), 0))
-	_enemy_faction.select(_faction_ids.find(theirs) + 1)
+	_seat_faction[0].select(maxi(_faction_ids.find(mine), 0))
+	for seat: int in range(1, SEATS):
+		_seat_faction[seat].select(_faction_ids.find(theirs) + 1)
 	_update_blurb()
+
+
+## For automated runs: put a seat (0-3) on a team (0-3).
+func choose_team(seat: int, team: int) -> void:
+	_seat_team[seat].select(clampi(team, 0, SEATS - 1))
+	_update_seats()
+
+
+func can_start() -> bool:
+	return not _start.disabled
 
 
 func _show(which: Control) -> void:
@@ -495,39 +610,48 @@ func is_setup_open() -> bool:
 	return _setup.visible
 
 
-## Builds the MatchConfig from the setup panel and starts the match.
-func start_skirmish() -> void:
-	var config: MatchConfig = MatchConfig.skirmish(int(_seed.value), _level.selected)
+## Builds the MatchConfig from the setup panel.
+func build_config() -> MatchConfig:
+	var data: GameData = GameData.shared()
+	var config: MatchConfig = MatchConfig.skirmish(int(_seed.value), 1)
 	config.map_id = _map_ids[maxi(_map.selected, 0)]
 	if _region.selected > 0:
 		config.region = SimMapGen.REGIONS[_region.selected - 1]
 	if config.map_id == COMPACT_MAP:
 		config.map_id = ""
 		config.map_cells = SimMapGen.SMALL_CELLS
-	config.factions = [_faction_ids[maxi(_faction.selected, 0)]]
-	config.is_ai = [false]
-	config.ai_levels = [1]
-	config.names = ["Commander"]
-	var opponents: int = mini(_opponents.selected + 1, _map_players[maxi(_map.selected, 0)] - 1)
-	for i: int in opponents:
-		var enemy_id: String = _faction_ids[randi_range(0, _faction_ids.size() - 1)]
-		if _enemy_faction.selected > 0:
-			enemy_id = _faction_ids[_enemy_faction.selected - 1]
-		var label: String = "%s AI" % LEVEL_NAMES[_level.selected]
-		if opponents > 1:
-			label = "%s %d" % [label, i + 1]
-		config.add_ai(enemy_id, _level.selected, label)
-	if _role.selected == 1:
-		# Watching: the first seat goes to an AI as well, and the sides are
-		# called after their factions.
-		config.watch = true
-		config.is_ai[0] = true
-		config.ai_levels[0] = _level.selected
-		var used: Dictionary[String, int] = {}
-		for i: int in config.player_count():
-			var side: String = GameData.shared().faction(config.factions[i]).name
-			used[side] = int(used.get(side, 0)) + 1
-			config.names[i] = side if used[side] == 1 else "%s %d" % [side, used[side]]
+	config.factions.clear()
+	config.is_ai.clear()
+	config.ai_levels.clear()
+	config.names.clear()
+	config.watch = _watching()
+	var used: Dictionary[String, int] = {}
+	for seat: int in SEATS:
+		if not _seat_open(seat):
+			continue
+		var faction_id: String = _faction_ids[randi_range(0, _faction_ids.size() - 1)]
+		var picked: int = _seat_faction[seat].selected - (0 if seat == 0 else 1)
+		if picked >= 0:
+			faction_id = _faction_ids[picked]
+		var ai: bool = seat > 0 or config.watch
+		# An AI goes by the name of its faction; two of a kind are numbered.
+		var seat_name: String = "Commander"
+		if ai:
+			seat_name = data.faction(faction_id).name
+			used[seat_name] = int(used.get(seat_name, 0)) + 1
+			if used[seat_name] > 1:
+				seat_name = "%s %d" % [seat_name, used[seat_name]]
+		config.factions.append(faction_id)
+		config.is_ai.append(ai)
+		config.ai_levels.append(_seat_level[seat].selected if ai else 1)
+		config.names.append(seat_name)
+		config.set_team(config.player_count() - 1, _seat_team[seat].selected)
+	return config
+
+
+func start_skirmish() -> void:
+	if _start.disabled:
+		return
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
-		game.start_match(config)
+		game.start_match(build_config())

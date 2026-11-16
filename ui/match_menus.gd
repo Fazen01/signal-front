@@ -139,7 +139,7 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	_result.add_child(box)
-	var won: bool = world.winner == local_player
+	var won: bool = world.has_won(local_player)
 	var headline: String = "VICTORY" if won else "DEFEAT"
 	if world.winner < 0:
 		headline = "DRAW"
@@ -154,7 +154,10 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	var secs: int = int(world.seconds())
 	var sub: String = "Match length %d:%02d" % [secs / 60, secs % 60]
 	if world.winner >= 0:
-		sub = "%s holds the field.   %s" % [world.players[world.winner].name, sub]
+		var holders: Array[String] = []
+		for wp: SimPlayer in world.winners():
+			holders.append(wp.name)
+		sub = "%s %s the field.   %s" % [" and ".join(holders), "holds" if holders.size() == 1 else "hold", sub]
 	var subtitle: Label = Hud.make_label(sub, 16, skin.dim)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(subtitle)
@@ -178,6 +181,23 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	grid.add_child(Hud.make_label("", 16, skin.dim))
 	for p: SimPlayer in world.players:
 		grid.add_child(Hud.make_label(p.name, 18, p.color.lightened(0.3)))
+	# With allies in the match, say who was on which side and how it ended.
+	var allied: bool = false
+	for a: SimPlayer in world.players:
+		for b: SimPlayer in world.players:
+			allied = allied or world.are_allies(a.id, b.id)
+	if allied:
+		var side_of: Dictionary[int, int] = {}
+		grid.add_child(Hud.make_label("Side", 16, skin.dim))
+		for p: SimPlayer in world.players:
+			if not side_of.has(p.team):
+				side_of[p.team] = side_of.size() + 1
+			var word: String = "Team %d" % side_of[p.team]
+			if world.winner >= 0:
+				word += "  won" if world.has_won(p.id) else "  lost"
+			var side: Label = Hud.make_label(word, 16, skin.text if world.has_won(p.id) else skin.dim)
+			side.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			grid.add_child(side)
 	var rows: Array[String] = ["Units built", "Units lost", "Buildings built", "Buildings lost", "Kills", "Value destroyed", "Salvage collected"]
 	for r: int in rows.size():
 		grid.add_child(Hud.make_label(rows[r], 16, skin.dim))

@@ -5,6 +5,7 @@ extends SceneTree
 ## Usage: godot --headless --path . -s res://tools/headless_match.gd -- \
 ##          [--seed=N] [--max-minutes=M] [--levels=1,1] [--quiet]
 ##          [--factions=aegis,foundry[,nomad[,aegis]]] [--map=twin_fords]
+##          [--teams=0,0,1,1]   (one number per faction: the same number = allies)
 ## Prints "MATCH RESULT: ..." on a win and "MATCH FAILED: ..." otherwise.
 
 
@@ -15,6 +16,7 @@ func _init() -> void:
 	var quiet: bool = false
 	var factions: Array[String] = ["aegis", "aegis"]
 	var map_id: String = ""
+	var teams: Array[int] = []
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--seed="):
 			seed_value = int(arg.trim_prefix("--seed="))
@@ -30,6 +32,9 @@ func _init() -> void:
 				factions.append(fname)
 		elif arg.begins_with("--map="):
 			map_id = arg.trim_prefix("--map=")
+		elif arg.begins_with("--teams="):
+			for part: String in arg.trim_prefix("--teams=").split(","):
+				teams.append(int(part))
 		elif arg == "--quiet":
 			quiet = true
 
@@ -41,7 +46,7 @@ func _init() -> void:
 	config.ai_levels.clear()
 	config.names.clear()
 	for i: int in factions.size():
-		config.add_ai(factions[i], levels[i % levels.size()], "P%d %s" % [i + 1, factions[i].capitalize()])
+		config.add_ai(factions[i], levels[i % levels.size()], "P%d %s" % [i + 1, factions[i].capitalize()], teams[i] if i < teams.size() else -1)
 	var w: SimWorld = SimSetup.create_match(config)
 	w.collect_events = false
 	var started: int = Time.get_ticks_msec()
@@ -55,9 +60,12 @@ func _init() -> void:
 	var wall: float = float(Time.get_ticks_msec() - started) / 1000.0
 	var game_time: String = _clock(w)
 	if w.game_over and w.winner >= 0:
-		var win: SimPlayer = w.players[w.winner]
+		# With teams, everybody on the winning side is named.
+		var names: Array[String] = []
+		for wp: SimPlayer in w.winners():
+			names.append(wp.name)
 		print("MATCH RESULT: seed %d, winner %s (player %d) at %s, %d ticks in %.1fs wall, peak %d entities" % [
-			seed_value, win.name, w.winner, game_time, w.tick_count, wall, peak_entities,
+			seed_value, " + ".join(names), w.winner, game_time, w.tick_count, wall, peak_entities,
 		])
 		for p: SimPlayer in w.players:
 			print("  %s: built %d units / %d buildings, lost %d / %d, kills %d, collected %d" % [

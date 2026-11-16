@@ -110,6 +110,29 @@ func are_enemies(a: int, b: int) -> bool:
 	return players[a].team != players[b].team
 
 
+## Two different players on the same team.
+func are_allies(a: int, b: int) -> bool:
+	if a < 0 or b < 0 or a == b:
+		return false
+	return players[a].team == players[b].team
+
+
+## True for the players of the team that won.
+func has_won(player_id: int) -> bool:
+	if winner < 0 or player_id < 0 or player_id >= players.size():
+		return false
+	return players[player_id].team == players[winner].team
+
+
+## Everybody on the winning team, in seat order.
+func winners() -> Array[SimPlayer]:
+	var out: Array[SimPlayer] = []
+	for p: SimPlayer in players:
+		if has_won(p.id):
+			out.append(p)
+	return out
+
+
 # --------------------------------------------------------------- entities
 
 func get_entity(id: int) -> SimEntity:

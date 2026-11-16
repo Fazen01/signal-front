@@ -54,6 +54,7 @@ static func config_to_dict(c: MatchConfig) -> Dictionary:
 		"region": c.region, "watch": c.watch,
 		"factions": _copy(c.factions), "is_ai": _copy(c.is_ai),
 		"ai_levels": _copy(c.ai_levels), "names": _copy(c.names),
+		"teams": _copy(c.teams),
 	}
 
 
@@ -68,6 +69,7 @@ static func config_from_dict(d: Dictionary) -> MatchConfig:
 	c.is_ai.assign(d.get("is_ai", []))
 	c.ai_levels.assign(d.get("ai_levels", []))
 	c.names.assign(d.get("names", []))
+	c.teams.assign(d.get("teams", []))
 	return c
 
 

@@ -20,10 +20,13 @@ From the main menu:
 
 - **Tutorials** — three short missions (economy, the Signal Grid, Directives).
   Start here.
-- **Skirmish** — pick a map, a region, one to three AI opponents, the
-  factions, a difficulty and a seed. Set "You" to **Watch** to let the AI
-  play every side while you look on: no fog of war, and + and - change the
-  speed.
+- **Skirmish** — pick a map, a region and a seed, then fill the seats. Each
+  of the four seats has a row: who plays it (you, an AI, or nobody), its
+  faction, its **team** and the AI's skill. Seats on the same team are
+  allies: they do not fight each other, share what they see, and win or
+  lose together, so an AI on your team fights at your side (two against
+  two, two against one, or everyone for themselves). Give seat one to the
+  AI to **watch** instead: no fog of war, and + and - change the speed.
   The setup panel dresses itself in the interface of the faction you pick:
   each of the eight has its own colours, shapes, lettering and emblem, and
   the match's HUD wears the same.

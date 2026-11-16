@@ -259,12 +259,12 @@ map generation itself to be improved.
 
 ## M29 — Teams, and a new match setup (owner request)
 
-- [ ] Players belong to teams; allies do not shoot each other, share what
+- [x] Players belong to teams; allies do not shoot each other, share what
       they see, and win or lose together
-- [ ] The AI can be on the player's team and fights alongside
-- [ ] A match setup screen with one row per seat: who plays it (you, an AI,
+- [x] The AI can be on the player's team and fights alongside
+- [x] A match setup screen with one row per seat: who plays it (you, an AI,
       nobody), its faction, its team, its difficulty
-- [ ] Saved games, the Watch option and the result screen know about teams
+- [x] Saved games, the Watch option and the result screen know about teams
 
 ## M30 — Two more factions (owner request)
 
@@ -300,8 +300,12 @@ map generation itself to be improved.
 
 ## M34 — Look, round two (owner request)
 
-- [ ] Units and buildings: one change at a time, shown to the owner before
-      building on it (the first attempt at this was withdrawn)
+- [ ] Units and buildings: a better look for every faction's models. The
+      owner does not want to be shown each change first: do the pass, keep
+      the silhouettes and team colours readable, and send pictures when it
+      is done. (The first attempt, a camouflage and weathering shader with
+      extra kit on every model, was withdrawn because the owner disliked
+      it: do not bring that back.)
 - [ ] Combat: bigger and more varied explosions, smoke that lingers,
       wrecks that burn, weapon effects per faction
 - [ ] The game as a whole: lighting per time of day, water and sky
@@ -677,6 +681,31 @@ restarted three times; the background tuner died with it).**
   the bar is no taller than before. While there: the selection panel has a
   health bar (green, amber, red; for a group, the whole group's health)
   and a line of facts (armour class, speed, sight).
+
+- **15:40 UTC — the owner on M34:** "you don't have to show me that. Do it
+  without showing me one change at a time." The roadmap item is reworded:
+  the look pass on units and buildings goes ahead in one go, with pictures
+  sent at the end. What was withdrawn before (camouflage and weathering
+  shader, yards, extra kit) stays withdrawn.
+- **M29 in progress (teams).** The sim already had a team number per
+  player and used it for targeting and victory; added: teams in
+  `MatchConfig` (and in saves), shared vision between allies (and allied
+  detectors reveal cloaked units for the whole team), allied starts side
+  by side on four-start maps, no attack orders on allies, no capturing an
+  ally's uplink. The skirmish setup is now one row per seat (played by,
+  faction, team, AI skill); seat one given to the AI is the old Watch
+  option. AIs are named after their faction. Decision: allies do not share
+  signal coverage; each army runs on its own grid.
+- **An AI stall found by the first two-against-two match**, and it is not
+  special to teams: a wave stays "out" until its last unit dies, and the
+  army gathering at home waits for it. One survivor that could not hurt
+  its target kept an AI with 125 units at home for ten minutes (the match
+  never ended). Fix: a wave worn down to a third of what set out, or out
+  for four minutes, is joined by whatever has gathered at home
+  (`_wave_spent`, `_reinforce`). The same match now ends at 17:34; three
+  other two-against-two matches end at 14, 19 and 27 minutes. This changes
+  every AI match, so the balance tables above are out of date and the
+  league has to be run again.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

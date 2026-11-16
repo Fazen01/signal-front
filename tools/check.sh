@@ -77,6 +77,8 @@ run_step ai_match_layout 900 "MATCH RESULT" -s res://tools/headless_match.gd -- 
 # Three-way free-for-alls run 17-55 game minutes since the 1v1 pacing change
 # (this seed is the slowest measured); the cap only has to catch stalemates.
 run_step ai_match_three 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=90 --factions=foundry,nomad,aegis
+# Two against two: allies must not fight each other, and one side must win.
+run_step ai_match_teams 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=11 --max-minutes=60 --factions=aegis,foundry,nomad,vesper --teams=0,1,0,1
 
 # The exported game: build the pack the Windows preset would ship and play the
 # whole flow from it. Catches data files or scenes missing from the export.

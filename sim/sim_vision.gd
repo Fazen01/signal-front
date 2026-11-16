@@ -2,7 +2,8 @@ class_name SimVision
 extends RefCounted
 ## Fog of war. Each player sees the cells inside their own signal coverage
 ## (the network shares what it sees) plus a disc around every unit and
-## building they own. Rebuilt four times a second.
+## building they own, and everything their allies see. Rebuilt four times a
+## second.
 
 const INTERVAL: int = 5
 const STEALTH_REVEAL_TICKS: int = 50  ## how long firing keeps a stealth unit visible
@@ -18,16 +19,28 @@ static func recompute(w: SimWorld) -> void:
 	w.vision_next_tick = w.tick_count + INTERVAL
 	w.vision_version += 1
 	var cells: int = w.map.w * w.map.h
+	# What each team sees: its members' views laid over one another.
+	var team_view: Dictionary[int, PackedByteArray] = {}
 	for p: SimPlayer in w.players:
-		var vis: PackedByteArray = w.coverage[p.id].duplicate()
+		var own: PackedByteArray = w.coverage[p.id].duplicate()
 		for e: SimEntity in w.entities:
 			if not e.alive or e.owner != p.id or e.def == null:
 				continue
 			var sight: float = SimCombat.sight_range(w, e) if e.constructed else SITE_SIGHT
-			SimSignal.stamp_disc(w, vis, e.pos, sight)
+			SimSignal.stamp_disc(w, own, e.pos, sight)
 		for r: Vector4 in w.reveals:
 			if int(r.w) == p.id:
-				SimSignal.stamp_disc(w, vis, Vector2(r.x, r.y), r.z)
+				SimSignal.stamp_disc(w, own, Vector2(r.x, r.y), r.z)
+		if team_view.has(p.team):
+			var shared: PackedByteArray = team_view[p.team]
+			for i: int in cells:
+				if own[i] != 0:
+					shared[i] = 1
+			team_view[p.team] = shared
+		else:
+			team_view[p.team] = own
+	for p: SimPlayer in w.players:
+		var vis: PackedByteArray = team_view[p.team]
 		var seen: PackedByteArray = w.explored[p.id]
 		for i: int in cells:
 			if vis[i] != 0:
@@ -68,13 +81,14 @@ static func is_stealthed(w: SimWorld, e: SimEntity) -> bool:
 
 ## Can this player currently see this entity?
 static func can_see(w: SimWorld, player_id: int, e: SimEntity) -> bool:
-	if e.owner == player_id:
+	if e.owner == player_id or w.are_allies(player_id, e.owner):
 		return true
 	if not is_visible(w, player_id, e.pos):
 		return false
 	if is_stealthed(w, e):
+		# Anyone on the team standing close enough gives it away to all of them.
 		for n: SimEntity in w.query_radius(e.pos, e.def.detect_range):
-			if n.owner == player_id and n.def != null:
+			if n.def != null and (n.owner == player_id or w.are_allies(player_id, n.owner)):
 				return true
 		return false
 	return true

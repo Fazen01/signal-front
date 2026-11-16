@@ -55,6 +55,8 @@ var _income: Label = null  ## salvage collected per minute, over the last half m
 var _income_at: PackedFloat32Array = PackedFloat32Array()
 var _income_total: PackedInt32Array = PackedInt32Array()
 var _speed: Label = null  ## shown when the game is not running at normal speed
+var _allies: Array[Label] = []  ## the names of the local player's allies in the top bar
+var _ally_ids: Array[int] = []
 var _directive_defs: Array[DirectiveDef] = []
 var _queue_sig: String = ""
 var minimap_slot: Control = null
@@ -167,12 +169,32 @@ func _build_top_bar() -> void:
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(spacer)
 	if battle.watching:
-		var sides: Array[String] = []
+		# Who is fighting whom: allies joined with a plus, sides with "vs".
+		var by_team: Dictionary[int, Array] = {}
 		for wp: SimPlayer in world.players:
-			sides.append(wp.name)
+			if not by_team.has(wp.team):
+				by_team[wp.team] = []
+			by_team[wp.team].append(wp.name)
+		var sides: Array[String] = []
+		for team: int in by_team:
+			sides.append(" + ".join(by_team[team]))
 		var banner: Label = skin.caption("WATCHING   " + "  vs  ".join(sides), skin.second)
 		banner.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(banner)
+	else:
+		# Allies, each in their own colour; struck from the list when they fall.
+		for ap: SimPlayer in world.players:
+			if not world.are_allies(player, ap.id):
+				continue
+			if _allies.is_empty():
+				row.add_child(skin.caption("WITH"))
+			var ally: Label = UiTheme.label(ap.name, 14, ap.color.lightened(0.35))
+			ally.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			ally.tooltip_text = "Your ally. You share what you see, and win or lose together."
+			ally.mouse_filter = Control.MOUSE_FILTER_STOP
+			row.add_child(ally)
+			_allies.append(ally)
+			_ally_ids.append(ap.id)
 	_speed = UiTheme.label("", 15, skin.accent)
 	_speed.add_theme_font_override("font", UiTheme.strong_font())
 	_speed.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -710,6 +732,11 @@ func _refresh() -> void:
 	var span: float = now - _income_at[0]
 	if span >= 5.0:
 		_income.text = "+%d / min" % int(float(p.stat_salvage_collected - _income_total[0]) * 60.0 / span)
+	for i: int in _allies.size():
+		var ally: SimPlayer = world.players[_ally_ids[i]]
+		if ally.defeated and not _allies[i].text.ends_with("(lost)"):
+			_allies[i].text = "%s (lost)" % ally.name
+			_allies[i].add_theme_color_override("font_color", skin.faint)
 	_update_card_state()
 	_refresh_directives()
 	_refresh_selection()
@@ -783,7 +810,10 @@ func _entity_detail(e: SimEntity) -> String:
 		return "Salvage remaining: %d. Send a Hauler to collect it." % e.salvage
 	var lines: Array[String] = []
 	if e.owner >= 0 and e.owner != player:
-		lines.append("Belongs to %s" % world.players[e.owner].name)
+		var standing: String = ""
+		if not battle.watching:
+			standing = ", your ally" if world.are_allies(player, e.owner) else ", an enemy"
+		lines.append("Belongs to %s%s" % [world.players[e.owner].name, standing])
 	if e.kind == SimEntity.Kind.BUILDING and not e.constructed:
 		lines.append("Under construction: %d%%" % int(e.build_progress * 100.0))
 	elif e.owner >= 0 and not e.linked:

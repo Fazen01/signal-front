@@ -31,6 +31,16 @@ func _process(_delta: float) -> void:
 			var menu: MainMenu = scene as MainMenu
 			if menu != null:
 				menu.choose_factions("foundry", "aegis")
+				# Everybody on one team is no match; allies are picked by team.
+				menu.choose_team(1, 0)
+				_expect(not menu.can_start(), "a match with one team cannot start")
+				menu.choose_team(1, 1)
+				_expect(menu.can_start(), "two teams can")
+				menu.choose_map("", 2)
+				menu.choose_team(2, 0)
+				var lineup: MatchConfig = menu.build_config()
+				_expect(lineup.player_count() == 3 and lineup.team_of(2) == lineup.team_of(0) and lineup.side_count() == 2, "an AI can be put on the player's team")
+				menu.choose_map("", 1)
 				menu.start_skirmish()
 				_next(5)
 		2:

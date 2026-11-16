@@ -72,6 +72,8 @@ static func _cmd_attack(w: SimWorld, cmd: SimCommand) -> void:
 	var target: SimEntity = w.get_entity(cmd.target_id)
 	if target == null or not target.is_combatant():
 		return
+	if w.are_allies(cmd.player, target.owner):
+		return  # nobody shoots at their own side
 	if not _attackable(w, cmd.player, target):
 		# Cannot see it: go and look instead.
 		cmd.pos = target.pos
