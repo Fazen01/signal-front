@@ -1,0 +1,14 @@
+# Godot
+.godot/
+*.translation
+export_presets.cfg
+.import/
+
+# Local Godot binary fetched by tools/install_godot.sh
+.godot-bin/
+
+# Builds and scratch
+build/
+*.tmp
+*.log
+screenshots/
