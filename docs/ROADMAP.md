@@ -343,6 +343,135 @@ are not to be built.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 5, 14:50-15:55 UTC (branch `claude/relay-session-1116-1450`)
+
+Status: **stopped early, on purpose.** Session 1 turned out to be alive and
+working on the same item (M26), so this session stood down after bringing
+its own two pieces of work to a state that can be picked up. Nothing is
+half-done. No roadmap box was ticked.
+
+- **What happened.** At 14:50 the newest remote commit was 73 minutes old,
+  so the liveness rule in `CLAUDE.md` said nobody was running, and this
+  session started on M26. Session 1 then pushed at 14:53, 15:08 and 15:09
+  (its worker had been restarted; see its entry). That was noticed at
+  15:20, when listing pull requests showed #1 had moved. From then on this
+  session only finished and measured what it already had in hand.
+  **For the rule:** 25 minutes is too short a quiet spell to mean "dead" —
+  session 1 was silent for 76 minutes and came back.
+- This branch is session 1's branch at `a7369d8` (merged cleanly at 15:20)
+  plus two things, each in its own commit. `tools/check.sh` passes on the
+  tip (it failed once on the way; see point 2). Godot verification: available.
+
+**1. `tools/check.sh` plays every faction through the real interface with
+random input** (`view/monkey_driver.gd`, from session 2's commit `577198b`,
+brought up to date; session 1's M27 entry listed this as not covered).
+
+- About 5,800 clicks, drags, wheel turns and key presses a faction, plus a
+  deliberate sequence every 90 frames: select a builder, press a command
+  card button, look at the headquarters, point beside it, click. All eight
+  factions run with no script errors, before and after the M28 interface,
+  and each places 20-40 construction sites. It adds about 90 seconds to the
+  check.
+- What had to change for it to work on today's interface:
+  - The pause-menu button has a node name (`MenuButton`); the test finds it
+    by that, not by its text or a fixed corner of the screen.
+  - **The building ghost follows the last mouse event**
+    (`BattleScene.pointer()`), not `Viewport.get_mouse_position()`. On a
+    real machine the two are the same. Headless, the window has no pointer,
+    so pushed-in clicks always tried to build at one fixed spot and failed.
+  - The test points first and clicks a frame later, as a hand does.
+- It found no bugs in the game. Buildings are placed but rarely finished,
+  because the random orders keep calling the builders away.
+
+**2. A rule that keeps an AI attack wave together — written, tested,
+measured, and left switched off** (`SimAI.keeps_together`, false by
+default; `test_a_wave_keeps_together_on_the_way_in` runs it both ways).
+
+- **Why it is off: with it on, `tools/check.sh` failed.** The Array against
+  Aegis on seed 4 ends in 15:31 without the rule and was still undecided at
+  45:00 with it: the Array got far ahead (50 units to 13 at minute 17) and
+  then spent wave after wave against the Aegis headquarters without
+  finishing it, until the map ran dry. One match does not show the rule
+  causes that, but a check may not be weakened to let it through, and this
+  session is not the one to tune it. With the flag off the AI plays exactly
+  as on session 1's branch.
+- Likely flaw, for whoever takes it up: a unit told to wait can be standing
+  inside the range of a headquarters gun or turret it cannot answer (it
+  waits unless it has a target of its own). Letting a unit that was hit in
+  the last few seconds carry on, and not waiting within about 20 of the
+  target rather than 14, would be the first things to try.
+  `tools/pace_batch.gd --ai.keeps_together=1` turns the rule on for a batch
+  without editing anything.
+- **Finding: nothing in the game matches a group's speed, and the AI sent
+  each wave with one attack-move.** Aircraft (speed 6.6-7.0) and scout cars
+  reached the enemy alone, two to three times sooner than the infantry
+  (2.7), and died there. In one Accord match against the Pact the Accord
+  built 14 aircraft and lost all 14, and destroyed 4,500 salvage worth
+  while losing about 15,000.
+- The rule: for the first two minutes of an assault, a wave unit that is
+  more than 9 ahead of the main body (the two-thirds point of the wave by
+  distance to the target), is not yet within 14 of the target and has
+  nothing to shoot at, stops and waits. In the test two gunships get more
+  than 25 ahead of six troopers in ten seconds without it and stay within
+  18 with it.
+- **Measured for the Accord only**, AI against AI, seeds 1-6, all seven
+  opponents, 42 games each, on session 1's numbers as of `a7369d8`:
+  **without the rule 9 of 42 (21%), with it 13 of 42 (31%)**; 95% of the
+  matches with it lasted 12-25 minutes, none undecided. Ten points is
+  about one standard error of the difference, so this is a lean, not
+  proof.
+- **What the rule does to the other 21 pairings** is being measured as
+  this is written: a full league (seeds 1-6, 168 games) with the rule on
+  and another with it off, from scratch copies of the tree. The result will
+  be added here.
+- **A second finding, not applied** (the data files are session 1's at the
+  moment): the Accord has one Flight Deck and by minute four it has 1,200
+  to 2,000 salvage it cannot spend, so its aircraft are limited by build
+  time, not price. With the rule above, plus build times of 12 / 16 / 21
+  seconds for the Swift / Lanner / Condor instead of 18 / 25 / 30 (and
+  aircraft about as strong as session 1's), the Accord won **18 of 42
+  (43%)** over the same seeds and opponents. Cheaper and tougher aircraft
+  alone gave 8 of 42 here and 19% in session 1's own league.
+- Every AI banks salvage the same way (the Pact had 7,000 unspent at minute
+  six of that match). A second production building once the bank passes a
+  threshold belongs under M31; it will move match length, so it was not
+  tried here.
+
+- **A mistake to avoid:** do not edit scripts in the working tree while
+  `tools/check.sh` or a league is running there. Every step starts a fresh
+  Godot that reads whatever is on disk at that moment, so a half-made edit
+  fails the run (it did, once). The leagues above were played from copies
+  of the tree in a scratch folder.
+- `claude/relay-session-1116-0451` (session 2) and
+  `claude/relay-session-1116-0654` (session 4) are still not merged, apart
+  from the random-input test.
+
+### 2026-11-16 — session 7, 19:50 UTC (branch `claude/relay-session-1116-1950`)
+
+**Working now (20:00 UTC):** merged, running `tools/check.sh` on the merge;
+then M30's open boxes, then M31 (the AI), which has to be written again.
+
+- Started from `claude/gracious-lovelace-fxl9n2` (`aa02b86`, the newest
+  remote commit, 16:36 UTC; nothing newer anywhere, so no session was
+  running).
+- **Session 1's M31 never arrived.** Its last note says M31 was committed
+  locally and waiting on the check. No such commit is on any remote branch,
+  so that work is lost and M31 starts from the pushed code.
+- Merged `claude/relay-session-1116-1450` (session 5): the random-input
+  monkey test in `tools/check.sh` and the keep-the-wave-together AI rule
+  (off by default). One conflict, two blocks of constants in
+  `sim/sim_ai.gd`, both kept. The monkey test now also runs as the
+  Brackenfold and the Lodestone Circle.
+- **Decision: `claude/relay-session-1116-1550` (session 6) is not merged.**
+  It holds a second, independent M29 (teams, match setup) and a faction
+  called the Ember Rite. Session 1's M29 is already here and the two touch
+  the same forty files; merging would mean choosing between two team
+  systems line by line with no gain. The Ember Rite (weapons that set
+  targets alight) is a candidate to port by hand later; the branch is left
+  as it is for the owner.
+- `claude/relay-session-1116-0451` and `-0654` remain unmerged, as session 1
+  left them.
+
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
 **Working now (16:40 UTC):** M28, M29 and the models and rules of M30 are
