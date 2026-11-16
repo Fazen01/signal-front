@@ -199,9 +199,16 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
   waves. Every other big wave gathers round one side of its target; waves
   are never split.
 - Allied AIs defend an ally's headquarters and share attack targets.
-- An AI that is plainly beaten concedes (`SimAI._should_concede`), so that
-  a match does not hang on a headquarters nobody can finish. An AI with a
-  person on its team never concedes.
+- In a match with no person in it, an AI that is plainly beaten concedes
+  (`SimAI._should_concede`: down to a few buildings and outmatched 2.5 to
+  1, or starved of income and outmatched 1.5 to 1), so that a match does
+  not hang on a headquarters nobody can finish. While a person is playing,
+  no AI concedes.
+- Vehicles keep 1.45 times the sum of their radii between their centres
+  and aircraft 2.1 times (`SimMovement.personal_space`); infantry stand
+  shoulder to shoulder. Formations of vehicles are staggered rank behind
+  rank. Without this, hulls drawn larger than their footprint ran into
+  each other and read as one machine.
 - Builders mend a building under fire at a fifth of the usual speed
   (`repair_under_fire_mult`), and give up on a building that has gone Dark.
 

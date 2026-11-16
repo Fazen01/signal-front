@@ -3,8 +3,9 @@ extends RefCounted
 ## Builds a ready-to-run SimWorld from a MatchConfig.
 
 
-static func create_match(config: MatchConfig) -> SimWorld:
-	var data: GameData = GameData.shared()
+## The map a configuration is played on: its hand-made layout, or one
+## generated from its seed. The match setup draws its preview from this.
+static func map_for(config: MatchConfig) -> SimMap:
 	var map: SimMap = null
 	if config.map_id != "":
 		map = SimMapGen.load_layout(config.map_id)
@@ -16,6 +17,12 @@ static func create_match(config: MatchConfig) -> SimWorld:
 		if config.player_count() > 2:
 			cells = maxi(cells, SimMapGen.LARGE_CELLS)
 		map = SimMapGen.generate(config.seed_value, cells, config.starts_needed(), config.region)
+	return map
+
+
+static func create_match(config: MatchConfig) -> SimWorld:
+	var data: GameData = GameData.shared()
+	var map: SimMap = map_for(config)
 	var w: SimWorld = SimWorld.new(data, map, config.seed_value)
 	var starts: Array[Vector2] = assign_starts(config, map.starts)
 	for i: int in config.player_count():

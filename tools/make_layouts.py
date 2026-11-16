@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Writes the three hand-made map layouts into data/maps/*.json.
+"""Writes the six hand-made map layouts into data/maps/*.json.
 
 The layouts are designed here as explicit shapes (rivers, ridges, rings),
 not random noise, and every shape is painted together with its rotated images
@@ -141,6 +141,7 @@ def crater_ring():
     g.feature(48, 20, "u")
     return {
         "name": "Crater Ring",
+        "region": "ashland",
         "players": 2,
         "desc": "Rich salvage sits inside a rock ring with four narrow gates.",
         "rows": g.rows(),
@@ -169,15 +170,118 @@ def crossroads():
     g.feature(43, 30, "u")
     return {
         "name": "Crossroads",
+        "region": "tundra",
         "players": 4,
         "desc": "Four quarters divided by ridges. The plaza in the middle holds the richest salvage.",
         "rows": g.rows(),
     }
 
 
+def dry_gulch():
+    n = 64
+    g = Grid(n, 2)
+    # Two long mesas run side by side between the bases. The gulch between
+    # them is the short road and holds the rich salvage; the open desert
+    # outside them is the long way round, with one pass through each mesa.
+    def mesa(x, y):
+        along = x + y - (n - 1)  # 0 half-way between the bases
+        across = x - y           # 0 on the line between them
+        return 5 <= across <= 9 and abs(along) <= 22 and not (8 <= along <= 12)
+    g.paint(mesa, "r")
+    # Boulders narrow the mouths of the gulch.
+    g.disc(22.5, 19.5, 1.6, "r")
+    g.disc(19.5, 22.5, 1.6, "r")
+    # An oasis in each empty corner, and rocks strewn over the flanks.
+    g.disc(53, 10, 2.6, "w")
+    g.paint(lambda x, y: 2.6 < math.hypot(x + 0.5 - 53, y + 0.5 - 10) <= 5.2 and speckle(x, y, 4), "f")
+    g.disc(44, 22, 2.0, "r")
+    g.disc(38, 9, 1.8, "r")
+    g.disc(58, 26, 2.2, "r")
+    g.starts([(1, 13, 13), (2, 51, 51)])
+    g.feature(23, 9, "s")
+    g.feature(9, 23, "s")
+    g.feature(36, 20, "s")
+    g.feature(28, 28, "S")
+    g.feature(47, 13, "u")
+    return {
+        "name": "Dry Gulch",
+        "region": "desert",
+        "players": 2,
+        "desc": "Two mesas wall a gulch between the bases. The rich salvage lies in it; the desert outside is the long way round.",
+        "rows": g.rows(),
+    }
+
+
+def frozen_strait():
+    n = 64
+    g = Grid(n, 2)
+    c = n / 2.0
+    # A wide strait of ice between the bases, with a land bridge towards each
+    # end and an island in the middle that two narrow causeways reach.
+    g.paint(lambda x, y: abs(x + y - (n - 1)) <= 5, "w")
+    for d in (26, -26):
+        g.paint(lambda x, y, d=d: abs(x + y - (n - 1)) <= 6 and abs((x - y) - d) <= 3, ".")
+    g.clear_disc(c, c, 5.6)
+    g.paint(lambda x, y: abs(x - y) <= 1 and abs(x + y - (n - 1)) <= 7, ".")
+    # Pinewoods on both shores and crags that cover the bridges.
+    g.paint(lambda x, y: 7 <= abs(x + y - (n - 1)) <= 10 and speckle(x, y, 4), "f")
+    g.paint(lambda x, y: (x - 40) ** 2 + (y - 9) ** 2 <= 22 and speckle(x, y, 5), "f")
+    g.paint(lambda x, y: (x - 9) ** 2 + (y - 40) ** 2 <= 22 and speckle(x, y, 5), "f")
+    g.disc(37, 18, 2.4, "r")
+    g.disc(18, 37, 2.4, "r")
+    g.disc(27, 21, 1.6, "r")
+    g.starts([(1, 13, 13), (2, 51, 51)])
+    g.feature(23, 9, "s")
+    g.feature(9, 23, "s")
+    g.feature(34, 7, "s")
+    g.feature(31, 29, "S", clear=2)
+    g.feature(50, 9, "u")
+    return {
+        "name": "Frozen Strait",
+        "region": "tundra",
+        "players": 2,
+        "desc": "A strait of ice with a land bridge at each end. The richest salvage is on an island in the middle, reached by two causeways.",
+        "rows": g.rows(),
+    }
+
+
+def ember_lake():
+    n = 96
+    g = Grid(n, 4)
+    c = n / 2.0
+    # A lake of lava fills the middle. A spur of rock runs from it towards
+    # each edge, so neighbours meet only on the shore road or along the edge.
+    g.disc(c, c, 13.0, "w")
+    g.paint(lambda x, y: abs(x + 0.5 - c) <= 1.5 and 9 <= y <= 30, "r")
+    # Black rock and burnt woods in every quarter.
+    g.disc(30, 30, 3.0, "r")
+    g.disc(24, 40, 2.2, "r")
+    g.disc(40, 24, 2.2, "r")
+    g.disc(36, 10, 2.0, "r")
+    g.paint(lambda x, y: (x - 22) ** 2 + (y - 30) ** 2 <= 16 and speckle(x, y, 4), "f")
+    g.paint(lambda x, y: (x - 30) ** 2 + (y - 20) ** 2 <= 16 and speckle(x, y, 4), "f")
+    g.starts([(1, 13, 13), (2, 83, 83), (3, 83, 13), (4, 13, 83)])
+    g.feature(23, 9, "s")
+    g.feature(9, 23, "s")
+    g.feature(34, 34, "s")
+    g.feature(47, 32, "S", clear=2)
+    g.feature(47, 4, "u")
+    return {
+        "name": "Ember Lake",
+        "region": "ashland",
+        "players": 4,
+        "desc": "A lake of lava in the middle and a spur of rock between each pair of neighbours. They meet on the shore road, where the rich salvage is, or along the map's edge.",
+        "rows": g.rows(),
+    }
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for key, layout in (("twin_fords", twin_fords()), ("crater_ring", crater_ring()), ("crossroads", crossroads())):
+    layouts = (
+        ("twin_fords", twin_fords()), ("crater_ring", crater_ring()), ("crossroads", crossroads()),
+        ("dry_gulch", dry_gulch()), ("frozen_strait", frozen_strait()), ("ember_lake", ember_lake()),
+    )
+    for key, layout in layouts:
         path = os.path.join(OUT, key + ".json")
         with open(path, "w", newline="\n") as f:
             json.dump(layout, f, indent="\t")

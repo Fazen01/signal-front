@@ -67,6 +67,23 @@ func _ready() -> void:
 			bconfig.factions = [_script_name.trim_prefix("base_"), "aegis"]
 			bconfig.region = "temperate"
 			bgame.pending_config = bconfig
+	if _script_name.begins_with("crowd_"):
+		var kgame: GameState = get_node_or_null("/root/Game") as GameState
+		var kdef: EntityDef = GameData.shared().entity(_script_name.trim_prefix("crowd_"))
+		if kgame != null and kdef != null:
+			var kconfig: MatchConfig = MatchConfig.skirmish(1)
+			kconfig.factions = [kdef.faction, "aegis"]
+			kconfig.region = "temperate"
+			kgame.pending_config = kconfig
+	if _script_name.begins_with("duel_"):
+		# "duel_<faction>_<faction>": the two fight in front of the first one's base.
+		var dgame: GameState = get_node_or_null("/root/Game") as GameState
+		var dparts: PackedStringArray = _script_name.trim_prefix("duel_").split("_")
+		if dgame != null and dparts.size() == 2:
+			var dconfig: MatchConfig = MatchConfig.skirmish(1)
+			dconfig.factions = [dparts[0], dparts[1]]
+			dconfig.region = "temperate"
+			dgame.pending_config = dconfig
 	if _script_name == "teams" or _script_name == "teams_result":
 		# Two against two, with an AI ally: the camera looks at the ally's base.
 		var tmgame: GameState = get_node_or_null("/root/Game") as GameState
@@ -175,6 +192,48 @@ func _run_script(battle: BattleScene) -> void:
 	if _script_name.begins_with("base_") and _count == 8:
 		# Select a builder so the command card is filled in.
 		battle.controller.select_next_idle_builder()
+	if _script_name.begins_with("duel_") and _count == 3:
+		var dw: SimWorld = battle.world
+		var dme: int = battle.local_player
+		var dhq: Vector2 = dw.players[dme].start_pos
+		var dfront: Vector2 = dw.map.nearest_free_pos(dhq + (dw.map.world_size() * 0.5 - dhq).normalized() * 22.0)
+		for side: int in 2:
+			var downer: int = dme if side == 0 else 1 - dme
+			var drow: int = 0
+			for def: EntityDef in dw.data.entities.values():
+				if def.is_building or def.faction != dw.players[downer].faction.id or not def.is_armed() or def.is_air():
+					continue
+				dw.spawn_unit(def.id, downer, dw.map.nearest_free_pos(dfront + Vector2(float(drow % 5) * 4.0 - 8.0, (4.0 if side == 0 else -9.0) + float(drow / 5) * (4.0 if side == 0 else -4.0))))
+				drow += 1
+		battle.fog_view.visible = false
+		battle.terrain.set_fog_texture(null)
+		battle.cam.set_distance(36.0)
+		battle.cam.center_on(dfront + Vector2(0.0, -2.0))
+	if _script_name.begins_with("crowd_") and _count == 3:
+		# "crowd_<unit id>": twelve of one unit dropped on almost the same
+		# spot, to see how they sort themselves out, then marched off.
+		var kw: SimWorld = battle.world
+		var kme: int = battle.local_player
+		var khq: Vector2 = kw.players[kme].start_pos
+		var kat: Vector2 = kw.map.nearest_free_pos(khq + (kw.map.world_size() * 0.5 - khq).normalized() * 20.0)
+		for k: int in 12:
+			kw.spawn_unit(_script_name.trim_prefix("crowd_"), kme, kat + Vector2(float(k % 4) * 0.5, float(k / 4) * 0.5))
+		battle.fog_view.visible = false
+		battle.terrain.set_fog_texture(null)
+		battle.cam.set_distance(30.0)
+		battle.cam.center_on(kat)
+	if _script_name.begins_with("crowd_") and _count == 150:
+		var mw: SimWorld = battle.world
+		var mids: PackedInt32Array = PackedInt32Array()
+		var mcentre: Vector2 = Vector2.ZERO
+		for e: SimEntity in mw.entities:
+			if e.alive and e.owner == battle.local_player and e.def != null and e.def.id == _script_name.trim_prefix("crowd_"):
+				mids.append(e.id)
+				mcentre += e.pos
+		mcentre /= float(maxi(1, mids.size()))
+		var mto: Vector2 = mcentre + (mw.map.world_size() * 0.5 - mcentre).normalized() * 16.0
+		mw.push_command(SimCommand.move(battle.local_player, mids, mto))
+		battle.cam.center_on(mcentre.lerp(mto, 0.6))
 	if _script_name == "teams" and _count == 4:
 		# Look at the ally's base: it is in view without any unit of ours there.
 		battle.cam.center_on(battle.world.players[2].start_pos)
@@ -391,7 +450,7 @@ func _run_script(battle: BattleScene) -> void:
 			if _count == 2:
 				battle.cam.set_distance(95.0)
 				battle.cam.center_on(battle.world.map.world_size() * 0.5)
-		"layout_twin_fords", "layout_crater_ring", "layout_crossroads":
+		"layout_twin_fords", "layout_crater_ring", "layout_crossroads", "layout_dry_gulch", "layout_frozen_strait", "layout_ember_lake":
 			if _count == 2:
 				battle.fog_view.visible = false
 				battle.terrain.set_fog_texture(null)

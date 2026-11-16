@@ -18,6 +18,7 @@ var linked_sight_bonus: float = 0.0  ## extra sight for Linked units and buildin
 var kill_bounty: float = 0.0  ## share of the value of everything destroyed that is paid out in salvage
 var linked_cloak: bool = false  ## Linked ground units are hidden while they stand still
 var regrowth: float = 0.0  ## share of full health everything mends per second once it has been left alone
+var fx_color: Color = Color(1.0, 0.85, 0.5)  ## the colour of its tracers, muzzle flashes and shells (looks only)
 var hit_slow: float = 0.0  ## how much slower a unit moves for a moment after this faction hits it (0.35 = a third)
 var drop_squad: Array[String] = []  ## units delivered by Reinforcement Drop
 var roles: Dictionary[String, String] = {}  ## what the AI builds for each job (see SimAI)

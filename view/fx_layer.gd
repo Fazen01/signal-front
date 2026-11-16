@@ -23,6 +23,7 @@ const MAX_BURSTS: int = 56  ## live particle emitters; extra bursts are skipped
 const MAX_LIGHTS: int = 6  ## flashes that light their surroundings at once
 const MAX_SCORCH: int = 36  ## burn marks left on the ground; the oldest goes first
 const SCORCH_LIFE: float = 22.0
+const PLAIN: Color = Color(1.0, 0.72, 0.3)  ## the colour of fire, when no faction's colour is given
 
 var _active: Array[Fx] = []
 var _bursts: Array[CPUParticles3D] = []
@@ -49,6 +50,7 @@ var _scorch_age: Array[float] = []
 var _scorch_mesh: CylinderMesh = null
 var _scorch_shader: Shader = null
 var _flame_ramp: Gradient = null
+var _blasts: int = 0  ## explosions so far; each leans a different way
 
 
 func _ready() -> void:
@@ -234,7 +236,7 @@ func _spawn(mesh: Mesh, color: Color, life: float, additive: bool = false) -> Fx
 
 
 ## A bright streak from a to b.
-func tracer(a: Vector3, b: Vector3, heavy: bool) -> void:
+func tracer(a: Vector3, b: Vector3, heavy: bool, tint: Color = PLAIN) -> void:
 	var d: Vector3 = b - a
 	var length: float = d.length()
 	if length < 0.05:
@@ -242,30 +244,32 @@ func tracer(a: Vector3, b: Vector3, heavy: bool) -> void:
 	var width: float = 0.09 if heavy else 0.05
 	var up: Vector3 = Vector3.UP if absf(d.normalized().y) < 0.95 else Vector3.RIGHT
 	# A hot core inside a wider, fainter glow.
-	var fx: Fx = _spawn(_tracer_mesh, Color(1.0, 0.95, 0.75, 0.95), 0.07, true)
+	var hot: Color = tint.lerp(Color.WHITE, 0.55)
+	var fx: Fx = _spawn(_tracer_mesh, Color(hot.r, hot.g, hot.b, 0.95), 0.07, true)
 	fx.node.position = (a + b) * 0.5
 	fx.node.look_at_from_position(fx.node.position, b, up)
 	fx.base_scale = Vector3(width, width, length)
 	fx.node.scale = fx.base_scale
-	var halo: Fx = _spawn(_tracer_mesh, Color(1.0, 0.62, 0.2, 0.4), 0.09, true)
+	var halo: Fx = _spawn(_tracer_mesh, Color(tint.r, tint.g, tint.b, 0.42), 0.09, true)
 	halo.node.position = fx.node.position
 	halo.node.look_at_from_position(halo.node.position, b, up)
 	halo.base_scale = Vector3(width * 3.0, width * 3.0, length)
 	halo.node.scale = halo.base_scale
-	muzzle(a, d / length, 0.5 if heavy else 0.3)
+	muzzle(a, d / length, 0.5 if heavy else 0.3, tint)
 
 
 ## A muzzle flash: a short tongue of flame along `dir` and a burst of light.
-func muzzle(at: Vector3, dir: Vector3, size: float) -> void:
+func muzzle(at: Vector3, dir: Vector3, size: float, tint: Color = PLAIN) -> void:
 	var up: Vector3 = Vector3.UP if absf(dir.y) < 0.95 else Vector3.RIGHT
-	var tongue: Fx = _spawn(_tracer_mesh, Color(1.0, 0.8, 0.4, 0.95), 0.06, true)
+	var warm: Color = tint.lerp(Color(1.0, 0.8, 0.4), 0.35)
+	var tongue: Fx = _spawn(_tracer_mesh, Color(warm.r, warm.g, warm.b, 0.95), 0.06, true)
 	tongue.node.position = at + dir * size * 0.9
 	tongue.node.look_at_from_position(tongue.node.position, at + dir * 4.0, up)
 	tongue.base_scale = Vector3(size * 0.45, size * 0.45, size * 1.8)
 	tongue.node.scale = tongue.base_scale
-	flash(at, size * 0.7, Color(1.0, 0.85, 0.5, 0.9), 0.06)
+	flash(at, size * 0.7, Color(warm.r, warm.g, warm.b, 0.9), 0.06)
 	if size >= 0.45:
-		light(at + Vector3(0.0, 0.4, 0.0), Color(1.0, 0.8, 0.5), 2.2, 5.0 + size * 4.0, 0.1)
+		light(at + Vector3(0.0, 0.4, 0.0), warm, 2.2, 5.0 + size * 4.0, 0.1)
 
 
 ## A brief light that falls on everything nearby. Skipped when too many are
@@ -355,20 +359,52 @@ func ground_disc(at: Vector3, radius: float, color: Color, life: float) -> void:
 	fx.late_fade = true
 
 
-## Fireball, flying debris and a column of smoke.
-func explosion(at: Vector3, size: float) -> void:
+## Fireball, flying debris and a column of smoke. `tint` colours the shock
+## ring and the hot core (a faction's shells burst in its own colour). No
+## two look quite alike: the fireball is lopsided, and the bigger the blast
+## the more there is to it (a second, slower fireball; a ring of dust; a
+## pillar of smoke that hangs for seconds).
+func explosion(at: Vector3, size: float, tint: Color = PLAIN) -> void:
+	_blasts += 1
+	var lean: Vector3 = Vector3(sin(float(_blasts) * 2.4), 0.0, cos(float(_blasts) * 2.4)) * size * 0.28
 	flash(at, size, Color(1.0, 0.6, 0.2, 0.9), 0.3)
-	flash(at + Vector3(0.0, size * 0.3, 0.0), size * 0.6, Color(1.0, 0.95, 0.8, 0.95), 0.16)
+	flash(at + lean + Vector3(0.0, size * 0.3, 0.0), size * 0.66, Color(1.0, 0.95, 0.8, 0.95), 0.16)
+	flash(at - lean * 0.8 + Vector3(0.0, size * 0.15, 0.0), size * 0.5, Color(1.0, 0.45, 0.12, 0.85), 0.36)
+	var core: Color = tint.lerp(Color(1.0, 0.85, 0.6), 0.4)
 	# A shock ring racing out along the ground.
-	ground_ring(Vector3(at.x, at.y - 0.3, at.z), size * 2.4, Color(1.0, 0.85, 0.6, 0.55), 0.32, true)
+	ground_ring(Vector3(at.x, at.y - 0.3, at.z), size * 2.4, Color(core.r, core.g, core.b, 0.6), 0.32, true)
 	light(at + Vector3(0.0, 0.8, 0.0), Color(1.0, 0.7, 0.35), 2.5 + size, 6.0 + size * 5.0, 0.3)
 	scorch(Vector3(at.x, at.y - 0.45, at.z), 0.9 + size * 0.9)
 	debris(at, size)
 	sparks(at, 4 + int(size * 3.0))
 	flames(at, maxf(0.6, size * 0.6))
 	smoke(at + Vector3(0.0, size * 0.3, 0.0), maxf(0.7, size * 0.7))
+	if size >= 1.4:
+		# A second fireball rolls up after the first.
+		flash(at + Vector3(0.0, size * 0.75, 0.0) + lean * 0.5, size * 0.8, Color(0.95, 0.4, 0.1, 0.7), 0.55)
 	if size >= 1.8:
 		dust(at, size * 0.6)
+		ground_ring(Vector3(at.x, at.y - 0.3, at.z), size * 3.6, Color(0.7, 0.62, 0.5, 0.3), 0.6, true)
+		smoke_pillar(at + Vector3(0.0, size * 0.5, 0.0), size)
+
+
+## Smoke that keeps rising from where something big blew up, for a few
+## seconds after the fire has gone. Skipped when the battle is already thick
+## with effects, so that the short bursts still get their turn.
+func smoke_pillar(at: Vector3, size: float) -> void:
+	if _bursts.size() > MAX_BURSTS * 2 / 3:
+		return
+	var p: CPUParticles3D = _emitter(at, 9, 4.2, _puff_mesh)
+	if p == null:
+		return
+	p.explosiveness = 0.1
+	p.spread = 12.0
+	p.initial_velocity_min = 0.8
+	p.initial_velocity_max = 1.6
+	p.gravity = Vector3(0.35, 0.5, 0.0)
+	p.scale_amount_min = 1.0 * size
+	p.scale_amount_max = 2.1 * size
+	p.color_ramp = _smoke_ramp
 
 
 ## How many mesh effects are live; callers use it to thin out optional ones.

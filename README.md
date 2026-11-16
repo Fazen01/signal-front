@@ -244,18 +244,23 @@ Brackenfold pulls back early to grow whole again, and the Zephyr Accord
 sends its aircraft at your relays and depots between attacks. Every other
 big attack comes round the side instead of down the straight road. An AI
 on your team answers an attack on your headquarters and joins your attacks
-(or those of another AI ally). An AI opponent that is plainly beaten (down
-to a few buildings, outmatched two and a half to one for two and a half
-minutes, no earlier than fourteen minutes in) concedes; an AI on your team
-never does.
+(or those of another AI ally). Against turrets it builds siege guns that
+out-range them. In a match you only watch, an AI that is plainly beaten
+concedes, so that the match ends; while you are playing, no AI ever gives
+up: you have to take its headquarters.
 
 ## Maps
 
 A seeded, symmetric generator (176 × 176 for two players, a compact 128 × 128
 option for shorter matches, 192 × 192 for three or four). The seed also picks
-the kind of country: open **plains**, **highlands** crossed by rock ridges
-with passes through them, **lakeland**, or (two players only) a **river
-valley** with fords. Worn tracks show the routes between the bases.
+the kind of country. In the Greenwood that is open **plains**, **highlands**
+crossed by rock ridges with passes through them, **lakeland**, (two players
+only) a **river valley** with fords, or **the Island**: a moat round the
+middle of the map with four ways across and the richest salvage of the map
+inside. Every region has five kinds of its own, the last always such a
+prize behind a wall or a moat. Worn tracks show the routes between the
+bases. The skirmish setup shows a picture of the map you are about to get:
+the land, the salvage, the uplink sites and where each seat starts.
 
 A battlefield also lies in one of four **regions**, picked by the seed or in
 the skirmish setup: the **Greenwood** (grass and woods), the **Dustlands**
@@ -263,9 +268,13 @@ the skirmish setup: the **Greenwood** (grass and woods), the **Dustlands**
 ice) and the **Cinder Wastes** (ash, burnt trees and lava). A region changes
 how the land looks and nothing about how it plays.
 
-There are also three hand-made layouts: **Twin Fords** (a river with three
-crossings), **Crater Ring** (rich salvage inside a rock ring) and
-**Crossroads** (four players, ridges and a central plaza).
+There are also six hand-made layouts: **Twin Fords** (a river with three
+crossings), **Crater Ring** (rich salvage inside a rock ring),
+**Crossroads** (four players, ridges and a central plaza), **Dry Gulch**
+(two mesas wall the short road between the bases), **Frozen Strait** (a
+strait of ice with a bridge at each end and an island of salvage in the
+middle) and **Ember Lake** (four players round a lake of lava, with a spur
+of rock between each pair of neighbours).
 
 ## Known limits
 

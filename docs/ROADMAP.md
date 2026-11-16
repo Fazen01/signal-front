@@ -300,10 +300,13 @@ map generation itself to be improved.
 
 ## M33 — Maps and map generation, round three (owner request)
 
-- [ ] More shapes within each region, and features that matter in play:
-      high ground, chokepoints, islands of salvage worth fighting for
-- [ ] Three more hand-made layouts, one for each new region
-- [ ] A preview of the map in the match setup
+- [x] More shapes within each region, and features that matter in play:
+      chokepoints and islands of salvage worth fighting for (a fifth kind
+      of country in every region: a prize behind a wall or a moat)
+- [ ] High ground that matters in play (not done: heights are still only
+      for looks; it needs a rule in the sim and a terrain of its own)
+- [x] Three more hand-made layouts, one for each new region
+- [x] A preview of the map in the match setup
 
 ## M34 — Look, round two (owner request)
 
@@ -313,7 +316,7 @@ map generation itself to be improved.
       is done. (The first attempt, a camouflage and weathering shader with
       extra kit on every model, was withdrawn because the owner disliked
       it: do not bring that back.)
-- [ ] Combat: bigger and more varied explosions, smoke that lingers,
+- [x] Combat: bigger and more varied explosions, smoke that lingers,
       wrecks that burn, weapon effects per faction
 - [ ] The game as a whole: lighting per time of day, water and sky
 
@@ -964,6 +967,75 @@ restarted three times; the background tuner died with it).**
   different between these six beyond the models and the interface.
   **None of this has been through a league**: the support units are
   priced by eye.
+
+- **M33: maps, round three.**
+  - *A picture of the map in the skirmish setup* (`ui/map_preview.gd`):
+    terrain in the region's colours, salvage (gold), uplink sites (white)
+    and a square in each seat's colour where it starts. It is drawn from
+    `SimSetup.map_for(config)`, the call the match itself makes, and from
+    the same start assignment, so allies show side by side. Generating a
+    map takes 40-60 ms, so it redraws on every change.
+  - *A fifth kind of country in every region, the prize*: the Island
+    (Greenwood, a moat), Rimrock (Dustlands), the Cirque (Frostline), the
+    Cauldron (Cinder Wastes, a lava moat). A ring 9-12 cells from the
+    centre with four gates five cells wide a quarter turn apart, and
+    20,000 salvage inside, more than anywhere else on the map. The ring is
+    the same under quarter and half turns, so it serves two and four
+    starts. The gates and the ground inside are cleared again after the
+    rest of the country is scattered. Adding a kind changed which kind
+    each seed gives (the barrier kind keeps its 28%; the other four share
+    the rest), so every seed is a different map from yesterday's.
+  - *Three layouts*: Dry Gulch (Dustlands, two players), Frozen Strait
+    (Frostline, two players), Ember Lake (Cinder Wastes, four players).
+    `tools/make_layouts.py` now writes all six and their regions (the
+    regions of the first three had been added to the JSON by hand; running
+    the tool would have dropped them).
+  - **Not done: high ground.** Heights are cosmetic. Making them matter
+    needs a terrain of its own (plateau: passable, more range and sight
+    for what stands on it), which touches the map, the generator, the
+    path finder's inputs, the terrain view, the minimap and the layouts'
+    legend. Left as an open box rather than half-built.
+
+- **`tools/check.sh` failed on the M32 commit** (not pushed alone): the
+  Lodestone against Verdigris match was undecided at 45 minutes. Both ran
+  out of salvage; the Order, with thirteen buildings and almost no army or
+  income from minute 18, held behind its turrets, and it was neither "down
+  to eight buildings" nor outmatched 2.5 to 1, so it never conceded. Two
+  changes: the AI weighs artillery up by 0.45 for every enemy turret it
+  knows of (to +3.0), since siege guns out-range turrets; and a second way
+  to be beaten: from minute 18, less than 150 salvage in over four minutes,
+  less than 400 in the bank, and the strongest enemy side at 1.5 times
+  ours. The same match then ends at 24 minutes.
+- **The owner on conceding: "if I play against AI would be boring if it
+  concede, I'm not sure."** Decision: no AI concedes while a person is
+  still playing, on either side. Conceding stays for matches the AI plays
+  against itself (Watch, the checks, the leagues), which is what it was
+  for. Tests cover both.
+- **The owner, looking at a capture of a fight: the tanks "line up so it
+  looks like they are merged".** Part of that was the capture (I had
+  spawned pairs on top of each other). The rest is real: units were pushed
+  apart only as far as the sum of their radii, and vehicle models are
+  longer than that and drawn 10% over size, so two tanks nose to tail
+  overlapped by a metre and read as one long machine. Now vehicles keep
+  1.45 times the sum of their radii and aircraft 2.1 times
+  (`SimMovement.personal_space`), formations of vehicles are 1.2 times
+  deeper than wide, and each rank stands behind the gaps of the one in
+  front. `tools/screenshot.sh x 360 crowd_<unit id>` drops twelve of a unit
+  on one spot and marches them off, to look at this. What is left: a long
+  gun still reaches over the vehicle ahead when twelve are dropped on one
+  point. A measurement of every model against its footprint showed the
+  worst overhangs are gun barrels (Stalker, Halberd, Mauler, Castellan).
+- **M34, the combat half.** Each faction's weapons burn in its own colour
+  (`fx_color` in `data/factions.json`: tracers, muzzle flashes, shells and
+  the shock ring of their bursts). Explosions lean a different way each
+  time; from a certain size they get a second, slower fireball, and the
+  biggest a ring of dust and a pillar of smoke that hangs for four
+  seconds. A vehicle's wreck burns for twelve seconds and smokes for
+  twenty-six (only a wreck made in view: one already lying there when a
+  save is loaded does not catch fire again). Tried and removed: a glowing
+  disc of embers under big explosions, which drew as a flat orange circle.
+  Still open in M34: a better look for every faction's models, and
+  lighting, water and sky.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

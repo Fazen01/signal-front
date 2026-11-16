@@ -158,7 +158,7 @@ func test_generated_maps_come_in_several_kinds() -> void:
 				open += 1
 		var share: float = float(open) / float(m.w * m.h)
 		check(share > 0.74 and share < 0.95, "seed %d (%s): %d%% open ground" % [seed_value, m.name, int(share * 100.0)])
-	for kind: String in ["River Valley", "Highlands", "Lakeland", "Plains"]:
+	for kind: String in ["River Valley", "Highlands", "Lakeland", "Plains", "The Island"]:
 		check(kinds.has(kind), "%s turns up among 24 seeds" % kind)
 	check(not kinds.has("Open Ground"), "no seed needed the open-ground fallback")
 
@@ -283,3 +283,68 @@ func test_match_settings_choose_the_region() -> void:
 	config.region = "desert"
 	var back: MatchConfig = SimSave.config_from_dict(SimSave.config_to_dict(config))
 	check_eq(back.region, "desert", "the region survives a save")
+
+
+func test_a_prize_map_has_a_walled_middle_with_four_gates() -> void:
+	for region: String in SimMapGen.REGIONS:
+		var kinds: Array = SimMapGen.REGION_KINDS[region]
+		var prize: String = SimMapGen.THEME_NAMES[str(kinds[kinds.size() - 1])]
+		var found: int = 0
+		for players: int in [2, 4]:
+			var cells: int = SimMapGen.STANDARD_CELLS if players == 2 else SimMapGen.LARGE_CELLS
+			for seed_value: int in range(1, 60):
+				var m: SimMap = SimMapGen.generate(seed_value, cells, players, region)
+				if _kind_of(m) != prize:
+					continue
+				found += 1
+				var middle: Vector2 = m.world_size() * 0.5
+				check_eq(_symmetry_mismatches(m, players if players == 4 else 2), 0, "%s seed %d (%s, %d starts): symmetric" % [region, seed_value, prize, players])
+				# The richest salvage of the map lies close round the middle.
+				var inside: int = 0
+				var outside_best: int = 0
+				for f: Vector3 in m.field_spots:
+					if Vector2(f.x, f.y).distance_to(middle) < 16.0:
+						inside += int(f.z)
+					else:
+						outside_best = maxi(outside_best, int(f.z))
+				check_eq(inside, SimMapGen.PRIZE_FIELD_AMOUNT, "%s seed %d: the prize is inside the wall" % [region, seed_value])
+				check(inside > outside_best, "%s seed %d: and it is the richest place on the map" % [region, seed_value])
+				check(_all_reachable(m), "%s seed %d: every start and field can be reached" % [region, seed_value])
+				# Walk a circle through the wall: it is shut except at four gates.
+				# (A way through is a stretch at least two cells wide; a single
+				# open sample where the circle clips a corner does not count.)
+				var wall: Vector3 = SimMapGen.PRIZE_WALLS[str(kinds[kinds.size() - 1])]
+				var ring: float = (wall.y + 1.0) * SimMap.CELL
+				var steps: int = 720
+				var two_cells: int = int(2.0 * SimMap.CELL / (TAU * ring / float(steps)))
+				var first_shut: int = 0
+				while first_shut < steps and m.is_passable(middle + Vector2.from_angle(TAU * float(first_shut) / float(steps)) * ring):
+					first_shut += 1
+				var open_runs: int = 0
+				var run: int = 0
+				for k: int in steps + 1:
+					var ang: float = TAU * float(first_shut + k) / float(steps)
+					if m.is_passable(middle + Vector2.from_angle(ang) * ring):
+						run += 1
+					else:
+						if run >= two_cells:
+							open_runs += 1
+						run = 0
+				check_eq(open_runs, 4, "%s seed %d (%s): four ways through the wall" % [region, seed_value, prize])
+				break
+		check(found >= 2, "%s: %s turns up for two and for four starts" % [region, prize])
+
+
+func test_the_setup_preview_shows_the_map_the_match_gets() -> void:
+	var config: MatchConfig = MatchConfig.skirmish(31)
+	var preview: MapPreview = MapPreview.new()
+	preview.show_config(config)
+	check_eq(preview.seats_shown(), 2, "two seats, two starts drawn")
+	var w: SimWorld = SimSetup.create_match(config)
+	check(preview.caption.begins_with(w.map.name), "the picture is of the map the match is played on (%s)" % preview.caption)
+	check(SimSetup.map_for(config).terrain == w.map.terrain, "the same land, cell for cell")
+	config.add_ai("nomad", 1, "Third", config.team_of(0))
+	config.add_ai("vesper", 1, "Fourth", config.team_of(1))
+	preview.show_config(config)
+	check_eq(preview.seats_shown(), 4, "four seats, four starts drawn")
+	preview.free()

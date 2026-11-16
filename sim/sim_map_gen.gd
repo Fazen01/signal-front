@@ -6,18 +6,23 @@ extends RefCounted
 ## is identical.
 ##
 ## The seed picks a region and, within it, a kind of country. Every region
-## has four kinds of its own: the Greenwood has river valleys, highlands,
-## lakeland and plains; the Dustlands have a long ridge, mesa country, oases
-## and dunes; the Frostline has an ice river, crags, frozen lakes and
-## pinewood; the Cinder Wastes have a lava river, fissures, calderas and
-## burnt plain. The first kind of each (a barrier across the middle with
-## fords or passes) only suits two players. Whatever the kind, most of the
-## map stays open ground, so matches run to a similar length on all of them.
+## has five kinds of its own: the Greenwood has river valleys, highlands,
+## lakeland, plains and the island; the Dustlands have a long ridge, mesa
+## country, oases, dunes and rimrock; the Frostline has an ice river, crags,
+## frozen lakes, pinewood and the cirque; the Cinder Wastes have a lava
+## river, fissures, calderas, burnt plain and the cauldron. The first kind
+## of each (a barrier across the middle with fords or passes) only suits two
+## players. The last of each is a prize: a moat or a wall round the middle
+## of the map with four gates in it and the richest salvage of the map
+## inside. Whatever the kind, most of the map stays open ground, so matches
+## run to a similar length on all of them.
 
 const START_MARGIN_CELLS: int = 13  ## start position, in cells from the corner
 const START_CLEAR_CELLS: int = 11  ## radius kept free of obstacles around a start
 const NEAR_FIELD_AMOUNT: int = 7500
 const MID_FIELD_AMOUNT: int = 13500
+const PRIZE_FIELD_AMOUNT: int = 20000  ## what lies inside the wall of a prize map, in all
+const PRIZE_GATE_CELLS: float = 5.0  ## width of each of the four ways in
 const SMALL_CELLS: int = 64  ## 128 x 128 world units: the compact two-player map and the layouts
 const STANDARD_CELLS: int = 88  ## 176 x 176 world units: the default two-player map
 const LARGE_CELLS: int = 96  ## 192 x 192 world units, up to four players
@@ -33,14 +38,23 @@ const THEME_NAMES: Dictionary[String, String] = {
 	"longridge": "Long Ridge", "mesas": "Mesa Country", "oasis": "Oasis", "dunes": "Dunes",
 	"iceriver": "Ice River", "crags": "Crags", "frozenlakes": "Frozen Lakes", "pinewood": "Pinewood",
 	"lavariver": "Lava River", "fissures": "Fissures", "calderas": "Calderas", "burntplain": "Burnt Plain",
+	"island": "The Island", "rimrock": "Rimrock", "cirque": "The Cirque", "cauldron": "The Cauldron",
 }
 ## The kinds of country in each region. The first of each is the one with a
 ## barrier across the middle, which is left out for more than two players.
 const REGION_KINDS: Dictionary[String, Array] = {
-	"temperate": ["river", "highlands", "lakes", "plains"],
-	"desert": ["longridge", "mesas", "oasis", "dunes"],
-	"tundra": ["iceriver", "crags", "frozenlakes", "pinewood"],
-	"ashland": ["lavariver", "fissures", "calderas", "burntplain"],
+	"temperate": ["river", "highlands", "lakes", "plains", "island"],
+	"desert": ["longridge", "mesas", "oasis", "dunes", "rimrock"],
+	"tundra": ["iceriver", "crags", "frozenlakes", "pinewood", "cirque"],
+	"ashland": ["lavariver", "fissures", "calderas", "burntplain", "cauldron"],
+}
+## The prize kinds: what the wall round the middle is made of, and how far
+## from the centre it starts and ends (in cells).
+const PRIZE_WALLS: Dictionary[String, Vector3] = {
+	"island": Vector3(SimMap.Terrain.WATER, 9.0, 12.0),
+	"rimrock": Vector3(SimMap.Terrain.ROCK, 9.0, 12.5),
+	"cirque": Vector3(SimMap.Terrain.ROCK, 9.5, 12.5),
+	"cauldron": Vector3(SimMap.Terrain.WATER, 9.0, 11.5),
 }
 
 
@@ -130,8 +144,33 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool, re
 	var rock: int = SimMap.Terrain.ROCK
 	var water: int = SimMap.Terrain.WATER
 	var wood: int = SimMap.Terrain.FOREST
+	# A prize map gets its wall first; the gates are opened again at the end.
+	var gate_at: float = 0.0
+	if PRIZE_WALLS.has(theme):
+		var wall: Vector3 = PRIZE_WALLS[theme]
+		gate_at = _ring_wall(m, rng, int(wall.x), wall.y, wall.z, false)
 	# Rock and water go down first; woods only grow on what is still open.
 	match theme:
+		# ---- The prize kinds: the country round the wall.
+		"island":
+			_scatter(m, rng, order, 3.0 * scale, rock, 1.4, 2.6)
+			_scatter(m, rng, order, 0.8 * scale, water, 1.8, 2.8)
+			_scatter(m, rng, order, 6.0 * scale, wood, 2.6, 4.8)
+			_scatter(m, rng, order, 7.0 * scale, wood, 1.2, 2.2)
+		"rimrock":
+			_scatter(m, rng, order, 6.0 * scale, rock, 1.4, 2.8)
+			_ridges(m, rng, order, 1.2 * scale, 5.0, 9.0)
+			_oases(m, rng, order, 0.7 * scale)
+			_scatter(m, rng, order, 2.0 * scale, wood, 1.3, 2.2)
+		"cirque":
+			_scatter(m, rng, order, 3.5 * scale, rock, 1.3, 2.6)
+			_scatter(m, rng, order, 1.0 * scale, water, 1.8, 3.0)
+			_scatter(m, rng, order, 3.5 * scale, wood, 3.0, 5.5)
+			_scatter(m, rng, order, 4.5 * scale, wood, 1.3, 2.3)
+		"cauldron":
+			_scatter(m, rng, order, 8.0 * scale, rock, 1.4, 2.8)
+			_ridges(m, rng, order, 1.4 * scale, 5.0, 9.0)
+			_scatter(m, rng, order, 3.5 * scale, wood, 1.8, 3.4)
 		# ---- Greenwood: well watered and wooded.
 		"river":
 			_river(m, rng, water)
@@ -243,6 +282,14 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool, re
 		_add_field(m, order, centre + Vector2(0.0, -1.0) * mid_off * 0.7, MID_FIELD_AMOUNT)
 	else:
 		_add_field(m, order, centre + across * mid_off, MID_FIELD_AMOUNT)
+	if PRIZE_WALLS.has(theme):
+		# Whatever was scattered since, the ways in and the ground inside stay
+		# open; the prize is shared out round the very middle.
+		var wall: Vector3 = PRIZE_WALLS[theme]
+		_ring_wall(m, rng, SimMap.Terrain.GROUND, wall.y - 1.0, wall.z + 1.0, true, gate_at)
+		_clear_disc(m, centre, int(wall.y) - 3)
+		var out: Vector2 = Vector2(cos(gate_at + PI * 0.25), sin(gate_at + PI * 0.25)) * (10.0 if order == 4 else 8.0)
+		_add_field(m, order, centre + out, PRIZE_FIELD_AMOUNT / order)
 	# One extra expansion field per start, further out along the edge.
 	var exp_pos: Vector2 = Vector2(start_a.x + rng.range_f(0.30, 0.38) * size.x, start_a.y + rng.range_f(-4.0, 4.0))
 	_add_field(m, order, exp_pos, NEAR_FIELD_AMOUNT)
@@ -275,7 +322,36 @@ static func _pick_theme(rng: SimRng, order: int, sparse: bool, region: String) -
 	if order == 2 and roll < 0.28:
 		return str(kinds[0])
 	var rest: float = (roll - 0.28) / 0.72 if order == 2 else roll
-	return str(kinds[1 + clampi(int(rest * 3.0), 0, 2)])
+	var others: int = kinds.size() - 1
+	return str(kinds[1 + clampi(int(rest * float(others)), 0, others - 1)])
+
+
+## Paints a ring round the middle of the map, between `inner` and `outer`
+## cells from the centre, leaving four gates a quarter turn apart; or, with
+## `gates_only`, paints just the four gates (to open them again). The ring
+## is the same under quarter and half turns, so it suits both map sizes.
+## Returns the direction of the first gate.
+static func _ring_wall(m: SimMap, rng: SimRng, terrain: int, inner: float, outer: float, gates_only: bool, first_gate: float = -1.0) -> float:
+	var centre: Vector2 = Vector2(float(m.w), float(m.h)) * 0.5
+	var first: float = first_gate if first_gate >= 0.0 else rng.range_f(0.0, PI * 0.5)
+	var wobble: float = rng.range_f(0.0, TAU) if first_gate < 0.0 else 0.0
+	for y: int in m.h:
+		for x: int in m.w:
+			var d: Vector2 = Vector2(float(x) + 0.5, float(y) + 0.5) - centre
+			var r: float = d.length()
+			if r < inner - 1.5 or r > outer + 1.5:
+				continue
+			var ang: float = d.angle()
+			# The wall bulges in and out eight times round, so it is not a compass circle.
+			var bulge: float = 0.0 if gates_only else sin(ang * 8.0 + wobble) * 0.8
+			if r < inner or r > outer + bulge:
+				continue
+			# How far along the ring this cell is from the middle of the nearest gate.
+			var off: float = absf(wrapf(ang - first, -PI * 0.25, PI * 0.25)) * r
+			var in_gate: bool = off < PRIZE_GATE_CELLS * 0.5
+			if in_gate == gates_only:
+				m.set_terrain(Vector2i(x, y), terrain)
+	return first
 
 
 ## Oases: a pool with a ring of green round it.

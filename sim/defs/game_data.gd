@@ -28,7 +28,7 @@ const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
 	"linked_vehicle_repair", "roles", "drop_squad", "forest_cloak", "wreck_salvage_mult",
 	"linked_speed_bonus", "linked_damage_resist", "linked_sight_bonus", "kill_bounty", "linked_cloak",
-	"regrowth", "hit_slow",
+	"regrowth", "hit_slow", "fx_color",
 ]
 const AI_ROLES: Array[String] = [
 	"", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air", "hijacker",
@@ -368,6 +368,9 @@ func _load_factions(d: Dictionary) -> void:
 		f.linked_cloak = bool(src.get("linked_cloak", false))
 		f.regrowth = float(src.get("regrowth", 0.0))
 		f.hit_slow = float(src.get("hit_slow", 0.0))
+		var tint: Array = src.get("fx_color", [])
+		if tint.size() == 3:
+			f.fx_color = Color(float(tint[0]), float(tint[1]), float(tint[2]))
 		if src.has("roles"):
 			var raw_roles: Dictionary = src["roles"]
 			for rk: Variant in raw_roles.keys():

@@ -29,6 +29,10 @@ var _range_ring: MeshInstance3D = null  ## how far its weapons reach, while it i
 var _fire: CPUParticles3D = null  ## flames on something close to destruction
 var _smoke: CPUParticles3D = null  ## rises from badly damaged vehicles and buildings
 var _selected: bool = false
+var _wreck_since: int = 0  ## when this wreck started to burn (msec)
+
+const WRECK_BURN: float = 12.0  ## seconds a fresh wreck is on fire
+const WRECK_SMOKE: float = 26.0  ## and how long it goes on smoking
 
 
 func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
@@ -44,6 +48,13 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 		SimEntity.Kind.WRECK:
 			model = ModelFactory.build_wreck(e.wreck_model, e.id)
 			model.rotation.y = -e.facing
+			# A wreck made just now is on fire; one that was already lying
+			# there when it came into view (or when a save was loaded) is not.
+			var made: int = e.decay_tick - int(world.data.wreck_decay_seconds * float(SimWorld.TICK_RATE))
+			if world.tick_count - made < SimWorld.TICK_RATE * 3:
+				_wreck_since = Time.get_ticks_msec()
+				_fire = _make_fire(e.radius)
+				_smoke = _make_smoke(e.radius)
 		SimEntity.Kind.FIELD:
 			model = ModelFactory.build_field(e.id)
 		_:
@@ -184,77 +195,100 @@ func _process(delta: float) -> void:
 func _update_damage_smoke(e: SimEntity) -> void:
 	var burning: bool = e.constructed and e.hp < e.max_hp * 0.45 and (e.kind == SimEntity.Kind.BUILDING or e.def.is_vehicle())
 	if burning and _smoke == null:
-		_smoke = CPUParticles3D.new()
-		var puff: SphereMesh = SphereMesh.new()
-		puff.radius = 0.3
-		puff.height = 0.6
-		puff.radial_segments = 6
-		puff.rings = 3
-		var m: StandardMaterial3D = StandardMaterial3D.new()
-		m.vertex_color_use_as_albedo = true
-		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		var ramp: Gradient = Gradient.new()
-		ramp.set_color(0, Color(0.18, 0.17, 0.16, 0.75))
-		ramp.set_color(1, Color(0.1, 0.1, 0.1, 0.0))
-		_smoke.mesh = puff
-		_smoke.material_override = m
-		_smoke.amount = 10
-		_smoke.lifetime = 2.2
-		_smoke.direction = Vector3.UP
-		_smoke.spread = 18.0
-		_smoke.initial_velocity_min = 1.0
-		_smoke.initial_velocity_max = 2.2
-		_smoke.gravity = Vector3(0.6, 0.8, 0.0)
-		_smoke.scale_amount_min = 0.8 + e.radius * 0.25
-		_smoke.scale_amount_max = 1.6 + e.radius * 0.5
-		_smoke.color_ramp = ramp
-		_smoke.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_smoke.position = Vector3(0.0, 1.0 + e.radius * 0.5, 0.0)
-		add_child(_smoke)
+		_smoke = _make_smoke(e.radius)
 	if _smoke != null and _smoke.emitting != burning:
 		_smoke.emitting = burning
 	# Close to destruction, flames join the smoke.
 	var ablaze: bool = burning and e.hp < e.max_hp * 0.25
 	if ablaze and _fire == null:
-		_fire = CPUParticles3D.new()
-		var lick: SphereMesh = SphereMesh.new()
-		lick.radius = 0.22
-		lick.height = 0.6
-		lick.radial_segments = 5
-		lick.rings = 3
-		var fm: StandardMaterial3D = StandardMaterial3D.new()
-		fm.vertex_color_use_as_albedo = true
-		fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		var heat: Gradient = Gradient.new()
-		heat.set_color(0, Color(1.0, 0.75, 0.3, 0.9))
-		heat.set_color(1, Color(0.9, 0.15, 0.03, 0.0))
-		_fire.mesh = lick
-		_fire.material_override = fm
-		_fire.amount = 9
-		_fire.lifetime = 0.7
-		_fire.direction = Vector3.UP
-		_fire.spread = 22.0
-		_fire.initial_velocity_min = 1.2
-		_fire.initial_velocity_max = 2.6
-		_fire.gravity = Vector3(0.0, 2.0, 0.0)
-		_fire.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-		_fire.emission_sphere_radius = maxf(0.3, e.radius * 0.45)
-		_fire.scale_amount_min = 0.7 + e.radius * 0.2
-		_fire.scale_amount_max = 1.3 + e.radius * 0.4
-		_fire.color_ramp = heat
-		_fire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_fire.position = Vector3(0.0, 0.7 + e.radius * 0.35, 0.0)
-		add_child(_fire)
+		_fire = _make_fire(e.radius)
 	if _fire != null and _fire.emitting != ablaze:
 		_fire.emitting = ablaze
+
+
+## A fresh wreck burns for a while and smokes for a while longer.
+func _update_wreck_fire() -> void:
+	if _fire == null and _smoke == null:
+		return
+	var age: float = float(Time.get_ticks_msec() - _wreck_since) * 0.001
+	if _fire != null and _fire.emitting and age > WRECK_BURN:
+		_fire.emitting = false
+	if _smoke != null and _smoke.emitting and age > WRECK_SMOKE:
+		_smoke.emitting = false
+
+
+func _make_smoke(radius: float) -> CPUParticles3D:
+	var smoke: CPUParticles3D = CPUParticles3D.new()
+	var puff: SphereMesh = SphereMesh.new()
+	puff.radius = 0.3
+	puff.height = 0.6
+	puff.radial_segments = 6
+	puff.rings = 3
+	var m: StandardMaterial3D = StandardMaterial3D.new()
+	m.vertex_color_use_as_albedo = true
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var ramp: Gradient = Gradient.new()
+	ramp.set_color(0, Color(0.18, 0.17, 0.16, 0.75))
+	ramp.set_color(1, Color(0.1, 0.1, 0.1, 0.0))
+	smoke.mesh = puff
+	smoke.material_override = m
+	smoke.amount = 10
+	smoke.lifetime = 2.2
+	smoke.direction = Vector3.UP
+	smoke.spread = 18.0
+	smoke.initial_velocity_min = 1.0
+	smoke.initial_velocity_max = 2.2
+	smoke.gravity = Vector3(0.6, 0.8, 0.0)
+	smoke.scale_amount_min = 0.8 + radius * 0.25
+	smoke.scale_amount_max = 1.6 + radius * 0.5
+	smoke.color_ramp = ramp
+	smoke.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	smoke.position = Vector3(0.0, 1.0 + radius * 0.5, 0.0)
+	add_child(smoke)
+	return smoke
+
+
+func _make_fire(radius: float) -> CPUParticles3D:
+	var fire: CPUParticles3D = CPUParticles3D.new()
+	var lick: SphereMesh = SphereMesh.new()
+	lick.radius = 0.22
+	lick.height = 0.6
+	lick.radial_segments = 5
+	lick.rings = 3
+	var fm: StandardMaterial3D = StandardMaterial3D.new()
+	fm.vertex_color_use_as_albedo = true
+	fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var heat: Gradient = Gradient.new()
+	heat.set_color(0, Color(1.0, 0.75, 0.3, 0.9))
+	heat.set_color(1, Color(0.9, 0.15, 0.03, 0.0))
+	fire.mesh = lick
+	fire.material_override = fm
+	fire.amount = 9
+	fire.lifetime = 0.7
+	fire.direction = Vector3.UP
+	fire.spread = 22.0
+	fire.initial_velocity_min = 1.2
+	fire.initial_velocity_max = 2.6
+	fire.gravity = Vector3(0.0, 2.0, 0.0)
+	fire.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	fire.emission_sphere_radius = maxf(0.3, radius * 0.45)
+	fire.scale_amount_min = 0.7 + radius * 0.2
+	fire.scale_amount_max = 1.3 + radius * 0.4
+	fire.color_ramp = heat
+	fire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	fire.position = Vector3(0.0, 0.7 + radius * 0.35, 0.0)
+	add_child(fire)
+	return fire
 
 
 func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 	if e.def != null:
 		_update_damage_smoke(e)
+	elif kind == SimEntity.Kind.WRECK:
+		_update_wreck_fire()
 	var p: Vector2 = e.prev_pos.lerp(e.pos, alpha)
 	base_y = map.height_at(p)
 	position = Vector3(p.x, base_y, p.y)

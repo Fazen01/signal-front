@@ -131,7 +131,7 @@ func _sync_projectiles(alpha: float) -> void:
 		if node == null:
 			node = MeshInstance3D.new()
 			node.mesh = _proj_mesh
-			node.material_override = _proj_mat(p.weapon.fx)
+			node.material_override = _proj_mat(p.weapon.fx, p.owner)
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(node)
 			_proj_views[p.id] = node
@@ -164,16 +164,27 @@ func _sync_projectiles(alpha: float) -> void:
 			_proj_views.erase(id)
 
 
-func _proj_mat(fx_name: String) -> StandardMaterial3D:
-	if _proj_mats.has(fx_name):
-		return _proj_mats[fx_name]
-	var color: Color = Color(1.0, 0.8, 0.4)
+## The colour a player's weapons burn with: its faction's.
+func _tint(player_id: int) -> Color:
+	if player_id < 0 or player_id >= world.players.size():
+		return FxLayer.PLAIN
+	return world.players[player_id].faction.fx_color
+
+
+## One material for each kind of shell of each faction: shells glow in the
+## faction's colour, missiles a shade deeper.
+func _proj_mat(fx_name: String, player_id: int) -> StandardMaterial3D:
+	var tint: Color = _tint(player_id)
+	var key: String = "%s|%s" % [fx_name, tint.to_html(false)]
+	if _proj_mats.has(key):
+		return _proj_mats[key]
+	var color: Color = tint.lerp(Color.WHITE, 0.25)
 	if fx_name == "missile":
-		color = Color(1.0, 0.55, 0.25)
+		color = tint.lerp(Color(1.0, 0.5, 0.2), 0.3)
 	var m: StandardMaterial3D = StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.albedo_color = color
-	_proj_mats[fx_name] = m
+	_proj_mats[key] = m
 	return m
 
 
@@ -238,20 +249,21 @@ func handle_event(ev: SimEvent) -> void:
 			_kick(ev.id)
 			var heavy: bool = ev.text == "tracer_heavy"
 			var hit: Vector3 = _ground(ev.pos2, 0.8 + _altitude_of(ev.other_id))
-			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), hit, heavy)
+			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), hit, heavy, _tint(ev.player))
 			if heavy or (ev.id + world.tick_count) % 3 == 0:
 				fx.sparks(hit, 5 if heavy else 3)
 			_sound("shot_heavy" if heavy else "shot", ev.pos, 60)
 		SimEvent.Type.PROJECTILE:
 			_kick(ev.id)
-			fx.flash(_ground(ev.pos, 1.1 + _altitude_of(ev.id)), 0.45, Color(1.0, 0.8, 0.45, 0.9), 0.08)
+			var glow: Color = _tint(ev.player).lerp(Color(1.0, 0.8, 0.45), 0.35)
+			fx.flash(_ground(ev.pos, 1.1 + _altitude_of(ev.id)), 0.45, Color(glow.r, glow.g, glow.b, 0.9), 0.08)
 			if ev.text == "missile":
 				_sound("missile", ev.pos, 120)
 			else:
 				fx.smoke(_ground(ev.pos, 1.2), 0.5, 3)
 				_sound("cannon", ev.pos, 90)
 		SimEvent.Type.IMPACT:
-			fx.explosion(_ground(ev.pos, 0.6), 0.9 + ev.value)
+			fx.explosion(_ground(ev.pos, 0.6), 0.9 + ev.value, _tint(ev.player))
 			_sound("explosion_big" if ev.value >= 2.5 else "explosion", ev.pos, 70)
 		SimEvent.Type.DIED:
 			if ev.text == "cancelled":

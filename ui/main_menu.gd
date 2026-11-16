@@ -94,6 +94,8 @@ var _time: float = 0.0
 var _backdrop: MenuBackdrop = null
 var _shade: GradientTexture2D = null  ## dark on the left, clear on the right
 var _live: Label = null  ## says which match is playing in the background
+var _preview: MapPreview = null  ## a picture of the battlefield the setup gives
+var _preview_caption: Label = null
 var _help_text: Label = null
 var _help_page: Button = null
 var _help_roster: VBoxContainer = null
@@ -297,11 +299,31 @@ func _build_setup() -> void:
 		_map.add_item("%s (%d players)" % [str(info["name"]), int(info["players"])])
 		_map_ids.append(id)
 		_map_players.append(int(info["players"]))
-	_row(box, "Map", _map)
+	# The map's rows on the left, a picture of it on the right.
+	var top: HBoxContainer = HBoxContainer.new()
+	top.add_theme_constant_override("separation", 16)
+	box.add_child(top)
+	var rows: VBoxContainer = VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 9)
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(rows)
+	var picture: VBoxContainer = VBoxContainer.new()
+	picture.add_theme_constant_override("separation", 4)
+	top.add_child(picture)
+	var frame: PanelContainer = PanelContainer.new()
+	frame.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.SUNK, UiTheme.LINE, 3, 1, 3.0))
+	picture.add_child(frame)
+	_preview = MapPreview.new()
+	_preview.name = "MapPreview"
+	frame.add_child(_preview)
+	_preview_caption = UiTheme.label("", 13, UiTheme.DIM)
+	_preview_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	picture.add_child(_preview_caption)
+	_row(rows, "Map", _map)
 	_map_blurb = Hud.make_label("", 14, Hud.DIM)
 	_map_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_map_blurb.custom_minimum_size = Vector2(760.0, 22.0)
-	box.add_child(_map_blurb)
+	_map_blurb.custom_minimum_size = Vector2(540.0, 62.0)
+	rows.add_child(_map_blurb)
 	_map.item_selected.connect(func(_i: int) -> void: _update_map())
 	# Region and seed share a line.
 	var land: HBoxContainer = HBoxContainer.new()
@@ -324,7 +346,9 @@ func _build_setup() -> void:
 	dice.text = "Random"
 	dice.pressed.connect(func() -> void: _seed.value = float(randi_range(1, 999999)))
 	land.add_child(dice)
-	_row(box, "Region", land)
+	_row(rows, "Region", land)
+	_region.item_selected.connect(func(_i: int) -> void: _update_preview())
+	_seed.value_changed.connect(func(_v: float) -> void: _update_preview())
 
 	# The seats.
 	box.add_child(UiTheme.rule(UiTheme.LINE_SOFT, 1.0))
@@ -526,7 +550,7 @@ func show_help_page(factions: bool) -> void:
 func _update_map() -> void:
 	var index: int = maxi(_map.selected, 0)
 	if _map_ids[index] == "":
-		_map_blurb.text = "A new battlefield from the seed, in one of four regions with four kinds of country each. 176 x 176 for two seats, 192 x 192 for three or four."
+		_map_blurb.text = "A new battlefield from the seed, in one of four regions with five kinds of country each. 176 x 176 for two seats, 192 x 192 for three or four."
 	elif _map_ids[index] == COMPACT_MAP:
 		_map_blurb.text = "A small 128 x 128 battlefield from the seed, for two seats. The armies meet early; expect a match of about ten minutes."
 	else:
@@ -591,6 +615,17 @@ func _update_seats() -> void:
 			note += " You watch: the AI plays every seat and nothing is hidden."
 	_seat_note.text = note
 	_seat_note.add_theme_color_override("font_color", Hud.RED if problem else Hud.TEXT)
+	_update_preview()
+
+
+## Redraws the picture of the battlefield for the setup as it stands. Random
+## factions are picked afresh when the match starts; the picture only needs
+## the map, the seats and their teams.
+func _update_preview() -> void:
+	if _preview == null or _start == null:
+		return
+	_preview.show_config(build_config())
+	_preview_caption.text = _preview.caption
 
 
 ## For automated runs: pick a map by id ("" = generated) and opponent count.
