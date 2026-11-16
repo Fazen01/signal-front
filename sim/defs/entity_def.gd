@@ -96,6 +96,15 @@ func is_armed() -> bool:
 	return weapons.size() > 0
 
 
+## True when at least one weapon can fire at ground targets (a Flak Post
+## cannot).
+func hits_ground() -> bool:
+	for w: WeaponDef in weapons:
+		if w.hits_ground:
+			return true
+	return false
+
+
 func max_weapon_range() -> float:
 	var best: float = 0.0
 	for w: WeaponDef in weapons:

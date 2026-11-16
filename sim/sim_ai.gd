@@ -10,6 +10,7 @@ enum Wave { NONE, STAGING, ASSAULT }
 const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
+const MEMORY_HALF_LIFE_TICKS: int = 20 * 40  ## how fast the remembered enemy army mix fades
 const ASSAULT_TICKS: int = 20 * 180  ## an assault ends after this long whatever happens
 const BLOCKED_TICKS: int = 20 * 30  ## how long an unplaceable building is skipped in the build order
 const SITE_AVOID_TICKS: int = 20 * 120  ## how long a spot where a site died is left alone
@@ -64,6 +65,7 @@ var _sites: Array[SimEntity] = []
 var _enemies: Array[SimEntity] = []
 var _enemy_buildings: Array[SimEntity] = []
 var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have seen
+var _enemy_mix: Array[float] = [0.0, 0.0, 0.0, 0.0]  ## armed enemy infantry, light, heavy, air seen lately (decaying)
 var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
 var _wish: Dictionary[int, String] = {}  ## building id -> unit it is saving up for
 var _wish_tick: Dictionary[int, int] = {}
@@ -338,7 +340,7 @@ func _run_construction(w: SimWorld, me: SimPlayer) -> void:
 		w.push_command(SimCommand.repair(player_id, _ids(free), _sites[0].id))
 		return
 	for b: SimEntity in _buildings:
-		if b.hp < b.max_hp * 0.7 and b.linked and _threat_near(b.pos, 14.0) == null:
+		if b.hp < b.max_hp * 0.7 and b.linked and _threat_near(b.pos, b.radius + 12.0) == null:
 			w.push_command(SimCommand.repair(player_id, _ids(free), b.id))
 			return
 
@@ -699,20 +701,28 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 		reserve = maxi(reserve, w.data.entity(_r("hauler")).cost)
 	if _engineers.size() + _queued(_r("builder")) == 0:
 		reserve = maxi(reserve, w.data.entity(_r("builder")).cost)
-	var heavy: int = 0
-	var light: int = 0
-	var infantry: int = 0
-	var air: int = 0
+	var seen_now: Array[float] = [0.0, 0.0, 0.0, 0.0]  ## infantry, light, heavy, air
 	for e: SimEntity in _enemies:
+		if not e.def.is_armed():
+			continue
 		if e.def.is_air():
-			air += 1
+			seen_now[3] += 1.0
 		elif e.def.is_infantry():
-			infantry += 1
+			seen_now[0] += 1.0
 		elif w.data.armor_classes[e.def.armor] == "heavy":
-			heavy += 1
+			seen_now[2] += 1.0
 		else:
-			light += 1
-	_enemy_air_seen = maxi(_enemy_air_seen, air)
+			seen_now[1] += 1.0
+	# Remember what the enemy fielded over the last minute or so, not just
+	# what is in sight this second: a quiet moment does not mean the enemy
+	# has no army, and the mix should not swing with every glimpse.
+	var keep: float = pow(0.5, float(think_ticks) / float(MEMORY_HALF_LIFE_TICKS))
+	for i: int in 4:
+		_enemy_mix[i] = maxf(_enemy_mix[i] * keep, seen_now[i])
+	var infantry: float = _enemy_mix[0]
+	var light: float = _enemy_mix[1]
+	var heavy: float = _enemy_mix[2]
+	_enemy_air_seen = maxi(_enemy_air_seen, int(seen_now[3]))
 	# Enemy turrets shape the army too: riflemen die in front of them, so
 	# they call for armour-piercing weapons and anything that outranges them.
 	var turrets: int = 0
@@ -725,7 +735,7 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 			support += 1
 	# With the enemy army gone what is left is buildings: favour the weapons
 	# that break them, or riflemen will plink at a headquarters all day.
-	var siege: float = 2.5 if waves_sent >= 2 and heavy + light + infantry < 4 else 0.0
+	var siege: float = 2.5 if waves_sent >= 2 and heavy + light + infantry < 4.0 else 0.0
 	var depth: int = 3 if me.salvage > 1000 else 2
 	for b: SimEntity in _buildings:
 		if b.def.produces.is_empty() or not b.linked or b.queue.size() >= depth:
@@ -763,12 +773,12 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 			var wgt: float = def.ai_weight
 			match def.ai_role:
 				"anti_infantry":
-					wgt += float(infantry) * 0.25
+					wgt += infantry * 0.25
 					wgt /= 1.0 + float(turrets) * 0.35
 					if siege > 0.0:
 						wgt *= 0.15
 				"anti_armor":
-					wgt += float(heavy) * 0.6 + float(light) * 0.3 + float(turrets) * 0.5 + siege
+					wgt += heavy * 0.6 + light * 0.3 + float(turrets) * 0.5 + siege
 				"artillery":
 					wgt += float(turrets) * 0.8 + siege
 				"anti_air":
@@ -975,7 +985,7 @@ func _should_retreat(w: SimWorld) -> bool:
 		if e.def.is_armed() and e.pos.distance_to(centre) < 22.0:
 			theirs += float(e.def.cost) * e.hp / e.max_hp
 	for b: SimEntity in _enemy_buildings:
-		if b.def.is_armed() and not b.def.signal_root and b.constructed and b.pos.distance_to(centre) < 18.0:
+		if b.def.is_armed() and b.def.hits_ground() and not b.def.signal_root and b.constructed and b.pos.distance_to(centre) < 18.0:
 			theirs += float(b.def.cost) * 1.5 * b.hp / b.max_hp
 	return theirs > mine * retreat_odds
 
@@ -1006,7 +1016,9 @@ func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 		timid = 0
 	var back: Vector2 = (_hq.pos - wave_target_pos).normalized()
 	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(wave_target_pos + back * STAGE_DISTANCE))
-	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), wave_stage))
+	# Attack-move, not move: a wave that meets defenders on the way must fight
+	# them, not file past them taking fire.
+	w.push_command(SimCommand.attack_move(player_id, PackedInt32Array(wave_ids), wave_stage))
 
 
 func _end_wave(w: SimWorld) -> void:

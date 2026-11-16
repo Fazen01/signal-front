@@ -15,7 +15,7 @@
 	"forest_vehicle_speed_mult": 0.5,
 	"harvest_seconds": 12.0,
 	"unload_seconds": 2.0,
-	"repair_rate": 0.04,
+	"repair_rate": 0.015,
 	"uplink_income_per_second": 3,
 	"uplink_capture_seconds": 8.0,
 	"hijack_seconds": 4.0,
