@@ -396,8 +396,11 @@ static func _update_harvest(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 				o.started = false
 				return
 			e.work_ticks += 1
-			if e.work_ticks >= int(w.data.harvest_seconds * float(SimWorld.TICK_RATE)):
-				var take: int = mini(e.def.capacity - e.cargo, res.salvage)
+			# Loading takes `harvest_seconds` per 100 salvage, so a small
+			# hauler is not penalised for making more trips.
+			var take: int = mini(e.def.capacity - e.cargo, res.salvage)
+			var load_ticks: int = maxi(SimWorld.TICK_RATE, int(w.data.harvest_seconds * float(SimWorld.TICK_RATE) * float(take) / 100.0))
+			if e.work_ticks >= load_ticks:
 				res.salvage -= take
 				# Some factions (the Nomad Circuit) strip wrecks more thoroughly.
 				if res.kind == SimEntity.Kind.WRECK:
@@ -582,13 +585,23 @@ static func _update_building(w: SimWorld, b: SimEntity) -> void:
 	if b.prod_progress < def.build_time:
 		b.prod_progress += SimWorld.DT
 		return
-	if p.bandwidth_used + def.bandwidth > p.bandwidth_cap:
+	if p.bandwidth_used + def.bandwidth > p.bandwidth_cap and not ignores_bandwidth_cap(w, def):
 		if w.tick_count % 200 == 0:
 			w.alert(b.owner, "Bandwidth limit reached - build Relays", b.pos)
 		return
 	b.queue.remove_at(0)
 	b.prod_progress = 0.0
 	_deliver_unit(w, b, def)
+
+
+## Units that deploy into a relay (Beacon Rigs) can always be finished, even
+## over the bandwidth cap: they are how a capped network grows, and without
+## this a player who loses every relay while at the cap could never recover.
+static func ignores_bandwidth_cap(w: SimWorld, def: EntityDef) -> bool:
+	if def.deploys_to == "":
+		return false
+	var into: EntityDef = w.data.entity(def.deploys_to)
+	return into != null and into.signal_radius > 0.0 and not into.signal_root
 
 
 ## A mine goes off when an enemy ground unit comes within its trigger radius.

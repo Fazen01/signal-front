@@ -183,3 +183,22 @@ func test_nomads_get_more_from_wrecks() -> void:
 		w.tick()
 		ticks += 1
 	check(w.players[0].salvage - before >= 90, "60 salvage of wreck pays 90 to a Nomad (got %d)" % (w.players[0].salvage - before))
+
+
+func test_beacon_rig_can_be_built_over_the_bandwidth_cap() -> void:
+	var w: SimWorld = _world()
+	var hub: SimEntity = _own(w, 0, "caravan_hub")[0]
+	var p: SimPlayer = w.players[0]
+	# Fill the cap with soldiers, as a player who lost every beacon might be.
+	while p.bandwidth_used < p.bandwidth_cap:
+		w.spawn_unit("drifter", 0, hub.pos + Vector2(8.0, float(p.bandwidth_used) * 0.5))
+	SimTestUtil.run(w, 2)
+	check(p.bandwidth_used >= p.bandwidth_cap, "the player is at the cap (%d / %d)" % [p.bandwidth_used, p.bandwidth_cap])
+	var rigs_before: int = _own(w, 0, "beacon_rig").size()
+	var skiffs_before: int = _own(w, 0, "skiff").size()
+	w.push_command(SimCommand.train(0, hub.id, "beacon_rig"))
+	SimTestUtil.run(w, 20 * 15)
+	check_eq(_own(w, 0, "beacon_rig").size(), rigs_before + 1, "a Beacon Rig is still delivered")
+	w.push_command(SimCommand.train(0, hub.id, "skiff"))
+	SimTestUtil.run(w, 20 * 15)
+	check_eq(_own(w, 0, "skiff").size(), skiffs_before, "anything else waits for bandwidth")

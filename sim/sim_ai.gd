@@ -10,6 +10,7 @@ enum Wave { NONE, STAGING, ASSAULT }
 const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
+const ASSAULT_TICKS: int = 20 * 180  ## an assault ends after this long whatever happens
 const BLOCKED_TICKS: int = 20 * 30  ## how long an unplaceable building is skipped in the build order
 const SITE_AVOID_TICKS: int = 20 * 120  ## how long a spot where a site died is left alone
 
@@ -26,7 +27,7 @@ var first_wave: int = 7
 var wave_growth: int = 3
 var max_wave: int = 26
 var wave_cooldown_ticks: int = 20 * 40
-var first_attack_tick: int = 20 * 240  ## no attack wave before this; the opening is for building
+var first_attack_tick: int = 20 * 270  ## no attack wave before this; the opening is for building
 var guard_fraction: float = 0.3  ## share of the army that stays home when a wave leaves
 var retreat_odds: float = 1.5  ## a wave facing this many times its own value falls back; 0 = never
 var max_barracks: int = 1
@@ -44,6 +45,8 @@ var wave_stage: Vector2 = Vector2.ZERO
 var wave_tick: int = 0
 var wave_size: int = 7
 var wave_launch_size: int = 0
+var wave_committed: bool = false  ## this wave fights to the end
+var timid: int = 0  ## waves in a row that were pulled back
 var waves_sent: int = 0
 var retreats: int = 0
 var last_wave_end: int = -100000
@@ -301,7 +304,7 @@ func _train_at_any(w: SimWorld, me: SimPlayer, def_id: String) -> bool:
 	var def: EntityDef = w.data.entity(def_id)
 	if def == null or not _can_afford(me, def.cost) or not me.meets_requirements(def):
 		return false
-	if me.bandwidth_used + _queued_bandwidth(w) + def.bandwidth > me.bandwidth_cap:
+	if me.bandwidth_used + _queued_bandwidth(w) + def.bandwidth > me.bandwidth_cap and not SimEconomy.ignores_bandwidth_cap(w, def):
 		return false
 	var best: SimEntity = null
 	for b: SimEntity in _buildings:
@@ -504,9 +507,13 @@ func _site_for(w: SimWorld, def: EntityDef) -> Vector2i:
 	var spread: int = 10
 	if def.id == _r("relay"):
 		around = _relay_spot(w, def)
-		if around == Vector2.INF:
-			return Vector2i(-1, -1)
-		spread = 5
+		if around == Vector2.INF or not _site_is_safe(w, around):
+			# The frontier is closed or contested: a relay beside the base
+			# still adds bandwidth, which is what a boxed-in player lacks.
+			around = _base_ring_spot(toward_enemy)
+			spread = 10
+		else:
+			spread = 5
 	elif def.id == _r("depot"):
 		var spot: Vector2 = _depot_spot(w)
 		if spot != Vector2.INF:
@@ -703,10 +710,19 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 		else:
 			light += 1
 	_enemy_air_seen = maxi(_enemy_air_seen, air)
+	# Enemy turrets shape the army too: riflemen die in front of them, so
+	# they call for armour-piercing weapons and anything that outranges them.
+	var turrets: int = 0
+	for b: SimEntity in _enemy_buildings:
+		if b.def.is_armed() and not b.def.signal_root and not b.def.is_mine():
+			turrets += 1
 	var support: int = 0
 	for e: SimEntity in _army:
 		if e.def.ai_role == "support":
 			support += 1
+	# With the enemy army gone what is left is buildings: favour the weapons
+	# that break them, or riflemen will plink at a headquarters all day.
+	var siege: float = 2.5 if waves_sent >= 2 and heavy + light + infantry < 4 else 0.0
 	var depth: int = 3 if me.salvage > 1000 else 2
 	for b: SimEntity in _buildings:
 		if b.def.produces.is_empty() or not b.linked or b.queue.size() >= depth:
@@ -745,12 +761,20 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 			match def.ai_role:
 				"anti_infantry":
 					wgt += float(infantry) * 0.25
+					wgt /= 1.0 + float(turrets) * 0.35
+					if siege > 0.0:
+						wgt *= 0.15
 				"anti_armor":
-					wgt += float(heavy) * 0.6 + float(light) * 0.3
+					wgt += float(heavy) * 0.6 + float(light) * 0.3 + float(turrets) * 0.5 + siege
+				"artillery":
+					wgt += float(turrets) * 0.8 + siege
 				"anti_air":
 					wgt += float(_enemy_air_seen) * 1.6
 				"support":
 					if support + _queued(id) >= 2:
+						wgt = 0.0
+				"hijacker", "scout":
+					if siege > 0.0:
 						wgt = 0.0
 				_:
 					pass
@@ -845,12 +869,22 @@ func _run_military(w: SimWorld) -> void:
 	if threat != null:
 		var defenders: Array[SimEntity] = []
 		for e: SimEntity in home:
-			if e.orders.is_empty() or e.pos.distance_to(threat.pos) > 14.0:
+			# Idle, far away, or only walking somewhere (back from a retreat,
+			# say): a unit on a plain move does not return fire.
+			if e.orders.is_empty() or e.pos.distance_to(threat.pos) > 14.0 or e.orders[0].type == SimOrder.Type.MOVE:
 				defenders.append(e)
 		if not defenders.is_empty():
 			w.push_command(SimCommand.attack_move(player_id, _ids(defenders), threat.pos))
-		# A serious attack on the HQ pulls the wave back.
-		if wave_state != Wave.NONE and threat.pos.distance_to(_hq.pos) < 26.0 and _count_near(_enemies, _hq.pos, 26.0) >= 4:
+		# A serious attack on the HQ pulls the wave back - but only one the
+		# guard cannot deal with; a handful of raiders must not recall an army.
+		var raiders: float = 0.0
+		for e: SimEntity in _enemies:
+			if e.def.is_armed() and e.pos.distance_to(_hq.pos) < 26.0:
+				raiders += float(e.def.cost)
+		var guards: float = 0.0
+		for e: SimEntity in home:
+			guards += float(e.def.cost)
+		if wave_state != Wave.NONE and threat.pos.distance_to(_hq.pos) < 26.0 and _count_near(_enemies, _hq.pos, 26.0) >= 4 and raiders > guards * 0.8:
 			var back: PackedInt32Array = PackedInt32Array(wave_ids)
 			w.push_command(SimCommand.attack_move(player_id, back, threat.pos))
 			_end_wave(w)
@@ -893,6 +927,10 @@ func _run_military(w: SimWorld) -> void:
 		Wave.ASSAULT:
 			if _should_retreat(w):
 				_retreat(w, rally)
+			elif w.tick_count - wave_tick > ASSAULT_TICKS:
+				# A wave that has fought this long is spent or stuck: the
+				# stragglers rejoin the army at home and the next wave forms.
+				_end_wave(w)
 			else:
 				_assault(w, false)
 
@@ -918,7 +956,7 @@ func _pick_attackers(home: Array[SimEntity], count: int, rally: Vector2) -> Arra
 ## True when the wave has been cut down or is facing far more than it can
 ## beat: the survivors are worth more at home than dying where they stand.
 func _should_retreat(w: SimWorld) -> bool:
-	if retreat_odds <= 0.0 or wave_ids.is_empty():
+	if retreat_odds <= 0.0 or wave_committed or wave_ids.is_empty():
 		return false
 	if wave_launch_size >= 5 and wave_ids.size() * 3 <= wave_launch_size:
 		return true
@@ -942,6 +980,7 @@ func _should_retreat(w: SimWorld) -> bool:
 func _retreat(w: SimWorld, rally: Vector2) -> void:
 	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), rally))
 	retreats += 1
+	timid += 1
 	_end_wave(w)
 
 
@@ -957,6 +996,11 @@ func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 	wave_tick = w.tick_count
 	waves_sent += 1
 	wave_launch_size = wave_ids.size()
+	# Two retreats in a row are enough caution: the third wave goes all the
+	# way, or two careful opponents would circle each other for ever.
+	wave_committed = timid >= 2
+	if wave_committed:
+		timid = 0
 	var back: Vector2 = (_hq.pos - wave_target_pos).normalized()
 	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(wave_target_pos + back * STAGE_DISTANCE))
 	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), wave_stage))

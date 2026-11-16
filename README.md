@@ -185,6 +185,14 @@ Plays one AI-vs-AI match (two to four factions; `--map=twin_fords` for a
 hand-made layout).
 
 ```bash
+.godot-bin/godot --headless --path . -s res://tools/match_timeline.gd -- --seed=2 --factions=aegis,foundry
+```
+
+Plays one two-player AI match and prints a timeline: every attack wave with
+its size and survivors, every building lost, and both treasuries each minute.
+The quickest way to see why a match ended when it did.
+
+```bash
 .godot-bin/godot --headless --path . -s res://tools/balance_batch.gd -- --seeds=1,2,3,4
 ```
 

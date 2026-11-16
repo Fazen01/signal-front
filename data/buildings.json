@@ -2,7 +2,7 @@
 	"hq": {
 		"name": "Headquarters", "desc": "The root of your signal network. Lose it and you lose the match.",
 		"faction": "aegis", "tier": 1, "cost": 2000, "build_time": 60.0,
-		"hp": 3000, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"hp": 4500, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
 		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
 		"weapons": ["hq_gun"], "turret": true,
 		"produces": ["field_engineer", "hauler"], "model": "hq", "buildable": false
@@ -70,7 +70,7 @@
 	"foundry_core": {
 		"name": "Foundry Core", "desc": "The root of your signal network. Lose it and you lose the match.",
 		"faction": "foundry", "tier": 1, "cost": 2000, "build_time": 60.0,
-		"hp": 3600, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"hp": 5400, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
 		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
 		"weapons": ["hq_gun"], "turret": true,
 		"produces": ["sapper", "scow", "crawler"], "model": "foundry_core", "buildable": false
@@ -132,7 +132,7 @@
 	"caravan_hub": {
 		"name": "Caravan Hub", "desc": "The root of your signal network. It can pack up and relocate, but your whole network goes Dark while it moves.",
 		"faction": "nomad", "tier": 1, "cost": 2000, "build_time": 60.0,
-		"hp": 2600, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"hp": 3900, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
 		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
 		"weapons": ["hq_gun"], "turret": true, "packs_to": "caravan",
 		"produces": ["tinker", "skiff", "beacon_rig"], "model": "caravan_hub", "buildable": false

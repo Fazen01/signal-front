@@ -214,7 +214,7 @@
 	"caravan": {
 		"name": "Caravan", "desc": "The Circuit's headquarters on the move. Deploy it anywhere to restore your network. While it rolls, everything you own is Dark.",
 		"faction": "nomad", "tier": 1, "cost": 2000, "build_time": 60.0, "bandwidth": 1,
-		"hp": 2600, "armor": "heavy", "move": "vehicle", "speed": 2.2, "turn_rate": 1.6,
+		"hp": 3900, "armor": "heavy", "move": "vehicle", "speed": 2.2, "turn_rate": 1.6,
 		"radius": 2.0, "sight": 12.0, "deploys_to": "caravan_hub", "model": "caravan", "hotkey": "Y"
 	}
 }
