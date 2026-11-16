@@ -95,11 +95,14 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			think_ticks = 10
 			max_haulers = 8
 			max_engineers = 3
-			first_wave = 6
-			first_attack_tick = 20 * 150
-			guard_fraction = 0.25
+			# Hard plays the same patient waves as Normal (small, frequent
+			# waves break on headquarters and turrets); its edge is a bigger
+			# economy, more production and quicker reactions.
+			first_wave = 8
+			first_attack_tick = 20 * 240
+			guard_fraction = 0.3
 			wave_growth = 3
-			wave_cooldown_ticks = 20 * 25
+			wave_cooldown_ticks = 20 * 35
 			max_barracks = 2
 			max_works = 2
 		_:
