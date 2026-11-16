@@ -2,6 +2,8 @@ class_name MatchMenus
 extends Control
 ## The pause menu and the victory / defeat summary shown over a match.
 
+const FIELD_CENTRE: float = 0.415  ## the middle of the view between the HUD's bars, as a share of the screen height
+
 var battle: BattleScene = null
 var skin: UiSkin = null
 var _pause: PanelContainer = null
@@ -31,11 +33,20 @@ func _centre_panel() -> PanelContainer:
 	var p: PanelContainer = PanelContainer.new()
 	p.add_theme_stylebox_override("panel", skin.panel(18.0))
 	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_lift(p)
 	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	p.grow_vertical = Control.GROW_DIRECTION_BOTH
 	p.visible = false
 	add_child(p)
 	return p
+
+
+## Centres a panel in the battlefield, between the top bar and the bottom
+## bar, instead of in the whole screen: a tall panel then stays clear of
+## the HUD at the bottom.
+func _lift(p: Control) -> void:
+	p.anchor_top = FIELD_CENTRE
+	p.anchor_bottom = FIELD_CENTRE
 
 
 func _button(text: String, action: Callable) -> Button:
@@ -75,6 +86,7 @@ func open_settings() -> void:
 		_settings = SettingsPanel.new()
 		_settings.skin = skin
 		_settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		_lift(_settings)
 		_settings.grow_horizontal = Control.GROW_DIRECTION_BOTH
 		_settings.grow_vertical = Control.GROW_DIRECTION_BOTH
 		add_child(_settings)
