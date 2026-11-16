@@ -268,9 +268,10 @@ map generation itself to be improved.
 
 ## M30 — Two more factions (owner request)
 
-- [ ] Ninth faction: design, data, one rule of its own, models, tests
-- [ ] Tenth faction: the same
-- [ ] Both in `tools/check.sh` and in the balance league
+- [x] Ninth faction: design, data, one rule of its own, models, tests
+      (the Brackenfold)
+- [x] Tenth faction: the same (the Lodestone Circle)
+- [x] Both in `tools/check.sh` and in the balance league
 
 ## M31 — A better AI, round two (owner request)
 
@@ -448,8 +449,16 @@ default; `test_a_wave_keeps_together_on_the_way_in` runs it both ways).
 
 ### 2026-11-16 — session 7, 19:50 UTC (branch `claude/relay-session-1116-1950`)
 
-**Working now (20:00 UTC):** merged, running `tools/check.sh` on the merge;
-then M30's open boxes, then M31 (the AI), which has to be written again.
+**Working now (20:05 UTC):** the merge passes `tools/check.sh` and is
+pushed. M31 (the AI) is written and unit-tested on a side branch; one of
+the check's matches stalemates with it, which is being looked at.
+
+- **M30 ticked.** Session 1 had pushed both factions complete (design
+  paragraph, data, rule, models, skin, tests, a match each in the check)
+  and left the boxes open. The league tool reads the faction list from
+  `data/factions.json`, so both are in it; the monkey test now plays them
+  too. What is still owed is a league *run* over all ten: that is M26's
+  open box, not M30's.
 
 - Started from `claude/gracious-lovelace-fxl9n2` (`aa02b86`, the newest
   remote commit, 16:36 UTC; nothing newer anywhere, so no session was
