@@ -91,9 +91,9 @@ decision in the session log at the bottom.
 
 ## M12 — Feel
 
-- [ ] Particles: tracers, muzzle flash, explosions, smoke, debris
-- [ ] Procedural SFX and ambient audio, volume settings
-- [ ] Unit response feedback: order markers, attack flashes, alert pings
+- [x] Particles: tracers, muzzle flash, explosions, smoke, debris
+- [x] Procedural SFX and ambient audio, volume settings
+- [x] Unit response feedback: order markers, attack flashes, alert pings
 
 ## M13 — Balance and performance
 
@@ -285,7 +285,15 @@ Notes on this session's pushes:
   setup chooses the map and one to three AI opponents (free-for-all).
   `check.sh` adds a match on a layout and a three-way match.
 
-Half-done / next: M12 feel (particles, procedural sound, order feedback).
+- M12 Feel: CPU-particle debris, smoke, sparks and dust on impacts and
+  deaths, missile exhaust trails, smoke from badly damaged vehicles and
+  buildings; 17 sounds synthesised in code (`view/sound_bank.gd`) with a
+  looping ambient bed, played through a pooled `AudioManager` that fades
+  with distance from the camera; Master / Effects / Ambience volume sliders
+  saved to `user://settings.cfg`; order acknowledgement and selection blips,
+  hit sparks, alert sounds and minimap pings.
+
+Half-done / next: M13 balance and performance.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -380,3 +388,9 @@ Fog decisions:
   salvage piles up, and saves up for the unit it picked rather than always
   buying the cheapest thing it can afford.
 - `check.sh` now takes about three minutes (five AI matches).
+- Audio could not be listened to here (the audio driver is the dummy one).
+  The sound bank is tested for existing, being audible in amplitude and not
+  clipping, but nobody has heard it. Expect to adjust levels and timbre by
+  ear; every sound is a few lines in `view/sound_bank.gd`.
+- Particle emitters are capped at 56 live bursts; beyond that new bursts are
+  skipped rather than queued.

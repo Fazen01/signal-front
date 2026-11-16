@@ -9,6 +9,8 @@ var views: Dictionary[int, EntityView] = {}
 var fog_enabled: bool = true
 var _ghosts: Array[EntityView] = []  ## remembered enemy buildings that died unseen
 var fx: FxLayer = null
+var audio: AudioManager = null  ## set by the battle scene
+var _trail_clock: float = 0.0
 var _proj_views: Dictionary[int, MeshInstance3D] = {}
 var _proj_mesh: BoxMesh = null
 var _proj_mats: Dictionary[String, StandardMaterial3D] = {}
@@ -90,6 +92,11 @@ func sync(alpha: float) -> void:
 	_sync_projectiles(alpha)
 
 
+func _process(delta: float) -> void:
+	# Missiles leave a puff of exhaust a dozen times a second.
+	_trail_clock = 0.08 if _trail_clock <= 0.0 else _trail_clock - delta
+
+
 func _sync_projectiles(alpha: float) -> void:
 	var live: Dictionary[int, bool] = {}
 	for p: SimProjectile in world.projectiles:
@@ -104,6 +111,8 @@ func _sync_projectiles(alpha: float) -> void:
 			_proj_views[p.id] = node
 		var flat: Vector2 = p.prev_pos.lerp(p.pos, alpha)
 		node.visible = not fog_enabled or SimVision.is_visible(world, local_player, flat)
+		if node.visible and p.weapon.homing and _trail_clock <= 0.0:
+			fx.puff(node.position)
 		var total: float = maxf(p.start_pos.distance_to(p.target_pos), 0.01)
 		var done: float = clampf(p.start_pos.distance_to(flat) / total, 0.0, 1.0)
 		var arc: float = 1.6 if p.weapon.homing else 0.5
@@ -140,6 +149,11 @@ func _proj_mat(fx_name: String) -> StandardMaterial3D:
 	m.albedo_color = color
 	_proj_mats[fx_name] = m
 	return m
+
+
+func _sound(sound: String, at: Vector2, gap_ms: int, gain_db: float = 0.0) -> void:
+	if audio != null:
+		audio.play_at(sound, at, gap_ms, gain_db)
 
 
 func _altitude_of(id: int) -> float:
@@ -189,10 +203,28 @@ func handle_event(ev: SimEvent) -> void:
 		SimEvent.Type.RANK_UP:
 			fx.ground_ring(_ground(ev.pos, 0.2), 1.6, Color(1.0, 0.85, 0.3, 0.9), 0.8, true)
 		SimEvent.Type.SHOT:
-			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), _ground(ev.pos2, 0.8 + _altitude_of(ev.other_id)), ev.text == "tracer_heavy")
+			var heavy: bool = ev.text == "tracer_heavy"
+			var hit: Vector3 = _ground(ev.pos2, 0.8 + _altitude_of(ev.other_id))
+			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), hit, heavy)
+			if heavy or (ev.id + world.tick_count) % 3 == 0:
+				fx.sparks(hit, 5 if heavy else 3)
+			_sound("shot_heavy" if heavy else "shot", ev.pos, 60)
 		SimEvent.Type.PROJECTILE:
-			fx.flash(_ground(ev.pos, 1.1), 0.4, Color(1.0, 0.8, 0.45, 0.9), 0.08)
+			fx.flash(_ground(ev.pos, 1.1 + _altitude_of(ev.id)), 0.45, Color(1.0, 0.8, 0.45, 0.9), 0.08)
+			if ev.text == "missile":
+				_sound("missile", ev.pos, 120)
+			else:
+				fx.smoke(_ground(ev.pos, 1.2), 0.5, 3)
+				_sound("cannon", ev.pos, 90)
 		SimEvent.Type.IMPACT:
 			fx.explosion(_ground(ev.pos, 0.6), 0.9 + ev.value)
+			_sound("explosion_big" if ev.value >= 2.5 else "explosion", ev.pos, 70)
 		SimEvent.Type.DIED:
-			fx.explosion(_ground(ev.pos, 0.7), 1.0 + ev.value * 1.4)
+			if ev.text == "cancelled":
+				fx.dust(_ground(ev.pos, 0.3), 1.2)
+			elif ev.value < 0.5:
+				# Infantry: a puff, not a fireball.
+				fx.dust(_ground(ev.pos, 0.4), 0.7)
+			else:
+				fx.explosion(_ground(ev.pos, 0.7), 1.0 + ev.value * 1.4)
+				_sound("explosion_big" if ev.value >= 1.6 else "explosion", ev.pos, 70, 2.0)

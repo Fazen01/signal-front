@@ -13,6 +13,7 @@ var terrain: TerrainView = null
 var world_view: WorldView = null
 var signal_view: SignalView = null
 var fog_view: FogView = null
+var audio: AudioManager = null
 var cam: RtsCamera = null
 var controller: SelectionController = null
 var overlay: BattleOverlay = null
@@ -58,6 +59,10 @@ func _ready() -> void:
 	world_view.name = "World"
 	add_child(world_view)
 	world_view.setup(world, local_player)
+	audio = AudioManager.new()
+	audio.name = "Audio"
+	add_child(audio)
+	world_view.audio = audio
 
 	signal_view = SignalView.new()
 	signal_view.name = "Signal"
@@ -205,6 +210,16 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	world.tick()
 	driver.expect(not thief.orders.is_empty() and thief.orders[0].type == SimOrder.Type.CAPTURE, "right click on a Dark vehicle orders a hijack")
 	cam.center_on(hq.pos)
+	# Sound and settings.
+	driver.expect(audio.played_count > 0, "interface sounds were played (%d)" % audio.played_count)
+	toggle_pause_menu()
+	menus.open_settings()
+	driver.expect(menus.is_pause_open(), "settings open from the pause menu")
+	GameSettings.set_volume("SFX", 0.6)
+	toggle_pause_menu()
+	driver.expect(not paused and not menus.is_pause_open(), "closing the pause menu closes settings")
+	world_view.fx.explosion(Vector3(hq.pos.x, 1.0, hq.pos.y), 2.0)
+	world_view.fx.sparks(Vector3(hq.pos.x, 1.0, hq.pos.y))
 	# Idle-builder key and camera bookmarks.
 	world.push_command(SimCommand.stop(local_player, PackedInt32Array([eng.id])))
 	controller.clear_selection()
@@ -262,6 +277,7 @@ func _process(delta: float) -> void:
 		if steps >= 10:
 			_accum = 0.0  # too far behind: drop the backlog rather than spiral
 	controller.prune()
+	audio.listener = cam.focus
 	cam.wasd_free = controller.own_unit_ids().is_empty()
 	world_view.sync(clampf(_accum / SimWorld.DT, 0.0, 1.0))
 	_update_markers(delta)
@@ -275,6 +291,7 @@ func _handle_event(ev: SimEvent) -> void:
 		SimEvent.Type.ALERT:
 			if ev.player == local_player:
 				hud.push_alert(ev.text, Hud.RED)
+				audio.play_ui("alert", -6.0)
 				if ev.pos != Vector2.ZERO:
 					hud.minimap.ping(ev.pos)
 		SimEvent.Type.BUILDING_DONE:
@@ -283,7 +300,22 @@ func _handle_event(ev: SimEvent) -> void:
 				if done != null:
 					hud.push_alert("%s complete" % done.def.name, Hud.CYAN)
 				hud.rebuild_card()
+				audio.play_ui("ready")
+		SimEvent.Type.BUILDING_PLACED:
+			if ev.player == local_player:
+				audio.play_ui("place")
+		SimEvent.Type.UNIT_READY:
+			if ev.player == local_player:
+				audio.play_ui("ready", -10.0)
+		SimEvent.Type.DEPOSIT:
+			if ev.player == local_player:
+				audio.play_at("deposit", ev.pos, 150, -6.0)
+		SimEvent.Type.RANK_UP:
+			if ev.player == local_player:
+				audio.play_ui("rank", -8.0)
 		SimEvent.Type.DIRECTIVE:
+			if ev.player == local_player and ev.text != "drop_arrived":
+				audio.play_ui("directive", -5.0)
 			if ev.player == local_player and ev.text == "signal_surge":
 				hud.push_alert("Signal Surge: emitter range +50%", Hud.CYAN)
 		SimEvent.Type.MATCH_OVER:
@@ -299,6 +331,8 @@ func _on_selection_changed() -> void:
 		cancel_placement()
 	if hud != null:
 		hud.rebuild_card()
+	if audio != null and not controller.selected.is_empty():
+		audio.play_ui("select", -12.0)
 
 
 # Hooks the controller calls before its default handling. They return true
@@ -524,6 +558,7 @@ func _update_placement() -> void:
 
 ## A ring that flashes on the ground where an order was given.
 func show_order_marker(at: Vector2, color: Color) -> void:
+	audio.play_ui("ack", -9.0)
 	var m: MeshInstance3D = ModelFactory.ring(self, 0.55, 0.7, Vector3(at.x, world.map.height_at(at) + 0.15, at.y), ModelFactory.mat(color, 1.2))
 	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_markers.append(m)

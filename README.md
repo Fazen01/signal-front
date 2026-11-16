@@ -123,8 +123,12 @@ wrecks; ground units vanish when they stand still in forest.
   against armor classes, projectiles, forest cover, win/lose with a stats
   screen.
 
-Not in yet (see the roadmap): particle effects and sound, balance passes,
-settings, save/load, tutorials.
+Effects and sound are generated in code too: particle debris, smoke and
+sparks, and sound effects and an ambient bed synthesised from noise and sine
+waves at start-up. Volumes are under **Settings** in the main and pause menus.
+
+Not in yet (see the roadmap): balance passes, video settings, save/load,
+tutorials, a Windows export preset.
 
 ## For developers
 

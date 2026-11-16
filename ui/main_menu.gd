@@ -48,6 +48,7 @@ train; the letter in brackets is its hotkey."""
 var _main_box: VBoxContainer = null
 var _setup: PanelContainer = null
 var _help: PanelContainer = null
+var _settings: SettingsPanel = null
 var _seed: SpinBox = null
 var _faction: OptionButton = null
 var _level: OptionButton = null
@@ -67,6 +68,13 @@ func _ready() -> void:
 	_build_main()
 	_build_setup()
 	_build_help()
+	GameSettings.ensure_loaded()
+	_settings = SettingsPanel.new()
+	_settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_settings.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_settings.grow_vertical = Control.GROW_DIRECTION_BOTH
+	add_child(_settings)
+	_settings.closed.connect(func() -> void: _show(_main_box))
 	_show(_main_box)
 	print("Main menu ready")
 
@@ -128,6 +136,7 @@ func _build_main() -> void:
 	for b: Button in [
 		_menu_button("Skirmish", open_skirmish),
 		_menu_button("How to Play", func() -> void: _show(_help)),
+		_menu_button("Settings", open_settings),
 		_menu_button("Quit", func() -> void: get_tree().quit()),
 	]:
 		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -294,6 +303,11 @@ func _show(which: Control) -> void:
 	_main_box.visible = which == _main_box
 	_setup.visible = which == _setup
 	_help.visible = which == _help
+	_settings.visible = which == _settings
+
+
+func open_settings() -> void:
+	_show(_settings)
 
 
 func open_skirmish() -> void:

@@ -17,6 +17,7 @@ var seen_once: bool = false  ## the local player has seen this at least once
 var owner_id: int = -1
 var altitude: float = 0.0  ## aircraft are drawn this far above the ground
 var _rotors: Array[Node3D] = []
+var _smoke: CPUParticles3D = null  ## rises from badly damaged vehicles and buildings
 var _selected: bool = false
 
 
@@ -101,7 +102,44 @@ func refresh_owner(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	select_ring.material_override = ModelFactory.mat(ring_color, 1.0)
 
 
+func _update_damage_smoke(e: SimEntity) -> void:
+	var burning: bool = e.constructed and e.hp < e.max_hp * 0.45 and (e.kind == SimEntity.Kind.BUILDING or e.def.is_vehicle())
+	if burning and _smoke == null:
+		_smoke = CPUParticles3D.new()
+		var puff: SphereMesh = SphereMesh.new()
+		puff.radius = 0.3
+		puff.height = 0.6
+		puff.radial_segments = 6
+		puff.rings = 3
+		var m: StandardMaterial3D = StandardMaterial3D.new()
+		m.vertex_color_use_as_albedo = true
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		var ramp: Gradient = Gradient.new()
+		ramp.set_color(0, Color(0.18, 0.17, 0.16, 0.75))
+		ramp.set_color(1, Color(0.1, 0.1, 0.1, 0.0))
+		_smoke.mesh = puff
+		_smoke.material_override = m
+		_smoke.amount = 10
+		_smoke.lifetime = 2.2
+		_smoke.direction = Vector3.UP
+		_smoke.spread = 18.0
+		_smoke.initial_velocity_min = 1.0
+		_smoke.initial_velocity_max = 2.2
+		_smoke.gravity = Vector3(0.6, 0.8, 0.0)
+		_smoke.scale_amount_min = 0.8 + e.radius * 0.25
+		_smoke.scale_amount_max = 1.6 + e.radius * 0.5
+		_smoke.color_ramp = ramp
+		_smoke.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_smoke.position = Vector3(0.0, 1.0 + e.radius * 0.5, 0.0)
+		add_child(_smoke)
+	if _smoke != null and _smoke.emitting != burning:
+		_smoke.emitting = burning
+
+
 func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
+	if e.def != null:
+		_update_damage_smoke(e)
 	var p: Vector2 = e.prev_pos.lerp(e.pos, alpha)
 	base_y = map.height_at(p)
 	position = Vector3(p.x, base_y, p.y)

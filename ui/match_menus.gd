@@ -6,6 +6,7 @@ var battle: BattleScene = null
 var _pause: PanelContainer = null
 var _result: PanelContainer = null
 var _dim: ColorRect = null
+var _settings: SettingsPanel = null
 var result_shown: bool = false
 
 
@@ -51,12 +52,29 @@ func _build_pause() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	box.add_child(_button("Resume", func() -> void: battle.toggle_pause_menu()))
+	box.add_child(_button("Settings", open_settings))
 	box.add_child(_button("Surrender", func() -> void: battle.surrender()))
 	box.add_child(_button("Quit to Main Menu", func() -> void: battle.quit_to_menu()))
 
 
 func is_pause_open() -> bool:
-	return _pause.visible
+	return _pause.visible or (_settings != null and _settings.visible)
+
+
+## Volume sliders, reached from the pause menu.
+func open_settings() -> void:
+	if _settings == null:
+		_settings = SettingsPanel.new()
+		_settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		_settings.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		_settings.grow_vertical = Control.GROW_DIRECTION_BOTH
+		add_child(_settings)
+		_settings.closed.connect(func() -> void:
+			_settings.visible = false
+			_pause.visible = true
+		)
+	_pause.visible = false
+	_settings.visible = true
 
 
 func set_pause_open(open: bool) -> void:
@@ -64,6 +82,8 @@ func set_pause_open(open: bool) -> void:
 		return
 	_pause.visible = open
 	_dim.visible = open
+	if _settings != null and not open:
+		_settings.visible = false
 
 
 ## Shows the end-of-match summary for the local player.

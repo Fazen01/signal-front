@@ -270,6 +270,8 @@ READY  Alt+%d" % [def.name, i + 1]
 # ----------------------------------------------------------------- alerts
 
 func push_alert(text: String, color: Color = TEXT) -> void:
+	if color == RED and battle.audio != null:
+		battle.audio.play_ui("error", -8.0)
 	# Do not stack identical messages.
 	for child: Node in _alerts.get_children():
 		var existing: Label = child as Label
@@ -416,6 +418,7 @@ func _on_card_hover(index: int) -> void:
 
 
 func _on_card_pressed(index: int) -> void:
+	battle.audio.play_ui("click")
 	if index >= 0 and index < _entries.size():
 		activate(_entries[index])
 

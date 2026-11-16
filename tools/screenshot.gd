@@ -164,6 +164,22 @@ func _run_script(battle: BattleScene) -> void:
 				battle.controller.set_selection([jb.id])
 				battle.cam.set_distance(56.0)
 				battle.cam.center_on(hub + Vector2(8.0, 6.0))
+		"combat":
+			if _count == 3:
+				var cw: SimWorld = battle.world
+				var cme: int = battle.local_player
+				var chq: Vector2 = cw.players[cme].start_pos
+				var front: Vector2 = cw.map.nearest_free_pos(chq + (cw.map.world_size() * 0.5 - chq).normalized() * 20.0)
+				for k: int in 3:
+					cw.spawn_unit("bulwark", cme, front + Vector2(float(k) * 3.0 - 3.0, 0.0))
+					cw.spawn_unit("trooper", cme, front + Vector2(float(k) * 1.5 - 2.0, 3.0))
+					cw.spawn_unit("bulwark", 1 - cme, front + Vector2(float(k) * 3.0 - 3.0, -9.0))
+					cw.spawn_unit("warden", 1 - cme, front + Vector2(float(k) * 3.0 - 4.0, -12.0))
+					cw.spawn_unit("lancer", 1 - cme, front + Vector2(float(k) * 1.5 + 4.0, -8.0))
+				var hurt: SimEntity = cw.spawn_building("barracks", cme, cw.map.cell_of(front) + Vector2i(-6, 2), true)
+				hurt.hp = hurt.max_hp * 0.3
+				battle.cam.set_distance(34.0)
+				battle.cam.center_on(front + Vector2(0.0, -3.0))
 		"result":
 			if _count == 5:
 				battle.world.push_command(SimCommand.surrender(battle.local_player))

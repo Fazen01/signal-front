@@ -14,7 +14,18 @@ class Fx:
 	var grow_limit: float = 0.0
 	var late_fade: bool = false  ## stay solid, fade only in the last 20%
 
+const MAX_BURSTS: int = 56  ## live particle emitters; extra bursts are skipped
+
 var _active: Array[Fx] = []
+var _bursts: Array[CPUParticles3D] = []
+var _burst_left: Array[float] = []
+var _debris_mesh: BoxMesh = null
+var _puff_mesh: SphereMesh = null
+var _spark_mesh: BoxMesh = null
+var _particle_mat: StandardMaterial3D = null
+var _smoke_ramp: Gradient = null
+var _spark_ramp: Gradient = null
+var _dust_ramp: Gradient = null
 var _tracer_mesh: BoxMesh = null
 var _blast_mesh: SphereMesh = null
 var _ring_mesh: TorusMesh = null
@@ -41,6 +52,107 @@ func _ready() -> void:
 	_disc_mesh.height = 0.05
 	_disc_mesh.radial_segments = 40
 	_disc_mesh.rings = 1
+	_debris_mesh = BoxMesh.new()
+	_debris_mesh.size = Vector3(0.16, 0.12, 0.2)
+	_spark_mesh = BoxMesh.new()
+	_spark_mesh.size = Vector3(0.05, 0.05, 0.22)
+	_puff_mesh = SphereMesh.new()
+	_puff_mesh.radius = 0.32
+	_puff_mesh.height = 0.64
+	_puff_mesh.radial_segments = 6
+	_puff_mesh.rings = 3
+	_particle_mat = StandardMaterial3D.new()
+	_particle_mat.vertex_color_use_as_albedo = true
+	_particle_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_particle_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_smoke_ramp = _ramp(Color(0.32, 0.30, 0.28, 0.8), Color(0.12, 0.12, 0.12, 0.0))
+	_spark_ramp = _ramp(Color(1.0, 0.95, 0.6, 1.0), Color(1.0, 0.45, 0.1, 0.0))
+	_dust_ramp = _ramp(Color(0.62, 0.55, 0.42, 0.55), Color(0.5, 0.45, 0.35, 0.0))
+
+
+func _ramp(from: Color, to: Color) -> Gradient:
+	var g: Gradient = Gradient.new()
+	g.set_color(0, from)
+	g.set_color(1, to)
+	return g
+
+
+func _emitter(at: Vector3, amount: int, life: float, mesh: Mesh) -> CPUParticles3D:
+	if _bursts.size() >= MAX_BURSTS:
+		return null
+	var p: CPUParticles3D = CPUParticles3D.new()
+	p.mesh = mesh
+	p.material_override = _particle_mat
+	p.amount = amount
+	p.lifetime = life
+	p.one_shot = true
+	p.explosiveness = 0.92
+	p.direction = Vector3.UP
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	p.position = at
+	add_child(p)
+	p.emitting = true
+	_bursts.append(p)
+	_burst_left.append(life + 0.35)
+	return p
+
+
+## Chunks thrown up by an explosion; they fall back under gravity.
+func debris(at: Vector3, size: float) -> void:
+	var p: CPUParticles3D = _emitter(at, int(5.0 + size * 5.0), 1.0, _debris_mesh)
+	if p == null:
+		return
+	p.spread = 55.0
+	p.initial_velocity_min = 3.5 + size
+	p.initial_velocity_max = 7.0 + size * 2.5
+	p.gravity = Vector3(0.0, -17.0, 0.0)
+	p.angular_velocity_min = -400.0
+	p.angular_velocity_max = 400.0
+	p.scale_amount_min = 0.6
+	p.scale_amount_max = 1.2 + size * 0.5
+	p.color = Color(0.2, 0.19, 0.18)
+
+
+## Rising, fading smoke.
+func smoke(at: Vector3, size: float, amount: int = 7) -> void:
+	var p: CPUParticles3D = _emitter(at, amount, 1.7, _puff_mesh)
+	if p == null:
+		return
+	p.explosiveness = 0.55
+	p.spread = 30.0
+	p.initial_velocity_min = 0.6
+	p.initial_velocity_max = 2.0 + size * 0.4
+	p.gravity = Vector3(0.0, 0.7, 0.0)
+	p.scale_amount_min = 0.9 * size
+	p.scale_amount_max = 2.0 * size
+	p.color_ramp = _smoke_ramp
+
+
+## A short spray of hot fragments where a round strikes.
+func sparks(at: Vector3, amount: int = 6) -> void:
+	var p: CPUParticles3D = _emitter(at, amount, 0.32, _spark_mesh)
+	if p == null:
+		return
+	p.spread = 75.0
+	p.initial_velocity_min = 4.0
+	p.initial_velocity_max = 9.0
+	p.gravity = Vector3(0.0, -12.0, 0.0)
+	p.color_ramp = _spark_ramp
+
+
+## Dust kicked up at ground level.
+func dust(at: Vector3, size: float) -> void:
+	var p: CPUParticles3D = _emitter(at, 6, 0.8, _puff_mesh)
+	if p == null:
+		return
+	p.direction = Vector3(0.0, 0.3, 0.0)
+	p.spread = 85.0
+	p.initial_velocity_min = 1.0
+	p.initial_velocity_max = 2.4 + size
+	p.gravity = Vector3(0.0, 0.2, 0.0)
+	p.scale_amount_min = 0.7 * size
+	p.scale_amount_max = 1.5 * size
+	p.color_ramp = _dust_ramp
 
 
 func _fx_mat(color: Color) -> StandardMaterial3D:
@@ -117,18 +229,34 @@ func ground_disc(at: Vector3, radius: float, color: Color, life: float) -> void:
 	fx.late_fade = true
 
 
+## Fireball, flying debris and a column of smoke.
 func explosion(at: Vector3, size: float) -> void:
 	flash(at, size, Color(1.0, 0.75, 0.3, 0.95), 0.28)
 	flash(at + Vector3(0.0, size * 0.3, 0.0), size * 0.6, Color(1.0, 0.95, 0.8, 0.95), 0.16)
-	var smoke: Fx = _spawn(_blast_mesh, Color(0.16, 0.15, 0.14, 0.7), 0.9)
-	smoke.node.position = at + Vector3(0.0, size * 0.4, 0.0)
-	smoke.base_scale = Vector3(size, size, size) * 0.8
-	smoke.node.scale = smoke.base_scale
-	smoke.grow = size * 0.9
-	smoke.rise = 1.4
+	debris(at, size)
+	smoke(at + Vector3(0.0, size * 0.3, 0.0), maxf(0.7, size * 0.7))
+	if size >= 1.8:
+		dust(at, size * 0.6)
+
+
+## A small trailing puff (missile exhaust).
+func puff(at: Vector3) -> void:
+	var fx: Fx = _spawn(_blast_mesh, Color(0.8, 0.78, 0.74, 0.5), 0.45)
+	fx.node.position = at
+	fx.base_scale = Vector3(0.22, 0.22, 0.22)
+	fx.node.scale = fx.base_scale
+	fx.grow = 0.7
 
 
 func _process(delta: float) -> void:
+	var b: int = _bursts.size() - 1
+	while b >= 0:
+		_burst_left[b] -= delta
+		if _burst_left[b] <= 0.0:
+			_bursts[b].queue_free()
+			_bursts.remove_at(b)
+			_burst_left.remove_at(b)
+		b -= 1
 	if _active.is_empty():
 		return
 	var kept: Array[Fx] = []
