@@ -220,8 +220,22 @@ over three or four seeds per faction pairing, Normal vs Normal:
   trickle of Drifter infantry. In progress (10:20 UTC): the AI now keeps a
   decaying memory of the armed enemy units it has seen (half-life 40 s)
   and uses it for both the army mix and the siege test. Seed 10 then ends
-  at 18:20. Batches on seeds 9-12 and 1-4 are running before it is
-  committed.
+  at 18:20. Seeds 9-12: no draws; but seeds 1-4 had two new 60-minute
+  draws, which led to two deeper faults:
+  - Repair healed 4% of a building's maximum health per second (times the
+    square root of the builders), so two engineers mended a 4,500-health
+    headquarters at about 250 health/s, faster than a 20-Lancer wave hurts
+    it. Decision: `repair_rate` 0.04 -> 0.015 (this affects human players
+    too: one engineer now takes about 67 s to fully repair a building, was
+    25 s). The AI also measures "is it safe to repair" from the building's
+    edge instead of its centre.
+  - AI waves walked to their staging point on a plain move order, filing
+    past defenders without fighting and losing two thirds before the
+    assault began. They now attack-move to the staging point.
+  - The retreat test no longer counts Flak Posts (anti-air only) as a
+    threat to a ground wave.
+  The three stalemate seeds now end at 13-26 minutes. In progress (10:50
+  UTC): 72-game batches on seeds 1-4 and 9-12 before committing.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
