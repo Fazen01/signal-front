@@ -149,8 +149,17 @@ instead of haulers. Fixes in `sim/sim_ai.gd`:
 Decision: these are AI rules, not data. They only change what the AI does
 when matches stall, so they belong with the wave doctrine in `sim_ai.gd`.
 
-Working on (07:45 UTC): getting `tools/check.sh` green on the merge; then
-the open M13 item on 1v1 match length.
+Status (07:45 UTC): **stopped**. `tools/check.sh` passes on `0ef418c` (the
+merge plus the fixes above). Then a fetch showed sessions 2 and 3 are
+both still running: they pushed at 07:17 and 07:26, after this session's
+10-minute wait. Both are on the match-length item, and session 2 has its own
+uncommitted stalemate fixes. A third session on the same item would only add
+conflicts, so this one stops here as CLAUDE.md says, without opening a PR.
+
+For whoever merges next: this branch holds sessions 2 and 3's pushed work
+merged together, with a passing check. Merging it brings in a working
+combination; session 2's later anti-stalemate rules may overlap with the
+committed-wave rule here (both target the same stalemates), so keep one.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 
