@@ -5,8 +5,9 @@ Build a base, harvest salvage, field tanks and infantry — and keep your relay
 network alive, because units outside it fight blind and slow. Cut the enemy's
 chain and their front goes dark.
 
-Built with Godot 4.7.2 in typed GDScript. Models, effects, interface art and
-sound are all generated in code; there are no downloaded assets.
+Built with Godot 4.7.2 in typed GDScript. Models, terrain, shaders, effects,
+interface art and sound are all generated in code; there are no downloaded
+assets.
 
 ## Run it
 
@@ -178,7 +179,10 @@ tools/screenshot.sh battle 120
 ```
 
 Captures `screenshots/battle.png` with software rendering (needs `xvfb-run`).
-`tools/gallery.tscn` puts every model on one sheet.
+`tools/gallery.tscn` puts every model on one sheet, or eight at a time close
+up with `page0`..`page7` as the capture script; `scenery_wide`,
+`scenery_water`, `scenery_forest` and `scenery_rock` show the bare landscape
+with fog off.
 
 ```bash
 .godot-bin/godot --headless --path . -s res://tools/headless_match.gd -- --seed=7 --factions=aegis,nomad

@@ -68,6 +68,10 @@ var _time: float = 0.0
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# A match between two AIs plays out behind the menu.
+	var backdrop: MenuBackdrop = MenuBackdrop.new()
+	backdrop.name = "Backdrop"
+	add_child(backdrop)
 	_build_main()
 	_build_setup()
 	_build_help()
@@ -88,10 +92,10 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-## Background: dark field with slow expanding signal rings.
+## Background: the live backdrop, dimmed, under slow expanding signal rings.
 func _draw() -> void:
 	var rect: Rect2 = get_viewport_rect()
-	draw_rect(rect, Color(0.035, 0.05, 0.065))
+	draw_rect(rect, Color(0.02, 0.035, 0.05, 0.56))
 	var origin: Vector2 = Vector2(rect.size.x * 0.5, rect.size.y * 0.30)
 	for i: int in 7:
 		var t: float = fposmod(_time * 0.12 + float(i) / 7.0, 1.0)

@@ -459,6 +459,37 @@ static func _assemble_field(seed_value: int) -> Node3D:
 	return root
 
 
+## Builders' scaffolding around a square footprint: poles, rails, plank
+## walkways and a diagonal brace on every side.
+static func build_scaffold(half: float, height: float) -> Node3D:
+	var key: String = "scaffold|%.1f|%.1f" % [half, height]
+	if not _baked.has(key):
+		var raw: Node3D = Node3D.new()
+		raw.name = "Scaffold"
+		var pole: StandardMaterial3D = mat(HAZARD, 0.0, 0.3, 0.6)
+		var rail: StandardMaterial3D = mat(METAL, 0.0, 0.6, 0.5)
+		var plank: StandardMaterial3D = mat(Color(0.46, 0.34, 0.21), 0.0, 0.0, 1.0)
+		var bays: int = maxi(2, int(round(half * 2.0 / 2.0)))
+		var levels: int = maxi(1, int(height / 1.4))
+		for side: int in 4:
+			var face: Node3D = Node3D.new()
+			face.rotation.y = float(side) * PI * 0.5
+			raw.add_child(face)
+			for i: int in bays:
+				var x: float = lerpf(-half, half, float(i) / float(bays))
+				cyl(face, 0.05, 0.05, height + 0.3, Vector3(x, (height + 0.3) * 0.5, half), pole, 5)
+			for level: int in levels:
+				var y: float = height * float(level + 1) / float(levels)
+				box(face, Vector3(half * 2.0, 0.06, 0.06), Vector3(0.0, y, half), rail)
+				box(face, Vector3(half * 2.0 - 0.3, 0.05, 0.5), Vector3(0.0, y - 0.55, half - 0.28), plank)
+			var run: float = half * 2.0 / float(bays)
+			var slant: float = atan2(height, run)
+			box(face, Vector3(sqrt(run * run + height * height), 0.05, 0.05), Vector3(-half + run * 0.5, height * 0.5, half), rail, Vector3(0.0, 0.0, slant))
+		_baked[key] = ModelBaker.bake(raw)
+		raw.free()
+	return ModelBaker.instantiate(_baked[key])
+
+
 ## An uplink site: a pad with a mast that lights up in its owner's colour.
 static func build_uplink(light: Color = Color(0.9, 0.9, 0.95)) -> Node3D:
 	var key: String = "uplink|%s" % light.to_html()

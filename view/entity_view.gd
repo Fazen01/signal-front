@@ -24,6 +24,8 @@ var _kick: float = 0.0  ## turret recoil, 1 just after firing, decaying to 0
 var _view_scale: float = 1.0
 var _walks: bool = false  ## infantry bob as they move
 var _stride: float = 0.0
+var _scaffold: Node3D = null  ## stands around a building until it is finished
+var _fire: CPUParticles3D = null  ## flames on something close to destruction
 var _smoke: CPUParticles3D = null  ## rises from badly damaged vehicles and buildings
 var _selected: bool = false
 
@@ -110,6 +112,15 @@ func refresh_owner(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	select_ring.material_override = ModelFactory.mat(ring_color, 1.0)
 
 
+## How tall the model stands, for sizing the scaffolding around it.
+func _model_height() -> float:
+	var body: MeshInstance3D = model.get_node_or_null("Body") as MeshInstance3D
+	if body == null or body.mesh == null:
+		return 2.0
+	var box: AABB = body.mesh.get_aabb()
+	return snappedf(clampf(box.position.y + box.size.y, 1.6, 4.6), 0.2)
+
+
 ## Looks up the moving groups of the current model.
 func _find_parts() -> void:
 	turret = model.get_node_or_null("Turret") as Node3D
@@ -175,6 +186,42 @@ func _update_damage_smoke(e: SimEntity) -> void:
 		add_child(_smoke)
 	if _smoke != null and _smoke.emitting != burning:
 		_smoke.emitting = burning
+	# Close to destruction, flames join the smoke.
+	var ablaze: bool = burning and e.hp < e.max_hp * 0.25
+	if ablaze and _fire == null:
+		_fire = CPUParticles3D.new()
+		var lick: SphereMesh = SphereMesh.new()
+		lick.radius = 0.22
+		lick.height = 0.6
+		lick.radial_segments = 5
+		lick.rings = 3
+		var fm: StandardMaterial3D = StandardMaterial3D.new()
+		fm.vertex_color_use_as_albedo = true
+		fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		var heat: Gradient = Gradient.new()
+		heat.set_color(0, Color(1.0, 0.75, 0.3, 0.9))
+		heat.set_color(1, Color(0.9, 0.15, 0.03, 0.0))
+		_fire.mesh = lick
+		_fire.material_override = fm
+		_fire.amount = 9
+		_fire.lifetime = 0.7
+		_fire.direction = Vector3.UP
+		_fire.spread = 22.0
+		_fire.initial_velocity_min = 1.2
+		_fire.initial_velocity_max = 2.6
+		_fire.gravity = Vector3(0.0, 2.0, 0.0)
+		_fire.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+		_fire.emission_sphere_radius = maxf(0.3, e.radius * 0.45)
+		_fire.scale_amount_min = 0.7 + e.radius * 0.2
+		_fire.scale_amount_max = 1.3 + e.radius * 0.4
+		_fire.color_ramp = heat
+		_fire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_fire.position = Vector3(0.0, 0.7 + e.radius * 0.35, 0.0)
+		add_child(_fire)
+	if _fire != null and _fire.emitting != ablaze:
+		_fire.emitting = ablaze
 
 
 func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
@@ -217,6 +264,12 @@ func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 			var sy: float = 1.0 if e.constructed else lerpf(0.12, 1.0, e.build_progress)
 			if absf(model.scale.y - sy) > 0.001:
 				model.scale = Vector3(1.0, sy, 1.0)
+			if not e.constructed and _scaffold == null and e.radius >= 1.4:
+				_scaffold = ModelFactory.build_scaffold(snappedf(e.radius + 0.15, 0.1), _model_height())
+				add_child(_scaffold)
+			elif e.constructed and _scaffold != null:
+				_scaffold.queue_free()
+				_scaffold = null
 		SimEntity.Kind.UPLINK:
 			for sp: Node3D in _spins:
 				sp.rotation.y = float(Time.get_ticks_msec()) * 0.0009

@@ -127,9 +127,12 @@ only (`view/`): nothing here changes the simulation or the data.
       factions
 - [x] Life: turret recoil, spinning dishes, hauler cargo that fills up,
       infantry bounce as they walk
-- [ ] Buildings under construction: scaffolding instead of a squashed model
-- [ ] Effects: muzzle flashes and explosions to match the new look
-- [ ] A 3D backdrop behind the main menu
+- [x] Buildings under construction stand inside scaffolding; buildings and
+      vehicles close to destruction burn
+- [x] Effects: glowing tracers, muzzle flashes, shock rings, scorch marks,
+      flashes that light their surroundings; effects fade out properly
+- [x] A live AI-versus-AI match plays behind the main menu
+- [ ] Minimap and coverage overlay colours retuned for the new ground
 
 ## Session log
 
@@ -174,8 +177,29 @@ better graphics (units, buildings, map) and to carry on; that is M15 above.
   `scenery_wide` (fog off), and `page0`..`page7` for `tools/gallery.tscn`
   (eight models at a time, close up).
 
-Working on: M15 — terrain, models and animation are in; next the
-construction look, effects and a menu backdrop.
+- **Finding: `GeometryInstance3D.transparency` does nothing in the
+  Compatibility renderer** (measured: three boxes at 0, 0.4 and 0.8 all
+  rendered fully opaque). Every combat effect used it to fade, so until now
+  flashes and rings simply popped out of existence. Effects now own a
+  material each (pooled) and fade through its alpha.
+- **Decision: no bloom.** `Environment.glow_*` was tried and produced no
+  visible halo here, so it is left off rather than spend a full-screen pass
+  on nothing. Lamps and furnace mouths get their punch from emission alone.
+- **Decision: the main menu shows a live AI-versus-AI match** (`MenuBackdrop`,
+  fog off, no sound) under a dimming layer. It restarts on a new seed when a
+  match ends. It costs one simulation and one set of views while the menu is
+  open.
+- The frame benchmark is unchanged by all this: 7.3 ms a frame with 300
+  units, same as before (`tools/frame_bench.tscn`). Draw calls per unit are
+  down from one per box to two or three, which only a real GPU will show.
+- Not from this work, for whoever looks next: every scene that plays sound
+  exits with "2 ObjectDB instances were leaked" (an `AudioStreamWAV` and its
+  playback). It is a warning, it predates M15, and `tools/check.sh` does not
+  treat it as a failure.
+- `claude/relay-session-1116-0550` (session 3, finished) was merged again at
+  09:48 UTC, cleanly.
+
+Working on: M15 is in except the minimap and overlay colours.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 
