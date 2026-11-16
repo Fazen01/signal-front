@@ -345,12 +345,12 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (16:05 UTC):** M28 and M29 are done. M30 (two more factions:
-Brackenfold and Lodestone Circle) is playable, tested and in the check, but
-its boxes stay open: the owner finds the Brackenfold the worst-looking
-faction, so its models are being redone. Then the balance league for all
-ten factions (the tables further down are from before the AI change and
-before these two factions).
+**Working now (16:40 UTC):** M28, M29 and the models and rules of M30 are
+pushed. M31 (the AI: faction tricks, allies, approach from the side, a
+beaten AI concedes, repairs slow under fire) is committed locally and
+`tools/check.sh` is running on it; it goes up when that passes. Next: the
+balance league over all ten factions (the tables further down are from
+before these AI changes and before the two new factions), then M32.
 
 Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
