@@ -449,9 +449,10 @@ default; `test_a_wave_keeps_together_on_the_way_in` runs it both ways).
 
 ### 2026-11-16 — session 7, 19:50 UTC (branch `claude/relay-session-1116-1950`)
 
-**Working now (20:05 UTC):** the merge passes `tools/check.sh` and is
-pushed. M31 (the AI) is written and unit-tested on a side branch; one of
-the check's matches stalemates with it, which is being looked at.
+**Working now (20:30 UTC):** M31 is written with eleven unit tests on a
+side branch (not pushed yet; it goes up when `tools/check.sh` passes on
+it). Batches of twenty AI matches are being played to see what each new
+behaviour does to match length before it is switched on for good.
 
 - **M30 ticked.** Session 1 had pushed both factions complete (design
   paragraph, data, rule, models, skin, tests, a match each in the check)
