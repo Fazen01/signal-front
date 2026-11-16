@@ -14,7 +14,7 @@ const ENTITY_KEYS: Array[String] = [
 	"name", "desc", "faction", "tier", "cost", "build_time", "bandwidth", "bandwidth_provided",
 	"hp", "armor", "move", "speed", "turn_rate", "radius", "sight", "weapons", "turret", "model",
 	"hotkey", "requires", "buildable", "builder", "builds", "harvester", "capacity", "footprint",
-	"signal_radius", "signal_root", "depot", "produces",
+	"signal_radius", "signal_root", "depot", "produces", "stealth",
 ]
 const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
@@ -224,6 +224,7 @@ func _load_entities(d: Dictionary, building: bool) -> void:
 		e.builds = _strings(src, "builds")
 		e.harvester = bool(src.get("harvester", false))
 		e.capacity = int(src.get("capacity", 0))
+		e.stealth = bool(src.get("stealth", false))
 		if src.has("footprint"):
 			var fp: Array = src["footprint"]
 			if fp.size() == 2:

@@ -245,5 +245,23 @@ M5 decisions and known gaps:
   AI floats salvage because it runs one Barracks and one Vehicle Works.
   Left for M13 balance; noted so it is not mistaken for a bug.
 
-Half-done / next: M6 battlefield awareness (fog of war, minimap, Uplink
-Sites, quality-of-life selection keys).
+Notes on this session's pushes:
+- The `v0.1` tag could not be pushed: the session may only write its own
+  branch (`send-pack: unexpected disconnect`). The tag exists only in this
+  session's clone. The M5 commit to tag is `457055b`.
+
+Half-done / next: M6 — fog of war is in the simulation (`sim/sim_vision.gd`:
+coverage plus unit sight reveal cells, explored memory, Marksman stealth,
+targeting and attack orders respect it, the AI only uses what it has seen).
+Still to do for M6: draw the fog and hide unseen enemies in the view, the
+minimap, Uplink Sites, idle-builder key and camera bookmarks.
+
+Fog decisions:
+- "Shared vision through coverage" is implemented as: everything inside your
+  own signal coverage is visible to you, plus a disc of each unit's sight
+  (30% shorter when Dark). Units can fire on anything any friendly source
+  reveals, if it is in weapon range.
+- A stealthed Marksman (standing still, not fired for 2.5 s) is only seen by
+  an enemy within 5 units.
+- An attack order on a unit you cannot see becomes an attack-move to where it
+  was; buildings can be targeted once explored.

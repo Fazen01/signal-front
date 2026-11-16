@@ -68,11 +68,24 @@ static func _cmd_attack(w: SimWorld, cmd: SimCommand) -> void:
 	var target: SimEntity = w.get_entity(cmd.target_id)
 	if target == null or not target.is_combatant():
 		return
+	if not _attackable(w, cmd.player, target):
+		# Cannot see it: go and look instead.
+		cmd.pos = target.pos
+		_cmd_move(w, cmd, SimOrder.Type.ATTACK_MOVE)
+		return
 	for e: SimEntity in own_units(w, cmd):
 		if e.def.is_armed() and SimCombat.best_multiplier(w, e, target) > 0.0:
 			give_order(e, SimOrder.make(SimOrder.Type.ATTACK, target.pos, target.id), cmd.queue)
 		else:
 			give_order(e, SimOrder.make(SimOrder.Type.MOVE, target.pos), cmd.queue)
+
+
+## Units must be in sight to be attacked; buildings only need to have been
+## seen once, since they do not move.
+static func _attackable(w: SimWorld, player_id: int, target: SimEntity) -> bool:
+	if SimVision.can_see(w, player_id, target):
+		return true
+	return target.kind == SimEntity.Kind.BUILDING and SimVision.is_explored(w, player_id, target.pos)
 
 
 ## Destination points for a group ordered to `target`: a block facing the
@@ -163,6 +176,8 @@ static func update_unit(w: SimWorld, e: SimEntity) -> void:
 				finish_order(e)
 		SimOrder.Type.ATTACK:
 			var target: SimEntity = w.get_entity(o.target_id)
+			if target != null and target.kind == SimEntity.Kind.UNIT and not SimVision.can_see(w, e.owner, target):
+				target = null  # lost sight of it
 			if target == null or not e.def.is_armed():
 				SimMovement.stop(e)
 				e.target_id = 0

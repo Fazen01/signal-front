@@ -137,6 +137,8 @@ static func _acquire(w: SimWorld, e: SimEntity) -> int:
 		var d: float = e.pos.distance_to(n.pos) - n.radius
 		if d > radius:
 			continue
+		if not SimVision.can_see(w, e.owner, n):
+			continue
 		var mult: float = best_multiplier(w, e, n)
 		if mult <= 0.01:
 			continue
@@ -154,6 +156,7 @@ static func _acquire(w: SimWorld, e: SimEntity) -> int:
 static func _fire(w: SimWorld, e: SimEntity, t: SimEntity, wd: WeaponDef, slot: int) -> void:
 	var ticks: float = wd.cooldown * float(SimWorld.TICK_RATE) / rof_mult(w, e)
 	e.cooldowns[slot] = maxi(1, int(roundf(ticks)))
+	e.last_fire_tick = w.tick_count
 	var damage: float = wd.damage * (1.0 + 0.15 * float(e.rank))
 	if wd.projectile_speed <= 0.0:
 		var ev: SimEvent = w.emit_event(SimEvent.Type.SHOT, e.id, e.owner, e.pos)

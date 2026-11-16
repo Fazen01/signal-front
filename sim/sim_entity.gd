@@ -41,6 +41,7 @@ var target_id: int = 0  ## current weapon target, 0 = none
 var cooldowns: PackedInt32Array = PackedInt32Array()  ## ticks until each weapon is ready
 var scan_tick: int = 0  ## next tick to look for targets
 var last_hit_tick: int = -100000
+var last_fire_tick: int = -100000
 var last_attacker: int = 0
 var kills: int = 0
 var xp: float = 0.0

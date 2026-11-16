@@ -21,6 +21,8 @@ static func create_match(config: MatchConfig) -> SimWorld:
 			w.ais.append(SimAI.new(p.id, p.ai_level, config.seed_value))
 	SimSignal.recompute(w)
 	w.signal_next_tick = 0
+	SimVision.recompute(w)
+	w.vision_next_tick = 0
 	return w
 
 

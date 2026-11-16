@@ -19,10 +19,10 @@
 		"builds": ["depot", "relay", "barracks", "vehicle_works", "sentry_turret", "lance_battery"]
 	},
 	"marksman": {
-		"name": "Marksman", "desc": "Long-sighted sharpshooter. Picks off infantry from afar.",
+		"name": "Marksman", "desc": "Long-sighted sharpshooter. Hidden while standing still unless an enemy is close.",
 		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 12.0, "bandwidth": 1,
 		"hp": 60, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
-		"radius": 0.4, "sight": 16.0, "weapons": ["marksman_rifle"], "model": "marksman",
+		"radius": 0.4, "sight": 16.0, "weapons": ["marksman_rifle"], "stealth": true, "model": "marksman",
 		"hotkey": "M", "requires": ["vehicle_works"]
 	},
 	"hauler": {

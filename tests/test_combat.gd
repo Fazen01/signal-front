@@ -60,7 +60,7 @@ func test_vehicle_leaves_wreck_infantry_does_not() -> void:
 func test_projectile_weapons_hit() -> void:
 	var w: SimWorld = SimTestUtil.make_world()
 	var lancer: SimEntity = w.spawn_unit("lancer", 0, Vector2(20, 20))
-	var tank: SimEntity = w.spawn_unit("hauler", 1, Vector2(28, 20))
+	var tank: SimEntity = w.spawn_unit("hauler", 1, Vector2(26, 20))
 	var saw_projectile: bool = false
 	for i: int in 20 * 8:
 		w.tick()

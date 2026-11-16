@@ -32,6 +32,7 @@ var hunts_relays: bool = true
 var wave_state: int = Wave.NONE
 var wave_ids: Array[int] = []
 var wave_target: int = 0
+var wave_target_pos: Vector2 = Vector2.ZERO
 var wave_stage: Vector2 = Vector2.ZERO
 var wave_tick: int = 0
 var wave_size: int = 7
@@ -47,6 +48,7 @@ var _buildings: Array[SimEntity] = []
 var _sites: Array[SimEntity] = []
 var _enemies: Array[SimEntity] = []
 var _enemy_buildings: Array[SimEntity] = []
+var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have seen
 var _spent: int = 0  ## salvage committed by commands issued this think
 var _bandwidth_committed: int = 0  ## bandwidth of units ordered this think
 
@@ -126,9 +128,15 @@ func _survey(w: SimWorld) -> void:
 			elif e.def.is_armed():
 				_army.append(e)
 		elif w.are_enemies(player_id, e.owner):
+			# The AI plays by the same fog of war as a human: it only knows
+			# units it can see right now and buildings it has seen before.
+			var seen: bool = SimVision.can_see(w, player_id, e)
 			if e.kind == SimEntity.Kind.BUILDING:
-				_enemy_buildings.append(e)
-			else:
+				if seen:
+					_known_buildings[e.id] = true
+				if seen or _known_buildings.has(e.id):
+					_enemy_buildings.append(e)
+			elif seen:
 				_enemies.append(e)
 
 
@@ -620,17 +628,17 @@ func _count_near(list: Array[SimEntity], pos: Vector2, radius: float) -> int:
 
 func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 	var target: SimEntity = _pick_target(w)
-	if target == null:
-		return
 	wave_ids.clear()
 	for e: SimEntity in units:
 		wave_ids.append(e.id)
-	wave_target = target.id
+	# With nothing scouted yet, head for where the enemy started.
+	wave_target = target.id if target != null else 0
+	wave_target_pos = target.pos if target != null else _enemy_hq_pos(w)
 	wave_state = Wave.STAGING
 	wave_tick = w.tick_count
 	waves_sent += 1
-	var back: Vector2 = (_hq.pos - target.pos).normalized()
-	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(target.pos + back * STAGE_DISTANCE))
+	var back: Vector2 = (_hq.pos - wave_target_pos).normalized()
+	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(wave_target_pos + back * STAGE_DISTANCE))
 	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), wave_stage))
 
 
@@ -646,18 +654,20 @@ func _assault(w: SimWorld, fresh: bool) -> void:
 	var target: SimEntity = w.get_entity(wave_target)
 	if target == null:
 		target = _pick_target(w)
-		if target == null:
-			_end_wave(w)
-			return
-		wave_target = target.id
-		fresh = true
+		var goal: Vector2 = target.pos if target != null else _enemy_hq_pos(w)
+		if target != null or goal.distance_to(wave_target_pos) > 1.0:
+			fresh = true
+		wave_target = target.id if target != null else 0
+		wave_target_pos = goal
+	else:
+		wave_target_pos = target.pos
 	var who: PackedInt32Array = PackedInt32Array()
 	for id: int in wave_ids:
 		var e: SimEntity = w.get_entity(id)
 		if fresh or e.orders.is_empty():
 			who.append(id)
 	if not who.is_empty():
-		w.push_command(SimCommand.attack_move(player_id, who, target.pos))
+		w.push_command(SimCommand.attack_move(player_id, who, wave_target_pos))
 
 
 ## What to hit next. Normal and Hard AIs go for the relay whose loss would

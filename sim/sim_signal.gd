@@ -120,7 +120,7 @@ static func recompute(w: SimWorld) -> void:
 		var grid: PackedByteArray = PackedByteArray()
 		grid.resize(cells)
 		for e: SimEntity in frontier:
-			_stamp(w, grid, e.pos, emitter_radius(w, e))
+			stamp_disc(w, grid, e.pos, emitter_radius(w, e))
 		w.coverage[p.id] = grid
 
 	# Everything that cannot move takes its state from the new grids.
@@ -131,7 +131,7 @@ static func recompute(w: SimWorld) -> void:
 
 
 ## Marks every cell whose centre lies within `radius` of `centre`.
-static func _stamp(w: SimWorld, grid: PackedByteArray, centre: Vector2, radius: float) -> void:
+static func stamp_disc(w: SimWorld, grid: PackedByteArray, centre: Vector2, radius: float) -> void:
 	var cw: int = w.map.w
 	var ch: int = w.map.h
 	var x0: int = clampi(int(floorf((centre.x - radius) / SimMap.CELL)), 0, cw - 1)

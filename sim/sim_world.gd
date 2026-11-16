@@ -29,6 +29,13 @@ var signal_dirty: bool = true
 var signal_next_tick: int = 0
 var coverage_version: int = 0  ## bumps whenever coverage is rebuilt
 
+# Fog of war (see SimVision)
+var visible: Array[PackedByteArray] = []  ## per player: 1 where currently seen
+var explored: Array[PackedByteArray] = []  ## per player: 1 where ever seen
+var reveals: Array[Vector4] = []  ## temporary reveals: x, z, radius, player id
+var vision_next_tick: int = 0
+var vision_version: int = 0
+
 var ais: Array[SimAI] = []
 
 var victory_enabled: bool = true  ## tests without bases switch this off
@@ -74,6 +81,8 @@ func add_player(faction_id: String, color: Color, is_ai: bool, start_pos: Vector
 	grid.resize(map.w * map.h)
 	coverage.append(grid)
 	signal_links.append(PackedInt32Array())
+	visible.append(grid.duplicate())
+	explored.append(grid.duplicate())
 	return p
 
 
@@ -296,6 +305,7 @@ func tick() -> void:
 		e.prev_aim = e.aim
 	_rebuild_buckets()
 	SimSignal.update(self)
+	SimVision.update(self)
 
 	var pending: Array[SimCommand] = commands
 	commands = []

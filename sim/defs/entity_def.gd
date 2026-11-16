@@ -36,6 +36,7 @@ var buildable: bool = true
 var builder: bool = false
 var builds: Array[String] = []
 var harvester: bool = false
+var stealth: bool = false  ## hidden from enemies while standing still
 var capacity: int = 0
 
 # Buildings
