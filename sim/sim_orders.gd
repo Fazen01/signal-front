@@ -115,7 +115,19 @@ static func formation_slots(w: SimWorld, units: Array[SimEntity], target: Vector
 		dir = Vector2.RIGHT
 	dir = dir.normalized()
 	var side: Vector2 = Vector2(-dir.y, dir.x)
+	# Room for the biggest unit of the group. Vehicles keep clear ground
+	# between them, stand further apart front to back than side to side
+	# (they are longer than they are wide), and each rank stands behind the
+	# gaps of the one in front, so no gun barrel lies over a hull.
 	var spacing: float = max_radius * 2.0 + 0.5
+	var depth: float = spacing
+	var stagger: float = 0.0
+	for e: SimEntity in units:
+		if not e.def.is_infantry():
+			var factor: float = SimMovement.AIR_SPACING if e.def.is_air() else SimMovement.VEHICLE_SPACING
+			spacing = maxf(spacing, max_radius * 2.0 * factor + 0.3)
+			depth = spacing * (1.0 if e.def.is_air() else 1.2)
+			stagger = spacing * 0.5
 	var cols: int = int(ceilf(sqrt(float(n))))
 	# Front rows go to the units already furthest along the direction of travel.
 	units.sort_custom(func(a: SimEntity, b: SimEntity) -> bool:
@@ -139,8 +151,8 @@ static func formation_slots(w: SimWorld, units: Array[SimEntity], target: Vector
 		)
 		for k: int in count:
 			units[i + k] = row_units[k]
-			var offset: float = (float(k) - float(count - 1) * 0.5) * spacing
-			var slot: Vector2 = target + side * offset - dir * (float(row) * spacing)
+			var offset: float = (float(k) - float(count - 1) * 0.5) * spacing + (stagger if row % 2 == 1 else 0.0)
+			var slot: Vector2 = target + side * offset - dir * (float(row) * depth)
 			slots.append(w.map.clamp_to_map(slot))
 		i += count
 		row += 1

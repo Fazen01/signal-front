@@ -76,13 +76,14 @@ func test_crawler_deploys_and_packs() -> void:
 	check_eq(SimEconomy.train_error(w, factory, w.data.entity("tusk")), "", "the factory builds vehicles")
 	w.push_command(SimCommand.train(0, factory.id, "tusk"))
 	SimTestUtil.run(w, 3)
-	var before: int = w.players[0].salvage
+	# (Net of what the haulers bring in meanwhile.)
+	var before: int = w.players[0].salvage - w.players[0].stat_salvage_collected
 	w.push_command(SimCommand.pack(0, factory.id))
 	SimTestUtil.run(w, 3)
 	check(not factory.alive, "factory packed up")
 	check_eq(_own(w, 0, "crawler").size(), 1, "and is a crawler again")
 	check(w.map.is_cell_passable(cell), "footprint freed")
-	check_eq(w.players[0].salvage, before + w.data.entity("tusk").cost, "queued unit refunded on packing")
+	check_eq(w.players[0].salvage - w.players[0].stat_salvage_collected, before + w.data.entity("tusk").cost, "queued unit refunded on packing")
 
 
 func test_crawler_cannot_deploy_outside_coverage() -> void:

@@ -2,6 +2,8 @@ class_name SimMovement
 extends RefCounted
 ## Path following, turning and unit-unit separation.
 
+const VEHICLE_SPACING: float = 1.45  ## two ground vehicles keep this many times the sum of their radii apart
+const AIR_SPACING: float = 2.1  ## two aircraft keep this much: wings and rotors reach well past the footprint
 const MAX_PUSH: float = 0.3  ## separation displacement cap per tick
 
 
@@ -106,6 +108,18 @@ static func _advance(w: SimWorld, e: SimEntity) -> void:
 		stop(e)
 
 
+
+## How far apart the centres of two units are kept. Infantry stand shoulder
+## to shoulder; vehicles are longer than they are wide and are drawn a
+## little larger than their footprint, and aircraft have wings, so two of
+## them keep some clear space between them: on screen their hulls never run
+## into one another and read as one machine.
+static func personal_space(a: SimEntity, b: SimEntity) -> float:
+	if a.def.is_infantry() or b.def.is_infantry():
+		return a.radius + b.radius
+	return (a.radius + b.radius) * (AIR_SPACING if a.def.is_air() else VEHICLE_SPACING)
+
+
 static func _separate(w: SimWorld, e: SimEntity) -> void:
 	var push: Vector2 = Vector2.ZERO
 	var air: bool = e.def.is_air()
@@ -123,7 +137,7 @@ static func _separate(w: SimWorld, e: SimEntity) -> void:
 				if n == e or not n.alive or n.kind != SimEntity.Kind.UNIT or n.def.is_air() != air:
 					continue
 				var d: Vector2 = e.pos - n.pos
-				var min_d: float = e.radius + n.radius
+				var min_d: float = personal_space(e, n)
 				var d2: float = d.length_squared()
 				if d2 >= min_d * min_d:
 					continue
