@@ -61,7 +61,9 @@ func test_everything_they_own_can_be_made() -> void:
 				check(built.has(def.id) or def.id == f.hq, "%s can be built" % def.name)
 			else:
 				check(made.has(def.id), "%s is produced somewhere" % def.name)
-		check_eq(count, 16, "%s: nine units and seven buildings" % f.name)
+		# Nine units and seven buildings each; the Accord has no tenth,
+		# signature unit yet (M32), the others do.
+		check_eq(count, 16 if faction == "zephyr" else 17, "%s: its whole roster is accounted for" % f.name)
 		for role: String in ["builder", "hauler", "relay", "barracks", "works", "depot", "turret_ground", "turret_armor", "turret_air", "tier3"]:
 			check(data.entities.has(f.role(role)), "%s: the AI has a %s (%s)" % [f.name, role, f.role(role)])
 

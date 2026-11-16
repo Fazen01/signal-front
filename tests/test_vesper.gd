@@ -56,7 +56,7 @@ func test_everything_the_array_owns_can_be_made() -> void:
 			check(built.has(def.id) or def.id == "nexus", "%s can be built by a Weaver" % def.name)
 		else:
 			check(made.has(def.id), "%s is produced somewhere" % def.name)
-	check_eq(count, 16, "nine units and seven buildings")
+	check_eq(count, 17, "ten units (the Tether is the tenth) and seven buildings")
 	var f: FactionDef = data.faction("vesper")
 	for role: String in ["builder", "hauler", "relay", "barracks", "works", "depot", "turret_ground", "turret_armor", "turret_air", "tier3"]:
 		check(data.entities.has(f.role(role)), "the AI has a %s (%s)" % [role, f.role(role)])
