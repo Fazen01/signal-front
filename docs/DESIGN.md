@@ -162,7 +162,9 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Ctrl+1..9 set control groups, 1..9 recall, double-tap centers the camera.
 - HUD: salvage and bandwidth at the top, minimap bottom-left (click to move
   the camera, right-click to order), selection panel and command card with
-  hotkeys bottom-center/right, Directive bar, alerts feed.
+  hotkeys bottom-center/right, the Directives between them, alerts feed.
+  Each faction has an interface of its own (`ui/ui_skin.gd`): colours,
+  panel and button shapes, lettering and an emblem.
 - Build placement shows a ghost tinted valid/invalid, plus the coverage overlay.
 - Screens: main menu, skirmish setup (map, faction, AI difficulty, seed),
   pause menu, settings, victory/defeat summary with stats.

@@ -733,7 +733,10 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 				"anti_armor":
 					wgt += float(heavy) * 0.6 + float(light) * 0.3
 				"anti_air":
-					wgt += float(_enemy_air_seen) * 1.6
+					# Enough flak to matter, never an army of nothing else: an
+					# opponent with a few aircraft is not answered with a
+					# force that cannot fight what is on the ground.
+					wgt += minf(float(_enemy_air_seen) * 1.2, 3.6)
 				"support":
 					if support + _queued(id) >= 2:
 						wgt = 0.0

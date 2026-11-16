@@ -18,7 +18,7 @@ var splash: float = 0.0
 var heal_fraction: float = 0.0
 var radius_mult: float = 1.0
 var squad: Array[String] = []
-var slot: int = 0  ## position on the Directive bar
+var slot: int = 0  ## position in the Directives panel
 
 
 func needs_target() -> bool:

@@ -163,7 +163,7 @@ func _draw() -> void:
 		var t: float = fposmod(ping_data.z, 1.0)
 		var at: Vector2 = _to_map(Vector2(ping_data.x, ping_data.y))
 		draw_arc(at, lerpf(3.0, 16.0, t), 0.0, TAU, 20, Color(1.0, 0.3, 0.25, 1.0 - t), 2.0)
-	draw_rect(full, Color(0.25, 0.55, 0.9, 0.8), false, 1.0)
+	draw_rect(full, battle.skin.line if battle != null and battle.skin != null else Color(0.25, 0.55, 0.9, 0.8), false, 1.0)
 
 
 func _gui_input(event: InputEvent) -> void:
