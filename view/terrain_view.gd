@@ -106,6 +106,7 @@ uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform vec3 shallow : source_color = vec3(0.25, 0.55, 0.58);
 uniform vec3 deep : source_color = vec3(0.06, 0.22, 0.38);
 uniform vec3 foam_color : source_color = vec3(0.86, 0.93, 0.92);
+uniform float glow = 0.0;
 varying vec3 wpos;
 
 void vertex() {
@@ -129,7 +130,9 @@ void fragment() {
 	float band = smoothstep(0.72, 1.0, sin(depth * 24.0 - TIME * 1.2 + n1.g * 5.0)) * (1.0 - smoothstep(0.10, 0.42, depth));
 	float foam = clamp(edge + band * 0.4, 0.0, 1.0);
 	ALBEDO = mix(col, foam_color, foam);
-	ALPHA = mix(mix(0.55, 0.92, d), 0.95, foam);
+	// Lava gives off its own light and is not see-through.
+	EMISSION = ALBEDO * glow * (0.75 + 0.5 * n1.g);
+	ALPHA = mix(mix(mix(0.55, 0.92, d), 0.95, foam), 1.0, clamp(glow, 0.0, 1.0));
 	ROUGHNESS = 0.12;
 	SPECULAR = 0.7;
 	vec3 nw = normalize(vec3((n1.r + n2.g - 1.0) * 0.45, 1.0, (n1.b + n2.r - 1.0) * 0.45));
@@ -175,6 +178,7 @@ void fragment() {
 static var _noise: ImageTexture = null
 
 var map: SimMap = null
+var look: RegionLook = null  ## the palette of the region this map lies in
 var _rng: SimRng = null
 var _forest: PackedFloat32Array = PackedFloat32Array()  ## per corner: share of the four cells around it that are forest
 var _rock: PackedFloat32Array = PackedFloat32Array()
@@ -189,6 +193,7 @@ var _ground_mat: ShaderMaterial = null
 
 func build(sim_map: SimMap, seed_value: int) -> void:
 	map = sim_map
+	look = RegionLook.of(map.region)
 	_rng = SimRng.new(seed_value + 4711)
 	_corner_weights()
 	_build_marks()
@@ -417,6 +422,8 @@ func _build_ground() -> void:
 	mat.set_shader_parameter("noise_tex", noise_texture())
 	mat.set_shader_parameter("mark_tex", _mark_tex)
 	mat.set_shader_parameter("map_size", map.world_size())
+	for key: String in ["lush", "dry", "soil", "litter_dark", "litter_light", "stone_dark", "stone_light", "sand_dark", "sand_light", "bed"]:
+		mat.set_shader_parameter(key, look.get(key))
 	_ground_mat = mat
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "Ground"
@@ -537,6 +544,10 @@ func _build_water() -> void:
 	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = shader
 	mat.set_shader_parameter("noise_tex", noise_texture())
+	mat.set_shader_parameter("shallow", look.water_shallow)
+	mat.set_shader_parameter("deep", look.water_deep)
+	mat.set_shader_parameter("foam_color", look.water_foam)
+	mat.set_shader_parameter("glow", look.water_glow)
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "Water"
 	mi.mesh = st.commit()
@@ -590,37 +601,85 @@ func _spot(x: int, y: int, margin: float, scale_min: float, scale_max: float, st
 
 func _conifer(tiers: int, girth: float) -> ArrayMesh:
 	var buf: MeshBuf = MeshBuf.new()
-	buf.cone(Vector3.ZERO, 0.13, 0.08, 0.95, 5, Color(0.16, 0.11, 0.08), Color(0.31, 0.22, 0.14))
+	buf.cone(Vector3.ZERO, 0.13, 0.08, 0.95, 5, look.bark_low, look.bark_high)
 	buf.soften = 0.9
 	var y: float = 0.55
 	for t: int in tiers:
 		var k: float = 1.0 - float(t) / float(tiers + 1)
-		var lift: float = 0.10 * float(t)
-		buf.cone(Vector3(0.0, y, 0.0), 0.80 * k * girth, 0.0, 1.25 * (0.75 + 0.25 * k), 7, Color(0.07 + lift * 0.15, 0.20 + lift * 0.25, 0.11), Color(0.17 + lift * 0.25, 0.37 + lift * 0.3, 0.18), float(t) * 0.5)
+		# Higher tiers shade towards the cap colour: lighter green, or snow.
+		var up: float = float(t) / float(maxi(1, tiers - 1))
+		var low: Color = look.conifer_low.lerp(look.conifer_cap, up * 0.25)
+		var high: Color = look.conifer_high.lerp(look.conifer_cap, 0.25 + up * 0.75)
+		buf.cone(Vector3(0.0, y, 0.0), 0.80 * k * girth, 0.0, 1.25 * (0.75 + 0.25 * k), 7, low, high, float(t) * 0.5)
 		y += 0.62 * (0.8 + 0.2 * k)
 	return buf.commit()
 
 
-func _broadleaf(shape_seed: int) -> ArrayMesh:
+## A leafy tree; `flat` squashes the crown into the wide top of a thorn tree.
+func _broadleaf(shape_seed: int, flat: float = 1.0) -> ArrayMesh:
 	var rng: SimRng = SimRng.new(shape_seed)
 	var buf: MeshBuf = MeshBuf.new()
-	buf.cone(Vector3.ZERO, 0.16, 0.10, 1.25, 5, Color(0.17, 0.12, 0.08), Color(0.33, 0.23, 0.15))
+	buf.cone(Vector3.ZERO, 0.16, 0.10, 1.25, 5, look.bark_low, look.bark_high)
 	buf.soften = 0.9
-	var low: Color = Color(0.10, 0.24, 0.07)
-	var high: Color = Color(0.26, 0.42, 0.13)
-	buf.blob(Vector3(0.0, 1.85, 0.0), Vector3(0.92, 0.72, 0.92), 1, 0.16, low, high, rng)
-	buf.blob(Vector3(0.55, 1.5, 0.25), Vector3(0.55, 0.45, 0.55), 0, 0.14, low, high, rng)
-	buf.blob(Vector3(-0.5, 1.6, -0.3), Vector3(0.6, 0.48, 0.6), 0, 0.14, low, high, rng)
-	buf.blob(Vector3(-0.1, 1.45, 0.6), Vector3(0.5, 0.42, 0.5), 0, 0.14, low, high, rng)
+	var low: Color = look.leaf_low
+	var high: Color = look.leaf_high
+	var wide: float = 1.0 + (1.0 - flat) * 0.5
+	buf.blob(Vector3(0.0, 1.85 - (1.0 - flat) * 0.25, 0.0), Vector3(0.92 * wide, 0.72 * flat, 0.92 * wide), 1, 0.16, low, high, rng)
+	buf.blob(Vector3(0.55 * wide, 1.5, 0.25), Vector3(0.55 * wide, 0.45 * flat, 0.55 * wide), 0, 0.14, low, high, rng)
+	buf.blob(Vector3(-0.5 * wide, 1.6, -0.3), Vector3(0.6 * wide, 0.48 * flat, 0.6 * wide), 0, 0.14, low, high, rng)
+	buf.blob(Vector3(-0.1, 1.45, 0.6 * wide), Vector3(0.5 * wide, 0.42 * flat, 0.5 * wide), 0, 0.14, low, high, rng)
 	return buf.commit()
+
+
+## A cactus: a ribbed column with an arm or two.
+func _cactus(arms: int) -> ArrayMesh:
+	var buf: MeshBuf = MeshBuf.new()
+	buf.soften = 0.6
+	var low: Color = look.conifer_low
+	var high: Color = look.conifer_high
+	buf.cone(Vector3.ZERO, 0.22, 0.18, 1.7, 7, low, high)
+	buf.cone(Vector3(0.0, 1.7, 0.0), 0.18, 0.0, 0.16, 7, high, look.conifer_cap)
+	for i: int in arms:
+		var side: float = 1.0 if i % 2 == 0 else -1.0
+		var at: float = 0.6 + 0.35 * float(i)
+		buf.cone(Vector3(side * 0.16, at, 0.0), 0.1, 0.1, 0.12, 6, low, high, 0.0, Vector3(side * 0.34, 0.0, 0.0))
+		buf.cone(Vector3(side * 0.5, at + 0.08, 0.0), 0.1, 0.08, 0.55 + 0.15 * float(i % 2), 6, low, high)
+	return buf.commit()
+
+
+## A burnt tree: a bare trunk and a few broken branches.
+func _dead_tree(shape_seed: int) -> ArrayMesh:
+	var rng: SimRng = SimRng.new(shape_seed)
+	var buf: MeshBuf = MeshBuf.new()
+	var low: Color = look.bark_low
+	var high: Color = look.bark_high
+	buf.cone(Vector3.ZERO, 0.17, 0.06, 2.1, 5, low, high, 0.0, Vector3(rng.range_f(-0.2, 0.2), 0.0, rng.range_f(-0.2, 0.2)))
+	for i: int in 4:
+		var ang: float = rng.range_f(0.0, TAU)
+		var reach: float = rng.range_f(0.45, 0.85)
+		buf.cone(Vector3(0.0, 0.9 + 0.28 * float(i), 0.0), 0.05, 0.0, rng.range_f(0.45, 0.8), 4, low, high, 0.0, Vector3(cos(ang) * reach, 0.0, sin(ang) * reach))
+	return buf.commit()
+
+
+## The five tree meshes of this region: two that stand in for conifers, two
+## for leafy trees, and a bush.
+func _tree_meshes() -> Array[ArrayMesh]:
+	match look.trees:
+		"snow":
+			return [_conifer(3, 1.0), _conifer(4, 0.82), _conifer(4, 1.0), _conifer(3, 0.8), _bush(5)]
+		"dry":
+			return [_cactus(2), _cactus(1), _broadleaf(11, 0.5), _broadleaf(29, 0.45), _bush(5)]
+		"dead":
+			return [_dead_tree(3), _dead_tree(8), _dead_tree(21), _dead_tree(34), _bush(5)]
+	return [_conifer(3, 1.0), _conifer(4, 0.82), _broadleaf(11), _broadleaf(29), _bush(5)]
 
 
 func _bush(shape_seed: int) -> ArrayMesh:
 	var rng: SimRng = SimRng.new(shape_seed)
 	var buf: MeshBuf = MeshBuf.new()
 	buf.soften = 0.9
-	var low: Color = Color(0.09, 0.21, 0.07)
-	var high: Color = Color(0.23, 0.38, 0.13)
+	var low: Color = look.bush_low
+	var high: Color = look.bush_high
 	buf.blob(Vector3(0.0, 0.28, 0.0), Vector3(0.5, 0.36, 0.5), 0, 0.2, low, high, rng)
 	buf.blob(Vector3(0.38, 0.2, 0.15), Vector3(0.32, 0.26, 0.32), 0, 0.2, low, high, rng)
 	buf.blob(Vector3(-0.3, 0.22, -0.25), Vector3(0.36, 0.28, 0.36), 0, 0.2, low, high, rng)
@@ -630,7 +689,7 @@ func _bush(shape_seed: int) -> ArrayMesh:
 func _boulder(shape_seed: int, detail: int) -> ArrayMesh:
 	var rng: SimRng = SimRng.new(shape_seed)
 	var buf: MeshBuf = MeshBuf.new()
-	buf.blob(Vector3(0.0, 0.35, 0.0), Vector3(1.0, 0.72, 0.86), detail, 0.24, Color(0.20, 0.20, 0.22), Color(0.52, 0.52, 0.50), rng)
+	buf.blob(Vector3(0.0, 0.35, 0.0), Vector3(1.0, 0.72, 0.86), detail, 0.24, look.rock_low, look.rock_high, rng)
 	return buf.commit()
 
 
@@ -638,8 +697,8 @@ func _tuft() -> ArrayMesh:
 	var buf: MeshBuf = MeshBuf.new()
 	# Lit like the ground it stands on, whichever way a blade happens to face.
 	buf.soften = 50.0
-	var low: Color = Color(0.21, 0.33, 0.13)
-	var high: Color = Color(0.44, 0.54, 0.22)
+	var low: Color = look.tuft_low
+	var high: Color = look.tuft_high
 	var above: Vector3 = Vector3(0.0, -5.0, 0.0)
 	for i: int in 5:
 		var ang: float = float(i) * 1.257 + 0.3
@@ -695,7 +754,7 @@ func _build_trees() -> void:
 					kinds[k].append(tree)
 					var shade: float = _rng.range_f(0.78, 1.0)
 					tints[k].append(Color(shade * _rng.range_f(0.86, 1.0), shade, shade * _rng.range_f(0.8, 1.0)))
-				if _rng.chance(0.3):
+				if _rng.chance(0.3 * look.bushes):
 					var shrub: Transform3D = _spot(x, y, 0.1, 0.7, 1.2, 0.2, 0.0)
 					if not _on_trail(shrub.origin):
 						kinds[4].append(shrub)
@@ -703,13 +762,13 @@ func _build_trees() -> void:
 			elif t == SimMap.Terrain.GROUND:
 				# Bushes straggle out of the forest edge; the odd one stands alone.
 				var edge: bool = _is(x - 1, y, SimMap.Terrain.FOREST) or _is(x + 1, y, SimMap.Terrain.FOREST) or _is(x, y - 1, SimMap.Terrain.FOREST) or _is(x, y + 1, SimMap.Terrain.FOREST)
-				if _rng.chance(0.4 if edge else 0.012):
+				if _rng.chance((0.4 if edge else 0.012) * look.bushes):
 					var bush: Transform3D = _spot(x, y, 0.15, 0.6, 1.15, 0.2, 0.0)
 					if not _on_trail(bush.origin):
 						kinds[4].append(bush)
 						tints[4].append(Color(0.95, 1.0, 0.85) * _rng.range_f(0.8, 1.0))
 	var foliage: ShaderMaterial = _prop_material(0.022, false, 0.22)
-	var meshes: Array[ArrayMesh] = [_conifer(3, 1.0), _conifer(4, 0.82), _broadleaf(11), _broadleaf(29), _bush(5)]
+	var meshes: Array[ArrayMesh] = _tree_meshes()
 	var names: Array[String] = ["Conifers", "TallConifers", "Broadleaf", "BroadleafB", "Bushes"]
 	for k: int in kinds.size():
 		var spots: Array[Transform3D] = []
@@ -772,7 +831,7 @@ func _build_grass() -> void:
 				continue
 			# Grass grows in drifts rather than evenly.
 			var drift: float = sin(float(x) * 0.31 + s1) * cos(float(y) * 0.27 + s2) + 0.4 * sin(float(x - y) * 0.13)
-			if not _rng.chance(clampf(0.22 + drift * 0.3, 0.04, 0.6)):
+			if not _rng.chance(clampf(0.22 + drift * 0.3, 0.04, 0.6) * look.grass):
 				continue
 			for i: int in _rng.range_i(1, 3):
 				var tuft: Transform3D = _spot(x, y, 0.05, 0.8, 1.5, 0.25, 0.0)
@@ -846,9 +905,10 @@ func _build_litter() -> void:
 			var by_water: bool = _is(x - 1, y, SimMap.Terrain.WATER) or _is(x + 1, y, SimMap.Terrain.WATER) or _is(x, y - 1, SimMap.Terrain.WATER) or _is(x, y + 1, SimMap.Terrain.WATER)
 			var by_wood: bool = _is(x - 1, y, SimMap.Terrain.FOREST) or _is(x + 1, y, SimMap.Terrain.FOREST) or _is(x, y - 1, SimMap.Terrain.FOREST) or _is(x, y + 1, SimMap.Terrain.FOREST)
 			if by_water:
-				for i: int in _rng.range_i(1, 3):
-					reeds.append(_spot(x, y, 0.05, 0.8, 1.5, 0.25, 0.0))
-					reed_tints.append(Color.WHITE * _rng.range_f(0.8, 1.0))
+				if look.reeds:
+					for i: int in _rng.range_i(1, 3):
+						reeds.append(_spot(x, y, 0.05, 0.8, 1.5, 0.25, 0.0))
+						reed_tints.append(Color.WHITE * _rng.range_f(0.8, 1.0))
 				continue
 			if by_wood and _rng.chance(0.09):
 				var lying: Transform3D = _spot(x, y, 0.2, 0.8, 1.3, 0.0, -0.13)
@@ -863,7 +923,7 @@ func _build_litter() -> void:
 					stump_tints.append(Color.WHITE * _rng.range_f(0.75, 1.0))
 			# Flowers come in patches of one colour.
 			var patch: float = sin(float(x) * 0.23 + s1) * cos(float(y) * 0.29 + s2)
-			if patch > 0.55 and _rng.chance(0.4):
+			if patch > 0.55 and _rng.chance(0.4 * look.flowers):
 				var hue: Color = petals[posmod(int(float(x) * 0.05 + float(y) * 0.07 + s1 * 3.0), petals.size())]
 				for i: int in _rng.range_i(1, 3):
 					var bloom: Transform3D = _spot(x, y, 0.05, 0.8, 1.4, 0.2, 0.0)

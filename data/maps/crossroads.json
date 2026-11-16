@@ -1,5 +1,6 @@
 {
 	"name": "Crossroads",
+	"region": "tundra",
 	"players": 4,
 	"desc": "Four quarters divided by ridges. The plaza in the middle holds the richest salvage.",
 	"rows": [

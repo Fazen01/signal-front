@@ -191,6 +191,16 @@ map generation itself to be improved.
       pods, chunkier frames, lit corner posts on every base
 - [ ] Balance against the other three measured over a larger batch
 
+## M21 — Regions (owner request, 16 November)
+
+- [x] Four regions: Greenwood, Dustlands, Frostline, Cinder Wastes. Each
+      has its own ground, rock, water (or lava), plants and light
+- [x] The seed picks the region; the skirmish setup can override it; the
+      hand-made layouts have a home region each
+- [x] A region changes the look only: tests check that terrain, heights,
+      fields and uplinks are identical in all four
+- [x] Minimap colours follow the region
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
@@ -369,6 +379,21 @@ Array.**
   shoulder pods, violet rims and lit posts on every base.
 - `tools/check.sh` gained `ai_match_vesper` (Array against Aegis, seed 4).
   `tools/screenshot.sh vesper 60 vesper` shows an Array base.
+
+**11:55 UTC — the owner asked for more regions (M21).**
+
+- **Decision: a region is a label in the simulation and a palette in the
+  view.** `SimMap.region` is a string the generator sets from the seed (on
+  its own random stream, so adding regions did not change any map).
+  `RegionLook` turns it into colours, plant shapes and light. Nothing in the
+  rules reads it; a test generates one seed in all four regions and compares
+  terrain, heights, fields and uplinks.
+- Lava in the Cinder Wastes is the same impassable "water" terrain, drawn
+  glowing. Ice in the Frostline is still water too: it cannot be crossed.
+- Crater Ring now lies in the Cinder Wastes and Crossroads on the Frostline.
+  The region dropdown in the skirmish setup overrides either.
+- `tools/screenshot.sh region_tundra 30 region_tundra` (or `region_desert`,
+  `region_ashland`) shows seed 4 in that region.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

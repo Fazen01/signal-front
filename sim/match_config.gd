@@ -12,6 +12,7 @@ const TEAM_COLORS: Array[Color] = [
 var seed_value: int = 1
 var map_cells: int = SimMapGen.STANDARD_CELLS  ## size of a generated two-player map
 var map_id: String = ""  ## a layout in data/maps, or "" for a generated map
+var region: String = ""  ## a SimMapGen region, or "" for the seed's (or the layout's) own
 var tutorial: String = ""  ## a SimTutorial mission id, or "" for a normal match
 var factions: Array[String] = ["aegis", "aegis"]
 var is_ai: Array[bool] = [false, true]

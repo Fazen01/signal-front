@@ -144,8 +144,15 @@ A seeded, symmetric generator (176 × 176 for two players, a compact 128 × 128
 option for shorter matches, 192 × 192 for three or four). The seed also picks
 the kind of country: open **plains**, **highlands** crossed by rock ridges
 with passes through them, **lakeland**, or (two players only) a **river
-valley** with fords. Worn tracks show the routes between the bases. There
-are also three hand-made layouts: **Twin Fords** (a river with three
+valley** with fords. Worn tracks show the routes between the bases.
+
+A battlefield also lies in one of four **regions**, picked by the seed or in
+the skirmish setup: the **Greenwood** (grass and woods), the **Dustlands**
+(sand, red mesas, cactus and oases), the **Frostline** (snow, capped pines,
+ice) and the **Cinder Wastes** (ash, burnt trees and lava). A region changes
+how the land looks and nothing about how it plays.
+
+There are also three hand-made layouts: **Twin Fords** (a river with three
 crossings), **Crater Ring** (rich salvage inside a rock ring) and
 **Crossroads** (four players, ridges and a central plaza).
 

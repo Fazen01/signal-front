@@ -5,12 +5,13 @@ extends RefCounted
 
 
 ## Adds a "Sun" and an "Environment" node to `parent`.
-static func add_to(parent: Node, shadows: bool) -> void:
+static func add_to(parent: Node, shadows: bool, region: String = "temperate") -> void:
+	var look: RegionLook = RegionLook.of(region)
 	var sun: DirectionalLight3D = DirectionalLight3D.new()
 	sun.name = "Sun"
 	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
-	sun.light_energy = 1.2
-	sun.light_color = Color(1.0, 0.95, 0.86)
+	sun.light_energy = look.sun_energy
+	sun.light_color = look.sun_color
 	sun.shadow_enabled = shadows
 	sun.shadow_blur = 1.4
 	sun.shadow_bias = 0.06
@@ -36,7 +37,7 @@ static func add_to(parent: Node, shadows: bool) -> void:
 	env.background_color = Color(0.03, 0.04, 0.05)
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.45
+	env.ambient_light_energy = look.ambient
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	var we: WorldEnvironment = WorldEnvironment.new()

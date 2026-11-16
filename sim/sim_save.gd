@@ -51,6 +51,7 @@ static func read_file() -> Dictionary:
 static func config_to_dict(c: MatchConfig) -> Dictionary:
 	return {
 		"seed_value": c.seed_value, "map_cells": c.map_cells, "map_id": c.map_id,
+		"region": c.region,
 		"factions": _copy(c.factions), "is_ai": _copy(c.is_ai),
 		"ai_levels": _copy(c.ai_levels), "names": _copy(c.names),
 	}
@@ -61,6 +62,7 @@ static func config_from_dict(d: Dictionary) -> MatchConfig:
 	c.seed_value = int(d.get("seed_value", 1))
 	c.map_cells = int(d.get("map_cells", 64))
 	c.map_id = str(d.get("map_id", ""))
+	c.region = str(d.get("region", ""))
 	c.factions.assign(d.get("factions", []))
 	c.is_ai.assign(d.get("is_ai", []))
 	c.ai_levels.assign(d.get("ai_levels", []))

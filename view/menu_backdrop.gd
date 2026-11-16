@@ -19,7 +19,6 @@ var caption: String = ""  ## "Live match: A vs B", for the menu to show
 
 func _ready() -> void:
 	GameSettings.ensure_loaded()
-	SceneLight.add_to(self, GameSettings.shadows)
 	_cam = Camera3D.new()
 	_cam.name = "Camera"
 	_cam.fov = 42.0
@@ -38,6 +37,7 @@ func _start() -> void:
 	var config: MatchConfig = MatchConfig.ai_vs_ai(31 + _round * 7)
 	config.factions = [FACTIONS[_round % FACTIONS.size()], FACTIONS[(_round + 1) % FACTIONS.size()]]
 	world = SimSetup.create_match(config)
+	SceneLight.add_to(_stage, GameSettings.shadows, world.map.region)
 	caption = "Live match:  %s  vs  %s" % [world.data.faction(config.factions[0]).name, world.data.faction(config.factions[1]).name]
 	var terrain: TerrainView = TerrainView.new()
 	terrain.name = "Terrain"

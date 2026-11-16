@@ -66,9 +66,10 @@ func quad_grad(a: Vector3, b: Vector3, c: Vector3, d: Vector3, inside: Vector3, 
 
 
 ## An upright cone (or a frustum when `top_radius` > 0) around the y axis.
-func cone(base: Vector3, radius: float, top_radius: float, height: float, sides: int, low: Color, high: Color, turn: float = 0.0) -> void:
-	var inside: Vector3 = base + Vector3(0.0, height * 0.4, 0.0)
-	var top: Vector3 = base + Vector3(0.0, height, 0.0)
+## `lean` moves the top sideways, for branches and bent trunks.
+func cone(base: Vector3, radius: float, top_radius: float, height: float, sides: int, low: Color, high: Color, turn: float = 0.0, lean: Vector3 = Vector3.ZERO) -> void:
+	var inside: Vector3 = base + Vector3(0.0, height * 0.4, 0.0) + lean * 0.4
+	var top: Vector3 = base + Vector3(0.0, height, 0.0) + lean
 	for i: int in sides:
 		var a0: float = turn + TAU * float(i) / float(sides)
 		var a1: float = turn + TAU * float(i + 1) / float(sides)

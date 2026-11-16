@@ -202,3 +202,41 @@ func test_four_player_maps_never_get_a_river() -> void:
 		check(_kind_of(m) != "River Valley", "seed %d: %s" % [seed_value, m.name])
 		check_eq(_symmetry_mismatches(m, 4), 0, "seed %d: quarter-turn symmetric" % seed_value)
 		check(_all_reachable(m), "seed %d: every start and field is reachable" % seed_value)
+
+
+func test_a_region_changes_the_look_and_nothing_else() -> void:
+	var plain: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2)
+	check(SimMapGen.REGIONS.has(plain.region), "a generated map lies in a known region (%s)" % plain.region)
+	for region: String in SimMapGen.REGIONS:
+		var m: SimMap = SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, region)
+		check_eq(m.region, region, "the region asked for is the region given")
+		check(m.terrain == plain.terrain, "%s: the terrain is the same" % region)
+		check(m.heights == plain.heights, "%s: the heights are the same" % region)
+		check(m.field_spots == plain.field_spots and m.uplink_spots == plain.uplink_spots, "%s: fields and uplinks are the same" % region)
+		check(SimMapGen.REGION_NAMES.has(region), "%s has a name" % region)
+	check_eq(SimMapGen.generate(9, SimMapGen.STANDARD_CELLS, 2, "nowhere").region, plain.region, "an unknown region falls back to the seed's")
+
+
+func test_seeds_spread_over_all_regions() -> void:
+	var seen: Dictionary[String, int] = {}
+	for seed_value: int in range(1, 41):
+		var region: String = SimMapGen.pick_region(seed_value)
+		seen[region] = int(seen.get(region, 0)) + 1
+		check_eq(SimMapGen.pick_region(seed_value), region, "seed %d always gives the same region" % seed_value)
+	for region: String in SimMapGen.REGIONS:
+		check(int(seen.get(region, 0)) >= 4, "%s turns up among 40 seeds (%d times)" % [region, int(seen.get(region, 0))])
+
+
+func test_match_settings_choose_the_region() -> void:
+	var config: MatchConfig = MatchConfig.skirmish(3)
+	config.region = "tundra"
+	check_eq(SimSetup.create_match(config).map.region, "tundra", "a generated match takes the chosen region")
+	config.map_id = "twin_fords"
+	check_eq(SimSetup.create_match(config).map.region, "tundra", "so does a hand-made layout")
+	config.region = ""
+	check_eq(SimSetup.create_match(config).map.region, "temperate", "left alone, Twin Fords is in the Greenwood")
+	config.map_id = "crater_ring"
+	check_eq(SimSetup.create_match(config).map.region, "ashland", "and Crater Ring in the Cinder Wastes")
+	config.region = "desert"
+	var back: MatchConfig = SimSave.config_from_dict(SimSave.config_to_dict(config))
+	check_eq(back.region, "desert", "the region survives a save")

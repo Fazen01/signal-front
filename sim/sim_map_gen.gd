@@ -18,25 +18,40 @@ const SMALL_CELLS: int = 64  ## 128 x 128 world units: the compact two-player ma
 const STANDARD_CELLS: int = 88  ## 176 x 176 world units: the default two-player map
 const LARGE_CELLS: int = 96  ## 192 x 192 world units, up to four players
 const LAYOUT_DIR: String = "res://data/maps"
+## Parts of the world a battlefield can lie in. A region changes how the land
+## looks (ground, plants, water, light) and nothing about how it plays.
+const REGIONS: Array[String] = ["temperate", "desert", "tundra", "ashland"]
+const REGION_NAMES: Dictionary[String, String] = {
+	"temperate": "Greenwood", "desert": "Dustlands", "tundra": "Frostline", "ashland": "Cinder Wastes",
+}
 const THEME_NAMES: Dictionary[String, String] = {
 	"plains": "Plains", "river": "River Valley", "highlands": "Highlands", "lakes": "Lakeland", "open": "Open Ground",
 }
 
 
 ## Generates a map for `players` starts (2 or 4) on a square of `size_cells`.
-static func generate(seed_value: int, size_cells: int = SMALL_CELLS, players: int = 2) -> SimMap:
+static func generate(seed_value: int, size_cells: int = SMALL_CELLS, players: int = 2, region: String = "") -> SimMap:
 	var order: int = 4 if players > 2 else 2
 	var attempt: int = 0
 	while attempt < 24:
 		var m: SimMap = _generate_once(seed_value + attempt * 7919, size_cells, order, attempt >= 16)
 		if _starts_connected(m):
 			m.name = "%s %d" % [m.name, seed_value]
+			m.region = pick_region(seed_value, region)
 			return m
 		attempt += 1
 	# Fall back to open ground; always playable.
 	var plain: SimMap = _generate_once(seed_value, size_cells, order, true)
 	plain.name = "Open Ground %d" % seed_value
+	plain.region = pick_region(seed_value, region)
 	return plain
+
+
+## The region a seed gives, unless a particular one is asked for.
+static func pick_region(seed_value: int, wanted: String = "") -> String:
+	if REGIONS.has(wanted):
+		return wanted
+	return REGIONS[SimRng.new(seed_value * 13 + 101).range_i(0, REGIONS.size() - 1)]
 
 
 ## A flat, empty map for tests.
@@ -429,6 +444,8 @@ static func load_layout(id: String) -> SimMap:
 	var m: SimMap = SimMap.new()
 	m.setup(w, h)
 	m.name = str(d.get("name", id))
+	var home: String = str(d.get("region", "temperate"))
+	m.region = home if REGIONS.has(home) else "temperate"
 	var starts: Dictionary[int, Vector2] = {}
 	for y: int in h:
 		var line: String = str(rows[y])

@@ -1,5 +1,6 @@
 {
 	"name": "Crater Ring",
+	"region": "ashland",
 	"players": 2,
 	"desc": "Rich salvage sits inside a rock ring with four narrow gates.",
 	"rows": [

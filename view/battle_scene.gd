@@ -277,7 +277,7 @@ func _read_spectate_args() -> void:
 
 
 func _build_environment() -> void:
-	SceneLight.add_to(self, GameSettings.shadows)
+	SceneLight.add_to(self, GameSettings.shadows, world.map.region)
 
 
 func _process(delta: float) -> void:

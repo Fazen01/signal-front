@@ -9,6 +9,7 @@ const CELL: float = 2.0
 enum Terrain { GROUND, FOREST, ROCK, WATER }
 
 var name: String = "Unnamed"
+var region: String = "temperate"  ## which part of the world this is; only the look depends on it
 var w: int = 0  ## width in cells
 var h: int = 0  ## height in cells
 var terrain: PackedByteArray = PackedByteArray()

@@ -8,12 +8,14 @@ static func create_match(config: MatchConfig) -> SimWorld:
 	var map: SimMap = null
 	if config.map_id != "":
 		map = SimMapGen.load_layout(config.map_id)
+		if map != null and SimMapGen.REGIONS.has(config.region):
+			map.region = config.region
 	if map == null or map.starts.size() < config.player_count():
 		# Generated: the large size whenever more than two players need starts.
 		var cells: int = config.map_cells
 		if config.player_count() > 2:
 			cells = maxi(cells, SimMapGen.LARGE_CELLS)
-		map = SimMapGen.generate(config.seed_value, cells, config.starts_needed())
+		map = SimMapGen.generate(config.seed_value, cells, config.starts_needed(), config.region)
 	var w: SimWorld = SimWorld.new(data, map, config.seed_value)
 	for i: int in config.player_count():
 		var p: SimPlayer = w.add_player(

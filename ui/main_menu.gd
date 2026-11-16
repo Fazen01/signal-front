@@ -63,6 +63,7 @@ var _map_ids: Array[String] = []  ## "" = generated
 var _map_players: Array[int] = []
 var _map_blurb: Label = null
 var _opponents: OptionButton = null
+var _region: OptionButton = null
 var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
@@ -258,6 +259,12 @@ func _build_setup() -> void:
 	_map_blurb.custom_minimum_size = Vector2(520.0, 22.0)
 	box.add_child(_map_blurb)
 	_map.item_selected.connect(func(_i: int) -> void: _update_map())
+	_region = OptionButton.new()
+	_region.add_item("From the seed")
+	for id: String in SimMapGen.REGIONS:
+		_region.add_item(SimMapGen.REGION_NAMES[id])
+	_region.tooltip_text = "Where the battlefield lies. It changes the look of the land, not how it plays."
+	_row(box, "Region", _region)
 	_opponents = OptionButton.new()
 	for n: int in [1, 2, 3]:
 		_opponents.add_item("%d opponent%s" % [n, "" if n == 1 else "s (free-for-all, larger map)"])
@@ -441,6 +448,8 @@ func is_setup_open() -> bool:
 func start_skirmish() -> void:
 	var config: MatchConfig = MatchConfig.skirmish(int(_seed.value), _level.selected)
 	config.map_id = _map_ids[maxi(_map.selected, 0)]
+	if _region.selected > 0:
+		config.region = SimMapGen.REGIONS[_region.selected - 1]
 	if config.map_id == COMPACT_MAP:
 		config.map_id = ""
 		config.map_cells = SimMapGen.SMALL_CELLS

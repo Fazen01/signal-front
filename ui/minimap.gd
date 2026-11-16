@@ -73,15 +73,16 @@ func _process(delta: float) -> void:
 
 
 func _terrain_color(t: int) -> Color:
+	var look: RegionLook = RegionLook.of(world.map.region)
 	match t:
 		SimMap.Terrain.FOREST:
-			return Color(0.13, 0.28, 0.13)
+			return look.map_forest
 		SimMap.Terrain.ROCK:
-			return Color(0.44, 0.44, 0.45)
+			return look.map_rock
 		SimMap.Terrain.WATER:
-			return Color(0.17, 0.42, 0.56)
+			return look.map_water
 		_:
-			return Color(0.31, 0.42, 0.21)
+			return look.map_ground
 
 
 func _refresh_texture() -> void:

@@ -219,8 +219,8 @@
 	},
 	"mote": {
 		"name": "Mote", "desc": "The Array's basic frame: a cheap walking drone with a pulse carbine. Weak alone, built in dozens.",
-		"faction": "vesper", "tier": 1, "cost": 50, "build_time": 7.0, "bandwidth": 1,
-		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
+		"faction": "vesper", "tier": 1, "cost": 55, "build_time": 7.5, "bandwidth": 1,
+		"hp": 66, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["mote_pulse"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "mote", "hotkey": "T"
 	},
 	"shard": {
