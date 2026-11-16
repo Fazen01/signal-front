@@ -141,9 +141,10 @@ game except through software-rendered screenshots, so:
   for taste.
 - Frame rate on a real GPU is unmeasured. Script-side cost with 300 units in
   one fight is about 7–8 ms a frame.
-- Balance is tuned with AI-vs-AI batches (roughly 58 / 54 / 38 % win rates for
-  Aegis / Foundry / Nomad at last measure). Matches between AIs last about 9
-  minutes, shorter than the 15–25 the design aims for.
+- Balance is tuned with AI-vs-AI batches (roughly 56 / 53 / 37 % win rates for
+  Aegis / Foundry / Nomad at last measure). Matches between AIs last about 19
+  minutes on average, inside the 15–25 the design aims for; Nomad matches run
+  shorter.
 
 ## For developers
 
@@ -165,7 +166,7 @@ This imports the project, runs the unit tests, boots the menu and battle
 scenes headless, drives the interface with synthetic input, walks the whole
 menu → match → result → load → tutorial loop, plays five AI-vs-AI matches
 that must each end with a winner, then exports the game as a pack and walks
-the loop again from the export. It fails on any script error. About three
+the loop again from the export. It fails on any script error. About eight
 minutes.
 
 Other tools:

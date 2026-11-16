@@ -103,8 +103,8 @@ decision in the session log at the bottom.
       spots (`tools/perf_bench.gd`, `tools/frame_bench.tscn`)
 - [ ] Confirm 60 fps with 300 units on real hardware (this needs a GPU: the
       sessions only have software rendering, so the draw cost is unmeasured)
-- [ ] Bring 1v1 match length up to the 15–25 minute target (AI-vs-AI matches
-      average about 9 minutes after tuning)
+- [x] Bring 1v1 match length up to the 15–25 minute target (AI-vs-AI matches
+      averaged about 9 minutes; now 19 on seeds the tuning never saw)
 
 ## M14 — Finish
 
@@ -176,7 +176,13 @@ over three or four seeds per faction pairing, Normal vs Normal:
     human players too and is tested.
 - Other balance changes in the same commit: fields 10,000 / 16,000 (were
   5,000 / 9,000), unloading 2 s (was 1 s), Bastion splash 1.6 -> 1.3.
-- Validation on seeds 5-8, which the tuning never saw, is running.
+- Validation on seeds 5-8, which the tuning never saw (36 games, Normal vs
+  Normal): average 19.1 minutes, no stalemates; per pairing 11.7 (Nomad
+  mirror) to 25.6 (Aegis mirror). Roadmap item ticked: the average is inside
+  15-25, though Nomad games run short.
+- Win rates over all 72 games of the last two batches (32 non-mirror games
+  per faction, roughly +/-9 points of noise): Aegis 56%, Foundry 53%,
+  Nomad 37% - the same picture session 1 left. Nomad is next.
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
