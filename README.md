@@ -141,8 +141,8 @@ game except through software-rendered screenshots, so:
   for taste.
 - Frame rate on a real GPU is unmeasured. Script-side cost with 300 units in
   one fight is about 7–8 ms a frame.
-- Balance is tuned with AI-vs-AI batches (roughly 56 / 41 / 53 % win rates for
-  Aegis / Foundry / Nomad at last measure). Matches between AIs last about 20
+- Balance is tuned with AI-vs-AI batches (roughly 53 / 56 / 41 % win rates for
+  Aegis / Foundry / Nomad at last measure). Matches between AIs last about 21
   minutes on average, inside the 15–25 the design aims for; Nomad mirrors run
   shorter.
 

@@ -91,7 +91,7 @@
 	"breaker": {
 		"name": "Breaker", "desc": "Rocket infantry. Slow, tough, and bad news for vehicles and aircraft.",
 		"faction": "foundry", "tier": 1, "cost": 120, "build_time": 9.0, "bandwidth": 1,
-		"hp": 95, "armor": "infantry", "move": "infantry", "speed": 2.2, "turn_rate": 12.0,
+		"hp": 115, "armor": "infantry", "move": "infantry", "speed": 2.2, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["breaker_rocket"], "ai_role": "anti_armor", "ai_weight": 2.2,
 		"model": "breaker", "hotkey": "B"
 	},

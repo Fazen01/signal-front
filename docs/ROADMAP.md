@@ -251,8 +251,9 @@ over three or four seeds per faction pairing, Normal vs Normal:
   - Marksman damage 48 -> 40: worse (Aegis 59%, Foundry 37%, and two
     Aegis-Foundry draws in 72 games, those games running 33-36 minutes).
     Reverted.
-  - In progress (12:40 UTC): Breaker health 95 -> 115 and Levy range
-    7.5 -> 8 (a Trooper's range), batches running.
+  - Breaker health 95 -> 115 and Levy range 7.5 -> 8 (a Trooper's range):
+    72 games, no draws, 21.5 minutes; Aegis 53%, Foundry 56%, Nomad 41%
+    (was 62 / 40 / 47). Foundry vs Aegis 7 of 16 (was 4 of 16). Kept.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
