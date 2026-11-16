@@ -7,6 +7,7 @@ extends SceneTree
 ##          [--unit-build=1.5] [--bld-build=1.5] [--harvest=6.0]
 ##          [--hq-hp=2.0] [--bld-hp=1.5] [--turret-dmg=1.5] [--damage=0.8]
 ##          [--wave-cd=1.5] [--first-wave=10] [--start-salvage=400]
+##          [--fields=1.5]  salvage in every field
 ##          [--map-cells=88]  generated map size (64 is the shipped two-player size)
 ##          [--ai.<field>=value]  set any SimAI variable on every AI
 ##          [--trace=1]  a status line for every 30 seconds of each match
@@ -62,6 +63,10 @@ func _init() -> void:
 				config.map_cells = int(knobs["map-cells"])
 			var w: SimWorld = SimSetup.create_match(config)
 			w.collect_events = false
+			if knobs.has("fields"):
+				for e: SimEntity in w.entities:
+					if e.kind == SimEntity.Kind.FIELD:
+						e.salvage = int(float(e.salvage) * knobs["fields"])
 			for ai: SimAI in w.ais:
 				if knobs.has("wave-cd"):
 					ai.wave_cooldown_ticks = int(float(ai.wave_cooldown_ticks) * knobs["wave-cd"])

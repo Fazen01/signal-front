@@ -146,6 +146,13 @@ games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
 matches are decided by minute 3-6 when one army is wiped out; the rest is
 mopping up. Slower macro plus tougher defences together -> average 13.9; a
 larger generated map (88 cells instead of 64) alone -> 13.6, median 12.0.
+The full mix on an 88-cell map overshot: median 16 but six 60-minute
+stalemates in 27 games. Traces: the map's salvage (about 46,000) is gone by
+minute 24, after which both sides live on trickles and armies of basic
+infantry cannot crack buffed turrets and a double-health HQ that is repaired
+for free. Without the turret and building buffs, with fields x1.5, harvest
+6 s, build times x1.3, HQ x1.5 and AI wave gaps x1.5 on an 88-cell map:
+average 16.2, median 15.2, no stalemates (candidate "X1", being refined).
 Tried and dropped: waves that retreat when cut below 40% made matches
 shorter (8.4), because the survivors die running and the enemy follows.
 
