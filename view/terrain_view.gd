@@ -50,10 +50,11 @@ void fragment() {
 	stone *= 0.94 + 0.08 * sin(wpos.y * 7.0 + mid.r * 9.0);
 	vec3 sand = mix(sand_dark, sand_light, fine.r);
 
-	float forest = smoothstep(0.30, 0.56, COLOR.r + wob);
-	float rock = smoothstep(0.22, 0.46, COLOR.g + wob * 0.8);
-	float shore = smoothstep(0.10, 0.30, COLOR.b + wob * 0.25);
-	float under = smoothstep(0.36, 0.64, COLOR.b);
+	// Terrain weights: UV = (forest, rock), UV2.x = water.
+	float forest = smoothstep(0.30, 0.56, UV.x + wob);
+	float rock = smoothstep(0.22, 0.46, UV.y + wob * 0.8);
+	float shore = smoothstep(0.10, 0.34, UV2.x + wob * 0.25);
+	float under = smoothstep(0.40, 0.70, UV2.x);
 
 	vec3 col = mix(grass, litter, forest);
 	col = mix(col, sand, shore);
@@ -62,6 +63,8 @@ void fragment() {
 	float steep = smoothstep(0.90, 0.72, up) * (1.0 - under);
 	col = mix(col, stone * 0.8, steep);
 	col *= 0.90 + 0.20 * grit;
+	// Fine speckle so the ground still has grain with the camera right down.
+	col *= 0.93 + 0.14 * texture(noise_tex, p * 2.3).b;
 	ALBEDO = col;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.12;
@@ -129,7 +132,8 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = pow(COLOR.rgb, vec3(2.2)) * dim;
+	// Vertex colours reach the shader already converted to linear light.
+	ALBEDO = COLOR.rgb * dim;
 	// Leaves let some light through: the shaded side never goes fully dark.
 	EMISSION = ALBEDO * lift;
 	ROUGHNESS = 1.0;
@@ -231,14 +235,16 @@ func _build_ground() -> void:
 	var row: int = map.w + 1
 	var verts: PackedVector3Array = PackedVector3Array()
 	var normals: PackedVector3Array = PackedVector3Array()
-	var colors: PackedColorArray = PackedColorArray()
+	var land: PackedVector2Array = PackedVector2Array()
+	var wet: PackedVector2Array = PackedVector2Array()
 	var indices: PackedInt32Array = PackedInt32Array()
 	for y: int in range(0, map.h + 1):
 		for x: int in range(0, map.w + 1):
 			var i: int = y * row + x
 			verts.append(_corner(x, y))
 			normals.append(Vector3(_height(x - 1, y) - _height(x + 1, y), 2.0 * SimMap.CELL, _height(x, y - 1) - _height(x, y + 1)).normalized())
-			colors.append(Color(_forest[i], _rock[i], _water[i], 1.0))
+			land.append(Vector2(_forest[i], _rock[i]))
+			wet.append(Vector2(_water[i], 0.0))
 	for y: int in map.h:
 		for x: int in map.w:
 			var i: int = y * row + x
@@ -247,7 +253,8 @@ func _build_ground() -> void:
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = verts
 	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_TEX_UV] = land
+	arrays[Mesh.ARRAY_TEX_UV2] = wet
 	arrays[Mesh.ARRAY_INDEX] = indices
 	var mesh: ArrayMesh = ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
@@ -408,7 +415,6 @@ func _build_apron() -> void:
 		buf.quad_grad(a, b, Vector3(b.x + reach, floor_y, b.z), Vector3(a.x + reach, floor_y, a.z), below, near, far)
 	var slope_mat: StandardMaterial3D = StandardMaterial3D.new()
 	slope_mat.vertex_color_use_as_albedo = true
-	slope_mat.vertex_color_is_srgb = true
 	slope_mat.roughness = 1.0
 	slope_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var slope: MeshInstance3D = MeshInstance3D.new()
@@ -458,13 +464,13 @@ func _spot(x: int, y: int, margin: float, scale_min: float, scale_max: float, st
 
 func _conifer(tiers: int, girth: float) -> ArrayMesh:
 	var buf: MeshBuf = MeshBuf.new()
-	buf.cone(Vector3.ZERO, 0.13, 0.08, 0.95, 5, Color(0.26, 0.19, 0.14), Color(0.42, 0.31, 0.21))
+	buf.cone(Vector3.ZERO, 0.13, 0.08, 0.95, 5, Color(0.16, 0.11, 0.08), Color(0.31, 0.22, 0.14))
 	buf.soften = 0.9
 	var y: float = 0.55
 	for t: int in tiers:
 		var k: float = 1.0 - float(t) / float(tiers + 1)
 		var lift: float = 0.10 * float(t)
-		buf.cone(Vector3(0.0, y, 0.0), 0.80 * k * girth, 0.0, 1.25 * (0.75 + 0.25 * k), 7, Color(0.19 + lift * 0.2, 0.35 + lift * 0.3, 0.22), Color(0.33 + lift * 0.3, 0.54 + lift * 0.4, 0.31), float(t) * 0.5)
+		buf.cone(Vector3(0.0, y, 0.0), 0.80 * k * girth, 0.0, 1.25 * (0.75 + 0.25 * k), 7, Color(0.07 + lift * 0.15, 0.20 + lift * 0.25, 0.11), Color(0.17 + lift * 0.25, 0.37 + lift * 0.3, 0.18), float(t) * 0.5)
 		y += 0.62 * (0.8 + 0.2 * k)
 	return buf.commit()
 
@@ -472,10 +478,10 @@ func _conifer(tiers: int, girth: float) -> ArrayMesh:
 func _broadleaf(shape_seed: int) -> ArrayMesh:
 	var rng: SimRng = SimRng.new(shape_seed)
 	var buf: MeshBuf = MeshBuf.new()
-	buf.cone(Vector3.ZERO, 0.16, 0.10, 1.25, 5, Color(0.27, 0.20, 0.15), Color(0.44, 0.33, 0.22))
+	buf.cone(Vector3.ZERO, 0.16, 0.10, 1.25, 5, Color(0.17, 0.12, 0.08), Color(0.33, 0.23, 0.15))
 	buf.soften = 0.9
-	var low: Color = Color(0.19, 0.36, 0.14)
-	var high: Color = Color(0.43, 0.60, 0.25)
+	var low: Color = Color(0.10, 0.24, 0.07)
+	var high: Color = Color(0.26, 0.42, 0.13)
 	buf.blob(Vector3(0.0, 1.85, 0.0), Vector3(0.92, 0.72, 0.92), 1, 0.16, low, high, rng)
 	buf.blob(Vector3(0.55, 1.5, 0.25), Vector3(0.55, 0.45, 0.55), 0, 0.14, low, high, rng)
 	buf.blob(Vector3(-0.5, 1.6, -0.3), Vector3(0.6, 0.48, 0.6), 0, 0.14, low, high, rng)
@@ -487,8 +493,8 @@ func _bush(shape_seed: int) -> ArrayMesh:
 	var rng: SimRng = SimRng.new(shape_seed)
 	var buf: MeshBuf = MeshBuf.new()
 	buf.soften = 0.9
-	var low: Color = Color(0.18, 0.34, 0.14)
-	var high: Color = Color(0.40, 0.56, 0.24)
+	var low: Color = Color(0.09, 0.21, 0.07)
+	var high: Color = Color(0.23, 0.38, 0.13)
 	buf.blob(Vector3(0.0, 0.28, 0.0), Vector3(0.5, 0.36, 0.5), 0, 0.2, low, high, rng)
 	buf.blob(Vector3(0.38, 0.2, 0.15), Vector3(0.32, 0.26, 0.32), 0, 0.2, low, high, rng)
 	buf.blob(Vector3(-0.3, 0.22, -0.25), Vector3(0.36, 0.28, 0.36), 0, 0.2, low, high, rng)
@@ -498,7 +504,7 @@ func _bush(shape_seed: int) -> ArrayMesh:
 func _boulder(shape_seed: int, detail: int) -> ArrayMesh:
 	var rng: SimRng = SimRng.new(shape_seed)
 	var buf: MeshBuf = MeshBuf.new()
-	buf.blob(Vector3(0.0, 0.35, 0.0), Vector3(1.0, 0.72, 0.86), detail, 0.24, Color(0.30, 0.31, 0.33), Color(0.66, 0.66, 0.65), rng)
+	buf.blob(Vector3(0.0, 0.35, 0.0), Vector3(1.0, 0.72, 0.86), detail, 0.24, Color(0.20, 0.20, 0.22), Color(0.52, 0.52, 0.50), rng)
 	return buf.commit()
 
 
@@ -506,8 +512,8 @@ func _tuft() -> ArrayMesh:
 	var buf: MeshBuf = MeshBuf.new()
 	# Lit like the ground it stands on, whichever way a blade happens to face.
 	buf.soften = 50.0
-	var low: Color = Color(0.36, 0.50, 0.24)
-	var high: Color = Color(0.62, 0.72, 0.36)
+	var low: Color = Color(0.21, 0.33, 0.13)
+	var high: Color = Color(0.44, 0.54, 0.22)
 	var above: Vector3 = Vector3(0.0, -5.0, 0.0)
 	for i: int in 5:
 		var ang: float = float(i) * 1.257 + 0.3

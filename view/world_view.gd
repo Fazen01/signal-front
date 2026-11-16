@@ -156,6 +156,12 @@ func _sound(sound: String, at: Vector2, gap_ms: int, gain_db: float = 0.0) -> vo
 		audio.play_at(sound, at, gap_ms, gain_db)
 
 
+func _kick(id: int) -> void:
+	var v: EntityView = views.get(id, null)
+	if v != null:
+		v.kick()
+
+
 func _altitude_of(id: int) -> float:
 	var e: SimEntity = world.get_entity(id)
 	if e == null or e.def == null:
@@ -203,6 +209,7 @@ func handle_event(ev: SimEvent) -> void:
 		SimEvent.Type.RANK_UP:
 			fx.ground_ring(_ground(ev.pos, 0.2), 1.6, Color(1.0, 0.85, 0.3, 0.9), 0.8, true)
 		SimEvent.Type.SHOT:
+			_kick(ev.id)
 			var heavy: bool = ev.text == "tracer_heavy"
 			var hit: Vector3 = _ground(ev.pos2, 0.8 + _altitude_of(ev.other_id))
 			fx.tracer(_ground(ev.pos, 1.0 + _altitude_of(ev.id)), hit, heavy)
@@ -210,6 +217,7 @@ func handle_event(ev: SimEvent) -> void:
 				fx.sparks(hit, 5 if heavy else 3)
 			_sound("shot_heavy" if heavy else "shot", ev.pos, 60)
 		SimEvent.Type.PROJECTILE:
+			_kick(ev.id)
 			fx.flash(_ground(ev.pos, 1.1 + _altitude_of(ev.id)), 0.45, Color(1.0, 0.8, 0.45, 0.9), 0.08)
 			if ev.text == "missile":
 				_sound("missile", ev.pos, 120)

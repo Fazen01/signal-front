@@ -17,6 +17,13 @@ var seen_once: bool = false  ## the local player has seen this at least once
 var owner_id: int = -1
 var altitude: float = 0.0  ## aircraft are drawn this far above the ground
 var _rotors: Array[Node3D] = []
+var _spins: Array[Node3D] = []  ## radar dishes and the like, turning slowly
+var _cargo: Node3D = null  ## a hauler's load, shown while it carries salvage
+var _turret_home: Vector3 = Vector3.ZERO
+var _kick: float = 0.0  ## turret recoil, 1 just after firing, decaying to 0
+var _view_scale: float = 1.0
+var _walks: bool = false  ## infantry bob as they move
+var _stride: float = 0.0
 var _smoke: CPUParticles3D = null  ## rises from badly damaged vehicles and buildings
 var _selected: bool = false
 
@@ -26,6 +33,7 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	kind = e.kind
 	owner_id = e.owner
 	name = "E%d" % e.id
+	set_process(false)
 	match e.kind:
 		SimEntity.Kind.UNIT, SimEntity.Kind.BUILDING:
 			var team: Color = world.players[e.owner].color if e.owner >= 0 else Color(0.7, 0.7, 0.7)
@@ -38,13 +46,15 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 		_:
 			model = ModelFactory.build_uplink()
 	add_child(model)
-	turret = model.get_node_or_null("Turret") as Node3D
 	if e.def != null and e.kind == SimEntity.Kind.UNIT:
 		altitude = e.def.altitude()
 		model.position.y = altitude
-		for child: Node in model.get_children():
-			if str(child.name).begins_with("Rotor"):
-				_rotors.append(child as Node3D)
+		# Units are drawn a little larger than their footprint so they read
+		# from the usual camera height; infantry most of all.
+		_walks = e.def.is_infantry()
+		_view_scale = 1.25 if _walks else 1.1
+		model.scale = Vector3.ONE * _view_scale
+	_find_parts()
 	var ring_color: Color = RING_NEUTRAL
 	if e.owner >= 0:
 		ring_color = RING_OWN if e.owner == local_player else RING_ENEMY
@@ -85,21 +95,51 @@ func refresh_owner(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	owner_id = e.owner
 	var team: Color = world.players[e.owner].color if e.owner >= 0 else Color(0.9, 0.9, 0.95)
 	model.queue_free()
-	_rotors.clear()
 	if kind == SimEntity.Kind.UPLINK:
 		model = ModelFactory.build_uplink(team)
 	else:
 		model = ModelFactory.build(e.def.model, team)
 		model.position.y = altitude
-		for child: Node in model.get_children():
-			if str(child.name).begins_with("Rotor"):
-				_rotors.append(child as Node3D)
+		if kind == SimEntity.Kind.UNIT:
+			model.scale = Vector3.ONE * _view_scale
 	add_child(model)
-	turret = model.get_node_or_null("Turret") as Node3D
+	_find_parts()
 	var ring_color: Color = RING_NEUTRAL
 	if e.owner >= 0:
 		ring_color = RING_OWN if e.owner == local_player else RING_ENEMY
 	select_ring.material_override = ModelFactory.mat(ring_color, 1.0)
+
+
+## Looks up the moving groups of the current model.
+func _find_parts() -> void:
+	turret = model.get_node_or_null("Turret") as Node3D
+	_turret_home = turret.position if turret != null else Vector3.ZERO
+	_cargo = model.get_node_or_null("Cargo") as Node3D
+	_rotors.clear()
+	_spins.clear()
+	for child: Node in model.find_children("*", "Node3D", true, false):
+		var part: String = str(child.name)
+		if part.begins_with("Rotor"):
+			_rotors.append(child as Node3D)
+		elif part.begins_with("Spin"):
+			_spins.append(child as Node3D)
+
+
+## The unit just fired: its turret jolts back.
+func kick() -> void:
+	if turret != null:
+		_kick = 1.0
+		set_process(true)
+
+
+## Only runs while a recoil is playing out.
+func _process(delta: float) -> void:
+	_kick = maxf(0.0, _kick - delta * 5.0)
+	if turret != null:
+		# Back along the barrel, which points down the turret's own +X.
+		turret.position = _turret_home + turret.transform.basis.x * (-0.22 * _kick * _kick)
+	if _kick <= 0.0:
+		set_process(false)
 
 
 func _update_damage_smoke(e: SimEntity) -> void:
@@ -149,17 +189,37 @@ func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 			model.rotation.y = -f
 			if turret != null:
 				turret.rotation.y = -(lerp_angle(e.prev_aim, e.aim, alpha) - f)
+			var t: float = float(Time.get_ticks_msec()) * 0.001
 			if altitude > 0.0:
-				var t: float = float(Time.get_ticks_msec()) * 0.001
 				model.position.y = altitude + sin(t * 1.7 + float(entity_id)) * 0.18
 				for r: Node3D in _rotors:
 					r.rotation.y = t * 38.0
+			elif _walks:
+				# A small bounce in step while on the move.
+				var moving: bool = e.pos.distance_squared_to(e.prev_pos) > 0.000001
+				_stride = lerpf(_stride, 1.0 if moving else 0.0, 0.2)
+				model.position.y = absf(sin(t * 9.0 + float(entity_id))) * 0.09 * _stride
+			if _cargo != null:
+				var fill: float = clampf(float(e.cargo) / maxf(1.0, float(e.def.capacity)), 0.0, 1.0)
+				_cargo.visible = fill > 0.02
+				var heap: float = lerpf(0.35, 1.0, fill)
+				if fill > 0.02 and absf(_cargo.scale.y - heap) > 0.02:
+					_cargo.scale = Vector3(1.0, heap, 1.0)
+			for sp: Node3D in _spins:
+				sp.rotation.y = t * 1.4
 		SimEntity.Kind.BUILDING:
 			if turret != null:
 				turret.rotation.y = -lerp_angle(e.prev_aim, e.aim, alpha)
+			if e.constructed and not _spins.is_empty():
+				var bt: float = float(Time.get_ticks_msec()) * 0.001
+				for sp: Node3D in _spins:
+					sp.rotation.y = bt * 1.1 + float(entity_id)
 			var sy: float = 1.0 if e.constructed else lerpf(0.12, 1.0, e.build_progress)
 			if absf(model.scale.y - sy) > 0.001:
 				model.scale = Vector3(1.0, sy, 1.0)
+		SimEntity.Kind.UPLINK:
+			for sp: Node3D in _spins:
+				sp.rotation.y = float(Time.get_ticks_msec()) * 0.0009
 		SimEntity.Kind.FIELD:
 			var s: float = lerpf(0.45, 1.0, clampf(float(e.salvage) / e.max_hp, 0.0, 1.0))
 			if absf(model.scale.x - s) > 0.005:

@@ -118,14 +118,18 @@ decision in the session log at the bottom.
 The owner asked for the units, buildings and map to look better. View layer
 only (`view/`): nothing here changes the simulation or the data.
 
-- [ ] Terrain: blended ground colours instead of per-cell checks, shores,
+- [x] Terrain: blended ground colours instead of per-cell checks, shores,
       ground scatter, better trees and rocks, animated water, sky and lighting
-- [ ] Models: bevelled geometry and richer materials for every unit and
-      building; more detail on the shared shapes (tracks, wheels, soldiers,
-      foundations)
-- [ ] Life: turret recoil, spinning dishes, hauler cargo, walking bob,
-      contact shadows
-- [ ] Buildings: lit windows, roof detail, construction scaffolding
+- [x] Models: every unit and building is baked into one mesh per rigid part
+      (one draw call each instead of one per box), with chamfered edges and
+      ground shading; tracks with road wheels, wheels with hubs, soldiers
+      with limbs; lamps, windows, hatches, aerials and radar across all three
+      factions
+- [x] Life: turret recoil, spinning dishes, hauler cargo that fills up,
+      infantry bounce as they walk
+- [ ] Buildings under construction: scaffolding instead of a squashed model
+- [ ] Effects: muzzle flashes and explosions to match the new look
+- [ ] A 3D backdrop behind the main menu
 
 ## Session log
 
@@ -149,7 +153,29 @@ better graphics (units, buildings, map) and to carry on; that is M15 above.
 - Godot verification: available, software-GL screenshots included. Baseline
   screenshots of the old look were taken first for comparison.
 
-Working on: M15, starting with the models.
+- **Decision: units are drawn larger than their footprint** (vehicles ×1.1,
+  infantry ×1.25, view only). At the usual camera height infantry were a
+  dozen pixels tall. Nothing in the simulation changes.
+- **Decision: linear tone mapping.** Filmic washed the team colours out to
+  pastel; linear keeps them saturated and the light levels are set so
+  nothing but lamps reaches full white.
+- **Finding: vertex colours arrive in shaders already converted to linear
+  light** in the Compatibility renderer. Converting again in the shader
+  made every model nearly black. Anything that is a weight rather than a
+  colour (the terrain blend) travels in UV channels instead.
+- **Finding: water used to disappear on high ground.** The old water was one
+  flat plane, and the height field rolls by more than the water is sunk, so
+  rivers on a rise showed as dry, impassable grass. The new water surface
+  follows the land around it.
+- Shader code cannot be checked headless (the dummy renderer does not
+  compile it). Every shader here was compiled and looked at through
+  `tools/screenshot.sh`; `tools/check.sh` only proves the scripts run.
+- New capture scripts: `scenery_water`, `scenery_forest`, `scenery_rock`,
+  `scenery_wide` (fog off), and `page0`..`page7` for `tools/gallery.tscn`
+  (eight models at a time, close up).
+
+Working on: M15 — terrain, models and animation are in; next the
+construction look, effects and a menu backdrop.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 

@@ -20,6 +20,12 @@ func _ready() -> void:
 			buildings.append(def)
 		else:
 			units.append(def)
+	# "page<N>" as the capture script shows eight models at a time, close up:
+	# tools/screenshot.sh gallery_p0 10 page0 res://tools/gallery.tscn
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--script=page"):
+			_show_page(units + buildings, int(arg.trim_prefix("--script=page")))
+			return
 	# Units in rows of seven at the front, buildings in rows of five behind.
 	var i: int = 0
 	for def: EntityDef in units:
@@ -38,6 +44,26 @@ func _ready() -> void:
 	cam.fov = 40.0
 	add_child(cam)
 	cam.look_at_from_position(Vector3(2.0, 40.0, 46.0), Vector3(2.0, 0.0, 3.0), Vector3.UP)
+	cam.current = true
+
+
+func _show_page(defs: Array[EntityDef], page: int) -> void:
+	for k: int in 8:
+		var index: int = page * 8 + k
+		if index >= defs.size():
+			break
+		var def: EntityDef = defs[index]
+		var model: Node3D = ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[index % 2])
+		var gap: float = 9.5 if def.is_building else 5.5
+		_put(model, Vector3((float(k % 4) - 1.5) * gap, def.altitude() * 0.35, (float(k / 4) - 0.5) * gap), def.name)
+	var close: bool = page * 8 < defs.size() and not defs[page * 8].is_building
+	var cam: Camera3D = Camera3D.new()
+	cam.fov = 40.0
+	add_child(cam)
+	if close:
+		cam.look_at_from_position(Vector3(0.0, 13.0, 15.0), Vector3(0.0, 0.0, 0.6), Vector3.UP)
+	else:
+		cam.look_at_from_position(Vector3(0.0, 24.0, 27.0), Vector3(0.0, 0.0, 1.5), Vector3.UP)
 	cam.current = true
 
 

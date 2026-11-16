@@ -36,10 +36,9 @@ static func add_to(parent: Node, shadows: bool) -> void:
 	env.background_color = Color(0.03, 0.04, 0.05)
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.5
+	env.ambient_light_energy = 0.45
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_white = 2.2
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	var we: WorldEnvironment = WorldEnvironment.new()
 	we.name = "Environment"
 	we.environment = env
