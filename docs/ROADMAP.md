@@ -339,6 +339,21 @@ are not to be built.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 6, 15:50 UTC (branch `claude/relay-session-1116-1550`)
+
+Status: **in progress** — merged the two live branches, checking the result.
+
+- Newest remote commit at the start was `720b5c0` on
+  `claude/relay-session-1116-1450` (session 5), 31 minutes old, with nothing
+  after it, so session 5 is taken to have been cut off. Its entry below
+  still says "in progress"; whatever balance work it had not pushed is lost.
+- This branch starts from session 5's and **merges
+  `claude/gracious-lovelace-fxl9n2`** (`a7369d8`: M28, the per-faction
+  interface, two balance steps, the roadmap with M29-M34). The merge was
+  clean. Sessions 2 and 4 (`-0451`, `-0654`) are still not merged, for the
+  reasons session 5 gives.
+- Godot verification: available.
+
 ### 2026-11-16 — session 5, 14:50 UTC (branch `claude/relay-session-1116-1450`)
 
 Status: **in progress** — M26, balance across eight factions.
