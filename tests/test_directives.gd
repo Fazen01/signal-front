@@ -155,12 +155,13 @@ func test_reinforcement_drop_delivers_squad() -> void:
 	SimTestUtil.run(w, 10)
 	check_eq(w.count_units(0), before, "nothing yet during the delay")
 	SimTestUtil.run(w, int(def.duration * 20.0) + 5)
-	check_eq(w.count_units(0), before + def.squad.size(), "squad delivered")
+	var squad_size: int = w.players[0].faction.drop_squad.size()
+	check_eq(w.count_units(0), before + squad_size, "squad delivered")
 	var close: int = 0
 	for e: SimEntity in w.entities:
 		if e.owner == 0 and e.kind == SimEntity.Kind.UNIT and e.pos.distance_to(at) < 6.0:
 			close += 1
-	check_eq(close, def.squad.size(), "squad arrives at the target")
+	check_eq(close, squad_size, "squad arrives at the target")
 
 
 func test_veterancy_ranks() -> void:

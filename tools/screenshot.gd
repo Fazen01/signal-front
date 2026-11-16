@@ -30,6 +30,13 @@ func _ready() -> void:
 		print("BOOT FAILED: cannot load %s" % _scene_path)
 		get_tree().quit(1)
 		return
+	if _script_name == "foundry":
+		# Play as the Foundry Pact for this capture.
+		var config: MatchConfig = MatchConfig.skirmish(1)
+		config.factions = ["foundry", "aegis"]
+		var game: GameState = get_node_or_null("/root/Game") as GameState
+		if game != null:
+			game.pending_config = config
 	_scene = packed.instantiate()
 	add_child(_scene)
 
@@ -119,6 +126,24 @@ func _run_script(battle: BattleScene) -> void:
 				for e: SimEntity in battle.world.entities:
 					if e.owner == battle.local_player and e.def != null and e.def.is_armed() and e.kind == SimEntity.Kind.UNIT:
 						e.rank = 2
+		"foundry":
+			if _count == 3:
+				var fw: SimWorld = battle.world
+				var fme: int = battle.local_player
+				var core: Vector2 = fw.players[fme].start_pos
+				fw.players[fme].salvage = 3000
+				fw.spawn_building("muster_hall", fme, fw.map.cell_of(core) + Vector2i(5, -2), true)
+				fw.spawn_building("pylon", fme, fw.map.cell_of(core) + Vector2i(9, 6), true)
+				fw.spawn_building("crawler_factory", fme, fw.map.cell_of(core) + Vector2i(-1, 5), true)
+				fw.spawn_building("bastion", fme, fw.map.cell_of(core) + Vector2i(7, 4), true)
+				fw.spawn_unit("mauler", fme, core + Vector2(15.0, 6.0))
+				fw.spawn_unit("tusk", fme, core + Vector2(12.0, 9.0))
+				fw.spawn_unit("anvil", fme, core + Vector2(9.0, 12.0))
+				fw.spawn_unit("ratchet", fme, core + Vector2(16.0, 10.0))
+				var cr: SimEntity = fw.spawn_unit("crawler", fme, core + Vector2(6.0, 14.0))
+				battle.controller.set_selection([cr.id])
+				battle.cam.set_distance(52.0)
+				battle.cam.center_on(core + Vector2(8.0, 6.0))
 		"result":
 			if _count == 5:
 				battle.world.push_command(SimCommand.surrender(battle.local_player))

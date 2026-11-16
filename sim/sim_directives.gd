@@ -185,11 +185,12 @@ static func _shell(w: SimWorld, t: Timed) -> void:
 static func _drop(w: SimWorld, t: Timed) -> void:
 	if w.players[t.player].defeated:
 		return
-	var n: int = t.def.squad.size()
+	var squad: Array[String] = w.players[t.player].faction.drop_squad
+	var n: int = squad.size()
 	for i: int in n:
 		var ang: float = float(i) * TAU / float(maxi(n, 1))
 		var at: Vector2 = w.map.nearest_free_pos(t.pos + Vector2.from_angle(ang) * 1.6)
-		w.spawn_unit(t.def.squad[i], t.player, at, ang)
+		w.spawn_unit(squad[i], t.player, at, ang)
 	var ev: SimEvent = w.emit_event(SimEvent.Type.DIRECTIVE, 0, t.player, t.pos)
 	ev.text = "drop_arrived"
 	ev.value = t.def.radius

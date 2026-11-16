@@ -68,8 +68,11 @@ is invisible to the enemy unless they come close.
 
 ## What is in this build
 
-One faction so far, the **Aegis Directorate**, in a mirror match against a
-scripted AI (Easy / Normal / Hard) on seeded, mirrored 128 × 128 maps.
+Two factions, each playable against a scripted AI (Easy / Normal / Hard) that
+can play either one, on seeded, mirrored 128 × 128 maps.
+
+**Aegis Directorate** — precise and networked. Long-range Relays, aircraft and
+artillery. Linked units gain weapon range; going Dark hurts them most.
 
 - Infantry: Trooper, Lancer (anti-armor), Field Engineer (builds, repairs,
   captures), Marksman (long sight, hidden while still).
@@ -81,6 +84,19 @@ scripted AI (Easy / Normal / Hard) on seeded, mirrored 128 × 128 maps.
 - Buildings: Headquarters, Depot, Relay, Barracks, Vehicle Works, Sentry
   Turret, Lance Battery, Flak Post, Command Lab (tier 3, faster Directives),
   Airpad.
+
+**Foundry Pact** — slow heavy industry. Linked vehicles repair themselves.
+
+- Infantry: Levy (cheap, massed), Breaker (rockets), Sapper (builds, repairs,
+  captures and lays hidden **mines** anywhere).
+- Vehicles: Scow (armored hauler), Ratchet (repair truck), Tusk (assault gun),
+  Harrow (flak half-track), Anvil (siege mortar), Mauler (heavy tank), and
+  the **Crawler**, a mobile factory: select it, press Y and click to deploy it
+  inside your coverage; press Y on the deployed factory to pack it up again.
+- Buildings: Foundry Core, **Pylon** (a cheap, armored relay with a short
+  radius — build a dense web), Scrapyard, Muster Hall, Bastion (gun turret),
+  Skyspike (anti-air), Arsenal (tier 3, faster Directives).
+
 - Systems: salvage economy with wrecks, construction and production queues,
   Bandwidth cap, the Signal Grid (link chains, coverage, Linked/Dark effects,
   placement rules), fog of war with vision shared through coverage, minimap,
@@ -88,8 +104,8 @@ scripted AI (Easy / Normal / Hard) on seeded, mirrored 128 × 128 maps.
   against armor classes, projectiles, forest cover, win/lose with a stats
   screen.
 
-Not in yet (see the roadmap): the Foundry Pact and Nomad Circuit factions,
-hand-made maps and 4-player games, sound, save/load.
+Not in yet (see the roadmap): the Nomad Circuit faction, hand-made maps and
+4-player games, sound, save/load.
 
 ## For developers
 

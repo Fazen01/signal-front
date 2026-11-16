@@ -76,8 +76,8 @@ decision in the session log at the bottom.
 
 ## M9 — Foundry Pact
 
-- [ ] Roster, Pylon network, Crawler mobile factory, self-repair when Linked
-- [ ] AI plays Foundry Pact
+- [x] Roster, Pylon network, Crawler mobile factory, self-repair when Linked
+- [x] AI plays Foundry Pact
 
 ## M10 — Nomad Circuit
 
@@ -265,11 +265,14 @@ Notes on this session's pushes:
   straight, ignore terrain and buildings, only crowd each other); per-weapon
   `hits_air` / `hits_ground`; artillery minimum range and scatter.
 
-Half-done / next: M9 Foundry Pact — the roster, data, models and simulation
-mechanics are in and tested (Pylons, Crawler deploy/pack, mines, Ratchet
-repair, Linked-vehicle self-repair, faction `roles` for the AI). Still to do:
-deploy/pack and faction choice in the UI, and making the AI role-based so it
-can play Foundry (it still uses Aegis ids).
+- M9 Foundry Pact: full second faction (10 units, 9 buildings, own models
+  and palette), Pylon web, Crawler deploy/pack with a placement ghost, mines,
+  Ratchet repair, Linked-vehicle self-repair, faction choice for both sides
+  in the skirmish setup. The AI is now role-based and plays either faction;
+  `check.sh` also runs a Foundry-vs-Aegis match and drives the Crawler's
+  Deploy/Pack through the real interface.
+
+Half-done / next: M10 Nomad Circuit.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -317,3 +320,18 @@ Fog decisions:
 - The AI builds a Command Lab and Airpad from about minute 4 on Normal/Hard,
   mixes in Kestrels and Longbows, and answers enemy aircraft with Tempests
   and Flak Posts. It does not build Scout Drones yet.
+- Foundry additions beyond the design's signature list, so the faction is
+  complete: Breaker (anti-armor infantry), Scow (hauler), Tusk (tier 2 line
+  vehicle), Harrow (anti-air), and the buildings Foundry Core, Scrapyard,
+  Muster Hall, Bastion, Skyspike, Arsenal. The Foundry has no aircraft.
+- The Foundry has no fixed vehicle factory: vehicles come from a deployed
+  Crawler (trained at the Foundry Core once a Muster Hall stands).
+- Mines are non-blocking, stealthed buildings the Sapper places like any
+  other building (2.5 s to arm, 40 salvage, anywhere on walkable ground). An
+  enemy sees one only within 2.2 units; ground units within 1.7 set it off.
+- Pylons give +5 bandwidth (Relays +10) because they cost about half.
+- The AI no longer names any unit or building: `data/factions.json` maps
+  roles (builder, hauler, relay, barracks, works or mobile factory, depot,
+  turrets, tier3, airpad) to definitions and `data/units.json` gives each
+  army unit an `ai_role` and `ai_weight`. A new faction needs only data.
+- Reinforcement Drop squads are per faction (`drop_squad`).

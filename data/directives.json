@@ -22,7 +22,6 @@
 	},
 	"reinforcement_drop": {
 		"name": "Reinforcement Drop", "desc": "Delivers a small infantry squad after a short delay. Own coverage only.",
-		"cost": 4, "cooldown": 150.0, "radius": 4.0, "duration": 3.0, "target": "coverage",
-		"squad": ["trooper", "trooper", "trooper", "lancer", "lancer"]
+		"cost": 4, "cooldown": 150.0, "radius": 4.0, "duration": 3.0, "target": "coverage"
 	}
 }

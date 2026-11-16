@@ -10,6 +10,7 @@ var start_units: Array[String] = []
 var linked_range_bonus: float = 0.0
 var dark_rof_mult: float = -1.0  ## -1 = use the global rule
 var linked_vehicle_repair: float = 0.0  ## fraction of max hp per second for Linked vehicles
+var drop_squad: Array[String] = []  ## units delivered by Reinforcement Drop
 var roles: Dictionary[String, String] = {}  ## what the AI builds for each job (see SimAI)
 var playable: bool = true
 

@@ -24,7 +24,7 @@ const DIRECTIVE_KEYS: Array[String] = [
 ]
 const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
-	"linked_vehicle_repair", "roles",
+	"linked_vehicle_repair", "roles", "drop_squad",
 ]
 const AI_ROLES: Array[String] = ["", "anti_infantry", "anti_armor", "anti_air", "artillery", "scout", "support", "air"]
 
@@ -309,6 +309,7 @@ func _load_factions(d: Dictionary) -> void:
 		f.dark_rof_mult = float(src.get("dark_rof_mult", -1.0))
 		f.playable = bool(src.get("playable", true))
 		f.linked_vehicle_repair = float(src.get("linked_vehicle_repair", 0.0))
+		f.drop_squad = _strings(src, "drop_squad")
 		if src.has("roles"):
 			var raw_roles: Dictionary = src["roles"]
 			for rk: Variant in raw_roles.keys():
@@ -407,6 +408,11 @@ func _validate() -> void:
 		for u: String in f.start_units:
 			if not entities.has(u):
 				errors.append("faction %s: unknown start unit '%s'" % [f.id, u])
+		if f.drop_squad.is_empty():
+			errors.append("faction %s: needs a drop_squad" % f.id)
+		for u: String in f.drop_squad:
+			if not entities.has(u) or entities[u].faction != f.id:
+				errors.append("faction %s: drop_squad unit '%s' is not one of its units" % [f.id, u])
 		for needed: String in ["builder", "hauler", "relay", "barracks", "depot"]:
 			if f.role(needed) == "":
 				errors.append("faction %s: missing AI role '%s'" % [f.id, needed])

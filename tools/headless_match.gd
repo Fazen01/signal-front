@@ -3,7 +3,7 @@ extends SceneTree
 ## the winner. This is the main regression test for the simulation and AI.
 ##
 ## Usage: godot --headless --path . -s res://tools/headless_match.gd -- \
-##          [--seed=N] [--max-minutes=M] [--levels=1,1] [--quiet]
+##          [--seed=N] [--max-minutes=M] [--levels=1,1] [--factions=aegis,foundry] [--quiet]
 ## Prints "MATCH RESULT: ..." on a win and "MATCH FAILED: ..." otherwise.
 
 
@@ -12,6 +12,7 @@ func _init() -> void:
 	var max_minutes: float = 45.0
 	var levels: Array[int] = [1, 1]
 	var quiet: bool = false
+	var factions: Array[String] = ["aegis", "aegis"]
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--seed="):
 			seed_value = int(arg.trim_prefix("--seed="))
@@ -21,11 +22,17 @@ func _init() -> void:
 			var parts: PackedStringArray = arg.trim_prefix("--levels=").split(",")
 			if parts.size() == 2:
 				levels = [int(parts[0]), int(parts[1])]
+		elif arg.begins_with("--factions="):
+			var names: PackedStringArray = arg.trim_prefix("--factions=").split(",")
+			if names.size() == 2:
+				factions = [names[0], names[1]]
 		elif arg == "--quiet":
 			quiet = true
 
 	var config: MatchConfig = MatchConfig.ai_vs_ai(seed_value)
 	config.ai_levels = levels
+	config.factions = factions
+	config.names = ["North %s" % factions[0].capitalize(), "South %s" % factions[1].capitalize()]
 	var w: SimWorld = SimSetup.create_match(config)
 	w.collect_events = false
 	var started: int = Time.get_ticks_msec()

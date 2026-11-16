@@ -6,6 +6,7 @@
 		"start_units": ["field_engineer", "field_engineer", "hauler", "hauler", "trooper", "trooper"],
 		"linked_range_bonus": 0.15,
 		"dark_rof_mult": 0.6,
+		"drop_squad": ["trooper", "trooper", "trooper", "lancer", "lancer"],
 		"roles": {
 			"builder": "field_engineer", "hauler": "hauler", "relay": "relay", "barracks": "barracks",
 			"works": "vehicle_works", "depot": "depot", "turret_ground": "sentry_turret",
@@ -20,6 +21,7 @@
 		"hq": "foundry_core",
 		"start_units": ["sapper", "sapper", "scow", "scow", "levy", "levy", "levy"],
 		"linked_vehicle_repair": 0.012,
+		"drop_squad": ["levy", "levy", "levy", "levy", "breaker", "breaker"],
 		"roles": {
 			"builder": "sapper", "hauler": "scow", "relay": "pylon", "barracks": "muster_hall",
 			"mobile_unit": "crawler", "mobile_factory": "crawler_factory", "depot": "scrapyard",

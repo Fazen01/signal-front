@@ -51,6 +51,8 @@ var _help: PanelContainer = null
 var _seed: SpinBox = null
 var _faction: OptionButton = null
 var _level: OptionButton = null
+var _enemy_faction: OptionButton = null
+var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
 
@@ -150,7 +152,7 @@ func _build_setup() -> void:
 	box.add_theme_constant_override("separation", 14)
 	_setup.add_child(box)
 	box.add_child(Hud.make_label("SKIRMISH", 32, Color(0.55, 0.85, 1.0)))
-	box.add_child(Hud.make_label("One opponent on a mirrored 128 x 128 battlefield. Destroy the enemy Headquarters.", 15, Hud.DIM))
+	box.add_child(Hud.make_label("One opponent on a mirrored 128 x 128 battlefield. Destroy the enemy headquarters.", 15, Hud.DIM))
 
 	var seed_row: HBoxContainer = HBoxContainer.new()
 	seed_row.add_theme_constant_override("separation", 8)
@@ -172,7 +174,18 @@ func _build_setup() -> void:
 		if f.playable:
 			_faction_ids.append(f.id)
 			_faction.add_item(f.name)
-	_row(box, "Faction", _faction)
+	_row(box, "Your faction", _faction)
+	_faction_blurb = Hud.make_label("", 14, Hud.DIM)
+	_faction_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_faction_blurb.custom_minimum_size = Vector2(520.0, 44.0)
+	box.add_child(_faction_blurb)
+	_faction.item_selected.connect(func(_i: int) -> void: _update_blurb())
+	_enemy_faction = OptionButton.new()
+	_enemy_faction.add_item("Random")
+	for id: String in _faction_ids:
+		_enemy_faction.add_item(data.faction(id).name)
+	_row(box, "Enemy faction", _enemy_faction)
+	_update_blurb()
 
 	_level = OptionButton.new()
 	for n: String in LEVEL_NAMES:
@@ -217,6 +230,18 @@ func _build_help() -> void:
 	box.add_child(back)
 
 
+func _update_blurb() -> void:
+	var f: FactionDef = GameData.shared().faction(_faction_ids[maxi(_faction.selected, 0)])
+	_faction_blurb.text = f.desc
+
+
+## For automated runs: pick factions by id before starting.
+func choose_factions(mine: String, theirs: String) -> void:
+	_faction.select(maxi(_faction_ids.find(mine), 0))
+	_enemy_faction.select(_faction_ids.find(theirs) + 1)
+	_update_blurb()
+
+
 func _show(which: Control) -> void:
 	_main_box.visible = which == _main_box
 	_setup.visible = which == _setup
@@ -235,7 +260,10 @@ func is_setup_open() -> bool:
 func start_skirmish() -> void:
 	var config: MatchConfig = MatchConfig.skirmish(int(_seed.value), _level.selected)
 	var faction_id: String = _faction_ids[maxi(_faction.selected, 0)]
-	config.factions = [faction_id, faction_id]
+	var enemy_id: String = _faction_ids[randi_range(0, _faction_ids.size() - 1)]
+	if _enemy_faction.selected > 0:
+		enemy_id = _faction_ids[_enemy_faction.selected - 1]
+	config.factions = [faction_id, enemy_id]
 	config.names = ["Commander", "%s AI" % LEVEL_NAMES[_level.selected]]
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:

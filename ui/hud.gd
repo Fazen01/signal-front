@@ -322,6 +322,11 @@ func rebuild_card() -> void:
 		for id: String in builds:
 			var def: EntityDef = world.data.entity(id)
 			_add_entry("build", def, "", def.hotkey, def.name, "%s\nCost %d   %s" % [def.name, def.cost, def.desc])
+		for e: SimEntity in units:
+			if e.def.deploys_to != "":
+				var into: EntityDef = world.data.entity(e.def.deploys_to)
+				_add_entry("deploy", null, e.def.deploys_to, "Y", "Deploy", "Deploy: set up as a %s. Must be inside your coverage." % into.name)
+				break
 		_add_entry("order", null, "attack_move", "A", "Attack-move", "Attack-move: advance and engage anything on the way.")
 		_add_entry("order", null, "stop", "S", "Stop", "Stop: drop all orders.")
 		_add_entry("order", null, "hold", "H", "Hold", "Hold position: fire only at what comes into range.")
@@ -338,6 +343,10 @@ func rebuild_card() -> void:
 		for id: String in produces:
 			var def: EntityDef = world.data.entity(id)
 			_add_entry("train", def, "", def.hotkey, def.name, "%s\nCost %d   Bandwidth %d   %s" % [def.name, def.cost, def.bandwidth, def.desc])
+		for e: SimEntity in buildings:
+			if e.constructed and e.def.packs_to != "":
+				_add_entry("pack", null, "", "Y", "Pack up", "Pack up into a %s so the factory can move. Queued units are refunded." % world.data.entity(e.def.packs_to).name)
+				break
 		if any_unfinished:
 			_add_entry("cancel", null, "", "X", "Cancel", "Cancel construction for a full refund.")
 	for i: int in CARD_SLOTS:
@@ -425,6 +434,12 @@ func activate(entry: CardEntry) -> bool:
 			var producer: SimEntity = _best_producer(entry.def)
 			if producer != null:
 				world.push_command(SimCommand.train(player, producer.id, entry.def.id))
+		"deploy":
+			battle.begin_placement(world.data.entity(entry.order), true)
+		"pack":
+			for e: SimEntity in _selected_own():
+				if e.kind == SimEntity.Kind.BUILDING and e.constructed and e.def.packs_to != "":
+					world.push_command(SimCommand.pack(player, e.id))
 		"cancel":
 			for e: SimEntity in _selected_own():
 				if e.kind == SimEntity.Kind.BUILDING and not e.constructed:

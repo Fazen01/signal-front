@@ -27,6 +27,7 @@ var _target_ok: int = -1
 
 # Building placement
 var placing: EntityDef = null
+var placing_deploy: bool = false  ## placing a unit's deploy footprint, not a new building
 var ghost: Node3D = null
 var ghost_cell: Vector2i = Vector2i.ZERO
 var ghost_ok: bool = false
@@ -309,11 +310,13 @@ func on_left_click(screen: Vector2, shift: bool) -> bool:
 	if builders.is_empty():
 		cancel_placement()
 		return true
-	var why: String = SimEconomy.placement_error(world, local_player, placing, ghost_cell)
-	if why == "" and world.players[local_player].salvage < placing.cost:
-		why = "Not enough salvage"
+	var why: String = _placement_error()
 	if why != "":
 		hud.push_alert(why, Hud.RED)
+		return true
+	if placing_deploy:
+		world.push_command(SimCommand.deploy(local_player, builders, ghost_cell, shift))
+		cancel_placement()
 		return true
 	world.push_command(SimCommand.build(local_player, builders, placing.id, ghost_cell, shift))
 	if not shift:
@@ -418,19 +421,37 @@ func _update_targeting() -> void:
 
 # ------------------------------------------------------ building placement
 
+## Selected units that can carry out the current placement: builders of the
+## building, or units that deploy into it.
 func _selected_builders(def_id: String) -> PackedInt32Array:
 	var out: PackedInt32Array = PackedInt32Array()
 	for e: SimEntity in controller.selected_entities():
-		if e.owner == local_player and e.kind == SimEntity.Kind.UNIT and e.def.builds.has(def_id):
+		if e.owner != local_player or e.kind != SimEntity.Kind.UNIT:
+			continue
+		if (placing_deploy and e.def.deploys_to == def_id) or (not placing_deploy and e.def.builds.has(def_id)):
 			out.append(e.id)
 	return out
 
 
+## Why the ghost cannot go where it is, or "".
+func _placement_error() -> String:
+	if placing_deploy:
+		for e: SimEntity in controller.selected_entities():
+			if e.owner == local_player and e.def != null and e.def.deploys_to == placing.id:
+				return SimEconomy.deploy_error(world, local_player, e.def, ghost_cell)
+		return "Nothing selected can deploy"
+	var why: String = SimEconomy.placement_error(world, local_player, placing, ghost_cell)
+	if why == "" and world.players[local_player].salvage < placing.cost:
+		why = "Not enough salvage"
+	return why
+
+
 ## Starts placing a building: a ghost follows the mouse until the player
 ## clicks (place) or right-clicks / presses Escape (cancel).
-func begin_placement(def: EntityDef) -> void:
+func begin_placement(def: EntityDef, deploy: bool = false) -> void:
 	cancel_placement()
 	placing = def
+	placing_deploy = deploy
 	ghost = ModelFactory.build(def.model, world.players[local_player].color)
 	ghost.name = "Ghost"
 	add_child(ghost)
@@ -445,6 +466,7 @@ func begin_placement(def: EntityDef) -> void:
 
 func cancel_placement() -> void:
 	placing = null
+	placing_deploy = false
 	if ghost != null:
 		ghost.queue_free()
 		ghost = null
@@ -467,7 +489,7 @@ func _update_placement() -> void:
 		(float(ghost_cell.y) + float(placing.footprint.y) * 0.5) * SimMap.CELL
 	)
 	ghost.position = Vector3(centre.x, world.map.height_at(world.map.clamp_to_map(centre)) + 0.05, centre.y)
-	ghost_ok = SimEconomy.can_place(world, local_player, placing, ghost_cell) and world.players[local_player].salvage >= placing.cost
+	ghost_ok = _placement_error() == ""
 	var state: int = 1 if ghost_ok else 0
 	if state != _ghost_shown_ok:
 		_ghost_shown_ok = state
