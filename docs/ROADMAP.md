@@ -184,6 +184,11 @@ over three or four seeds per faction pairing, Normal vs Normal:
   per faction, roughly +/-9 points of noise): Aegis 56%, Foundry 53%,
   Nomad 37% - the same picture session 1 left. Nomad is next.
 
+In progress (08:20 UTC): Nomad balance. Proportional loading made the
+Skiff's small 80-salvage loads cost more travel per salvage, which may be
+part of it. Skiff capacity 100: Nomad 62% on seeds 1-4 (was 37% there);
+checking seeds 5-8 before committing.
+
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
 Status: **finished** at about 04:00 UTC, M0 through M14 (two split-out M13
