@@ -17,6 +17,7 @@ static func create_match(config: MatchConfig) -> SimWorld:
 		w.spawn_field(Vector2(f.x, f.y), int(f.z))
 	for p: SimPlayer in w.players:
 		place_base(w, p)
+	SimEconomy.recompute_bandwidth(w)
 	return w
 
 
@@ -35,4 +36,10 @@ static func place_base(w: SimWorld, p: SimPlayer) -> void:
 		var spread: float = (float(i) - float(n - 1) * 0.5) * 0.32
 		var dist: float = hq.radius + 4.0 + float(i % 2) * 2.4
 		var at: Vector2 = hq.pos + Vector2.from_angle(base_angle + spread) * dist
-		w.spawn_unit(p.faction.start_units[i], p.id, w.map.nearest_free_pos(at), base_angle)
+		var u: SimEntity = w.spawn_unit(p.faction.start_units[i], p.id, w.map.nearest_free_pos(at), base_angle)
+		if u.def.harvester:
+			# Starting haulers go straight to work on the nearest field.
+			var res: SimEntity = SimEconomy.find_resource(w, hq.pos, 60.0)
+			if res != null:
+				u.orders.append(SimOrder.make(SimOrder.Type.HARVEST, res.pos, res.id))
+				SimEconomy.start_harvest(u, res, false)

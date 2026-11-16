@@ -24,6 +24,8 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 			for e: SimEntity in own_units(w, cmd):
 				clear_orders(e)
 				e.hold = true
+		_:
+			SimEconomy.apply_command(w, cmd)
 
 
 ## The alive units in cmd.ids that belong to the commanding player.

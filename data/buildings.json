@@ -11,7 +11,7 @@
 		"name": "Depot", "desc": "Drop-off point for salvage. Builds Haulers.",
 		"faction": "aegis", "tier": 1, "cost": 250, "build_time": 20.0,
 		"hp": 1000, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
-		"depot": true, "produces": ["hauler"], "model": "depot", "hotkey": "D"
+		"depot": true, "produces": ["hauler"], "model": "depot", "hotkey": "P"
 	},
 	"relay": {
 		"name": "Relay", "desc": "Extends your signal grid and adds bandwidth. Must link back to the HQ.",
@@ -37,7 +37,7 @@
 		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 12.0,
 		"hp": 600, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
 		"weapons": ["sentry_gun"], "turret": true, "model": "sentry_turret",
-		"hotkey": "S", "requires": ["barracks"]
+		"hotkey": "T", "requires": ["barracks"]
 	},
 	"lance_battery": {
 		"name": "Lance Battery", "desc": "Anti-armor missile emplacement.",

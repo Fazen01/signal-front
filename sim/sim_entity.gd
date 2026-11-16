@@ -53,6 +53,7 @@ var linked: bool = true  ## emitters: chained to the HQ; others: inside own cove
 var cargo: int = 0
 var salvage: int = 0  ## salvage left in a field or wreck
 var work_ticks: int = 0  ## progress of harvesting or unloading
+var job: int = 0  ## SimEconomy.Job state of a hauler
 var harvest_target: int = 0
 var decay_tick: int = 0  ## wrecks vanish at this tick
 

@@ -34,9 +34,9 @@ decision in the session log at the bottom.
 
 ## M3 — Economy and construction
 
-- [ ] Salvage Fields, Haulers, Depots, wreck harvesting
+- [x] Salvage Fields, Haulers, Depots, wreck harvesting
 - [ ] Builder units, placement ghost, construction progress, cancel/refund
-- [ ] Production queues, rally points, Bandwidth cap
+- [x] Production queues, rally points, Bandwidth cap
 - [ ] HUD: resources, selection panel, command card with hotkeys
 
 ## M4 — Signal Grid
@@ -190,4 +190,6 @@ View decisions:
 - Map heights are cosmetic (units are simulated in 2D) but are baked into
   `SimMap.heights` so the mesh and unit placement agree.
 
-Half-done / next: M3 economy and construction.
+Half-done / next: M3 — the economy simulation is done and tested (harvest,
+build, cancel/refund, production, rally, bandwidth); the HUD, command card and
+placement ghost are being written.

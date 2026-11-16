@@ -149,7 +149,7 @@ func spawn_building(def_id: String, owner: int, cell: Vector2i, constructed: boo
 	e.rally = e.pos + Vector2(0.0, float(def.footprint.y) * SimMap.CELL * 0.5 + 3.0)
 	emit_event(SimEvent.Type.SPAWNED, e.id, owner, e.pos)
 	if constructed:
-		_on_building_completed(e, false)
+		on_building_completed(e, false)
 	return e
 
 
@@ -182,7 +182,7 @@ func spawn_wreck(at: Vector2, amount: int, radius: float, model: String, facing:
 	return e
 
 
-func _on_building_completed(e: SimEntity, announce: bool) -> void:
+func on_building_completed(e: SimEntity, announce: bool) -> void:
 	if e.owner < 0:
 		return
 	var p: SimPlayer = players[e.owner]
@@ -190,6 +190,8 @@ func _on_building_completed(e: SimEntity, announce: bool) -> void:
 	if announce:
 		p.stat_buildings_built += 1
 		emit_event(SimEvent.Type.BUILDING_DONE, e.id, e.owner, e.pos)
+	SimSignal.mark_dirty(self)
+	SimEconomy.recompute_bandwidth(self)
 
 
 func on_building_removed(e: SimEntity) -> void:
@@ -197,6 +199,7 @@ func on_building_removed(e: SimEntity) -> void:
 	if e.constructed and e.owner >= 0:
 		var p: SimPlayer = players[e.owner]
 		p.building_counts[e.def.id] = maxi(0, p.building_counts.get(e.def.id, 0) - 1)
+	SimSignal.mark_dirty(self)
 
 
 ## Removes an entity from play at the end of this tick.
@@ -285,6 +288,7 @@ func tick() -> void:
 		for e: SimEntity in entities:
 			if e.alive and e.kind == SimEntity.Kind.UNIT:
 				SimOrders.update_unit(self, e)
+		SimEconomy.update(self)
 		SimMovement.update(self)
 		SimCombat.update(self)
 
