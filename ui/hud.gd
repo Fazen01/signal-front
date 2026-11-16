@@ -23,12 +23,18 @@ const DIM: Color = Color(0.62, 0.68, 0.72)
 var battle: BattleScene = null
 var world: SimWorld = null
 var player: int = 0
+var skin: UiSkin = null  ## colours, shapes and lettering of the local player's faction
 
 var _salvage: Label = null
 var _bandwidth: Label = null
 var _clock: Label = null
 var _sel_title: Label = null
 var _sel_detail: Label = null
+var _health_row: HBoxContainer = null  ## health of what is selected: a bar and the numbers
+var _health_bar: ProgressBar = null
+var _health_text: Label = null
+var _health_fills: Array[StyleBoxFlat] = []  ## green, amber, red
+var _health_tone: int = -1
 var _queue_row: HBoxContainer = null
 var _queue_bar: ProgressBar = null
 var _info: Label = null
@@ -40,6 +46,8 @@ var _alert_age: Array[float] = []
 var _refresh_in: float = 0.0
 var _points: Label = null
 var _directive_buttons: Array[Button] = []
+var _directive_names: Array[Label] = []
+var _directive_states: Array[Label] = []
 var _key_labels: Array[Label] = []  ## hotkey badge on each command card button
 var _cost_labels: Array[Label] = []  ## salvage cost on each command card button
 var _bandwidth_bar: ProgressBar = null
@@ -56,7 +64,8 @@ var minimap: Minimap = null
 func setup(scene: BattleScene) -> void:
 	# Set here as well as on the root window: themes do not pass down
 	# through a CanvasLayer.
-	theme = UiTheme.theme()
+	skin = scene.skin if scene.skin != null else UiSkin.of("")
+	theme = skin.theme()
 	battle = scene
 	world = scene.world
 	player = scene.local_player
@@ -65,7 +74,6 @@ func setup(scene: BattleScene) -> void:
 	_build_top_bar()
 	_build_bottom_bar()
 	_build_alerts()
-	_build_directive_bar()
 	rebuild_card()
 	_refresh()
 
@@ -86,14 +94,7 @@ static func make_label(text: String, font_px: int, color: Color) -> Label:
 
 ## A strip across a screen edge: darker than a panel, with one hairline.
 func _strip_style(top_edge: bool) -> StyleBoxFlat:
-	var sb: StyleBoxFlat = UiTheme.box(Color(0.03, 0.045, 0.065, 0.86), UiTheme.LINE, 0, 0, 7.0)
-	if top_edge:
-		sb.border_width_top = 1
-	else:
-		sb.border_width_bottom = 1
-	sb.content_margin_left = 14.0
-	sb.content_margin_right = 12.0
-	return sb
+	return skin.strip(top_edge)
 
 
 ## An icon, a value and a small caption; returns the value label.
@@ -109,7 +110,7 @@ func _stat(row: HBoxContainer, kind: String, caption_text: String, color: Color)
 	value.add_theme_font_override("font", UiTheme.strong_font())
 	chip.add_child(value)
 	if caption_text != "":
-		var cap: Label = UiTheme.caption(caption_text)
+		var cap: Label = skin.caption(caption_text)
 		cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		chip.add_child(cap)
 	row.add_child(chip)
@@ -126,13 +127,34 @@ func _build_top_bar() -> void:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 30)
 	bar.add_child(row)
-	_salvage = _stat(row, "salvage", "SALVAGE", GOLD)
-	_income = UiTheme.label("", 13, Color(GOLD.r, GOLD.g, GOLD.b, 0.75))
+	# Whose interface this is: the faction's emblem and name.
+	var plate: HBoxContainer = HBoxContainer.new()
+	plate.name = "FactionPlate"
+	plate.add_theme_constant_override("separation", 9)
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var emblem: HudIcon = HudIcon.new()
+	emblem.kind = skin.emblem
+	emblem.color = skin.accent
+	emblem.custom_minimum_size = Vector2(28.0, 28.0)
+	plate.add_child(emblem)
+	var plate_name: Label = skin.caption(skin.plate, skin.accent)
+	plate_name.add_theme_font_size_override("font_size", 13)
+	plate_name.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	plate.add_child(plate_name)
+	row.add_child(plate)
+	var divider: ColorRect = ColorRect.new()
+	divider.color = skin.line
+	divider.custom_minimum_size = Vector2(maxf(1.0, float(skin.panel_edge[1]) * 0.5), 24.0)
+	divider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(divider)
+	_salvage = _stat(row, "salvage", "SALVAGE", skin.second)
+	_income = UiTheme.label("", 13, Color(skin.second.r, skin.second.g, skin.second.b, 0.75))
 	_income.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_income.tooltip_text = "Salvage your haulers brought in per minute, over the last half minute."
 	_income.mouse_filter = Control.MOUSE_FILTER_STOP
 	_salvage.get_parent().add_child(_income)
-	_bandwidth = _stat(row, "bandwidth", "BANDWIDTH", CYAN)
+	_bandwidth = _stat(row, "bandwidth", "BANDWIDTH", skin.accent)
 	_bandwidth_bar = ProgressBar.new()
 	_bandwidth_bar.custom_minimum_size = Vector2(96.0, 8.0)
 	_bandwidth_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -148,14 +170,14 @@ func _build_top_bar() -> void:
 		var sides: Array[String] = []
 		for wp: SimPlayer in world.players:
 			sides.append(wp.name)
-		var banner: Label = UiTheme.caption("WATCHING   " + "  vs  ".join(sides), GOLD)
+		var banner: Label = skin.caption("WATCHING   " + "  vs  ".join(sides), skin.second)
 		banner.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(banner)
-	_speed = UiTheme.label("", 15, CYAN)
+	_speed = UiTheme.label("", 15, skin.accent)
 	_speed.add_theme_font_override("font", UiTheme.strong_font())
 	_speed.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(_speed)
-	_clock = _stat(row, "clock", "", TEXT)
+	_clock = _stat(row, "clock", "", skin.text)
 	var menu: Button = Button.new()
 	menu.text = "Menu  Esc"
 	menu.custom_minimum_size = Vector2(112.0, 30.0)
@@ -178,7 +200,7 @@ func _build_bottom_bar() -> void:
 
 	# Three framed sections: the map, what is selected, and what it can do.
 	var map_frame: PanelContainer = PanelContainer.new()
-	map_frame.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.SUNK, UiTheme.LINE, 4, 1, 4.0))
+	map_frame.add_theme_stylebox_override("panel", skin.frame())
 	row.add_child(map_frame)
 	minimap_slot = Control.new()
 	minimap_slot.name = "MinimapSlot"
@@ -190,7 +212,7 @@ func _build_bottom_bar() -> void:
 	minimap.clip_contents = true
 	minimap.setup(battle)
 
-	var section: StyleBoxFlat = UiTheme.box(Color(0.06, 0.085, 0.115, 0.9), UiTheme.LINE_SOFT, 5, 1, 10.0)
+	var section: StyleBoxFlat = skin.section()
 	var info_frame: PanelContainer = PanelContainer.new()
 	info_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_frame.add_theme_stylebox_override("panel", section)
@@ -206,10 +228,25 @@ func _build_bottom_bar() -> void:
 	sel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	sel.add_theme_constant_override("separation", 3)
 	holder.add_child(sel)
-	_sel_title = make_label("", 21, TEXT)
+	_sel_title = make_label("", 21, skin.text)
 	_sel_title.add_theme_font_override("font", UiTheme.strong_font())
 	sel.add_child(_sel_title)
-	_sel_detail = make_label("", 14, DIM)
+	var health_row: HBoxContainer = HBoxContainer.new()
+	health_row.add_theme_constant_override("separation", 9)
+	sel.add_child(health_row)
+	_health_bar = ProgressBar.new()
+	_health_bar.custom_minimum_size = Vector2(230.0, 9.0)
+	_health_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_health_bar.show_percentage = false
+	_health_bar.max_value = 1.0
+	_health_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	health_row.add_child(_health_bar)
+	_health_text = make_label("", 13, skin.text)
+	health_row.add_child(_health_text)
+	_health_row = health_row
+	for tone: Color in [Color(0.36, 0.86, 0.42), Color(0.98, 0.78, 0.25), RED]:
+		_health_fills.append(UiTheme.box(tone, Color(0.0, 0.0, 0.0, 0.0), mini(3, skin.corners[0]), 0, 0.0))
+	_sel_detail = make_label("", 14, skin.dim)
 	_sel_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sel.add_child(_sel_detail)
 	_queue_row = HBoxContainer.new()
@@ -222,11 +259,13 @@ func _build_bottom_bar() -> void:
 	_queue_bar.max_value = 1.0
 	_queue_bar.visible = false
 	sel.add_child(_queue_bar)
-	_info = make_label("", 13, GOLD)
+	_info = make_label("", 13, skin.second)
 	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_info.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	sel.add_child(_info)
+
+	_build_directives(row, section)
 
 	var card_frame: PanelContainer = PanelContainer.new()
 	card_frame.add_theme_stylebox_override("panel", section)
@@ -249,13 +288,13 @@ func _build_bottom_bar() -> void:
 		_card.add_child(b)
 		_buttons.append(b)
 		# Hotkey in the top-left corner, cost in the bottom-right.
-		var key: Label = UiTheme.label("", 11, CYAN)
+		var key: Label = UiTheme.label("", 11, skin.accent)
 		key.add_theme_font_override("font", UiTheme.strong_font())
 		key.position = Vector2(6.0, 2.0)
 		key.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(key)
 		_key_labels.append(key)
-		var cost: Label = UiTheme.label("", 12, GOLD)
+		var cost: Label = UiTheme.label("", 12, skin.second)
 		cost.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 		cost.offset_left = -70.0
 		cost.offset_top = -19.0
@@ -277,40 +316,66 @@ func _build_alerts() -> void:
 	add_child(_alerts)
 
 
-func _build_directive_bar() -> void:
-	var bar: PanelContainer = PanelContainer.new()
-	bar.name = "DirectiveBar"
-	bar.visible = not battle.watching
-	bar.add_theme_stylebox_override("panel", panel_style(Color(1.0, 0.82, 0.35, 0.6)))
-	bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	bar.offset_bottom = -206.0
-	add_child(bar)
-	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	bar.add_child(row)
+## The Directives sit inside the bottom bar, between the selection and the
+## command card, so they cover none of the battlefield.
+func _build_directives(row: HBoxContainer, section: StyleBoxFlat) -> void:
+	var frame: PanelContainer = PanelContainer.new()
+	frame.name = "Directives"
+	frame.visible = not battle.watching
+	frame.add_theme_stylebox_override("panel", section)
+	row.add_child(frame)
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 5)
+	frame.add_child(box)
+	var head: HBoxContainer = HBoxContainer.new()
+	head.add_theme_constant_override("separation", 6)
+	box.add_child(head)
 	var star: HudIcon = HudIcon.new()
 	star.kind = "points"
-	star.color = GOLD
-	row.add_child(star)
-	_points = make_label("CP 0", 18, GOLD)
+	star.color = skin.second
+	star.custom_minimum_size = Vector2(18.0, 18.0)
+	head.add_child(star)
+	_points = make_label("0", 17, skin.second)
 	_points.add_theme_font_override("font", UiTheme.strong_font())
-	_points.custom_minimum_size = Vector2(58.0, 0.0)
 	_points.tooltip_text = "Command Points: earned by destroying enemy units and buildings. Spend them to unlock Directives."
 	_points.mouse_filter = Control.MOUSE_FILTER_STOP
-	row.add_child(_points)
+	head.add_child(_points)
+	var cap: Label = skin.caption("COMMAND POINTS")
+	cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(cap)
+	var grid: GridContainer = GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 4)
+	grid.add_theme_constant_override("v_separation", 4)
+	box.add_child(grid)
 	for id: String in world.data.directive_order:
 		var def: DirectiveDef = world.data.directive(id)
 		var b: Button = Button.new()
-		b.custom_minimum_size = Vector2(150.0, 44.0)
+		b.theme_type_variation = "ChipButton"
+		b.custom_minimum_size = Vector2(128.0, 38.0)
 		b.focus_mode = Control.FOCUS_NONE
-		b.add_theme_font_size_override("font_size", 12)
 		b.pressed.connect(activate_directive.bind(def.slot))
 		b.mouse_entered.connect(_on_directive_hover.bind(def.slot))
 		b.mouse_exited.connect(_on_directive_hover.bind(-1))
-		row.add_child(b)
+		grid.add_child(b)
+		# The name along the top, what it needs or when it is ready below.
+		var title: Label = UiTheme.label(def.name, 12, skin.text)
+		title.position = Vector2(8.0, 2.0)
+		title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(title)
+		var state: Label = UiTheme.label("", 11, skin.dim)
+		state.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		state.offset_left = -118.0
+		state.offset_top = -18.0
+		state.offset_right = -8.0
+		state.offset_bottom = -2.0
+		state.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		state.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(state)
 		_directive_buttons.append(b)
+		_directive_names.append(title)
+		_directive_states.append(state)
 		_directive_defs.append(def)
 
 
@@ -350,26 +415,35 @@ func activate_directive(index: int) -> bool:
 
 func _refresh_directives() -> void:
 	var p: SimPlayer = world.players[player]
-	_points.text = "CP %d" % p.command_points
+	_points.text = str(p.command_points)
 	for i: int in _directive_defs.size():
 		var def: DirectiveDef = _directive_defs[i]
 		var b: Button = _directive_buttons[i]
+		var title: Label = _directive_names[i]
+		var state: Label = _directive_states[i]
+		var name_color: Color = skin.text
+		var state_color: Color = skin.dim
 		if not p.unlocked.has(def.id):
-			b.text = "%s
-Unlock: %d CP" % [def.name, def.cost]
+			state.text = "Unlock  %d CP" % def.cost
 			b.disabled = p.command_points < def.cost
-			b.add_theme_color_override("font_color", TEXT)
+			if b.disabled:
+				name_color = skin.faint
+				state_color = skin.faint
+			else:
+				state_color = skin.second
 		else:
 			var left: float = SimDirectives.cooldown_left(world, player, def)
 			if left > 0.0:
-				b.text = "%s
-%d s" % [def.name, int(ceilf(left))]
+				state.text = "%d s" % int(ceilf(left))
 				b.disabled = true
+				name_color = skin.dim
 			else:
-				b.text = "%s
-READY  Alt+%d" % [def.name, i + 1]
+				state.text = "Ready  Alt+%d" % (i + 1)
 				b.disabled = false
-				b.add_theme_color_override("font_color", GOLD)
+				name_color = Color.WHITE
+				state_color = skin.accent
+		title.add_theme_color_override("font_color", name_color)
+		state.add_theme_color_override("font_color", state_color)
 
 
 # ----------------------------------------------------------------- alerts
@@ -377,6 +451,13 @@ READY  Alt+%d" % [def.name, i + 1]
 func push_alert(text: String, color: Color = TEXT) -> void:
 	if color == RED and battle.audio != null:
 		battle.audio.play_ui("error", -8.0)
+	# Callers name the plain colours; the faction's interface has its own.
+	if color == CYAN:
+		color = skin.accent
+	elif color == GOLD:
+		color = skin.second
+	elif color == TEXT:
+		color = skin.text
 	# Do not stack identical messages.
 	for child: Node in _alerts.get_children():
 		var existing: Label = child as Label
@@ -614,7 +695,7 @@ func _refresh() -> void:
 	_salvage.text = "%d" % p.salvage
 	_bandwidth.text = "%d / %d" % [p.bandwidth_used, p.bandwidth_cap]
 	_bandwidth_bar.value = clampf(float(p.bandwidth_used) / maxf(1.0, float(p.bandwidth_cap)), 0.0, 1.0)
-	_bandwidth.add_theme_color_override("font_color", RED if p.bandwidth_used >= p.bandwidth_cap else CYAN)
+	_bandwidth.add_theme_color_override("font_color", RED if p.bandwidth_used >= p.bandwidth_cap else skin.accent)
 	var secs: int = int(world.seconds())
 	_clock.text = "%d:%02d" % [secs / 60, secs % 60]
 	_speed.text = "" if is_equal_approx(battle.time_scale, 1.0) else "SPEED x%s" % str(battle.time_scale)
@@ -637,6 +718,22 @@ func _refresh() -> void:
 func _refresh_selection() -> void:
 	var sel: Array[SimEntity] = battle.controller.selected_entities()
 	var queue_owner: SimEntity = null
+	# Health: of the one thing selected, or of the whole group together.
+	var hp_now: float = 0.0
+	var hp_full: float = 0.0
+	for e: SimEntity in sel:
+		if e.def != null:
+			hp_now += maxf(e.hp, 0.0)
+			hp_full += e.max_hp
+	_health_row.visible = hp_full > 0.0
+	if hp_full > 0.0:
+		var part: float = clampf(hp_now / hp_full, 0.0, 1.0)
+		_health_bar.value = part
+		_health_text.text = "%d / %d" % [int(ceilf(hp_now)), int(hp_full)]
+		var tone: int = 0 if part > 0.6 else (1 if part > 0.3 else 2)
+		if tone != _health_tone:
+			_health_tone = tone
+			_health_bar.add_theme_stylebox_override("fill", _health_fills[tone])
 	if sel.is_empty():
 		_sel_title.text = ""
 		_sel_detail.text = "Left-drag to select. Right-click to order. Select a builder to build." if GameSettings.key_hints else ""
@@ -685,9 +782,8 @@ func _entity_detail(e: SimEntity) -> String:
 			return "%s this site, but it is outside their coverage and pays nothing." % who
 		return "Salvage remaining: %d. Send a Hauler to collect it." % e.salvage
 	var lines: Array[String] = []
-	lines.append("Health %d / %d" % [int(ceilf(e.hp)), int(e.max_hp)])
 	if e.owner >= 0 and e.owner != player:
-		lines[0] += "   (%s)" % world.players[e.owner].name
+		lines.append("Belongs to %s" % world.players[e.owner].name)
 	if e.kind == SimEntity.Kind.BUILDING and not e.constructed:
 		lines.append("Under construction: %d%%" % int(e.build_progress * 100.0))
 	elif e.owner >= 0 and not e.linked:
@@ -699,6 +795,11 @@ func _entity_detail(e: SimEntity) -> String:
 		lines.append("%s: %d %s damage, range %d" % [wd.name, int(wd.damage), GameData.DAMAGE_TYPES[wd.damage_type], int(wd.max_range)])
 	if e.def.signal_radius > 0.0:
 		lines.append("Signal radius %d%s" % [int(e.def.signal_radius), "" if e.linked else " (unlinked)"])
+	var facts: Array[String] = ["%s armour" % world.data.armor_classes[e.def.armor].capitalize()]
+	if e.def.speed > 0.0:
+		facts.append("speed %s" % str(snappedf(e.def.speed, 0.1)))
+	facts.append("sight %d" % int(e.def.sight))
+	lines.append(",  ".join(facts))
 	if e.rank > 0:
 		lines.append("Veteran rank %d" % e.rank)
 	lines.append(e.def.desc)

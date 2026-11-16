@@ -4,19 +4,21 @@ extends PanelContainer
 
 signal closed
 
+var skin: UiSkin = UiSkin.of("")  ## set before the panel enters the tree to dress it for a faction
+
 
 func _ready() -> void:
 	# Set here as well as on the root window: themes do not pass down
 	# through a CanvasLayer.
-	theme = UiTheme.theme()
+	theme = skin.theme()
 	GameSettings.ensure_loaded()
-	add_theme_stylebox_override("panel", Hud.panel_style())
+	add_theme_stylebox_override("panel", skin.panel(18.0))
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
 	add_child(box)
-	box.add_child(UiTheme.title("SETTINGS", 24))
+	box.add_child(skin.title("SETTINGS", 24))
 
-	box.add_child(Hud.make_label("Audio", 16, Hud.GOLD))
+	box.add_child(Hud.make_label("Audio", 16, skin.second))
 	for bus: String in GameSettings.BUSES:
 		var caption: String = "Master volume"
 		if bus == "SFX":
@@ -33,7 +35,7 @@ func _ready() -> void:
 		slider.value_changed.connect(_on_volume.bind(bus))
 		_row(box, caption, slider)
 
-	box.add_child(Hud.make_label("Video", 16, Hud.GOLD))
+	box.add_child(Hud.make_label("Video", 16, skin.second))
 	_toggle(box, "Fullscreen", GameSettings.fullscreen, func(on: bool) -> void:
 		GameSettings.fullscreen = on
 		GameSettings.apply_video()
@@ -54,7 +56,7 @@ func _ready() -> void:
 	)
 	_row(box, "Anti-aliasing", aa)
 
-	box.add_child(Hud.make_label("Interface", 16, Hud.GOLD))
+	box.add_child(Hud.make_label("Interface", 16, skin.second))
 	_toggle(box, "Show hotkey hints", GameSettings.key_hints, func(on: bool) -> void: GameSettings.key_hints = on)
 
 	var done: Button = Button.new()
@@ -72,7 +74,7 @@ func _ready() -> void:
 func _row(box: VBoxContainer, caption: String, control: Control) -> void:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
-	var label: Label = Hud.make_label(caption, 17, Hud.TEXT)
+	var label: Label = Hud.make_label(caption, 17, skin.text)
 	label.custom_minimum_size = Vector2(170.0, 0.0)
 	row.add_child(label)
 	row.add_child(control)

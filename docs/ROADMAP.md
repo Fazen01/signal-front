@@ -253,9 +253,9 @@ map generation itself to be improved.
 
 ## M28 — An interface of its own for each faction (owner request)
 
-- [ ] Each faction's HUD has its own accent colours, panel and button
+- [x] Each faction's HUD has its own accent colours, panel and button
       shapes, lettering and emblem
-- [ ] The skirmish setup previews the chosen faction's style
+- [x] The skirmish setup previews the chosen faction's style
 
 ## M29 — Teams, and a new match setup (owner request)
 
@@ -645,6 +645,30 @@ restarted three times; the background tuner died with it).**
   order above is the order they will be worked in, after the balance pass
   that is already running. The three ideas of mine that were not struck are
   kept below them without numbers.
+
+- **15:25 UTC — M28 done: an interface for each faction.** `ui/ui_skin.gd`
+  holds one skin per faction (colours, corner and border shapes, slant,
+  lettering, emblem) and builds a whole theme from it; the HUD, pause menu,
+  result screen, settings and tutorial panel take the local player's skin,
+  and the skirmish setup panel puts on the skin of the faction picked.
+  Aegis: cool glass, thin lines. Foundry: square iron plates, heavy lower
+  edge, furnace orange. Nomad: canvas brown and teal, opposite corners
+  folded. Vesper: violet pills, wide lettering. Verdigris: eight-sided
+  plates with a bronze edge. Zephyr: pale slate, slanted flight strips,
+  orange. Tally: black ledger ruled in gold above and below, oxblood when
+  pressed. Veil: dusk with ghost-green hairlines and two cut corners.
+  Watch mode uses a neutral skin. Checked by screenshot for all eight
+  (`tools/screenshot.sh hud_x 40 base_<faction>`, and `setup_<faction>`
+  with the menu scene); tests check that every faction's skin is its own
+  and that text stays readable on it.
+- **The owner said the "CP" box takes up a lot of the screen.** It did: the
+  Directive bar floated over the battlefield, 1040 x 70. Decision: the
+  Directives now sit inside the bottom bar, between the selection panel and
+  the command card (a 2 x 3 grid of short chips: name, and "Unlock 3 CP" /
+  seconds left / "Ready Alt+3"). Nothing covers the playfield any more and
+  the bar is no taller than before. While there: the selection panel has a
+  health bar (green, amber, red; for a group, the whole group's health)
+  and a line of facts (armour class, speed, sight).
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

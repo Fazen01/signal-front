@@ -27,6 +27,7 @@ var _tutorial_marker: MeshInstance3D = null
 var _tutorial_index: int = -1
 var _tutorial_ping_in: float = 0.0
 var ui_layer: CanvasLayer = null
+var skin: UiSkin = null  ## the interface look: the local player's faction, or neutral when watching
 
 # Directive targeting
 var targeting: DirectiveDef = null
@@ -110,6 +111,7 @@ func _ready() -> void:
 	controller.setup(self)
 	controller.selection_changed.connect(_on_selection_changed)
 
+	skin = UiSkin.of("" if watching else world.players[local_player].faction.id)
 	ui_layer = CanvasLayer.new()
 	ui_layer.name = "UI"
 	add_child(ui_layer)
@@ -129,7 +131,7 @@ func _ready() -> void:
 		tutorial_panel = TutorialPanel.new()
 		tutorial_panel.name = "TutorialPanel"
 		ui_layer.add_child(tutorial_panel)
-		tutorial_panel.setup(world)
+		tutorial_panel.setup(world, skin)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		var smoke: SmokeDriver = SmokeDriver.new()
 		smoke.name = "Smoke"
