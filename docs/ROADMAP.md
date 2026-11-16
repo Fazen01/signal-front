@@ -211,6 +211,17 @@ over three or four seeds per faction pairing, Normal vs Normal:
 - New test: AI memory (lost-site spots, blocked build entries, retreat
   count, wave members) survives a file save in the middle of a war, and the
   match continues identically.
+- Seeds 9-12 (36 games): Aegis 50%, Foundry 62%, Nomad 31%. Seeds 1-12
+  together (48 non-mirror games per faction): Aegis 54%, Foundry 48%,
+  Nomad 46%. Balanced within noise; Foundry left alone.
+- One more stalemate there (Foundry vs Nomad, seed 10): the "siege" rule
+  judged the enemy army by what was visible that second, so Foundry kept
+  building anti-armour Breakers and sending them into Nomad's steady
+  trickle of Drifter infantry. In progress (10:20 UTC): the AI now keeps a
+  decaying memory of the armed enemy units it has seen (half-life 40 s)
+  and uses it for both the army mix and the siege test. Seed 10 then ends
+  at 18:20. Batches on seeds 9-12 and 1-4 are running before it is
+  committed.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
