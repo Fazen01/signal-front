@@ -24,11 +24,11 @@ func test_every_faction_has_its_own_skin() -> void:
 		check(not looks.has(look), "%s: does not look like %s" % [f.id, str(looks.get(look, ""))])
 		looks[look] = f.id
 		check(UiSkin.of(f.id) == skin, "%s: the skin is made once" % f.id)
-	check(count >= 8, "every playable faction was tried (%d)" % count)
+	check(count >= 10, "every playable faction was tried (%d)" % count)
 
 
 func test_a_skin_builds_a_whole_theme() -> void:
-	for id: String in ["", "aegis", "foundry", "nomad", "vesper", "verdigris", "zephyr", "tally", "veil"]:
+	for id: String in ["", "aegis", "foundry", "nomad", "vesper", "verdigris", "zephyr", "tally", "veil", "bracken", "lodestone"]:
 		var skin: UiSkin = UiSkin.of(id)
 		var t: Theme = skin.theme()
 		for kind: String in ["Button", "OptionButton"]:

@@ -125,6 +125,11 @@ own on top of the shared Signal Grid:
   everything they destroy.
 - **Umbral Veil** — ambushers: Linked ground units are hidden while they
   stand still, and their turrets are hidden until they fire.
+- **Brackenfold** — grown war beasts and buildings like flowers:
+  everything it owns mends 1.2% of its health a second once it has not
+  been hit for six seconds. Cheap, plentiful, soft-hitting.
+- **Lodestone Circle** — magnets and coil guns: whatever its weapons hit
+  moves 35% slower for 2.5 s. Its guns hit a little less hard.
 
 **Vesper Array** (added 16 November at the owner's request) — an automated
 legion of drone frames: cheap, quick and many, but fragile. Linked frames

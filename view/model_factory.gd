@@ -62,6 +62,22 @@ const GILT: Color = Color(0.85, 0.65, 0.25)
 const UMBRA: Color = Color(0.16, 0.16, 0.22)
 const UMBRA_LIGHT: Color = Color(0.29, 0.29, 0.38)
 const GHOST: Color = Color(0.55, 1.0, 0.80)
+# Brackenfold palette: dark heartwood, worked wood, plates of pale bone,
+# leaves the red of autumn, and sap light. Nothing in it is green: it has to
+# stand out from the grass and the trees.
+const BARK: Color = Color(0.24, 0.14, 0.11)
+const BARK_LIGHT: Color = Color(0.60, 0.43, 0.27)
+const LEAF: Color = Color(0.80, 0.26, 0.11)
+const LEAF_LIGHT: Color = Color(0.97, 0.58, 0.16)
+const BONE: Color = Color(0.84, 0.77, 0.62)
+const BONE_DARK: Color = Color(0.56, 0.48, 0.36)
+const SAP: Color = Color(0.82, 1.0, 0.25)
+# Lodestone Circle palette: graphite, porcelain insulators, copper windings, magenta flux.
+const GRAPHITE: Color = Color(0.20, 0.21, 0.25)
+const GRAPHITE_LIGHT: Color = Color(0.36, 0.38, 0.43)
+const PORCELAIN: Color = Color(0.90, 0.90, 0.86)
+const COIL: Color = Color(0.82, 0.46, 0.22)
+const FLUX: Color = Color(1.0, 0.34, 0.86)
 const SKIN: Color = Color(0.76, 0.58, 0.45)
 const LAMP: Color = Color(1.0, 0.93, 0.72)
 const LAMP_RED: Color = Color(1.0, 0.25, 0.18)
@@ -631,6 +647,90 @@ static func _assemble(model: String, team: Color) -> Node3D:
 			_sentinel(root, team)
 		"occulus":
 			_occulus(root, team)
+		"thornling":
+			_sprout(root, team)
+			cyl(root, 0.05, 0.07, 0.6, Vector3(0.34, 0.92, 0.2), mat(BARK), 5, Vector3(0.0, 0.0, -PI * 0.5))
+			box(root, Vector3(0.07, 0.07, 0.07), Vector3(0.66, 0.92, 0.2), mat(SAP, 1.6))
+		"lasher":
+			_sprout(root, team)
+			cyl(root, 0.03, 0.1, 1.15, Vector3(0.1, 1.22, 0.22), mat(BONE), 5, Vector3(0.0, 0.0, -PI * 0.5))
+			cyl(root, 0.12, 0.12, 0.3, Vector3(-0.3, 1.22, 0.22), mat(BARK), 6, Vector3(0.0, 0.0, -PI * 0.5))
+			box(root, Vector3(0.08, 0.08, 0.08), Vector3(0.7, 1.22, 0.22), mat(SAP, 1.7))
+		"grafter":
+			_sprout(root, team)
+			var pod: MeshInstance3D = ball(root, 0.2, Vector3(-0.3, 0.95, 0.0), mat(SAP, 0.9), 6)
+			pod.scale = Vector3(0.8, 1.15, 1.0)
+			cyl(root, 0.04, 0.04, 0.6, Vector3(0.27, 0.8, 0.24), mat(BONE), 5)
+			box(root, Vector3(0.16, 0.1, 0.06), Vector3(0.3, 1.1, 0.24), mat(BONE))
+		"forager":
+			_forager(root, team)
+		"quillhound":
+			_quillhound(root, team)
+		"quillback":
+			_quillback(root, team)
+		"barkhide":
+			_barkhide(root, team)
+		"whipvine":
+			_whipvine(root, team)
+		"sporemortar":
+			_sporemortar(root, team)
+		"heartroot":
+			_heartroot(root, team)
+		"tendril":
+			_tendril(root, team)
+		"mulch_pit":
+			_mulch_pit(root, team)
+		"seedbed":
+			_seedbed(root, team)
+		"bloomworks":
+			_bloomworks(root, team)
+		"spine_stalk":
+			_spine_stalk(root, team)
+		"elder_bough":
+			_elder_bough(root, team)
+		"keeper":
+			_lineman(root, team)
+			box(root, Vector3(0.72, 0.08, 0.09), Vector3(0.3, 0.92, 0.2), mat(GUNMETAL))
+			box(root, Vector3(0.06, 0.06, 0.06), Vector3(0.68, 0.92, 0.2), mat(FLUX, 1.7))
+		"railhand":
+			_lineman(root, team)
+			box(root, Vector3(1.2, 0.07, 0.05), Vector3(0.2, 1.26, 0.17), mat(GUNMETAL))
+			box(root, Vector3(1.2, 0.07, 0.05), Vector3(0.2, 1.26, 0.29), mat(GUNMETAL))
+			for x: float in [-0.1, 0.25, 0.6]:
+				box(root, Vector3(0.07, 0.13, 0.2), Vector3(x, 1.26, 0.23), mat(COIL, 0.0, 0.7, 0.4))
+			box(root, Vector3(0.06, 0.05, 0.07), Vector3(0.82, 1.26, 0.23), mat(FLUX, 1.8))
+		"coilwright":
+			_lineman(root, team)
+			cyl(root, 0.17, 0.17, 0.3, Vector3(-0.3, 0.95, 0.0), mat(COIL, 0.0, 0.7, 0.4), 8, Vector3(PI * 0.5, 0.0, 0.0))
+			cyl(root, 0.2, 0.2, 0.05, Vector3(-0.3, 0.95, 0.17), mat(GRAPHITE), 8, Vector3(PI * 0.5, 0.0, 0.0))
+			cyl(root, 0.2, 0.2, 0.05, Vector3(-0.3, 0.95, -0.17), mat(GRAPHITE), 8, Vector3(PI * 0.5, 0.0, 0.0))
+			box(root, Vector3(0.1, 0.5, 0.1), Vector3(0.25, 0.75, 0.24), mat(HAZARD))
+		"lodecart":
+			_lodecart(root, team)
+		"compass":
+			_compass(root, team)
+		"dynamo":
+			_dynamo(root, team)
+		"armature":
+			_armature(root, team)
+		"stator":
+			_stator(root, team)
+		"solenoid":
+			_solenoid(root, team)
+		"lode_hall":
+			_lode_hall(root, team)
+		"conductor":
+			_conductor(root, team)
+		"magnet_yard":
+			_magnet_yard(root, team)
+		"ring_hall":
+			_ring_hall(root, team)
+		"winding_shed":
+			_winding_shed(root, team)
+		"arc_pole":
+			_arc_pole(root, team)
+		"resonator":
+			_resonator(root, team)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -2904,6 +3004,601 @@ static func _occulus(root: Node3D, team: Color) -> void:
 	hoop.rotation = Vector3(PI * 0.5, 0.0, 0.0)
 	box(halo, Vector3(0.14, 0.14, 0.14), Vector3(1.06, 0.0, 0.0), mat(GHOST, 1.8))
 	box(halo, Vector3(0.14, 0.14, 0.14), Vector3(-1.06, 0.0, 0.0), mat(GHOST, 1.8))
+
+
+# -------------------------------------------------------------- Brackenfold
+
+## A Brackenfold foot soldier: wood-brown limbs, a mask of bone with one
+## sap-bright slit, a red leaf for a crest and a thorn on each shoulder.
+static func _sprout(root: Node3D, team: Color) -> void:
+	_soldier(root, team, BONE, BARK_LIGHT, BARK)
+	wedge(root, Vector3(0.52, 0.3, 0.1), Vector3(-0.16, 1.5, 0.0), mat(LEAF), 0.9)
+	box(root, Vector3(0.05, 0.06, 0.24), Vector3(0.17, 1.3, 0.0), mat(SAP, 1.8))
+	for z: float in [-0.3, 0.3]:
+		cyl(root, 0.0, 0.06, 0.26, Vector3(-0.02, 1.2, z), mat(BONE), 4, Vector3(signf(z) * 0.5, 0.0, 0.3))
+
+
+## One jointed leg: a thick thigh that rises away from the body to a knob
+## of a knee, and a shin that comes down to a clawed foot.
+static func _beast_leg(root: Node3D, x: float, z: float, side: float, hip: float) -> void:
+	box(root, Vector3(0.2, 0.2, 0.62), Vector3(x, hip + 0.16, z + side * 0.24), mat(BARK), Vector3(-side * 0.55, 0.0, 0.0))
+	box(root, Vector3(0.2, 0.2, 0.2), Vector3(x, hip + 0.33, z + side * 0.5), mat(BONE_DARK))
+	box(root, Vector3(0.15, hip + 0.3, 0.15), Vector3(x, (hip + 0.3) * 0.5, z + side * 0.58), mat(BARK), Vector3(-side * 0.2, 0.0, 0.0))
+	box(root, Vector3(0.3, 0.08, 0.24), Vector3(x + 0.05, 0.04, z + side * 0.66), mat(BONE_DARK))
+
+
+## The body of a Brackenfold beast: a dark belly under three overlapping
+## plates of horn that arch like a woodlouse, sap glowing in the seams, a
+## low head with horns and bright eyes, a crest of red fins down the back
+## and jointed legs. A turret sits at about 0.5 + height * 1.3.
+static func _beast(root: Node3D, team: Color, length: float, width: float, pairs: int, height: float = 0.5) -> void:
+	var hip: float = 0.3
+	box(root, Vector3(length * 0.92, 0.3, width * 0.7), Vector3(0.0, hip + 0.14, 0.0), mat(BARK))
+	for i: int in 3:
+		var f: float = float(i) / 2.0
+		var x: float = lerpf(-length * 0.31, length * 0.24, f)
+		var h: float = height * (0.8 + 0.5 * sin(f * PI))
+		var wide: float = width * (0.86 + 0.16 * sin(f * PI))
+		var lean: float = lerpf(0.26, -0.26, f)
+		box(root, Vector3(length * 0.36, h, wide), Vector3(x, hip + 0.22 + h * 0.5, 0.0), mat(BONE), Vector3(0.0, 0.0, lean))
+		# A darker rim where each plate laps the next, and the team's colour
+		# across its back and down its flanks.
+		box(root, Vector3(0.07, h * 1.02, wide * 1.03), Vector3(x - length * 0.17, hip + 0.22 + h * 0.5, 0.0), mat(BONE_DARK), Vector3(0.0, 0.0, lean))
+		box(root, Vector3(length * 0.14, 0.06, wide * 0.7), Vector3(x + length * 0.02, hip + 0.23 + h, 0.0), team_mat(team), Vector3(0.0, 0.0, lean))
+		for side: float in [-1.0, 1.0]:
+			box(root, Vector3(length * 0.2, h * 0.46, 0.05), Vector3(x + length * 0.02, hip + 0.22 + h * 0.52, side * (wide * 0.5 + 0.01)), team_mat(team), Vector3(0.0, 0.0, lean))
+		if i < 2:
+			box(root, Vector3(0.07, h * 0.5, wide * 0.6), Vector3(x + length * 0.15, hip + 0.24 + h * 0.4, 0.0), mat(SAP, 1.4))
+		# A fin on every plate: the crest.
+		wedge(root, Vector3(length * 0.26, height * 0.5, 0.07), Vector3(x - length * 0.04, hip + 0.22 + h + height * 0.2, 0.0), mat(LEAF if i != 1 else LEAF_LIGHT), 0.15, Vector3(0.0, 0.0, lean))
+	# Head: a brow plate over a dark jaw, two eyes, two horns swept forward.
+	wedge(root, Vector3(length * 0.3, height * 0.8, width * 0.72), Vector3(length * 0.5, hip + 0.2 + height * 0.4, 0.0), mat(BONE), 0.0)
+	box(root, Vector3(length * 0.22, 0.16, width * 0.5), Vector3(length * 0.52, hip + 0.08, 0.0), mat(BARK))
+	for side: float in [-1.0, 1.0]:
+		box(root, Vector3(0.12, 0.1, 0.14), Vector3(length * 0.53, hip + 0.3 + height * 0.3, side * width * 0.22), mat(SAP, 2.0))
+		cyl(root, 0.0, 0.09, 0.6, Vector3(length * 0.62, hip + 0.3 + height * 0.5, side * width * 0.3), mat(BONE_DARK), 5, Vector3(0.0, 0.0, -PI * 0.5 + 0.5))
+		for i: int in pairs:
+			var x: float = lerpf(-length * 0.3, length * 0.3, float(i) / float(maxi(1, pairs - 1))) if pairs > 1 else 0.0
+			_beast_leg(root, x, side * width * 0.3, side, hip)
+	# Tail: a stub with a fin on it.
+	box(root, Vector3(length * 0.2, 0.2, width * 0.3), Vector3(-length * 0.52, hip + 0.22, 0.0), mat(BONE_DARK))
+	wedge(root, Vector3(length * 0.34, height * 1.2, 0.08), Vector3(-length * 0.6, hip + 0.3 + height * 0.6, 0.0), mat(LEAF), 1.0)
+
+
+## A cluster of quills fanned out forwards and up: the Brackenfold's guns.
+static func _quills(t: Node3D, count: int, length: float, spread: float) -> void:
+	for i: int in count:
+		var z: float = (float(i) - float(count - 1) * 0.5) * spread
+		var tilt: float = -PI * 0.5 + 0.3 + 0.1 * absf(z) / maxf(spread, 0.01)
+		cyl(t, 0.015, 0.055, length, Vector3(length * 0.42, 0.14 + length * 0.13, z), mat(BARK), 5, Vector3(0.0, 0.0, tilt))
+		box(t, Vector3(0.06, 0.06, 0.06), Vector3(length * 0.9, 0.14 + length * 0.27, z), mat(SAP, 1.6))
+
+
+## A ring of petals round a centre, each rising as it goes outward.
+static func _petals(root: Node3D, at: Vector3, count: int, reach: float, size: Vector3, color: Color, turn: float = 0.0) -> void:
+	for i: int in count:
+		var ang: float = float(i) * TAU / float(count) + turn
+		wedge(root, size, at + Vector3(cos(ang) * reach, size.y * 0.5, sin(ang) * reach), mat(color), 1.0, Vector3(0.0, -ang, 0.0))
+
+
+## A bone turret collar with a leaf on each side.
+static func _bud(t: Node3D, team: Color, radius: float) -> void:
+	cyl(t, radius * 0.8, radius, radius * 0.7, Vector3(0.0, radius * 0.35, 0.0), mat(BONE), 8)
+	cyl(t, radius * 0.84, radius * 0.84, 0.06, Vector3(0.0, radius * 0.72, 0.0), team_mat(team), 8)
+	for side: float in [-1.0, 1.0]:
+		wedge(t, Vector3(radius * 1.5, radius * 0.7, 0.06), Vector3(-radius * 0.5, radius * 0.75, side * radius * 0.7), mat(LEAF), 1.0, Vector3(0.0, side * 0.35 + PI, 0.0))
+
+
+static func _forager(root: Node3D, team: Color) -> void:
+	_beast(root, team, 2.2, 1.2, 3, 0.36)
+	# A woven basket on its back holds the load.
+	cyl(root, 0.62, 0.52, 0.34, Vector3(-0.3, 1.1, 0.0), mat(BARK_LIGHT), 8)
+	cyl(root, 0.66, 0.66, 0.07, Vector3(-0.3, 1.26, 0.0), mat(BARK), 8)
+	_cargo(root, Vector3(-0.3, 1.22, 0.0), Vector3(0.86, 0.46, 0.86))
+
+
+static func _quillhound(root: Node3D, team: Color) -> void:
+	_beast(root, team, 1.7, 0.8, 2, 0.3)
+	var t: Node3D = _turret(root, Vector3(0.1, 0.92, 0.0))
+	_bud(t, team, 0.24)
+	_quills(t, 3, 0.6, 0.12)
+
+
+static func _quillback(root: Node3D, team: Color) -> void:
+	_beast(root, team, 2.2, 1.2, 3, 0.44)
+	var t: Node3D = _turret(root, Vector3(-0.1, 1.1, 0.0))
+	_bud(t, team, 0.4)
+	_quills(t, 7, 1.0, 0.12)
+
+
+static func _barkhide(root: Node3D, team: Color) -> void:
+	_beast(root, team, 2.8, 1.5, 3, 0.56)
+	# Extra slabs of bone hung along the flanks.
+	for side: float in [-1.0, 1.0]:
+		for x: float in [-0.75, 0.05, 0.8]:
+			box(root, Vector3(0.66, 0.46, 0.1), Vector3(x, 0.72, side * 0.88), mat(BONE_DARK), Vector3(side * 0.22, 0.0, 0.0))
+			box(root, Vector3(0.5, 0.06, 0.12), Vector3(x, 0.9, side * 0.92), mat(LEAF))
+	var t: Node3D = _turret(root, Vector3(-0.2, 1.26, 0.0))
+	_bud(t, team, 0.52)
+	# The gall cannon: a trunk bound with bone that swells at the muzzle.
+	cyl(t, 0.17, 0.12, 1.6, Vector3(1.1, 0.24, 0.0), mat(BARK_LIGHT), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	for x: float in [0.6, 1.1, 1.6]:
+		cyl(t, 0.19, 0.19, 0.09, Vector3(x, 0.24, 0.0), mat(BONE), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	cyl(t, 0.24, 0.17, 0.2, Vector3(1.96, 0.24, 0.0), mat(BARK), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	box(t, Vector3(0.06, 0.2, 0.2), Vector3(2.07, 0.24, 0.0), mat(SAP, 1.6))
+
+
+static func _whipvine(root: Node3D, team: Color) -> void:
+	_beast(root, team, 2.1, 1.15, 3, 0.4)
+	var t: Node3D = _turret(root, Vector3(-0.2, 1.04, 0.0))
+	_bud(t, team, 0.36)
+	# Four whips reach for the sky, each tipped with sap.
+	for z: float in [-0.27, -0.09, 0.09, 0.27]:
+		cyl(t, 0.02, 0.05, 1.35, Vector3(0.42, 0.72, z), mat(BARK), 5, Vector3(0.0, 0.0, -0.75))
+		box(t, Vector3(0.07, 0.07, 0.07), Vector3(0.9, 1.22, z), mat(SAP, 1.7))
+
+
+static func _sporemortar(root: Node3D, team: Color) -> void:
+	_beast(root, team, 2.5, 1.3, 3, 0.4)
+	var t: Node3D = _turret(root, Vector3(-0.35, 1.04, 0.0))
+	_bud(t, team, 0.46)
+	# A trumpet of bound wood, wide at the mouth, with a pod ready in it.
+	cyl(t, 0.44, 0.16, 1.6, Vector3(0.6, 0.92, 0.0), mat(BARK_LIGHT), 8, Vector3(0.0, 0.0, -0.9))
+	cyl(t, 0.48, 0.48, 0.09, Vector3(1.2, 1.4, 0.0), mat(BONE), 8, Vector3(0.0, 0.0, -0.9))
+	cyl(t, 0.3, 0.3, 0.08, Vector3(0.75, 1.04, 0.0), mat(BONE), 8, Vector3(0.0, 0.0, -0.9))
+	ball(t, 0.26, Vector3(1.14, 1.36, 0.0), mat(SAP, 1.4), 6)
+
+
+## The deck the Brackenfold grows its buildings on: dark heartwood with a
+## floor of worked wood, a bone thorn leaning out of each corner and a sap
+## lantern at its foot.
+static func _mound(root: Node3D, w: float, d: float, h: float = 0.4) -> void:
+	box(root, Vector3(w, h, d), Vector3(0.0, 0.0, 0.0), mat(BARK))
+	box(root, Vector3(w - 0.7, 0.05, d - 0.7), Vector3(0.0, h * 0.5 + 0.02, 0.0), mat(BARK_LIGHT))
+	for side: float in [-1.0, 1.0]:
+		box(root, Vector3(w - 1.4, 0.05, 0.1), Vector3(0.0, h * 0.5 + 0.04, side * (d * 0.5 - 0.22)), mat(LEAF))
+		box(root, Vector3(0.1, 0.05, d - 1.4), Vector3(side * (w * 0.5 - 0.22), h * 0.5 + 0.04, 0.0), mat(LEAF))
+		for other: float in [-1.0, 1.0]:
+			var at: Vector3 = Vector3(side * (w * 0.5 - 0.32), h * 0.5, other * (d * 0.5 - 0.32))
+			cyl(root, 0.0, 0.16, 1.0, at + Vector3(0.0, 0.48, 0.0), mat(BONE), 5, Vector3(other * 0.25, 0.0, -side * 0.25))
+			box(root, Vector3(0.16, 0.16, 0.16), at + Vector3(-side * 0.3, 0.1, -other * 0.3), mat(SAP, 1.5))
+
+
+static func _heartroot(root: Node3D, team: Color) -> void:
+	_mound(root, 7.7, 7.7, 0.5)
+	# A great flower: a drum of wood, two rings of red petals and a tower of
+	# bone rising out of the middle with the sap heart at its top.
+	cyl(root, 2.3, 2.6, 1.0, Vector3(0.0, 0.75, 0.0), mat(BARK_LIGHT), 8)
+	cyl(root, 2.64, 2.64, 0.26, Vector3(0.0, 0.9, 0.0), team_mat(team), 8)
+	_petals(root, Vector3(0.0, 1.2, 0.0), 8, 2.5, Vector3(1.9, 1.3, 1.5), LEAF, PI / 8.0)
+	cyl(root, 1.5, 1.9, 1.0, Vector3(0.0, 1.75, 0.0), mat(BARK_LIGHT), 8)
+	_petals(root, Vector3(0.0, 2.2, 0.0), 6, 1.55, Vector3(1.4, 1.3, 1.1), LEAF_LIGHT)
+	cyl(root, 0.6, 1.0, 2.6, Vector3(0.0, 3.5, 0.0), mat(BONE), 8)
+	for y: float in [2.9, 3.6, 4.3]:
+		cyl(root, 1.0 - (y - 2.2) * 0.15, 1.0 - (y - 2.2) * 0.15, 0.1, Vector3(0.0, y, 0.0), mat(BARK), 8)
+	ball(root, 0.7, Vector3(0.0, 5.2, 0.0), mat(SAP, 1.5), 10)
+	var halo: Node3D = group(root, "Spin", Vector3(0.0, 5.2, 0.0))
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0
+		wedge(halo, Vector3(0.6, 0.1, 0.3), Vector3(cos(ang) * 1.15, 0.0, sin(ang) * 1.15), mat(LEAF_LIGHT), 1.0, Vector3(0.0, -ang, 0.0))
+	# The way in, under a lintel of sap.
+	box(root, Vector3(0.2, 0.8, 1.1), Vector3(2.5, 0.7, 0.0), mat(CHARRED))
+	box(root, Vector3(0.1, 0.08, 1.3), Vector3(2.6, 1.14, 0.0), mat(SAP, 1.4))
+	# Command mast: a bone spire with the root of the signal grid at its tip.
+	cyl(root, 0.06, 0.2, 3.4, Vector3(3.0, 1.95, 3.0), mat(BONE), 5)
+	ring(root, 0.75, 0.9, Vector3(3.0, 2.6, 3.0), team_mat(team))
+	ring(root, 0.45, 0.58, Vector3(3.0, 3.3, 3.0), mat(SAP, 1.0))
+	ball(root, 0.22, Vector3(3.0, 3.8, 3.0), mat(team, 1.4))
+	cyl(root, 0.4, 0.5, 0.8, Vector3(-2.9, 0.65, -2.9), mat(BARK_LIGHT), 8)
+	var t: Node3D = _turret(root, Vector3(-2.9, 1.05, -2.9))
+	_bud(t, team, 0.4)
+	_quills(t, 3, 0.9, 0.14)
+
+
+static func _tendril(root: Node3D, team: Color) -> void:
+	cyl(root, 0.55, 0.85, 0.3, Vector3(0.0, 0.15, 0.0), mat(BARK), 8)
+	_petals(root, Vector3(0.0, 0.2, 0.0), 5, 0.6, Vector3(0.7, 0.4, 0.5), LEAF)
+	# A stalk of bone, jointed like bamboo.
+	cyl(root, 0.1, 0.26, 4.2, Vector3(0.0, 2.3, 0.0), mat(BONE), 6)
+	for y: float in [1.1, 2.0, 2.9, 3.7]:
+		cyl(root, 0.3 - y * 0.04, 0.3 - y * 0.04, 0.08, Vector3(0.0, y, 0.0), mat(BARK), 6)
+	ring(root, 0.5, 0.62, Vector3(0.0, 2.4, 0.0), team_mat(team))
+	ring(root, 0.32, 0.42, Vector3(0.0, 3.4, 0.0), team_mat(team))
+	# A whorl of leaves turns below the bud.
+	var whorl: Node3D = group(root, "Spin", Vector3(0.0, 4.4, 0.0))
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0
+		wedge(whorl, Vector3(0.7, 0.2, 0.3), Vector3(cos(ang) * 0.45, 0.0, sin(ang) * 0.45), mat(LEAF_LIGHT), 1.0, Vector3(0.0, -ang, 0.0))
+	ball(root, 0.24, Vector3(0.0, 4.75, 0.0), mat(SAP, 1.7), 6)
+	ball(root, 0.12, Vector3(0.0, 5.08, 0.0), mat(team, 1.4))
+
+
+static func _mulch_pit(root: Node3D, team: Color) -> void:
+	_mound(root, 5.7, 5.7)
+	# An open flower round a dark pit that bubbles with sap.
+	cyl(root, 1.7, 2.0, 0.9, Vector3(-0.4, 0.65, -0.4), mat(BARK_LIGHT), 8)
+	cyl(root, 2.04, 2.04, 0.16, Vector3(-0.4, 0.62, -0.4), team_mat(team), 8)
+	cyl(root, 1.5, 1.5, 0.08, Vector3(-0.4, 1.1, -0.4), mat(CHARRED), 8)
+	_petals(root, Vector3(-0.4, 0.9, -0.4), 8, 1.95, Vector3(1.0, 0.9, 1.1), LEAF, PI / 8.0)
+	for at: Vector3 in [Vector3(-0.9, 1.14, -0.6), Vector3(0.0, 1.14, 0.1), Vector3(-0.3, 1.14, -1.1), Vector3(0.3, 1.14, -0.7)]:
+		ball(root, 0.22, at, mat(SAP, 1.3), 6)
+	# What the Foragers brought in, heaped by the gate.
+	box(root, Vector3(0.9, 0.6, 0.8), Vector3(1.9, 0.5, 1.6), mat(RUST, 0.0, 0.4, 0.7))
+	box(root, Vector3(0.8, 0.5, 0.7), Vector3(1.3, 0.45, 2.1), mat(METAL, 0.0, 0.7, 0.45))
+	box(root, Vector3(0.7, 0.5, 0.6), Vector3(1.7, 1.0, 1.8), mat(BARK_LIGHT))
+
+
+static func _seedbed(root: Node3D, team: Color) -> void:
+	_mound(root, 5.7, 5.7)
+	# A long pod of wood under ribs of bone, a crest of red leaves down its
+	# back, and a row of seeds swelling in front of it.
+	box(root, Vector3(4.4, 0.8, 2.3), Vector3(-0.1, 0.6, -1.0), mat(BARK_LIGHT))
+	var pod: MeshInstance3D = arch(root, 1.15, 4.4, Vector3(-0.1, 1.0, -1.0), mat(BARK_LIGHT))
+	pod.rotation = Vector3(0.0, PI * 0.5, 0.0)
+	box(root, Vector3(4.46, 0.16, 2.36), Vector3(-0.1, 0.96, -1.0), team_mat(team))
+	for x: float in [-2.0, -1.05, -0.1, 0.85, 1.8]:
+		var rib: MeshInstance3D = arch(root, 1.24, 0.14, Vector3(x, 1.0, -1.0), mat(BONE))
+		rib.rotation = Vector3(0.0, PI * 0.5, 0.0)
+	for x: float in [-1.55, -0.6, 0.35, 1.3]:
+		wedge(root, Vector3(0.8, 0.5, 0.1), Vector3(x, 2.4, -1.0), mat(LEAF), 0.2)
+	box(root, Vector3(0.9, 0.85, 0.1), Vector3(-0.1, 0.7, 0.18), mat(CHARRED))
+	box(root, Vector3(1.1, 0.07, 0.12), Vector3(-0.1, 1.16, 0.2), mat(SAP, 1.4))
+	for x: float in [-1.9, -0.9, 0.9, 1.9]:
+		cyl(root, 0.2, 0.34, 0.7, Vector3(x, 0.55, 1.5), mat(BONE), 6)
+		_petals(root, Vector3(x, 0.2, 1.5), 4, 0.3, Vector3(0.4, 0.3, 0.3), LEAF, 0.4)
+		box(root, Vector3(0.14, 0.14, 0.14), Vector3(x, 0.96, 1.5), mat(SAP, 1.6))
+
+
+static func _bloomworks(root: Node3D, team: Color) -> void:
+	_mound(root, 7.7, 5.7)
+	# A great bud of bound wood, its petals just opening round the sap.
+	cyl(root, 2.2, 2.6, 1.4, Vector3(-0.5, 0.9, -0.5), mat(BARK_LIGHT), 8)
+	cyl(root, 2.64, 2.64, 0.24, Vector3(-0.5, 1.0, -0.5), team_mat(team), 8)
+	cyl(root, 1.2, 2.2, 1.3, Vector3(-0.5, 2.25, -0.5), mat(BARK_LIGHT), 8)
+	for i: int in 8:
+		var ang: float = float(i) * TAU / 8.0 + PI / 8.0
+		cyl(root, 0.06, 0.1, 2.9, Vector3(-0.5 + cos(ang) * 2.05, 1.7, -0.5 + sin(ang) * 2.05), mat(BONE), 4, Vector3(sin(ang) * 0.4, 0.0, -cos(ang) * 0.4))
+	_petals(root, Vector3(-0.5, 2.7, -0.5), 6, 1.1, Vector3(1.3, 1.0, 1.0), LEAF)
+	ball(root, 0.62, Vector3(-0.5, 3.1, -0.5), mat(SAP, 1.4), 8)
+	box(root, Vector3(2.2, 1.3, 0.3), Vector3(-0.5, 0.85, 1.95), mat(CHARRED))
+	box(root, Vector3(2.4, 0.08, 0.34), Vector3(-0.5, 1.54, 1.96), mat(SAP, 1.5))
+	# A beast half grown on the apron.
+	box(root, Vector3(1.3, 0.34, 0.8), Vector3(2.7, 0.44, 1.6), mat(BARK))
+	box(root, Vector3(0.6, 0.4, 0.86), Vector3(2.5, 0.72, 1.6), mat(BONE), Vector3(0.0, 0.0, 0.1))
+	_petals(root, Vector3(2.9, 0.2, -1.7), 5, 0.4, Vector3(0.6, 0.5, 0.4), LEAF_LIGHT)
+	cyl(root, 0.1, 0.2, 1.6, Vector3(2.9, 1.0, -1.7), mat(BONE), 5)
+	box(root, Vector3(0.2, 0.2, 0.2), Vector3(2.9, 1.9, -1.7), mat(SAP, 1.6))
+
+
+static func _spine_stalk(root: Node3D, team: Color) -> void:
+	cyl(root, 0.55, 0.9, 0.36, Vector3(0.0, 0.18, 0.0), mat(BARK), 8)
+	_petals(root, Vector3(0.0, 0.3, 0.0), 6, 0.55, Vector3(0.6, 0.4, 0.45), LEAF)
+	cyl(root, 0.3, 0.42, 0.8, Vector3(0.0, 0.7, 0.0), mat(BARK_LIGHT), 8)
+	ring(root, 0.42, 0.52, Vector3(0.0, 0.8, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 1.1, 0.0))
+	_bud(t, team, 0.42)
+	_quills(t, 5, 0.95, 0.12)
+
+
+static func _elder_bough(root: Node3D, team: Color) -> void:
+	_mound(root, 5.7, 5.7)
+	cyl(root, 1.5, 1.9, 0.6, Vector3(0.0, 0.5, 0.0), mat(BARK_LIGHT), 8)
+	cyl(root, 1.56, 1.56, 0.14, Vector3(0.0, 0.76, 0.0), team_mat(team), 8)
+	_petals(root, Vector3(0.0, 0.7, 0.0), 8, 1.7, Vector3(1.0, 0.7, 0.9), LEAF, PI / 8.0)
+	# Four great tusks of bone lean together over a lantern of sap.
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0 + PI * 0.25
+		cyl(root, 0.06, 0.34, 4.0, Vector3(cos(ang) * 1.0, 2.6, sin(ang) * 1.0), mat(BONE), 6, Vector3(sin(ang) * 0.36, 0.0, -cos(ang) * 0.36))
+	ball(root, 0.7, Vector3(0.0, 2.5, 0.0), mat(SAP, 1.5), 10)
+	var halo: Node3D = group(root, "Spin", Vector3(0.0, 2.5, 0.0))
+	for i: int in 4:
+		var ang: float = float(i) * TAU / 4.0
+		wedge(halo, Vector3(0.55, 0.12, 0.3), Vector3(cos(ang) * 1.2, 0.0, sin(ang) * 1.2), mat(LEAF_LIGHT), 1.0, Vector3(0.0, -ang, 0.0))
+	box(root, Vector3(0.2, 0.2, 0.2), Vector3(0.0, 4.55, 0.0), mat(SAP, 1.7))
+
+
+# --------------------------------------------------------- Lodestone Circle
+
+## A Circle foot soldier: graphite fatigues, a porcelain helmet with a
+## magenta visor and a small coil on the back.
+static func _lineman(root: Node3D, team: Color) -> void:
+	_soldier(root, team, PORCELAIN, GRAPHITE_LIGHT, GRAPHITE)
+	box(root, Vector3(0.05, 0.06, 0.24), Vector3(0.17, 1.3, 0.0), mat(FLUX, 1.7))
+	cyl(root, 0.1, 0.1, 0.3, Vector3(-0.32, 0.98, 0.0), mat(COIL, 0.0, 0.7, 0.4), 6)
+	cyl(root, 0.03, 0.03, 0.3, Vector3(-0.32, 1.28, 0.0), mat(GUNMETAL), 4)
+	box(root, Vector3(0.06, 0.06, 0.06), Vector3(-0.32, 1.45, 0.0), mat(FLUX, 1.6))
+
+
+## A porcelain insulator: a short stack of ribbed discs.
+static func _insulator(root: Node3D, pos: Vector3, height: float, radius: float = 0.12) -> void:
+	cyl(root, radius * 0.5, radius * 0.5, height, pos + Vector3(0.0, height * 0.5, 0.0), mat(GUNMETAL), 5)
+	var discs: int = maxi(2, int(height / 0.14))
+	for i: int in discs:
+		cyl(root, radius * 0.75, radius, 0.07, pos + Vector3(0.0, (float(i) + 0.5) * height / float(discs), 0.0), mat(PORCELAIN), 8)
+
+
+## A copper winding round an axis along X, between two graphite cheeks.
+static func _winding(parent: Node3D, pos: Vector3, radius: float, length: float) -> void:
+	cyl(parent, radius, radius, length, pos, mat(COIL, 0.0, 0.7, 0.4), 10, Vector3(0.0, 0.0, -PI * 0.5))
+	for side: float in [-1.0, 1.0]:
+		cyl(parent, radius * 1.2, radius * 1.2, 0.06, pos + Vector3(side * length * 0.5, 0.0, 0.0), mat(GRAPHITE), 10, Vector3(0.0, 0.0, -PI * 0.5))
+
+
+## A horseshoe magnet lying along X with its poles forward.
+static func _horseshoe(parent: Node3D, pos: Vector3, length: float, gap: float, thick: float) -> void:
+	for side: float in [-1.0, 1.0]:
+		box(parent, Vector3(length, thick, thick), pos + Vector3(0.0, 0.0, side * gap * 0.5), mat(GRAPHITE_LIGHT, 0.0, 0.6, 0.4))
+		box(parent, Vector3(length * 0.22, thick * 1.1, thick * 1.1), pos + Vector3(length * 0.42, 0.0, side * gap * 0.5), mat(PORCELAIN))
+	box(parent, Vector3(thick, thick, gap + thick), pos + Vector3(-length * 0.5 + thick * 0.5, 0.0, 0.0), mat(GRAPHITE_LIGHT, 0.0, 0.6, 0.4))
+
+
+## The Circle's car: a graphite hull with rounded shoulders, a copper bus
+## bar down each flank on porcelain stand-offs, and a magenta strip in front.
+static func _coil_car(root: Node3D, team: Color, length: float, width: float, axles: int, height: float = 0.42) -> void:
+	box(root, Vector3(length, 0.24, width * 0.86), Vector3(0.0, 0.46, 0.0), mat(GRAPHITE))
+	box(root, Vector3(length * 0.84, height, width * 0.9), Vector3(-length * 0.03, 0.58 + height * 0.5, 0.0), mat(GRAPHITE_LIGHT))
+	wedge(root, Vector3(length * 0.2, height, width * 0.9), Vector3(length * 0.49, 0.58 + height * 0.5, 0.0), mat(GRAPHITE_LIGHT), 0.0)
+	box(root, Vector3(length * 0.5, 0.06, width * 0.6), Vector3(-length * 0.08, 0.6 + height, 0.0), team_mat(team))
+	for side: float in [-1.0, 1.0]:
+		var z: float = side * (width * 0.5)
+		box(root, Vector3(length * 0.82, 0.1, 0.06), Vector3(-length * 0.02, 0.62, z + side * 0.02), team_mat(team))
+		cyl(root, 0.05, 0.05, length * 0.74, Vector3(-length * 0.04, 0.6 + height * 0.72, z + side * 0.08), mat(COIL, 0.0, 0.7, 0.4), 6, Vector3(0.0, 0.0, -PI * 0.5))
+		for x: float in [-length * 0.34, length * 0.26]:
+			cyl(root, 0.045, 0.06, 0.1, Vector3(x, 0.6 + height * 0.72, z + side * 0.03), mat(PORCELAIN), 6, Vector3(PI * 0.5, 0.0, 0.0))
+		for i: int in axles:
+			var x: float = lerpf(-length * 0.34, length * 0.34, float(i) / float(maxi(1, axles - 1)))
+			wheel(root, 0.3, 0.22, Vector3(x, 0.3, z - side * 0.04))
+	box(root, Vector3(0.05, 0.07, width * 0.56), Vector3(length * 0.5 + 0.01, 0.56, 0.0), mat(FLUX, 1.6))
+	_tail(root, -length * 0.5 - 0.01, 0.62, width * 0.34)
+
+
+## A fork of two prongs with flux crackling between the tips.
+static func _prongs(t: Node3D, pos: Vector3, length: float, gap: float) -> void:
+	for side: float in [-1.0, 1.0]:
+		box(t, Vector3(length, 0.07, 0.07), pos + Vector3(length * 0.5, 0.0, side * gap * 0.5), mat(GUNMETAL))
+		box(t, Vector3(0.12, 0.1, 0.1), pos + Vector3(length, 0.0, side * gap * 0.5), mat(PORCELAIN))
+	ball(t, gap * 0.28, pos + Vector3(length, 0.0, 0.0), mat(FLUX, 1.8), 6)
+
+
+static func _lodecart(root: Node3D, team: Color) -> void:
+	_coil_car(root, team, 2.3, 1.2, 3, 0.3)
+	box(root, Vector3(0.6, 0.5, 1.05), Vector3(0.72, 1.14, 0.0), mat(GRAPHITE_LIGHT))
+	box(root, Vector3(0.05, 0.16, 0.86), Vector3(1.03, 1.2, 0.0), mat(FLUX, 1.0))
+	box(root, Vector3(1.3, 0.2, 1.16), Vector3(-0.4, 0.98, 0.0), mat(GRAPHITE))
+	_cargo(root, Vector3(-0.4, 1.08, 0.0), Vector3(1.1, 0.48, 0.98))
+	# A jib with a lifting magnet over the bed.
+	cyl(root, 0.05, 0.06, 1.0, Vector3(0.36, 1.64, 0.46), mat(GUNMETAL), 5)
+	box(root, Vector3(0.9, 0.06, 0.06), Vector3(-0.06, 2.12, 0.46), mat(GUNMETAL))
+	cyl(root, 0.2, 0.2, 0.1, Vector3(-0.46, 1.96, 0.46), mat(PORCELAIN), 8)
+	cyl(root, 0.15, 0.15, 0.05, Vector3(-0.46, 1.89, 0.46), mat(FLUX, 1.3), 8)
+
+
+static func _compass(root: Node3D, team: Color) -> void:
+	_coil_car(root, team, 1.8, 0.95, 2, 0.3)
+	var t: Node3D = _turret(root, Vector3(-0.1, 0.9, 0.0))
+	cyl(t, 0.26, 0.3, 0.16, Vector3(0.0, 0.08, 0.0), mat(GRAPHITE), 8)
+	barrel(t, 0.035, 0.7, Vector3(0.2, 0.12, 0.0), mat(GUNMETAL))
+	# The needle that gives it its name: one half white, one half magenta.
+	wedge(t, Vector3(0.5, 0.05, 0.16), Vector3(0.22, 0.26, 0.0), mat(FLUX, 1.2), 1.0)
+	wedge(t, Vector3(0.5, 0.05, 0.16), Vector3(-0.28, 0.26, 0.0), mat(PORCELAIN), 0.0)
+	aerial(root, Vector3(-0.7, 0.9, 0.3), 0.9, FLUX)
+
+
+static func _dynamo(root: Node3D, team: Color) -> void:
+	_coil_car(root, team, 2.2, 1.2, 3, 0.4)
+	var t: Node3D = _turret(root, Vector3(-0.15, 1.04, 0.0))
+	box(t, Vector3(0.9, 0.14, 0.9), Vector3(-0.1, 0.07, 0.0), mat(GRAPHITE))
+	# A drum wound with copper lies across the turret; two forks reach forward.
+	var drum: MeshInstance3D = cyl(t, 0.34, 0.34, 0.7, Vector3(-0.15, 0.46, 0.0), mat(COIL, 0.0, 0.7, 0.4), 10, Vector3(PI * 0.5, 0.0, 0.0))
+	drum.name = "Drum"
+	for z: float in [-0.39, 0.39]:
+		cyl(t, 0.4, 0.4, 0.07, Vector3(-0.15, 0.46, z), mat(GRAPHITE_LIGHT), 10, Vector3(PI * 0.5, 0.0, 0.0))
+	box(t, Vector3(0.3, 0.07, 0.5), Vector3(-0.15, 0.84, 0.0), team_mat(team))
+	_prongs(t, Vector3(0.2, 0.34, 0.0), 0.75, 0.42)
+
+
+static func _armature(root: Node3D, team: Color) -> void:
+	_tracks(root, 2.8, 0.62)
+	box(root, Vector3(2.7, 0.44, 1.0), Vector3(0.0, 0.66, 0.0), mat(GRAPHITE_LIGHT))
+	wedge(root, Vector3(0.6, 0.44, 1.0), Vector3(1.55, 0.66, 0.0), mat(GRAPHITE_LIGHT), 0.0)
+	box(root, Vector3(2.2, 0.08, 1.5), Vector3(-0.1, 0.9, 0.0), team_mat(team))
+	for z: float in [-0.76, 0.76]:
+		cyl(root, 0.05, 0.05, 2.2, Vector3(-0.1, 0.98, z), mat(COIL, 0.0, 0.7, 0.4), 6, Vector3(0.0, 0.0, -PI * 0.5))
+	box(root, Vector3(0.05, 0.08, 0.7), Vector3(1.86, 0.6, 0.0), mat(FLUX, 1.6))
+	var t: Node3D = _turret(root, Vector3(-0.25, 0.94, 0.0))
+	cyl(t, 0.62, 0.72, 0.4, Vector3(0.0, 0.2, 0.0), mat(GRAPHITE), 8)
+	box(t, Vector3(0.7, 0.06, 0.7), Vector3(-0.05, 0.42, 0.0), team_mat(team))
+	# The coilgun: two rails and a row of windings down their length.
+	for z: float in [-0.11, 0.11]:
+		box(t, Vector3(2.3, 0.08, 0.06), Vector3(1.55, 0.22, z), mat(GUNMETAL))
+	for x: float in [0.8, 1.25, 1.7, 2.15]:
+		_winding(t, Vector3(x, 0.22, 0.0), 0.17, 0.22)
+	box(t, Vector3(0.1, 0.16, 0.34), Vector3(2.72, 0.22, 0.0), mat(PORCELAIN))
+	box(t, Vector3(0.05, 0.08, 0.14), Vector3(2.78, 0.22, 0.0), mat(FLUX, 1.9))
+	_insulator(t, Vector3(-0.4, 0.4, 0.34), 0.4, 0.09)
+
+
+static func _stator(root: Node3D, team: Color) -> void:
+	_coil_car(root, team, 2.2, 1.2, 3, 0.4)
+	var t: Node3D = _turret(root, Vector3(-0.2, 1.04, 0.0))
+	cyl(t, 0.42, 0.5, 0.2, Vector3(0.0, 0.1, 0.0), mat(GRAPHITE), 8)
+	# Four barrels through an upright ring of windings.
+	var hoop: MeshInstance3D = ring(t, 0.3, 0.46, Vector3(0.36, 0.7, 0.0), mat(COIL, 0.0, 0.7, 0.4))
+	hoop.rotation = Vector3(0.0, 0.0, PI * 0.5 - 0.85)
+	for z: float in [-0.17, 0.17]:
+		for y: float in [-0.1, 0.1]:
+			cyl(t, 0.03, 0.03, 1.4, Vector3(0.5 - y * 0.75, 0.86 + y * 0.66, z), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -0.85))
+	box(t, Vector3(0.08, 0.08, 0.4), Vector3(1.0, 1.42, 0.0), mat(FLUX, 1.6), Vector3(0.0, 0.0, 0.72))
+	box(t, Vector3(0.4, 0.06, 0.6), Vector3(-0.2, 0.24, 0.0), team_mat(team))
+
+
+static func _solenoid(root: Node3D, team: Color) -> void:
+	_coil_car(root, team, 2.6, 1.3, 3, 0.38)
+	for z: float in [-0.9, 0.9]:
+		box(root, Vector3(0.5, 0.08, 0.14), Vector3(-1.05, 0.28, z), mat(GRAPHITE), Vector3(0.0, 0.0, 0.4))
+	var t: Node3D = _turret(root, Vector3(-0.4, 1.0, 0.0))
+	cyl(t, 0.46, 0.54, 0.22, Vector3(0.0, 0.11, 0.0), mat(GRAPHITE), 8)
+	# A long tube wound with copper from breech to muzzle.
+	cyl(t, 0.2, 0.2, 2.5, Vector3(0.75, 1.02, 0.0), mat(GRAPHITE_LIGHT), 8, Vector3(0.0, 0.0, -0.95))
+	for d: float in [0.3, 0.75, 1.2, 1.65, 2.1]:
+		cyl(t, 0.27, 0.27, 0.2, Vector3(-0.27 + d * 0.81, 0.3 + d * 0.58, 0.0), mat(COIL, 0.0, 0.7, 0.4), 8, Vector3(0.0, 0.0, -0.95))
+	cyl(t, 0.24, 0.24, 0.08, Vector3(1.78, 1.76, 0.0), mat(PORCELAIN), 8, Vector3(0.0, 0.0, -0.95))
+	ball(t, 0.14, Vector3(1.84, 1.8, 0.0), mat(FLUX, 1.8), 6)
+	box(t, Vector3(0.4, 0.06, 0.7), Vector3(-0.3, 0.26, 0.0), team_mat(team))
+
+
+## The slab the Circle builds on: graphite, a copper bus bar let into each
+## edge and a porcelain insulator standing at each corner.
+static func _plinth(root: Node3D, w: float, d: float, h: float = 0.4) -> void:
+	box(root, Vector3(w, h, d), Vector3(0.0, 0.0, 0.0), mat(GRAPHITE))
+	box(root, Vector3(w - 0.7, 0.05, d - 0.7), Vector3(0.0, h * 0.5 + 0.02, 0.0), mat(GRAPHITE_LIGHT))
+	for side: float in [-1.0, 1.0]:
+		box(root, Vector3(w - 1.3, 0.06, 0.1), Vector3(0.0, h * 0.5 + 0.04, side * (d * 0.5 - 0.22)), mat(COIL, 0.0, 0.7, 0.4))
+		box(root, Vector3(0.1, 0.06, d - 1.3), Vector3(side * (w * 0.5 - 0.22), h * 0.5 + 0.04, 0.0), mat(COIL, 0.0, 0.7, 0.4))
+		for other: float in [-1.0, 1.0]:
+			var at: Vector3 = Vector3(side * (w * 0.5 - 0.3), h * 0.5, other * (d * 0.5 - 0.3))
+			_insulator(root, at, 0.7, 0.16)
+			box(root, Vector3(0.1, 0.1, 0.1), at + Vector3(0.0, 0.76, 0.0), mat(FLUX, 1.5))
+
+
+## A hall with a rounded roof and a ring let into its front wall.
+static func _drum_hall(root: Node3D, at: Vector3, size: Vector3, team: Color) -> void:
+	box(root, Vector3(size.x, size.y * 0.6, size.z), at + Vector3(0.0, size.y * 0.3, 0.0), mat(GRAPHITE_LIGHT))
+	var vault: MeshInstance3D = arch(root, size.z * 0.5, size.x, at + Vector3(0.0, size.y * 0.6, 0.0), mat(GRAPHITE))
+	vault.rotation = Vector3(0.0, PI * 0.5, 0.0)
+	vault.scale = Vector3(1.0, (size.y * 0.4) / (size.z * 0.5), 1.0)
+	box(root, Vector3(size.x + 0.05, 0.16, size.z + 0.05), at + Vector3(0.0, size.y * 0.56, 0.0), team_mat(team))
+	for x: float in [-size.x * 0.3, 0.0, size.x * 0.3]:
+		box(root, Vector3(0.14, size.y * 0.42, size.z + 0.08), at + Vector3(x, size.y * 0.8, 0.0), mat(COIL, 0.0, 0.7, 0.4)).scale = Vector3(1.0, 1.0, 0.92)
+
+
+static func _lode_hall(root: Node3D, team: Color) -> void:
+	_plinth(root, 7.7, 7.7, 0.5)
+	# A round hall under a great upright ring: the lodestone itself.
+	cyl(root, 2.5, 2.7, 1.9, Vector3(0.0, 1.2, 0.0), mat(GRAPHITE_LIGHT), 12)
+	cyl(root, 2.74, 2.74, 0.3, Vector3(0.0, 1.5, 0.0), team_mat(team), 12)
+	cyl(root, 1.7, 2.5, 0.7, Vector3(0.0, 2.5, 0.0), mat(GRAPHITE), 12)
+	var hoop: MeshInstance3D = ring(root, 2.6, 3.2, Vector3(0.0, 2.3, 0.0), mat(GRAPHITE_LIGHT, 0.0, 0.6, 0.4))
+	hoop.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+	for side: float in [-1.0, 1.0]:
+		# Windings where the ring meets the ground, porcelain caps above them.
+		cyl(root, 0.5, 0.5, 1.1, Vector3(side * 2.9, 1.2, 0.0), mat(COIL, 0.0, 0.7, 0.4), 10)
+		cyl(root, 0.56, 0.56, 0.12, Vector3(side * 2.9, 1.8, 0.0), mat(PORCELAIN), 10)
+	ball(root, 0.55, Vector3(0.0, 3.4, 0.0), mat(FLUX, 1.5), 10)
+	var halo: Node3D = group(root, "Spin", Vector3(0.0, 3.4, 0.0))
+	ring(halo, 0.85, 0.95, Vector3.ZERO, mat(PORCELAIN))
+	box(halo, Vector3(0.16, 0.16, 0.16), Vector3(0.9, 0.0, 0.0), mat(FLUX, 1.8))
+	box(halo, Vector3(0.16, 0.16, 0.16), Vector3(-0.9, 0.0, 0.0), mat(FLUX, 1.8))
+	box(root, Vector3(1.3, 1.1, 0.14), Vector3(0.0, 0.85, 2.64), mat(GUNMETAL))
+	box(root, Vector3(1.5, 0.08, 0.16), Vector3(0.0, 1.44, 2.66), mat(FLUX, 1.4))
+	# Command mast: the root of the signal grid.
+	_insulator(root, Vector3(2.6, 0.25, 2.6), 2.4, 0.2)
+	cyl(root, 0.05, 0.08, 1.6, Vector3(2.6, 3.4, 2.6), mat(GUNMETAL), 5)
+	ring(root, 0.75, 0.9, Vector3(2.6, 2.9, 2.6), team_mat(team))
+	ring(root, 0.45, 0.58, Vector3(2.6, 3.6, 2.6), mat(FLUX, 1.0))
+	ball(root, 0.22, Vector3(2.6, 4.3, 2.6), mat(team, 1.4))
+	cyl(root, 0.45, 0.55, 0.9, Vector3(-2.5, 0.7, -2.5), mat(GRAPHITE_LIGHT), 8)
+	var t: Node3D = _turret(root, Vector3(-2.5, 1.15, -2.5))
+	cyl(t, 0.4, 0.46, 0.2, Vector3(0.0, 0.1, 0.0), mat(GRAPHITE), 8)
+	_prongs(t, Vector3(0.1, 0.3, 0.0), 0.8, 0.36)
+
+
+static func _conductor(root: Node3D, team: Color) -> void:
+	cyl(root, 0.6, 0.85, 0.3, Vector3(0.0, 0.15, 0.0), mat(GRAPHITE), 8)
+	_insulator(root, Vector3(0.0, 0.3, 0.0), 2.2, 0.3)
+	cyl(root, 0.08, 0.1, 1.9, Vector3(0.0, 3.4, 0.0), mat(GUNMETAL), 6)
+	cyl(root, 0.3, 0.3, 0.5, Vector3(0.0, 2.75, 0.0), mat(COIL, 0.0, 0.7, 0.4), 10)
+	ring(root, 0.55, 0.67, Vector3(0.0, 2.2, 0.0), team_mat(team))
+	ring(root, 0.34, 0.44, Vector3(0.0, 3.5, 0.0), team_mat(team))
+	# Two horns at the top with flux between them.
+	for side: float in [-1.0, 1.0]:
+		cyl(root, 0.03, 0.05, 0.9, Vector3(side * 0.26, 4.5, 0.0), mat(GUNMETAL), 5, Vector3(0.0, 0.0, -side * 0.36))
+		box(root, Vector3(0.1, 0.1, 0.1), Vector3(side * 0.42, 4.92, 0.0), mat(PORCELAIN))
+	var spark: Node3D = group(root, "Spin", Vector3(0.0, 4.6, 0.0))
+	box(spark, Vector3(0.5, 0.06, 0.06), Vector3.ZERO, mat(FLUX, 1.8))
+	box(spark, Vector3(0.06, 0.06, 0.5), Vector3.ZERO, mat(FLUX, 1.8))
+	ball(root, 0.12, Vector3(0.0, 5.0, 0.0), mat(team, 1.4))
+
+
+static func _magnet_yard(root: Node3D, team: Color) -> void:
+	_plinth(root, 5.7, 5.7)
+	_drum_hall(root, Vector3(-0.9, 0.2, -1.2), Vector3(3.2, 1.8, 2.4), team)
+	# A gantry over the scrap heap, with the lifting magnet hanging from it.
+	for x: float in [0.2, 2.3]:
+		for z: float in [0.5, 2.2]:
+			cyl(root, 0.07, 0.09, 2.4, Vector3(x, 1.4, z), mat(GUNMETAL), 5)
+	box(root, Vector3(2.4, 0.12, 0.12), Vector3(1.25, 2.6, 0.5), mat(GRAPHITE_LIGHT))
+	box(root, Vector3(2.4, 0.12, 0.12), Vector3(1.25, 2.6, 2.2), mat(GRAPHITE_LIGHT))
+	box(root, Vector3(0.2, 0.14, 1.9), Vector3(1.25, 2.68, 1.35), team_mat(team))
+	cyl(root, 0.02, 0.02, 0.8, Vector3(1.25, 2.2, 1.35), mat(GUNMETAL), 4)
+	cyl(root, 0.42, 0.42, 0.16, Vector3(1.25, 1.75, 1.35), mat(PORCELAIN), 10)
+	cyl(root, 0.34, 0.34, 0.06, Vector3(1.25, 1.65, 1.35), mat(FLUX, 1.4), 10)
+	box(root, Vector3(0.9, 0.6, 0.8), Vector3(1.0, 0.5, 1.3), mat(RUST, 0.0, 0.4, 0.7))
+	box(root, Vector3(0.8, 0.5, 0.7), Vector3(1.7, 0.45, 1.6), mat(METAL, 0.0, 0.7, 0.45))
+	box(root, Vector3(0.6, 0.4, 0.5), Vector3(1.3, 1.0, 1.4), mat(GRAPHITE_LIGHT), Vector3(0.0, 0.4, 0.2))
+	_winding(root, Vector3(-1.9, 0.7, 1.8), 0.5, 0.9)
+
+
+static func _ring_hall(root: Node3D, team: Color) -> void:
+	_plinth(root, 5.7, 5.7)
+	_drum_hall(root, Vector3(-0.2, 0.2, -0.9), Vector3(4.4, 2.2, 2.6), team)
+	# The door is a ring: recruits walk through the field.
+	var gate: MeshInstance3D = ring(root, 0.75, 1.0, Vector3(-0.2, 1.2, 0.46), mat(PORCELAIN))
+	gate.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+	cyl(root, 0.74, 0.74, 0.06, Vector3(-0.2, 1.2, 0.42), mat(GUNMETAL), 12, Vector3(PI * 0.5, 0.0, 0.0))
+	box(root, Vector3(0.12, 0.12, 0.12), Vector3(-0.2, 2.3, 0.5), mat(FLUX, 1.7))
+	_insulator(root, Vector3(1.9, 0.2, 1.6), 1.5, 0.22)
+	box(root, Vector3(0.5, 0.9, 0.04), Vector3(2.2, 1.6, 1.6), team_mat(team))
+	_winding(root, Vector3(-1.9, 0.6, 1.8), 0.4, 0.8)
+
+
+static func _winding_shed(root: Node3D, team: Color) -> void:
+	_plinth(root, 7.7, 5.7)
+	# A long shed under a saw-tooth roof.
+	box(root, Vector3(6.2, 1.7, 3.0), Vector3(0.0, 1.05, -0.9), mat(GRAPHITE_LIGHT))
+	for i: int in 4:
+		wedge(root, Vector3(1.55, 0.8, 3.0), Vector3(-2.32 + float(i) * 1.55, 2.3, -0.9), mat(GRAPHITE), 0.0)
+		box(root, Vector3(0.06, 0.6, 2.6), Vector3(-3.06 + float(i) * 1.55, 2.24, -0.9), mat(FLUX, 0.7))
+	box(root, Vector3(6.26, 0.2, 3.06), Vector3(0.0, 1.8, -0.9), team_mat(team))
+	box(root, Vector3(2.8, 1.4, 0.1), Vector3(-0.6, 0.9, 0.62), mat(GUNMETAL))
+	box(root, Vector3(3.0, 0.08, 0.12), Vector3(-0.6, 1.64, 0.64), mat(FLUX, 1.5))
+	# A great coil waits on the apron beside a half-built hull.
+	_winding(root, Vector3(2.5, 0.85, 1.8), 0.62, 1.1)
+	box(root, Vector3(1.7, 0.3, 1.0), Vector3(-1.6, 0.4, 1.9), mat(GRAPHITE))
+	wedge(root, Vector3(0.9, 0.36, 0.9), Vector3(-1.4, 0.72, 1.9), mat(GRAPHITE_LIGHT), 0.0)
+	_insulator(root, Vector3(3.3, 0.2, -2.3), 2.2, 0.2)
+	box(root, Vector3(0.12, 0.12, 0.12), Vector3(3.3, 2.5, -2.3), mat(FLUX, 1.7))
+
+
+static func _arc_pole(root: Node3D, team: Color) -> void:
+	cyl(root, 0.55, 0.9, 0.36, Vector3(0.0, 0.18, 0.0), mat(GRAPHITE), 8)
+	_insulator(root, Vector3(0.0, 0.36, 0.0), 0.7, 0.3)
+	ring(root, 0.62, 0.72, Vector3(0.0, 0.34, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 1.1, 0.0))
+	cyl(t, 0.36, 0.42, 0.24, Vector3(0.0, 0.12, 0.0), mat(GRAPHITE_LIGHT), 8)
+	box(t, Vector3(0.4, 0.06, 0.4), Vector3(-0.05, 0.27, 0.0), team_mat(team))
+	_winding(t, Vector3(-0.1, 0.5, 0.0), 0.2, 0.36)
+	_prongs(t, Vector3(0.05, 0.5, 0.0), 0.85, 0.36)
+
+
+static func _resonator(root: Node3D, team: Color) -> void:
+	_plinth(root, 5.7, 5.7)
+	cyl(root, 1.3, 1.7, 0.7, Vector3(0.0, 0.55, 0.0), mat(GRAPHITE_LIGHT), 10)
+	cyl(root, 1.34, 1.34, 0.14, Vector3(0.0, 0.84, 0.0), team_mat(team), 10)
+	cyl(root, 0.5, 0.5, 0.2, Vector3(0.0, 1.1, 0.0), mat(COIL, 0.0, 0.7, 0.4), 10)
+	# Three rings stand one inside the other round a ball of flux; the
+	# innermost turns.
+	var outer: MeshInstance3D = ring(root, 1.75, 1.95, Vector3(0.0, 2.7, 0.0), mat(GRAPHITE_LIGHT, 0.0, 0.6, 0.4))
+	outer.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+	var middle: MeshInstance3D = ring(root, 1.3, 1.45, Vector3(0.0, 2.7, 0.0), mat(COIL, 0.0, 0.7, 0.4))
+	middle.rotation = Vector3(PI * 0.5, PI * 0.5, 0.0)
+	var halo: Node3D = group(root, "Spin", Vector3(0.0, 2.7, 0.0))
+	var inner: MeshInstance3D = ring(halo, 0.85, 0.97, Vector3.ZERO, mat(PORCELAIN))
+	inner.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+	box(halo, Vector3(0.14, 0.14, 0.14), Vector3(0.9, 0.0, 0.0), mat(FLUX, 1.8))
+	box(halo, Vector3(0.14, 0.14, 0.14), Vector3(-0.9, 0.0, 0.0), mat(FLUX, 1.8))
+	ball(root, 0.5, Vector3(0.0, 2.7, 0.0), mat(FLUX, 1.5), 10)
+	cyl(root, 0.2, 0.3, 1.2, Vector3(0.0, 1.5, 0.0), mat(GRAPHITE), 8)
 
 
 # ------------------------------------------------------------------ detail

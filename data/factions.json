@@ -122,5 +122,35 @@
 			"tier3": "occulus"
 		},
 		"playable": true
+	},
+	"bracken": {
+		"name": "Brackenfold",
+		"desc": "Grown, not built. Everything the Brackenfold owns mends itself once it has been left alone for a few seconds, so an army that pulls back comes back whole. Cheap and plentiful; nothing in it hits very hard.",
+		"hq": "heartroot",
+		"start_units": ["grafter", "grafter", "forager", "forager", "thornling", "thornling"],
+		"regrowth": 0.012,
+		"drop_squad": ["thornling", "thornling", "thornling", "lasher", "lasher"],
+		"roles": {
+			"builder": "grafter", "hauler": "forager", "relay": "tendril",
+			"barracks": "seedbed", "works": "bloomworks", "depot": "mulch_pit",
+			"turret_ground": "spine_stalk", "turret_armor": "spine_stalk", "turret_air": "spine_stalk",
+			"tier3": "elder_bough"
+		},
+		"playable": true
+	},
+	"lodestone": {
+		"name": "Lodestone Circle",
+		"desc": "Masters of magnetic drag. Whatever a Circle weapon hits moves a third slower for a moment: nothing gets away from them and nothing closes with them quickly. Their guns hit a little less hard than most.",
+		"hq": "lode_hall",
+		"start_units": ["coilwright", "coilwright", "lodecart", "lodecart", "keeper", "keeper"],
+		"hit_slow": 0.35,
+		"drop_squad": ["keeper", "keeper", "keeper", "railhand", "railhand"],
+		"roles": {
+			"builder": "coilwright", "hauler": "lodecart", "relay": "conductor",
+			"barracks": "ring_hall", "works": "winding_shed", "depot": "magnet_yard",
+			"turret_ground": "arc_pole", "turret_armor": "arc_pole", "turret_air": "arc_pole",
+			"tier3": "resonator"
+		},
+		"playable": true
 	}
 }

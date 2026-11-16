@@ -161,6 +161,9 @@ static func _upkeep(w: SimWorld, e: SimEntity) -> void:
 	if f.linked_vehicle_repair > 0.0 and e.linked and e.hp < e.max_hp and e.def.is_vehicle():
 		if w.tick_count - e.last_hit_tick > 80:
 			e.hp = minf(e.max_hp, e.hp + e.max_hp * f.linked_vehicle_repair * SimWorld.DT)
+	# Brackenfold: anything left alone for a few seconds grows back.
+	if f.regrowth > 0.0 and e.hp < e.max_hp and w.tick_count - e.last_hit_tick > SimCombat.REGROW_DELAY:
+		e.hp = minf(e.max_hp, e.hp + e.max_hp * f.regrowth * SimWorld.DT)
 	# Repair trucks mend the most damaged friendly vehicle or building nearby.
 	if e.def.repair_rate > 0.0 and (w.tick_count + e.id) % 5 == 0:
 		var worst: SimEntity = null

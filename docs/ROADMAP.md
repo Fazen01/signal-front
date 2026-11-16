@@ -345,13 +345,12 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (15:55 UTC):** M29 (teams, new match setup) is written and
-committed locally but not pushed: `tools/check.sh` fails on it, because an
-AI change made for team matches (a spent wave is reinforced from home)
-makes the three-way free-for-all of the check run past 90 minutes. Fixing
-that first. M30 (two more factions: Brackenfold and Lodestone Circle) is in
-the working tree. The owner finds the Brackenfold the worst-looking
-faction: its models are to be redone before M30 is called finished.
+**Working now (16:05 UTC):** M28 and M29 are done. M30 (two more factions:
+Brackenfold and Lodestone Circle) is playable, tested and in the check, but
+its boxes stay open: the owner finds the Brackenfold the worst-looking
+faction, so its models are being redone. Then the balance league for all
+ten factions (the tables further down are from before the AI change and
+before these two factions).
 
 Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
@@ -706,6 +705,35 @@ restarted three times; the background tuner died with it).**
   other two-against-two matches end at 14, 19 and 27 minutes. This changes
   every AI match, so the balance tables above are out of date and the
   league has to be run again.
+- **That fix failed `tools/check.sh`** (the commit was not pushed): sending
+  home units after the wave in batches of half a wave made attacks trickle
+  in, and the three-way free-for-all of the check, which used to end at 19
+  minutes, was still going at 90. Second version: a spent wave no longer
+  holds back the next one, but the next one still has to be a full wave
+  (or, after a long wait, whatever a starved economy has), and it stages
+  before it attacks with the survivors of the old wave folded in
+  (`_next_wave_ready`). The three-way match ends at 17:25, the
+  two-against-two at 15:05.
+- **M30, first half: two more factions, ten in all.** The Brackenfold
+  (`bracken`): grown war beasts; everything it owns mends 1.2% of its
+  health a second once it has not been hit for six seconds (`regrowth`);
+  cheap, plentiful, nothing hits hard. The Lodestone Circle (`lodestone`):
+  coil guns and magnets; whatever its weapons hit moves 35% slower for
+  2.5 s (`hit_slow`); its guns hit a little less hard. Both follow the
+  usual roster (builder, hauler, two infantry, scout, gun car, tank,
+  anti-air, artillery; seven buildings); M32 is where rosters get units
+  that break that template. Each has models, an interface skin and an
+  emblem, tests for its rule, and a match in the check.
+- **The owner on the Brackenfold: "the worst looking faction right now."**
+  The first version was bark-brown and moss-green balls: on grass, next to
+  the map's own trees, it looked like scenery, and the beasts were dark
+  lumps. Redone with nothing green in it: buildings are flowers (rings of
+  autumn-red petals round a sap-bright heart, on decks of dark heartwood
+  with bone thorns at the corners), the barracks is a pod under ribs of
+  bone, and the beasts are plated in pale horn with dark rims, a crest of
+  red fins, horns, bright eyes and jointed legs. Lesson for M34: a faction
+  has to contrast with the ground it stands on, and crisp faceted shapes
+  read better than balls at this size.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

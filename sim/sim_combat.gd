@@ -2,6 +2,8 @@ class_name SimCombat
 extends RefCounted
 ## Target acquisition, weapons fire, projectiles, damage and death.
 
+const SLOW_TICKS: int = 50  ## how long a Lodestone hit drags its target (2.5 s)
+const REGROW_DELAY: int = 120  ## ticks without damage before the Brackenfold starts to mend (6 s)
 const TURRET_RATE: float = 4.5  ## radians per second
 const SCAN_INTERVAL: int = 5  ## ticks between target scans
 const BIG_RADIUS: float = 4.5  ## padding so large buildings are found by centre queries
@@ -286,6 +288,12 @@ static func apply_damage(w: SimWorld, t: SimEntity, amount: float, damage_type: 
 		return
 	t.hp -= dmg
 	t.last_hit_tick = w.tick_count
+	# Lodestone Circle: what its weapons hit is dragged for a moment.
+	if attacker_owner >= 0 and t.kind == SimEntity.Kind.UNIT:
+		var drag: float = w.players[attacker_owner].faction.hit_slow
+		if drag > 0.0:
+			t.slow_amount = maxf(drag, t.slow_amount if w.tick_count < t.slow_until else 0.0)
+			t.slow_until = w.tick_count + SLOW_TICKS
 	t.last_attacker = attacker.id if attacker != null else 0
 	if t.owner >= 0 and (t.kind == SimEntity.Kind.BUILDING or t.def.harvester):
 		var victim: SimPlayer = w.players[t.owner]

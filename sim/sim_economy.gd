@@ -583,6 +583,11 @@ static func _pay_uplinks(w: SimWorld) -> void:
 static func _update_building(w: SimWorld, b: SimEntity) -> void:
 	var workers: int = b.builders_now
 	b.builders_now = 0
+	# Brackenfold: finished buildings left alone for a few seconds grow back.
+	if b.constructed and b.owner >= 0 and b.hp < b.max_hp:
+		var regrowth: float = w.players[b.owner].faction.regrowth
+		if regrowth > 0.0 and w.tick_count - b.last_hit_tick > SimCombat.REGROW_DELAY:
+			b.hp = minf(b.max_hp, b.hp + b.max_hp * regrowth * SimWorld.DT)
 	if not b.constructed:
 		if workers > 0:
 			# Extra builders help with diminishing returns.

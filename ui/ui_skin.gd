@@ -221,6 +221,54 @@ static func of(faction_id: String) -> UiSkin:
 			k.panel_edge = [1, 1, 1, 1]
 			k.letter_spacing = 7
 			k.embolden = 0.2
+		"bracken":
+			# Bark and leaf-mould, lit by sap: panels arched like seed pods.
+			k.plate = "BRACKENFOLD"
+			k.emblem = "emblem_bracken"
+			k.accent = Color(0.76, 1.0, 0.38)
+			k.second = Color(0.96, 0.88, 0.62)
+			k.text = Color(0.92, 0.93, 0.86)
+			k.dim = Color(0.66, 0.68, 0.56)
+			k.faint = Color(0.44, 0.46, 0.36)
+			k.panel_fill = Color(0.075, 0.068, 0.045, 0.93)
+			k.strip_fill = Color(0.06, 0.054, 0.036, 0.91)
+			k.section_fill = Color(0.10, 0.092, 0.06, 0.93)
+			k.raised = Color(0.17, 0.165, 0.095, 0.98)
+			k.raised_hot = Color(0.22, 0.30, 0.12, 0.98)
+			k.pressed = Color(0.28, 0.44, 0.12, 1.0)
+			k.primary = Color(0.25, 0.40, 0.10, 1.0)
+			k.sunk = Color(0.038, 0.034, 0.022, 0.96)
+			k.line = Color(0.44, 0.52, 0.24, 0.85)
+			k.line_soft = Color(0.40, 0.44, 0.24, 0.5)
+			k.corners = [13, 13, 2, 2]
+			k.edges = [1, 1, 1, 3]
+			k.panel_edge = [1, 1, 1, 4]
+			k.letter_spacing = 2
+			k.embolden = 0.5
+		"lodestone":
+			# Graphite between two poles: a bar down each side, magenta flux.
+			k.plate = "LODESTONE CIRCLE"
+			k.emblem = "emblem_lodestone"
+			k.accent = Color(1.0, 0.50, 0.90)
+			k.second = Color(0.98, 0.70, 0.44)
+			k.text = Color(0.93, 0.92, 0.95)
+			k.dim = Color(0.68, 0.66, 0.72)
+			k.faint = Color(0.45, 0.44, 0.49)
+			k.panel_fill = Color(0.07, 0.07, 0.085, 0.93)
+			k.strip_fill = Color(0.055, 0.055, 0.068, 0.91)
+			k.section_fill = Color(0.095, 0.095, 0.115, 0.93)
+			k.raised = Color(0.175, 0.175, 0.205, 0.98)
+			k.raised_hot = Color(0.33, 0.19, 0.31, 0.98)
+			k.pressed = Color(0.55, 0.17, 0.47, 1.0)
+			k.primary = Color(0.50, 0.14, 0.43, 1.0)
+			k.sunk = Color(0.032, 0.032, 0.04, 0.96)
+			k.line = Color(0.78, 0.46, 0.30, 0.85)
+			k.line_soft = Color(0.56, 0.38, 0.32, 0.55)
+			k.corners = [3, 3, 3, 3]
+			k.edges = [3, 1, 3, 1]
+			k.panel_edge = [4, 1, 4, 1]
+			k.letter_spacing = 3
+			k.embolden = 0.9
 		_:
 			pass
 	_skins[faction_id] = k

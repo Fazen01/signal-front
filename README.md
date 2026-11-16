@@ -28,7 +28,7 @@ From the main menu:
   two, two against one, or everyone for themselves). Give seat one to the
   AI to **watch** instead: no fog of war, and + and - change the speed.
   The setup panel dresses itself in the interface of the faction you pick:
-  each of the eight has its own colours, shapes, lettering and emblem, and
+  each of the ten has its own colours, shapes, lettering and emblem, and
   the match's HUD wears the same.
 - **Continue Saved Game** — pick up the match you saved from the pause menu
   ("Save Game", or "Save and Quit to Menu"), exactly where it stopped.
@@ -195,6 +195,31 @@ until they fire. Fragile and costly, with the longest guns on the field.
 - Buildings: Sanctum, Reservoir, Obelisk, Hollow, Shroudworks, Sentinel,
   Occulus (tier 3).
 
+**Brackenfold** — grown, not built: beasts plated in horn and buildings
+that open like flowers. Everything it owns mends itself (1.2% of its health
+a second) once it has been left alone for six seconds, so an army that
+pulls back comes back whole. Cheap and plentiful; nothing in it hits very
+hard.
+
+- Infantry: Thornling, Lasher (anti-armor spine), Grafter (builder).
+- Beasts: Forager (hauler), Quillhound (scout), Quillback (anti-infantry),
+  Barkhide (the tank), Whipvine (anti-air), Sporemortar (siege, tier 3).
+- Buildings: Heartroot, Mulch Pit, Tendril, Seedbed, Bloomworks, Spine
+  Stalk (fires at ground and air), Elder Bough (tier 3).
+
+**Lodestone Circle** — magnets and coil guns. Whatever a Circle weapon
+hits moves 35% slower for two and a half seconds: nothing gets away from
+them and nothing closes with them quickly. Their guns hit a little less
+hard than most.
+
+- Infantry: Keeper, Railhand (anti-armor slug thrower), Coilwright
+  (builder).
+- Vehicles: Lodecart (hauler with a lifting magnet), Compass (scout),
+  Dynamo (arc projector), Armature (coilgun tank), Stator (anti-air),
+  Solenoid (coil mortar, tier 3).
+- Buildings: Lode Hall, Magnet Yard, Conductor, Ring Hall, Winding Shed,
+  Arc Pole (fires at ground and air), Resonator (tier 3).
+
 ### The AI
 
 One to three opponents at Easy, Normal or Hard. Normal and Hard opponents
@@ -239,7 +264,7 @@ game except through software-rendered screenshots, so:
   the latest table. One-on-one matches between AIs on the default map last
   about a quarter of an hour (the design aims for 15–25 minutes); the
   compact map gives about ten.
-- Five of the eight factions were added in one day. They share the AI and
+- Seven of the ten factions were added in one day. They share the AI and
   most rules with the first three, each with one rule of its own, and have
   had far less testing.
 
@@ -261,10 +286,11 @@ tools/check.sh
 
 This imports the project, runs the unit tests, boots the menu and battle
 scenes headless, drives the interface with synthetic input, walks the whole
-menu → match → result → load → tutorial loop, plays five AI-vs-AI matches
-that must each end with a winner, then exports the game as a pack and walks
-the loop again from the export. It fails on any script error. About eight
-to ten minutes.
+menu → match → result → load → tutorial loop, plays AI-vs-AI matches for
+every faction, a three-way free-for-all and a two-against-two that must
+each end with a winner, then exports the game as a pack and walks the loop
+again from the export. It fails on any script error. About a quarter of an
+hour.
 
 Other tools:
 

@@ -268,5 +268,69 @@
 	"sentinel_gun": {
 		"name": "Sentinel Gun", "damage_type": "ballistic", "damage": 11.0, "range": 11.0,
 		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"thorn_spit": {
+		"name": "Thorn Spit", "damage_type": "ballistic", "damage": 6.5, "range": 8.0,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"lasher_spine": {
+		"name": "Lasher Spine", "damage_type": "piercing", "damage": 42.0, "range": 9.5,
+		"cooldown": 2.9, "projectile_speed": 16.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"quill_burst": {
+		"name": "Quill Burst", "damage_type": "ballistic", "damage": 5.5, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"quill_volley": {
+		"name": "Quill Volley", "damage_type": "ballistic", "damage": 15.0, "range": 9.0,
+		"cooldown": 0.45, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"gall_cannon": {
+		"name": "Gall Cannon", "damage_type": "piercing", "damage": 60.0, "range": 10.0,
+		"cooldown": 2.3, "projectile_speed": 30.0, "splash": 0.7, "fx": "shell"
+	},
+	"whip_darts": {
+		"name": "Whip Darts", "damage_type": "flak", "damage": 16.0, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"spore_pods": {
+		"name": "Spore Pods", "damage_type": "explosive", "damage": 58.0, "range": 20.0, "min_range": 6.0,
+		"cooldown": 3.2, "projectile_speed": 16.0, "splash": 2.5, "scatter": 2.4, "fx": "artillery"
+	},
+	"stalk_spines": {
+		"name": "Stalk Spines", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"keeper_carbine": {
+		"name": "Keeper Carbine", "damage_type": "ballistic", "damage": 6.5, "range": 8.0,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"railhand_slug": {
+		"name": "Railhand Slug", "damage_type": "piercing", "damage": 44.0, "range": 10.0,
+		"cooldown": 3.0, "projectile_speed": 26.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"compass_gun": {
+		"name": "Compass Gun", "damage_type": "ballistic", "damage": 5.0, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"dynamo_arc": {
+		"name": "Dynamo Arc", "damage_type": "ballistic", "damage": 14.0, "range": 8.5,
+		"cooldown": 0.42, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"armature_coilgun": {
+		"name": "Armature Coilgun", "damage_type": "piercing", "damage": 60.0, "range": 10.5,
+		"cooldown": 2.4, "projectile_speed": 40.0, "splash": 0.6, "fx": "shell"
+	},
+	"stator_flak": {
+		"name": "Stator Flak", "damage_type": "flak", "damage": 15.5, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"solenoid_shot": {
+		"name": "Solenoid Shot", "damage_type": "explosive", "damage": 56.0, "range": 20.5, "min_range": 6.0,
+		"cooldown": 3.3, "projectile_speed": 18.0, "splash": 2.3, "scatter": 2.3, "fx": "artillery"
+	},
+	"arc_pole_gun": {
+		"name": "Pole Arc", "damage_type": "ballistic", "damage": 9.5, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
 	}
 }

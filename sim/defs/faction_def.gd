@@ -17,6 +17,8 @@ var linked_damage_resist: float = 0.0  ## share of damage Linked units shrug off
 var linked_sight_bonus: float = 0.0  ## extra sight for Linked units and buildings (0.25 = a quarter further)
 var kill_bounty: float = 0.0  ## share of the value of everything destroyed that is paid out in salvage
 var linked_cloak: bool = false  ## Linked ground units are hidden while they stand still
+var regrowth: float = 0.0  ## share of full health everything mends per second once it has been left alone
+var hit_slow: float = 0.0  ## how much slower a unit moves for a moment after this faction hits it (0.35 = a third)
 var drop_squad: Array[String] = []  ## units delivered by Reinforcement Drop
 var roles: Dictionary[String, String] = {}  ## what the AI builds for each job (see SimAI)
 var playable: bool = true

@@ -408,5 +408,95 @@
 		"hp": 1400, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"directive_cooldown_mult": 0.75, "model": "occulus",
 		"hotkey": "C", "requires": ["shroudworks"]
+	},
+	"heartroot": {
+		"name": "Heartroot", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "bracken", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 5800, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["grafter", "forager"], "model": "heartroot", "buildable": false
+	},
+	"tendril": {
+		"name": "Tendril", "desc": "Extends your signal grid and adds bandwidth. Must link back to the Heartroot.",
+		"faction": "bracken", "tier": 1, "cost": 140, "build_time": 15.0,
+		"hp": 560, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "tendril", "hotkey": "R"
+	},
+	"mulch_pit": {
+		"name": "Mulch Pit", "desc": "Drop-off point for salvage. Raises Foragers.",
+		"faction": "bracken", "tier": 1, "cost": 240, "build_time": 25.0,
+		"hp": 1250, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["forager"], "model": "mulch_pit", "hotkey": "P"
+	},
+	"seedbed": {
+		"name": "Seedbed", "desc": "Raises infantry: Thornlings, Lashers and Grafters.",
+		"faction": "bracken", "tier": 1, "cost": 190, "build_time": 22.5,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["thornling", "lasher", "grafter"], "model": "seedbed", "hotkey": "B"
+	},
+	"bloomworks": {
+		"name": "Bloomworks", "desc": "Grows the Brackenfold's war beasts. Unlocks tier 2.",
+		"faction": "bracken", "tier": 2, "cost": 390, "build_time": 36.0,
+		"hp": 1750, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
+		"produces": ["forager", "quillhound", "quillback", "barkhide", "whipvine", "sporemortar"], "model": "bloomworks",
+		"hotkey": "V", "requires": ["seedbed"]
+	},
+	"spine_stalk": {
+		"name": "Spine Stalk", "desc": "Rooted spitter that fires at ground and air alike, and grows back if it is not finished off.",
+		"faction": "bracken", "tier": 2, "cost": 155, "build_time": 14.0,
+		"hp": 720, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["stalk_spines"], "turret": true, "model": "spine_stalk", "hotkey": "T", "requires": ["seedbed"]
+	},
+	"elder_bough": {
+		"name": "Elder Bough", "desc": "Tier 3: unlocks the Sporemortar. Directives recharge 25% faster.",
+		"faction": "bracken", "tier": 3, "cost": 480, "build_time": 38.0,
+		"hp": 1550, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "elder_bough",
+		"hotkey": "C", "requires": ["bloomworks"]
+	},
+	"lode_hall": {
+		"name": "Lode Hall", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "lodestone", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 5800, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["coilwright", "lodecart"], "model": "lode_hall", "buildable": false
+	},
+	"conductor": {
+		"name": "Conductor", "desc": "Extends your signal grid and adds bandwidth. Must link back to the Lode Hall.",
+		"faction": "lodestone", "tier": 1, "cost": 150, "build_time": 15.5,
+		"hp": 600, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "conductor", "hotkey": "R"
+	},
+	"magnet_yard": {
+		"name": "Magnet Yard", "desc": "Drop-off point for salvage. Builds Lodecarts.",
+		"faction": "lodestone", "tier": 1, "cost": 250, "build_time": 26.0,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["lodecart"], "model": "magnet_yard", "hotkey": "P"
+	},
+	"ring_hall": {
+		"name": "Ring Hall", "desc": "Trains infantry: Keepers, Railhands and Coilwrights.",
+		"faction": "lodestone", "tier": 1, "cost": 200, "build_time": 23.5,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["keeper", "railhand", "coilwright"], "model": "ring_hall", "hotkey": "B"
+	},
+	"winding_shed": {
+		"name": "Winding Shed", "desc": "Builds the Circle's vehicles. Unlocks tier 2.",
+		"faction": "lodestone", "tier": 2, "cost": 400, "build_time": 36.5,
+		"hp": 1750, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
+		"produces": ["lodecart", "compass", "dynamo", "armature", "stator", "solenoid"], "model": "winding_shed",
+		"hotkey": "V", "requires": ["ring_hall"]
+	},
+	"arc_pole": {
+		"name": "Arc Pole", "desc": "Defensive arc that fires at ground and air alike and drags whatever it hits.",
+		"faction": "lodestone", "tier": 2, "cost": 165, "build_time": 14.5,
+		"hp": 740, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["arc_pole_gun"], "turret": true, "model": "arc_pole", "hotkey": "T", "requires": ["ring_hall"]
+	},
+	"resonator": {
+		"name": "Resonator", "desc": "Tier 3: unlocks the Solenoid coil mortar. Directives recharge 25% faster.",
+		"faction": "lodestone", "tier": 3, "cost": 490, "build_time": 39.0,
+		"hp": 1550, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "resonator",
+		"hotkey": "C", "requires": ["winding_shed"]
 	}
 }

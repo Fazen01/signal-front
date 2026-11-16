@@ -496,5 +496,117 @@
 		"hp": 280, "armor": "light", "move": "vehicle", "speed": 2.9, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["eclipse_beam"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "eclipse", "hotkey": "L",
 		"requires": ["occulus"]
+	},
+	"thornling": {
+		"name": "Thornling", "desc": "Cheap spitter of thorns. Weak alone; mends itself between fights.",
+		"faction": "bracken", "tier": 1, "cost": 50, "build_time": 7.0, "bandwidth": 1,
+		"hp": 78, "armor": "infantry", "move": "infantry", "speed": 2.7, "turn_rate": 12.0, "radius": 0.4, "sight": 11.0,
+		"weapons": ["thorn_spit"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "thornling", "hotkey": "T"
+	},
+	"lasher": {
+		"name": "Lasher", "desc": "Hurls a barbed spine that homes on vehicles. Slow to fire.",
+		"faction": "bracken", "tier": 1, "cost": 105, "build_time": 11.0, "bandwidth": 1,
+		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0, "radius": 0.4, "sight": 11.0,
+		"weapons": ["lasher_spine"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "lasher", "hotkey": "L"
+	},
+	"grafter": {
+		"name": "Grafter", "desc": "Grows and mends structures and captures uplinks. Unarmed.",
+		"faction": "bracken", "tier": 1, "cost": 85, "build_time": 9.5, "bandwidth": 1,
+		"hp": 85, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0, "radius": 0.4, "sight": 10.0,
+		"builder": true, "model": "grafter", "hotkey": "F",
+		"builds": ["mulch_pit", "tendril", "seedbed", "bloomworks", "spine_stalk", "elder_bough"]
+	},
+	"forager": {
+		"name": "Forager", "desc": "A beast of burden. Collects salvage and carries it to a Mulch Pit.",
+		"faction": "bracken", "tier": 1, "cost": 130, "build_time": 14.0, "bandwidth": 2,
+		"hp": 360, "armor": "light", "move": "vehicle", "speed": 3.1, "turn_rate": 2.8, "radius": 1.0, "sight": 8.0,
+		"harvester": true, "capacity": 100, "model": "forager", "hotkey": "U"
+	},
+	"quillhound": {
+		"name": "Quillhound", "desc": "Fast runner that sprays quills. Made for chasing haulers and finding the enemy.",
+		"faction": "bracken", "tier": 2, "cost": 105, "build_time": 11.0, "bandwidth": 1,
+		"hp": 210, "armor": "light", "move": "vehicle", "speed": 6.4, "turn_rate": 4.2, "radius": 0.8, "sight": 14.0,
+		"weapons": ["quill_burst"], "turret": true, "ai_role": "scout", "ai_weight": 0.6, "model": "quillhound", "hotkey": "C"
+	},
+	"quillback": {
+		"name": "Quillback", "desc": "Walking quill battery. Shreds infantry and light vehicles.",
+		"faction": "bracken", "tier": 2, "cost": 215, "build_time": 17.5, "bandwidth": 3,
+		"hp": 450, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0, "radius": 1.0, "sight": 11.0,
+		"weapons": ["quill_volley"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "quillback", "hotkey": "R"
+	},
+	"barkhide": {
+		"name": "Barkhide", "desc": "Thick-skinned battle beast with a gall cannon. Slow, tough, and whole again after every fight it survives.",
+		"faction": "bracken", "tier": 2, "cost": 360, "build_time": 25.0, "bandwidth": 4,
+		"hp": 760, "armor": "heavy", "move": "vehicle", "speed": 3.3, "turn_rate": 2.3, "radius": 1.15, "sight": 11.0,
+		"weapons": ["gall_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "barkhide", "hotkey": "B"
+	},
+	"whipvine": {
+		"name": "Whipvine", "desc": "Anti-air creeper. Its darts are weak against armor.",
+		"faction": "bracken", "tier": 2, "cost": 230, "build_time": 18.0, "bandwidth": 3,
+		"hp": 380, "armor": "light", "move": "vehicle", "speed": 4.1, "turn_rate": 3.0, "radius": 1.0, "sight": 12.0,
+		"weapons": ["whip_darts"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "whipvine", "hotkey": "K"
+	},
+	"sporemortar": {
+		"name": "Sporemortar", "desc": "Lobs bursting spore pods a long way. It cannot hit close targets and needs spotters.",
+		"faction": "bracken", "tier": 3, "cost": 420, "build_time": 28.0, "bandwidth": 4,
+		"hp": 330, "armor": "light", "move": "vehicle", "speed": 2.9, "turn_rate": 2.4, "radius": 1.1, "sight": 10.0,
+		"weapons": ["spore_pods"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "sporemortar",
+		"hotkey": "L", "requires": ["elder_bough"]
+	},
+	"keeper": {
+		"name": "Keeper", "desc": "Carbine infantry. Whatever it hits is dragged and slowed.",
+		"faction": "lodestone", "tier": 1, "cost": 60, "build_time": 8.0, "bandwidth": 1,
+		"hp": 90, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0, "radius": 0.4, "sight": 11.0,
+		"weapons": ["keeper_carbine"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "keeper", "hotkey": "T"
+	},
+	"railhand": {
+		"name": "Railhand", "desc": "Carries a coil-driven slug thrower. Slow to fire, deadly to vehicles.",
+		"faction": "lodestone", "tier": 1, "cost": 115, "build_time": 11.5, "bandwidth": 1,
+		"hp": 85, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0, "radius": 0.4, "sight": 11.0,
+		"weapons": ["railhand_slug"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "railhand", "hotkey": "L"
+	},
+	"coilwright": {
+		"name": "Coilwright", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "lodestone", "tier": 1, "cost": 85, "build_time": 9.5, "bandwidth": 1,
+		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0, "radius": 0.4, "sight": 10.0,
+		"builder": true, "model": "coilwright", "hotkey": "F",
+		"builds": ["magnet_yard", "conductor", "ring_hall", "winding_shed", "arc_pole", "resonator"]
+	},
+	"lodecart": {
+		"name": "Lodecart", "desc": "Hauler with a lifting magnet. Collects salvage and carries it to a Magnet Yard.",
+		"faction": "lodestone", "tier": 1, "cost": 135, "build_time": 14.0, "bandwidth": 2,
+		"hp": 350, "armor": "light", "move": "vehicle", "speed": 3.2, "turn_rate": 2.8, "radius": 1.0, "sight": 8.0,
+		"harvester": true, "capacity": 100, "model": "lodecart", "hotkey": "U"
+	},
+	"compass": {
+		"name": "Compass", "desc": "Fast scout car. Its gun does little harm, but what it hits cannot run.",
+		"faction": "lodestone", "tier": 2, "cost": 110, "build_time": 11.0, "bandwidth": 1,
+		"hp": 195, "armor": "light", "move": "vehicle", "speed": 6.4, "turn_rate": 4.0, "radius": 0.8, "sight": 14.0,
+		"weapons": ["compass_gun"], "turret": true, "ai_role": "scout", "ai_weight": 0.6, "model": "compass", "hotkey": "C"
+	},
+	"dynamo": {
+		"name": "Dynamo", "desc": "Arc projector on wheels. Shreds infantry and light vehicles at short range.",
+		"faction": "lodestone", "tier": 2, "cost": 225, "build_time": 18.0, "bandwidth": 3,
+		"hp": 410, "armor": "light", "move": "vehicle", "speed": 4.3, "turn_rate": 3.0, "radius": 1.0, "sight": 11.0,
+		"weapons": ["dynamo_arc"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "dynamo", "hotkey": "R"
+	},
+	"armature": {
+		"name": "Armature", "desc": "Coilgun tank. One heavy slug at a time, and the tank it hits is going nowhere fast.",
+		"faction": "lodestone", "tier": 2, "cost": 380, "build_time": 26.0, "bandwidth": 4,
+		"hp": 720, "armor": "heavy", "move": "vehicle", "speed": 3.4, "turn_rate": 2.4, "radius": 1.15, "sight": 11.0,
+		"weapons": ["armature_coilgun"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "armature", "hotkey": "B"
+	},
+	"stator": {
+		"name": "Stator", "desc": "Anti-air half-track. Aircraft it hits are slowed too. Weak against armor.",
+		"faction": "lodestone", "tier": 2, "cost": 235, "build_time": 18.0, "bandwidth": 3,
+		"hp": 360, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0, "radius": 1.0, "sight": 12.0,
+		"weapons": ["stator_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "stator", "hotkey": "K"
+	},
+	"solenoid": {
+		"name": "Solenoid", "desc": "Long-range coil mortar. It cannot hit close targets and needs spotters.",
+		"faction": "lodestone", "tier": 3, "cost": 440, "build_time": 28.5, "bandwidth": 4,
+		"hp": 300, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.4, "radius": 1.1, "sight": 10.0,
+		"weapons": ["solenoid_shot"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "solenoid",
+		"hotkey": "L", "requires": ["resonator"]
 	}
 }

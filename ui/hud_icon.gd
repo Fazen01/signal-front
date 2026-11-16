@@ -108,5 +108,19 @@ func _draw() -> void:
 			var low: Vector2 = c + Vector2(0.0, r * 0.96)
 			draw_colored_polygon(PackedVector2Array([top, low, c + Vector2(-r * 0.7, 0.0)]), color)
 			draw_polyline(PackedVector2Array([top, c + Vector2(r * 0.7, 0.0), low]), color, 1.6, true)
+		"emblem_bracken":
+			# A sprout: a stem and two leaves.
+			draw_line(c + Vector2(0.0, r * 0.95), c + Vector2(0.0, -r * 0.1), color, 2.2, true)
+			for side: float in [-1.0, 1.0]:
+				var leaf: PackedVector2Array = PackedVector2Array([
+					c + Vector2(0.0, r * 0.05), c + Vector2(side * r * 0.3, -r * 0.62), c + Vector2(side * r * 0.95, -r * 0.9),
+					c + Vector2(side * r * 0.82, -r * 0.22), c + Vector2(side * r * 0.36, r * 0.12)])
+				draw_colored_polygon(leaf, color)
+		"emblem_lodestone":
+			# A horseshoe magnet, poles down, with a gap at each tip.
+			draw_arc(c + Vector2(0.0, -r * 0.12), r * 0.56, PI, TAU, 16, color, r * 0.4, true)
+			for side: float in [-1.0, 1.0]:
+				draw_rect(Rect2(c.x + side * r * 0.56 - r * 0.2, c.y - r * 0.14, r * 0.4, r * 0.56), color)
+				draw_rect(Rect2(c.x + side * r * 0.56 - r * 0.2, c.y + r * 0.56, r * 0.4, r * 0.34), color)
 		_:
 			draw_circle(c, r * 0.6, color)

@@ -1,8 +1,10 @@
 extends TestCase
-## The Zephyr Accord (air power, Linked sight), the Crimson Tally (bounties)
-## and the Umbral Veil (hidden while still inside its own coverage).
+## The Zephyr Accord (air power, Linked sight), the Crimson Tally (bounties),
+## the Umbral Veil (hidden while still inside its own coverage), the
+## Brackenfold (everything grows back) and the Lodestone Circle (what it
+## hits is slowed).
 
-const NEW: Array[String] = ["zephyr", "tally", "veil"]
+const NEW: Array[String] = ["zephyr", "tally", "veil", "bracken", "lodestone"]
 
 
 func _world(faction: String) -> SimWorld:
@@ -152,3 +154,52 @@ func test_veil_units_hide_while_still_inside_their_coverage() -> void:
 	# Aegis units get no such thing.
 	var trooper: SimEntity = _own(w, 1, "trooper")[0]
 	check(trooper.linked and not SimVision.is_stealthed(w, trooper), "a Linked Aegis trooper standing still is in plain view")
+
+
+func test_the_brackenfold_grows_back() -> void:
+	var w: SimWorld = _world("bracken")
+	var beast: SimEntity = w.spawn_unit("barkhide", 0, w.map.nearest_free_pos(w.players[0].start_pos + Vector2(10.0, 0.0)))
+	var other: SimEntity = w.spawn_unit("bulwark", 1, w.map.nearest_free_pos(w.players[1].start_pos + Vector2(10.0, 0.0)))
+	var hq: SimEntity = _own(w, 0, "heartroot")[0]
+	beast.hp = beast.max_hp * 0.5
+	other.hp = other.max_hp * 0.5
+	hq.hp = hq.max_hp * 0.5
+	# Just hit: nothing mends for the first few seconds.
+	beast.last_hit_tick = w.tick_count
+	SimTestUtil.run(w, SimCombat.REGROW_DELAY - 10)
+	check(is_equal_approx(beast.hp, beast.max_hp * 0.5), "a Barkhide that was just hit does not mend yet")
+	SimTestUtil.run(w, 20 * 20)
+	check(beast.hp > beast.max_hp * 0.68, "left alone, it grows back (%.0f of %.0f)" % [beast.hp, beast.max_hp])
+	check(hq.hp > hq.max_hp * 0.68, "and so do the Brackenfold's buildings")
+	check(is_equal_approx(other.hp, other.max_hp * 0.5), "another faction's tank stays as damaged as it was")
+	SimTestUtil.run(w, 20 * 60)
+	check(is_equal_approx(beast.hp, beast.max_hp), "it mends all the way and no further")
+
+
+func test_what_the_circle_hits_is_slowed() -> void:
+	var w: SimWorld = _world("lodestone")
+	var middle: Vector2 = w.map.nearest_free_pos(w.map.world_size() * 0.5)
+	var runner: SimEntity = w.spawn_unit("courser", 1, middle)
+	var far: Vector2 = w.map.nearest_free_pos(middle + Vector2(30.0, 0.0))
+	# How far it gets in three seconds when nobody is shooting.
+	w.push_command(SimCommand.move(1, PackedInt32Array([runner.id]), far))
+	SimTestUtil.run(w, 60)
+	var free_run: float = runner.pos.distance_to(middle)
+	check(free_run > 6.0, "the car moves freely (%.1f)" % free_run)
+	check(runner.slow_until <= w.tick_count, "and is not dragged")
+	# The same run after a Keeper's bullet.
+	var keeper: SimEntity = w.spawn_unit("keeper", 0, w.map.nearest_free_pos(runner.pos + Vector2(0.0, 5.0)))
+	SimCombat.apply_damage(w, runner, 1.0, 0, keeper, 0)
+	check(runner.slow_until > w.tick_count and runner.slow_amount > 0.3, "a hit from the Circle drags it")
+	var from: Vector2 = runner.pos
+	SimTestUtil.run(w, 20)
+	var dragged: float = runner.pos.distance_to(from)
+	check(dragged < free_run / 3.0 * 0.8, "it covers less ground while dragged (%.1f in a second, %.1f free)" % [dragged, free_run / 3.0])
+	# Buildings are not dragged, and another faction's hits drag nothing.
+	var hq: SimEntity = _own(w, 1, "hq")[0]
+	SimCombat.apply_damage(w, hq, 1.0, 0, keeper, 0)
+	check(hq.slow_until <= w.tick_count, "a building is not dragged")
+	var mine: SimEntity = w.spawn_unit("compass", 0, w.map.nearest_free_pos(middle + Vector2(-8.0, 0.0)))
+	var trooper: SimEntity = w.spawn_unit("trooper", 1, w.map.nearest_free_pos(middle + Vector2(-8.0, 3.0)))
+	SimCombat.apply_damage(w, mine, 1.0, 0, trooper, 1)
+	check(mine.slow_until <= w.tick_count, "other factions' weapons do not drag")
