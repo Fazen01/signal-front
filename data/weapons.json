@@ -1,0 +1,108 @@
+{
+	"rifle": {
+		"name": "Service Rifle", "damage_type": "ballistic", "damage": 7.0, "range": 8.0,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"lance_missile": {
+		"name": "Lance Missile", "damage_type": "piercing", "damage": 44.0, "range": 10.0,
+		"cooldown": 2.8, "projectile_speed": 16.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"marksman_rifle": {
+		"name": "Long Rifle", "damage_type": "ballistic", "damage": 48.0, "range": 14.0,
+		"cooldown": 2.8, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"light_mg": {
+		"name": "Light Machine Gun", "damage_type": "ballistic", "damage": 5.0, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"autocannon": {
+		"name": "Autocannon", "damage_type": "ballistic", "damage": 15.0, "range": 9.0,
+		"cooldown": 0.45, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"tank_cannon": {
+		"name": "Tank Cannon", "damage_type": "piercing", "damage": 62.0, "range": 10.5,
+		"cooldown": 2.4, "projectile_speed": 34.0, "splash": 0.8, "fx": "shell"
+	},
+	"sentry_gun": {
+		"name": "Sentry Gun", "damage_type": "ballistic", "damage": 9.0, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"battery_missile": {
+		"name": "Battery Missile", "damage_type": "piercing", "damage": 75.0, "range": 13.0,
+		"cooldown": 3.0, "projectile_speed": 18.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"hq_gun": {
+		"name": "Point Defence Gun", "damage_type": "ballistic", "damage": 10.0, "range": 11.0,
+		"cooldown": 0.4, "hits_air": true, "fx": "tracer"
+	},
+	"tempest_flak": {
+		"name": "Flak Cannons", "damage_type": "flak", "damage": 16.0, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"flak_burst": {
+		"name": "Flak Battery", "damage_type": "flak", "damage": 24.0, "range": 13.5,
+		"cooldown": 0.5, "hits_air": true, "hits_ground": false, "fx": "tracer_heavy"
+	},
+	"longbow_shell": {
+		"name": "Longbow Howitzer", "damage_type": "explosive", "damage": 95.0, "range": 22.0,
+		"min_range": 7.0, "cooldown": 5.5, "projectile_speed": 15.0, "splash": 3.0, "scatter": 2.0,
+		"fx": "artillery"
+	},
+	"kestrel_rockets": {
+		"name": "Rocket Pods", "damage_type": "explosive", "damage": 30.0, "range": 9.5,
+		"cooldown": 0.9, "projectile_speed": 22.0, "splash": 1.2, "fx": "missile"
+	},
+	"levy_carbine": {
+		"name": "Carbine", "damage_type": "ballistic", "damage": 5.5, "range": 7.5,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"breaker_rocket": {
+		"name": "Breaker Rocket", "damage_type": "piercing", "damage": 46.0, "range": 9.5,
+		"cooldown": 3.0, "projectile_speed": 14.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"tusk_gun": {
+		"name": "Assault Gun", "damage_type": "explosive", "damage": 48.0, "range": 8.5,
+		"cooldown": 1.9, "projectile_speed": 26.0, "splash": 1.4, "fx": "shell"
+	},
+	"mauler_cannon": {
+		"name": "Mauler Cannon", "damage_type": "piercing", "damage": 88.0, "range": 10.5,
+		"cooldown": 3.0, "projectile_speed": 30.0, "splash": 1.0, "fx": "shell"
+	},
+	"anvil_mortar": {
+		"name": "Siege Mortar", "damage_type": "explosive", "damage": 70.0, "range": 17.0,
+		"min_range": 5.0, "cooldown": 4.2, "projectile_speed": 13.0, "splash": 2.6, "scatter": 2.2,
+		"fx": "artillery"
+	},
+	"harrow_flak": {
+		"name": "Harrow Flak", "damage_type": "flak", "damage": 15.0, "range": 11.0,
+		"cooldown": 0.33, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"bastion_gun": {
+		"name": "Bastion Gun", "damage_type": "explosive", "damage": 42.0, "range": 11.0,
+		"cooldown": 1.5, "projectile_speed": 24.0, "splash": 1.3, "fx": "shell"
+	},
+	"drifter_smg": {
+		"name": "Scrap SMG", "damage_type": "ballistic", "damage": 6.0, "range": 7.0,
+		"cooldown": 0.45, "hits_air": true, "fx": "tracer"
+	},
+	"dart_gun": {
+		"name": "Dart Guns", "damage_type": "ballistic", "damage": 6.0, "range": 7.0,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"sidewinder_missile": {
+		"name": "Sidewinder Missile", "damage_type": "piercing", "damage": 60.0, "range": 11.0,
+		"cooldown": 2.3, "projectile_speed": 20.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"gnat_flak": {
+		"name": "Gnat Flak", "damage_type": "flak", "damage": 13.0, "range": 10.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"prowler_cannon": {
+		"name": "Prowler Cannon", "damage_type": "piercing", "damage": 44.0, "range": 9.0,
+		"cooldown": 1.5, "projectile_speed": 28.0, "splash": 1.0, "fx": "shell"
+	},
+	"snare_gun": {
+		"name": "Snare Gun", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	}
+}

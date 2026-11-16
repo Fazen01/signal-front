@@ -7,108 +7,671 @@ decision in the session log at the bottom.
 
 ## M0 — Bootstrap
 
-- [ ] `project.godot` for Godot 4.7.2 (Compatibility renderer), folder layout
+- [x] `project.godot` for Godot 4.7.2 (Compatibility renderer), folder layout
       `sim/ view/ ui/ data/ scenes/ tests/ tools/`, input map
-- [ ] `tools/install_godot.sh` — fetches the Godot 4.7.2 Linux headless build
+- [x] `tools/install_godot.sh` — fetches the Godot 4.7.2 Linux headless build
       into `.godot-bin/` (git-ignored) if it is not already there
-- [ ] `tests/run_tests.gd` — minimal headless test runner, non-zero exit on failure
-- [ ] `tools/check.sh` — import, run tests, fail on any script error
-- [ ] An empty main scene boots headless with zero errors
+- [x] `tests/run_tests.gd` — minimal headless test runner, non-zero exit on failure
+- [x] `tools/check.sh` — import, run tests, fail on any script error
+- [x] An empty main scene boots headless with zero errors
 
 ## M1 — Simulation core
 
-- [ ] Fixed-tick `SimWorld`, seeded RNG, entity registry, player state
-- [ ] Map grid with terrain types and passability
-- [ ] Grid pathfinding + steering and separation; move orders
-- [ ] Weapons, damage/armor table, projectiles, death, wrecks
-- [ ] Orders: move, attack, attack-move, stop, hold
-- [ ] Headless test: two mixed squads fight to a deterministic result
+- [x] Fixed-tick `SimWorld`, seeded RNG, entity registry, player state
+- [x] Map grid with terrain types and passability
+- [x] Grid pathfinding + steering and separation; move orders
+- [x] Weapons, damage/armor table, projectiles, death, wrecks
+- [x] Orders: move, attack, attack-move, stop, hold
+- [x] Headless test: two mixed squads fight to a deterministic result
 
 ## M2 — View and controls
 
-- [ ] Terrain mesh, lighting, RTS camera (pan, zoom, rotate, bounds)
-- [ ] Procedural low-poly models for units and buildings with team colours
-- [ ] View layer interpolating sim state; health bars; selection rings
-- [ ] Click and box selection, context orders, control groups
-- [ ] Headless boot test of the battle scene for 600 frames with zero errors
+- [x] Terrain mesh, lighting, RTS camera (pan, zoom, rotate, bounds)
+- [x] Procedural low-poly models for units and buildings with team colours
+- [x] View layer interpolating sim state; health bars; selection rings
+- [x] Click and box selection, context orders, control groups
+- [x] Headless boot test of the battle scene for 600 frames with zero errors
 
 ## M3 — Economy and construction
 
-- [ ] Salvage Fields, Haulers, Depots, wreck harvesting
-- [ ] Builder units, placement ghost, construction progress, cancel/refund
-- [ ] Production queues, rally points, Bandwidth cap
-- [ ] HUD: resources, selection panel, command card with hotkeys
+- [x] Salvage Fields, Haulers, Depots, wreck harvesting
+- [x] Builder units, placement ghost, construction progress, cancel/refund
+- [x] Production queues, rally points, Bandwidth cap
+- [x] HUD: resources, selection panel, command card with hotkeys
 
 ## M4 — Signal Grid
 
-- [ ] Emitters, link graph back to HQ, coverage grid
-- [ ] Linked/Dark effects on units, turrets and production
-- [ ] Placement rules (buildings in coverage, relays in link range)
-- [ ] Overlay, link lines, blackout alert, Dark indicator
-- [ ] Tests: cutting a mid-chain relay unlinks everything downstream
+- [x] Emitters, link graph back to HQ, coverage grid
+- [x] Linked/Dark effects on units, turrets and production
+- [x] Placement rules (buildings in coverage, relays in link range)
+- [x] Overlay, link lines, blackout alert, Dark indicator
+- [x] Tests: cutting a mid-chain relay unlinks everything downstream
 
 ## M5 — First playable (tag `v0.1`)
 
-- [ ] Aegis Directorate roster complete through T2
-- [ ] Skirmish AI: economy, relay expansion, army, attack waves, defense
-- [ ] Win/lose conditions, victory screen with stats
-- [ ] Main menu → skirmish setup → match → back to menu
-- [ ] `tools/check.sh` runs a full headless AI-vs-AI match that ends with a winner
-- [ ] README: how to run, controls, what is in the build
+- [x] Aegis Directorate roster complete through T2
+- [x] Skirmish AI: economy, relay expansion, army, attack waves, defense
+- [x] Win/lose conditions, victory screen with stats
+- [x] Main menu → skirmish setup → match → back to menu
+- [x] `tools/check.sh` runs a full headless AI-vs-AI match that ends with a winner
+- [x] README: how to run, controls, what is in the build
 
 ## M6 — Battlefield awareness
 
-- [ ] Fog of war and shared vision through coverage
-- [ ] Minimap with camera box, click-to-move, alerts
-- [ ] Uplink Sites; capture by Field Engineer
-- [ ] Double-click select, idle-builder key, camera bookmarks
+- [x] Fog of war and shared vision through coverage
+- [x] Minimap with camera box, click-to-move, alerts
+- [x] Uplink Sites; capture by Field Engineer
+- [x] Double-click select, idle-builder key, camera bookmarks
 
 ## M7 — Directives and veterancy
 
-- [ ] Command Points, Directive bar, all six Directives with targeting UI
-- [ ] Veterancy ranks and indicators
-- [ ] AI uses Directives
+- [x] Command Points, Directive bar, all six Directives with targeting UI
+- [x] Veterancy ranks and indicators
+- [x] AI uses Directives
 
 ## M8 — T3 and air
 
-- [ ] Command Lab, Airpad, Longbow, Kestrel, Scout Drone, Tempest, Flak Post
-- [ ] Air movement layer, anti-air targeting rules
+- [x] Command Lab, Airpad, Longbow, Kestrel, Scout Drone, Tempest, Flak Post
+- [x] Air movement layer, anti-air targeting rules
 
 ## M9 — Foundry Pact
 
-- [ ] Roster, Pylon network, Crawler mobile factory, self-repair when Linked
-- [ ] AI plays Foundry Pact
+- [x] Roster, Pylon network, Crawler mobile factory, self-repair when Linked
+- [x] AI plays Foundry Pact
 
 ## M10 — Nomad Circuit
 
-- [ ] Roster, Beacon Rigs, relocating HQ, jammers, forest cloak, hijack of Dark vehicles
-- [ ] AI plays Nomad Circuit
+- [x] Roster, Beacon Rigs, relocating HQ, jammers, forest cloak, hijack of Dark vehicles
+- [x] AI plays Nomad Circuit
 
 ## M11 — Maps
 
-- [ ] Seeded mirrored map generator; 2- and 4-player sizes
-- [ ] Three hand-tuned layouts; up to 3 AI opponents
+- [x] Seeded mirrored map generator; 2- and 4-player sizes
+- [x] Three hand-tuned layouts; up to 3 AI opponents
 
 ## M12 — Feel
 
-- [ ] Particles: tracers, muzzle flash, explosions, smoke, debris
-- [ ] Procedural SFX and ambient audio, volume settings
-- [ ] Unit response feedback: order markers, attack flashes, alert pings
+- [x] Particles: tracers, muzzle flash, explosions, smoke, debris
+- [x] Procedural SFX and ambient audio, volume settings
+- [x] Unit response feedback: order markers, attack flashes, alert pings
 
 ## M13 — Balance and performance
 
-- [ ] Batch AI-vs-AI runs across factions; tune costs and stats toward even win rates
-- [ ] AI difficulty levels
-- [ ] Profile and hold 60 fps with 300 units
+- [x] Batch AI-vs-AI runs across factions; tune costs and stats toward even win rates
+- [x] AI difficulty levels
+- [x] Profile the simulation and the view with 300 units and optimise the hot
+      spots (`tools/perf_bench.gd`, `tools/frame_bench.tscn`)
+- [ ] Confirm 60 fps with 300 units on real hardware (this needs a GPU: the
+      sessions only have software rendering, so the draw cost is unmeasured)
+- [x] Bring 1v1 match length up to the 15–25 minute target (AI-vs-AI matches
+      averaged about 9 minutes; now 19 on seeds the tuning never saw)
 
 ## M14 — Finish
 
-- [ ] Settings (video, audio, key hints), pause menu, save/load of a skirmish
-- [ ] Three scripted tutorial missions teaching economy, signal and Directives
-- [ ] Windows export preset; final README
+- [x] Settings (video, audio, key hints), pause menu, save/load of a skirmish
+- [x] Three scripted tutorial missions teaching economy, signal and Directives
+- [x] Windows export preset; final README
 
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 2 (branch `claude/relay-session-1116-0451`)
+
+Status: **in progress**, started 04:51 UTC from `3a43a9e` (session 1's last
+commit; `tools/check.sh` passes on it here, Godot and software GL available).
+
+Done so far:
+- Looked at screenshots of the menu, skirmish setup, HUD states, signal
+  overlay, Directives, combat and result screens. Three faults fixed: the
+  minimap's camera box was drawn outside the minimap over the selection
+  text; "[C] Command Lab" was cut off on the command card; the bottom panel
+  was see-through enough to make its text hard to read.
+- `tools/match_timeline.gd`: plays one AI match and prints every wave
+  (size, survivors), every building lost and both treasuries each minute.
+- Two AI faults the timeline showed, both fixed:
+  - It re-placed a building site on the same spot each time the enemy shot
+    one down (13 Depots, 3,200 salvage, lost in 80 seconds in one match). It
+    now avoids a spot for two minutes after losing a site there and does not
+    place sites within 16 units of a visible armed enemy.
+  - One unplaceable building (usually that Depot) blocked the whole build
+    order, so the AI sat on 3,000-4,000 salvage with one Barracks and one
+    Vehicle Works. Blocked entries are now skipped for 30 seconds.
+- AI wave doctrine: no attack before 6:00 / 4:00 / 2:30 (Easy / Normal /
+  Hard); a guard of 40% / 30% / 25% of the army stays home; Normal and Hard
+  pull a wave back when it is down to a third or facing 1.5 times its value.
+
+Match length, the open M13 item (committed in `0c87091` at about 08:00 UTC;
+`check.sh` passes, its five AI matches now last 17-32 minutes). Averages
+over three or four seeds per faction pairing, Normal vs Normal:
+- baseline 10.0 minutes; first attack delayed to 4:00 alone 10.1; harvesting
+  2.5 times slower on top 11.0; guard + retreat + the two fixes above 9.4.
+  The first large clash decided the match whenever it happened.
+- What moved it: a much slower economy (loading 100 salvage takes 12 s, was
+  4 s) 12.7; retreating units defend their base instead of walking through
+  the fight 12.9; loading time in proportion to the load 13.1; headquarters
+  health +50% and a longer-ranged headquarters gun 17.3 but with two
+  60-minute stalemates; richer fields and anti-stalemate rules 20-22 with
+  one stalemate in 36 games.
+- Stalemates found, their causes and fixes:
+  - A 62-unit wave was recalled every time four free Reinforcement Drop
+    infantry reached the base. A wave is now recalled only when the raiders
+    outweigh 80% of the guard at home.
+  - Riflemen sent against splash turrets for half an hour. Visible enemy
+    turrets now weigh production toward anti-armour and artillery and away
+    from anti-infantry; once the enemy army is gone ("siege": two waves sent
+    and fewer than four enemy units seen) anti-infantry, scouts and
+    hijackers are nearly dropped.
+  - Two careful AIs each retreating for ever: after two retreats in a row
+    the next wave fights to the end.
+  - A boxed-in AI sitting on 7,000 salvage because its only relay spots were
+    under fire: relays fall back to a spot beside the base, which still adds
+    bandwidth.
+  - A wave stuck in its assault for 40 minutes with one unit left that never
+    arrived, so no new wave ever formed. Assaults now end after 3 minutes.
+  - A Nomad AI that had lost every beacon while its haulers filled the
+    20-bandwidth cap could never train a Beacon Rig again. Decision: units
+    that deploy into a relay can be finished over the cap. This applies to
+    human players too and is tested.
+- Other balance changes in the same commit: fields 10,000 / 16,000 (were
+  5,000 / 9,000), unloading 2 s (was 1 s), Bastion splash 1.6 -> 1.3.
+- Validation on seeds 5-8, which the tuning never saw (36 games, Normal vs
+  Normal): average 19.1 minutes, no stalemates; per pairing 11.7 (Nomad
+  mirror) to 25.6 (Aegis mirror). Roadmap item ticked: the average is inside
+  15-25, though Nomad games run short.
+- Win rates over all 72 games of the last two batches (32 non-mirror games
+  per faction, roughly +/-9 points of noise): Aegis 56%, Foundry 53%,
+  Nomad 37% - the same picture session 1 left. Nomad is next.
+
+- Nomad balance: proportional loading made the Skiff's small 80-salvage
+  loads cost more travel per salvage. Skiff capacity 80 -> 100. Over 72
+  games on seeds 1-8 (32 non-mirror per faction): Aegis 56%, Foundry 41%,
+  Nomad 53% (was 56 / 53 / 37). The spread narrowed from 19 to 15 points;
+  Foundry is now lowest but inside the noise. Average length 20.7 minutes.
+  Foundry's weak matchup is Aegis (6 of 16).
+
+- Difficulty levels under the new pacing. Hard beat Easy 18 of 18, but Hard
+  lost to Normal (7 of 18, one draw): its first wave at 2:30 and 25-second
+  wave gaps fed small waves into the tougher defences. First attack moved
+  to 4:00: 10 of 18, still 1 of 6 in mirrors. Decision: Hard now waves
+  with Normal's patience (first wave 8, 35 s gaps, 30% guard) and keeps its
+  edge in economy (8 haulers, 3 engineers, two of each factory) and
+  reaction (thinks twice as often). Hard beat Normal 28 of 36 on seeds
+  1-4 (Hard in the first seat), Normal beat Easy 18 of 18. Easy matches
+  are short (about 9 minutes), which is fine for Easy.
+- Foundry vs Aegis (Foundry 6 of 16) looked at: Foundry's cheap infantry
+  armies lose the first head-on clash; no bug found. Gathering 36 more
+  games on seeds 9-12 (09:55 UTC) before deciding whether to tune.
+- After the Hard change: Hard beat Easy 18 of 18 again. Every AI level
+  beats a player who does nothing in 5-8 minutes.
+- Mid-war screenshot (spectated Aegis vs Foundry at 7:28) reads clearly.
+  Haulers spend 65% of their time loading and 8% queued at a field, so the
+  slower loading does not cause crowding.
+- New test: AI memory (lost-site spots, blocked build entries, retreat
+  count, wave members) survives a file save in the middle of a war, and the
+  match continues identically.
+- Seeds 9-12 (36 games): Aegis 50%, Foundry 62%, Nomad 31%. Seeds 1-12
+  together (48 non-mirror games per faction): Aegis 54%, Foundry 48%,
+  Nomad 46%. Balanced within noise; Foundry left alone.
+- One more stalemate there (Foundry vs Nomad, seed 10): the "siege" rule
+  judged the enemy army by what was visible that second, so Foundry kept
+  building anti-armour Breakers and sending them into Nomad's steady
+  trickle of Drifter infantry. In progress (10:20 UTC): the AI now keeps a
+  decaying memory of the armed enemy units it has seen (half-life 40 s)
+  and uses it for both the army mix and the siege test. Seed 10 then ends
+  at 18:20. Seeds 9-12: no draws; but seeds 1-4 had two new 60-minute
+  draws, which led to two deeper faults:
+  - Repair healed 4% of a building's maximum health per second (times the
+    square root of the builders), so two engineers mended a 4,500-health
+    headquarters at about 250 health/s, faster than a 20-Lancer wave hurts
+    it. Decision: `repair_rate` 0.04 -> 0.015 (this affects human players
+    too: one engineer now takes about 67 s to fully repair a building, was
+    25 s). The AI also measures "is it safe to repair" from the building's
+    edge instead of its centre.
+  - AI waves walked to their staging point on a plain move order, filing
+    past defenders without fighting and losing two thirds before the
+    assault began. They now attack-move to the staging point.
+  - The retreat test no longer counts Flak Posts (anti-air only) as a
+    threat to a ground wave.
+  The three stalemate seeds now end at 13-26 minutes. Batches: seeds 1-4
+  no draws (18.7 min); seeds 9-12 two draws (19.5 min).
+- Those two draws had the same cause: the map was exhausted. A two-player
+  generated map starts with 92,000 salvage and had 1,800 left at 36
+  minutes; with both economies stopped, turrets and headquarters guns beat
+  the trickle of free Reinforcement Drop squads for ever. Fields 10,000 /
+  16,000 -> 14,000 / 22,000, so the salvage outlasts a normal match. Both
+  seeds then end at 20 and 26 minutes. 72 games on seeds 1-4 and 9-12:
+  no draws, 21.4 minutes on average; Aegis 62%, Foundry 40%, Nomad 47%.
+  Committed as `92a7ea0`.
+- Foundry vs Aegis was now 4 of 16 for Foundry. Value killed per value
+  lost by unit type over 12 such games: Aegis Marksman 1.85 (every other
+  non-artillery unit 0.4-1.0), Foundry Breaker 0.52 with about 1,000
+  built. The Marksman's 14 range outreaches all Foundry infantry. In
+  progress (12:10 UTC): Marksman damage 48 -> 40, batches running.
+- Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
+  [--faction=foundry]` on the battle scene): about 6,000 random clicks,
+  drags, wheel turns and hotkeys per run, pushed into the root viewport so
+  they pass through the HUD, minimap and command card before the camera
+  and selection code, with a deliberate select-builder / card / place
+  sequence every 90 frames. `check.sh` runs it as each faction (7 s each).
+  No script errors found so far.
+  - Gotchas: `Input.parse_input_event` is not dispatched by the headless
+    display server, and `Viewport.push_input` must be given local
+    coordinates (`push_input(ev, true)`), or the canvas-items stretch
+    rescales them (the headless viewport is 1600x1600).
+  - Once, in one run that could not be reproduced, the game ended up
+    paused. If it happens again the monkey prints "Monkey note: the game
+    paused" with the last inputs and unpauses.
+  - "ObjectDB instances leaked at exit" warnings in battle logs come from
+    sound streams still playing at quit. They predate this session and are
+    harmless.
+
+### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
+
+Status: **finished** at about 04:00 UTC, M0 through M14 (two split-out M13
+items left open, see below).
+
+Where things stand, for whoever reads this first:
+- The game is playable end to end: menu -> tutorials or skirmish (three
+  factions, generated or hand-made maps, one to three AI opponents) -> match
+  -> result, with save/load, settings and a Windows export preset.
+- `tools/check.sh` passes on the last pushed commit: 120 unit tests, headless
+  boots, synthetic-input smoke runs, the full flow from the project and from
+  an exported pack, and five AI-vs-AI matches that each end with a winner.
+- Open roadmap items: confirming 60 fps on a real GPU, and match length (AI
+  matches last about 9 minutes, the design wants 15-25).
+- Never verified by a person: how it feels with a real mouse and keyboard,
+  how it sounds, how it performs on a GPU. Start there.
+- The rest of this entry is in the order things were built: each milestone's
+  summary, then the decisions taken for it. Notes marked "(later: ...)" were
+  true when written and have since been dealt with.
+
+Godot verification: **available**. `tools/install_godot.sh` downloads the
+official 4.7.2 Linux build and `tools/check.sh` runs it headless. A
+software-GL display (`xvfb-run` + `--rendering-driver opengl3`, Mesa llvmpipe)
+also works here, so screenshots can be captured and looked at.
+
+Finished:
+- M0 Bootstrap: project file, folder layout, input map, Godot installer, test
+  runner, `tools/check.sh` (import → unit tests → headless boot of the main
+  scene; fails on any `SCRIPT ERROR`, engine `ERROR:` or warning-as-error).
+
+Decisions:
+- GDScript warnings `untyped_declaration`, `unused_variable`,
+  `shadowed_variable`, `unreachable_code` and `standalone_expression` are
+  errors in `project.godot`, so untyped code does not load at all.
+- Godot exits 0 even when a script fails to parse, so `check.sh` greps the
+  output of every step instead of trusting exit codes alone.
+- Scenes are tiny hand-written `.tscn` files (root node + script); everything
+  else is built in code, because nobody can open the editor.
+- Camera keys: the design gives WASD to the camera and A/S to attack-move and
+  stop. Arrow keys, W and D always pan; A and S pan only while no units are
+  selected, otherwise they are the unit orders.
+- `.uid` files that Godot generates next to scripts are committed (standard
+  for Godot 4.4+); `.godot/` is not.
+
+- M1 Simulation core: `SimWorld` fixed 20 Hz tick, seeded `SimRng`, entity
+  registry, players, map grid with terrain, `AStarGrid2D` pathfinding with
+  string-pulling, steering/separation, formation move orders, weapons, damage
+  table, projectiles, death, wrecks, move / attack / attack-move / stop / hold,
+  and a deterministic mixed-squad battle test.
+
+More decisions:
+- One map cell is 2x2 world units and is shared by terrain, pathfinding,
+  building footprints and (later) signal coverage. A 2-player map is 64x64
+  cells = 128x128 world units.
+- Pathfinding uses Godot's built-in `AStarGrid2D` (a plain `RefCounted`, no
+  scene tree) with one grid for infantry and one for vehicles (forest costs
+  vehicles double).
+- Definitions are JSON in `data/` loaded into typed `EntityDef` / `WeaponDef`
+  / `FactionDef` objects by `sim/defs/game_data.gd`; unknown keys are errors.
+- Everything outside `sim/` changes the simulation only through
+  `SimWorld.push_command(SimCommand)`; commands apply at the next tick.
+- Infantry stop to shoot; turreted vehicles fire on the move. Units on a plain
+  move order only shoot what is already in range; attack-move and idle units
+  chase what they see (idle units give up 18 units from where they stood).
+- The HQ has a light point-defence gun (not in the design) so a couple of
+  early raiders cannot end a match on their own.
+- GDScript gotcha, now avoided: a method named like a global function
+  (`randf`, `randi_range`...) is shadowed by the global one when called
+  unqualified inside the class. `SimRng` uses `next_float` / `range_f` /
+  `range_i` for that reason.
+
+Notes:
+- Early in this session `git push` was refused (the Claude GitHub App had no
+  write access to the repository). The owner granted access and pushes work
+  now; if a later session sees a 403 on push, that is the cause.
+
+- M2 View and controls: terrain mesh with trees/boulders/water, sun and
+  ambient light, RTS camera, procedural models for the whole T1/T2 Aegis
+  roster, interpolated entity views with turrets, projectile and tracer
+  effects, health bars, selection rings, click/box/double-click selection,
+  context orders, attack-move/stop/hold keys, control groups.
+- Verification tooling: `tools/screenshot.sh` (software-GL screenshots into
+  the git-ignored `screenshots/`), `tools/gallery.tscn` (every model on one
+  sheet) and a headless smoke driver (`--smoke`) that feeds synthetic mouse
+  and key events through the real input handlers; `check.sh` runs it.
+
+View decisions:
+- Models face +X and are built from cached primitive meshes in
+  `view/model_factory.gd`; a child named `Turret` follows the weapon aim.
+- Health bars and the drag box are drawn in 2D by `ui/battle_overlay.gd`
+  from projected positions; selection rings are 3D.
+- Map heights are cosmetic (units are simulated in 2D) but are baked into
+  `SimMap.heights` so the mesh and unit placement agree.
+
+- M3 Economy and construction: haulers work fields and wrecks and unload at
+  depots; engineers place construction sites (ghost tinted valid/invalid),
+  extra builders help with diminishing returns (sqrt), unfinished buildings
+  cancel for a full refund; production queues of 5 with rally points and the
+  bandwidth cap; HUD with resources, selection panel, command card with
+  hotkeys, production queue and alerts.
+
+Economy and HUD decisions:
+- Costs are paid up front (on placing a site or queueing a unit) and fully
+  refunded on cancel. Repair is free but only works on Linked buildings.
+- New haulers start harvesting the nearest field on their own unless the
+  building has a player-set rally point. Haulers pick up wrecks too.
+- Command-card hotkeys never use W, A, S, D, Q, E, G or H (camera and order
+  keys); a data test enforces it. Depot is P, Hauler is U, Warden is R.
+- A screenshot showed the HUD collapsed into a corner even though every
+  headless check passed (`set_anchors_preset` keeps the old zero size; use
+  `set_anchors_and_offsets_preset`). Look at screenshots after UI changes.
+
+- M4 Signal Grid: emitters link breadth-first from the HQ within range 30;
+  per-player coverage grid rebuilt at most 4x a second; Dark units fire
+  slower, see less and lose the Aegis range bonus; Dark buildings pause
+  production and cannot be repaired; Dark turrets fire at half rate;
+  placement needs coverage (relays need link range); unlinked relays give no
+  bandwidth and raise a blackout alert; coverage overlay (G), animated link
+  lines, Dark icon over affected units, reach ring on a relay ghost.
+
+Signal decisions:
+- Only finished buildings emit. Coverage is "cell centre inside the disc".
+- Units without any HQ (test worlds) are simply Dark.
+- The overlay dims uncovered ground and tints covered ground in the team
+  colour with a brighter rim; it shows only the local player's network.
+
+- M5 First playable (tag `v0.1`): scripted-priority skirmish AI (hauler
+  economy, build order, relay expansion toward uncovered salvage, depots at
+  far fields, turrets, army mix weighted by enemy composition, staged attack
+  waves that prefer relays whose loss cuts the most enemy network, base
+  defence, three difficulty levels); HQ-loss defeat and surrender; main menu,
+  skirmish setup, pause menu, victory/defeat screen with stats; README.
+  `check.sh` now also walks menu → setup → match → result → menu headless and
+  plays a full AI-vs-AI match (seed 1 ends at about 8:36 game time in ~8 s).
+
+M5 decisions and known gaps:
+- A player is defeated when their HQ is destroyed; all their remaining units
+  and buildings are destroyed with it.
+- The AI currently sees the whole map (there is no fog of war until M6). When
+  fog lands it must be limited to what it has scouted. (later: done in M6.)
+- Two T2 roster details wait for later systems: the Marksman's "stealth while
+  still" needs fog of war (M6) and the Field Engineer's "capture" needs Uplink
+  Sites (M6). Everything else in the T1/T2 Aegis roster is in. (later: both
+  done in M6.)
+- AI-vs-AI matches on seeds 1-7 all end with a winner in 7-15 game minutes,
+  shorter than the 15-25 minute target, and the first player wins more often
+  than the second. Income is high (~2,500 salvage a minute mid-game) and the
+  AI floats salvage because it runs one Barracks and one Vehicle Works.
+  Left for M13 balance; noted so it is not mistaken for a bug. (later: M13
+  removed the seat bias and M11 the floating salvage; match length is still
+  open.)
+
+Notes on this session's pushes:
+- The `v0.1` tag could not be pushed: the session may only write its own
+  branch (`send-pack: unexpected disconnect`). The tag exists only in this
+  session's clone. The M5 commit to tag is `457055b`.
+
+- M6 Battlefield awareness: fog of war with vision shared through coverage,
+  Marksman stealth, minimap (camera box, click to move, right-click orders,
+  alert pings), Uplink Sites captured by Field Engineers, double-click
+  select, idle-builder key (period or F1), camera bookmarks (Ctrl+F5..F8).
+
+- M7 Directives and veterancy: Command Points from value destroyed, six
+  Directives with unlock costs, cooldowns and targeting rules, a Directive
+  bar (click or Alt+1..6) with a targeting ring, ground effects, veterancy
+  ranks with chevrons; the Normal and Hard AI unlock and use Directives.
+
+- M8 Tier 3 and air: Command Lab, Airpad, Flak Post, Tempest, Longbow,
+  Kestrel and Scout Drone with models; an air movement layer (aircraft fly
+  straight, ignore terrain and buildings, only crowd each other); per-weapon
+  `hits_air` / `hits_ground`; artillery minimum range and scatter.
+
+- M9 Foundry Pact: full second faction (10 units, 9 buildings, own models
+  and palette), Pylon web, Crawler deploy/pack with a placement ghost, mines,
+  Ratchet repair, Linked-vehicle self-repair, faction choice for both sides
+  in the skirmish setup. The AI is now role-based and plays either faction;
+  `check.sh` also runs a Foundry-vs-Aegis match and drives the Crawler's
+  Deploy/Pack through the real interface.
+
+- M10 Nomad Circuit: full third faction (11 units, 7 buildings, own models
+  and palette), deployable Beacon Rigs instead of relays, the Caravan Hub
+  that packs up and relocates, Jammer Buggy, forest cloak, Splicer hijack of
+  Dark vehicles (right-click), +50% wreck salvage. The AI plays Nomad:
+  it builds and deploys rigs toward uncovered salvage and sends Splicers
+  after Dark vehicles. `check.sh` adds a Nomad-vs-Foundry match.
+
+- M11 Maps: the generator makes two-player (128 x 128, half-turn symmetric)
+  and four-player (192 x 192, quarter-turn symmetric) maps; three hand-made
+  layouts in `data/maps/` (Twin Fords, Crater Ring, Crossroads); skirmish
+  setup chooses the map and one to three AI opponents (free-for-all).
+  `check.sh` adds a match on a layout and a three-way match.
+
+- M12 Feel: CPU-particle debris, smoke, sparks and dust on impacts and
+  deaths, missile exhaust trails, smoke from badly damaged vehicles and
+  buildings; 17 sounds synthesised in code (`view/sound_bank.gd`) with a
+  looping ambient bed, played through a pooled `AudioManager` that fades
+  with distance from the camera; Master / Effects / Ambience volume sliders
+  saved to `user://settings.cfg`; order acknowledgement and selection blips,
+  hit sparks, alert sounds and minimap pings.
+
+- M13 Balance and performance (three of five items; two were split out and
+  are still open, see the roadmap): `tools/balance_batch.gd` plays every
+  ordered faction pairing over a list of seeds; four tuning passes;
+  difficulty levels measured; simulation and view profiled and optimised.
+
+- M14, first item: settings for audio, video (fullscreen, vsync, shadows,
+  anti-aliasing) and hotkey hints; Save Game in the pause menu and Load
+  Saved Game on the main menu (one slot, `user://skirmish.sav`).
+
+- M14, second item: three tutorial missions (`sim/sim_tutorial.gd`) for the
+  economy, the Signal Grid and Directives, with an objective panel, a pulsing
+  ground marker, minimap pings and a mission-complete screen that leads to
+  the next mission. Tests complete each mission by issuing the commands its
+  objectives ask for; `check.sh` plays one through the real interface.
+
+- M14, third item: `export_presets.cfg` with a "Windows Desktop" preset,
+  `tools/export_windows.sh`, and the final README. The export was run here
+  (templates downloaded): it wrote a 110 MB `SignalFront.exe`. The `.exe`
+  could not be executed on Linux, but the same preset exported as a pack
+  runs the whole menu -> match -> load -> tutorial flow with the Linux
+  binary, and `check.sh` now repeats that on every run (exporting a pack
+  needs no templates).
+
+Half-done / next: every roadmap box is ticked except two that were split
+out of M13 and need things a headless session does not have:
+1. Confirm 60 fps with 300 units on real hardware.
+2. Bring 1v1 match length up to 15-25 minutes (see the match-length
+   experiment below for what did not work).
+After those, the most valuable work is a human play-through: nobody has
+used a real mouse, seen the game move, or heard it.
+
+Fog decisions:
+- "Shared vision through coverage" is implemented as: everything inside your
+  own signal coverage is visible to you, plus a disc of each unit's sight
+  (30% shorter when Dark). Units can fire on anything any friendly source
+  reveals, if it is in weapon range.
+- A stealthed Marksman (standing still, not fired for 2.5 s) is only seen by
+  an enemy within 5 units.
+- An attack order on a unit you cannot see becomes an attack-move to where it
+  was; buildings can be targeted once explored.
+- In the view, enemy units show only while seen; enemy buildings and neutral
+  objects stay drawn once seen (a building destroyed out of sight stays as a
+  ghost until the spot is seen again). Trees and boulders are darkened per
+  instance so they do not glow out of the fog.
+- "X under attack" alerts fire at most every 15 s per player, for buildings
+  and haulers, and ping the minimap.
+- Uplink Sites: the design pays "whoever has them inside their coverage" and
+  the roadmap adds capture by engineer. Implemented as both: an engineer
+  captures the site (8 s), and it pays 3 salvage a second only while inside
+  its owner's coverage. An enemy engineer can flip it. Sites cannot be
+  destroyed and go neutral if their owner is defeated.
+- Directives: 1 Command Point per 300 salvage of enemy value destroyed, plus
+  1 to start. Points unlock a Directive permanently; after that it is free to
+  use on its cooldown. Unlock costs: Recon 1, Repair 2, Surge 2, Barrage 3,
+  Blackout 3, Drop 4. The barrage never hurts its owner's units.
+- Veterancy: ranks at 2x, 4x and 8x the unit's own cost in value destroyed;
+  each rank +15% damage and +10% health; rank 3 repairs 1% health a second
+  after 5 s without taking damage.
+- Directive hotkeys are Alt+1..6 (plain digits are control groups).
+- The AI unlocks Directives in a fixed order (Recon, Barrage, Repair, Drop,
+  Blackout, Surge), barrages visible clusters of 3+, repairs clusters of
+  damaged units, blacks out the assault target and surges during assaults.
+  The Easy AI does not use Directives.
+- With Directives in, AI-vs-AI seed 1 runs 15:29 (was about 9-10 minutes).
+- Air: aircraft are simulated in 2D like everything else and drawn 6 units
+  up. Rifles, machine guns, autocannons and missiles can hit them (weakly,
+  per the damage table); tank cannons, artillery and rockets cannot; the
+  Flak Post cannot hit ground. Aircraft leave no wreck.
+- The Tempest is tier 2 (Vehicle Works) so anti-air exists before aircraft
+  do. The Command Lab's "Directive upgrades" are a 25% shorter cooldown on
+  every Directive while a linked lab stands.
+- The Field Engineer's command card is now full (9 buildings + 3 orders = 12
+  slots). The next faction building for an engineer needs a bigger card or a
+  second page.
+- The AI builds a Command Lab and Airpad from about minute 4 on Normal/Hard,
+  mixes in Kestrels and Longbows, and answers enemy aircraft with Tempests
+  and Flak Posts. It does not build Scout Drones yet.
+- Foundry additions beyond the design's signature list, so the faction is
+  complete: Breaker (anti-armor infantry), Scow (hauler), Tusk (tier 2 line
+  vehicle), Harrow (anti-air), and the buildings Foundry Core, Scrapyard,
+  Muster Hall, Bastion, Skyspike, Arsenal. The Foundry has no aircraft.
+- The Foundry has no fixed vehicle factory: vehicles come from a deployed
+  Crawler (trained at the Foundry Core once a Muster Hall stands).
+- Mines are non-blocking, stealthed buildings the Sapper places like any
+  other building (2.5 s to arm, 40 salvage, anywhere on walkable ground). An
+  enemy sees one only within 2.2 units; ground units within 1.7 set it off.
+- Pylons give +5 bandwidth (Relays +10) because they cost about half.
+- The AI no longer names any unit or building: `data/factions.json` maps
+  roles (builder, hauler, relay, barracks, works or mobile factory, depot,
+  turrets, tier3, airpad) to definitions and `data/units.json` gives each
+  army unit an `ai_role` and `ai_weight`. A new faction needs only data.
+- Reinforcement Drop squads are per faction (`drop_squad`).
+- Nomad additions beyond the design's signature list: Drifter, Tinker
+  (builder), Skiff (hauler), Gnat (anti-air), Prowler (light tank), and the
+  buildings Cache, Camp, Chop Shop, Snare Turret, Signal Loom. No aircraft.
+- Deploy rules are shared by all deployable units: a headquarters deploys
+  anywhere buildable, an emitter (Beacon) within link range of a linked
+  emitter, anything else (Crawler) inside coverage.
+- A packed headquarters still counts as alive; while it is packed its owner
+  has no coverage and no bandwidth. The AI never relocates its HQ.
+- A jammer clears enemy coverage in an 11-unit disc that follows it; the
+  grid is rebuilt (at most 4x a second) while any jammer is alive.
+- Hijack: 4 seconds next to an enemy vehicle that is Dark and visible. The
+  vehicle changes owner with its hit points, the Splicer is consumed. Any
+  vehicle can be taken, including haulers, Crawlers and Beacon Rigs.
+- Forest cloak applies to Nomad ground units standing still in forest that
+  have not fired for 2.5 s; enemies within 5 units still see them.
+- Balance between the factions is untuned (M13). In the seed-3 samples the
+  Nomads beat Aegis from the first seat and lost from the second, and lost
+  to Foundry.
+- Layouts are JSON grids of characters (legend in `sim/sim_map_gen.gd`).
+  They are produced by `tools/make_layouts.py`, which paints explicit shapes
+  together with their rotated images; edit and re-run it to change a layout.
+- With more than two players every AI is its own team (free-for-all) and
+  attacks the nearest surviving enemy. Three players use three of the four
+  starts on a four-start map. A layout with too few starts falls back to a
+  generated map.
+- AI fixes found by the first stalemates (two matches ran 60 minutes with no
+  winner): it now keeps enough salvage back for a hauler and a builder when
+  it has none, attacks with whatever it has after 2.5 minutes without a wave
+  instead of waiting for an ever-larger one, adds production buildings when
+  salvage piles up, and saves up for the unit it picked rather than always
+  buying the cheapest thing it can afford.
+- `check.sh` now takes about three minutes (five AI matches).
+- Audio could not be listened to here (the audio driver is the dummy one).
+  The sound bank is tested for existing, being audible in amplitude and not
+  clipping, but nobody has heard it. Expect to adjust levels and timbre by
+  ear; every sound is a few lines in `view/sound_bank.gd`.
+- Particle emitters are capped at 56 live bursts; beyond that new bursts are
+  skipped rather than queued.
+- Balance, measured with `tools/balance_batch.gd` (Normal vs Normal, six
+  seeds per ordered pairing, 24 games per faction against the other two):
+  - Before tuning: Aegis beat Foundry 11-1 and Nomad 7-4; Foundry beat Nomad
+    10-2; the first seat won the Aegis mirror 5-1.
+  - After four passes, on seeds 7-12 that the tuning had not seen: Aegis
+    58%, Foundry 54%, Nomad 38% (Aegis-Foundry 7-5, Aegis-Nomad 7-5,
+    Foundry-Nomad 8-4); every mirror split 3-3. With 24 games each the noise
+    is roughly +/-10 points, so only the Nomad figure is clearly off.
+  - What changed: units now fire in alternating order each tick and the AIs
+    alternate who thinks first (this removed the first-seat bias); Trooper
+    60 -> 55; Lance Missile 40 -> 44; Crawler 420 -> 380 and 22 s -> 18 s;
+    Tusk hp 620 -> 580; Bastion 220 -> 190; Prowler is tier 2, cheaper (280)
+    and armor-piercing; Sidewinder cheaper, tougher, hits harder; Dart and
+    Drifter tougher; Beacon +10 bandwidth; Snare Turret tougher; Chop Shop
+    340 -> 300.
+  - Not addressed: AI-vs-AI matches average about 9 game minutes against the
+    15-25 minute target. Slowing income is the obvious lever
+    (`harvest_seconds`, field amounts) but it moves every matchup, so it
+    needs its own batch.
+- Difficulty, same tool with `--levels`: Hard beat Easy in 21 of 24 games,
+  Hard beat Normal in 8 of 12, Normal beat Easy in 9 of 12. A unit test that
+  asserted one seeded Hard-vs-Easy result was tried and dropped: single
+  matches flip with any stat change.
+- Performance, on this container's CPU (no GPU): with 313 units in one fight
+  the simulation tick averages 6.7-6.9 ms (was 9.9) with spikes of 17-31 ms
+  (was 54); the whole frame's script and scene processing averages 6.6-8 ms
+  with a 24-25 ms worst frame, against a 16.7 ms budget at 60 fps. Changes:
+  per-armor damage, range and minimum-range tables precomputed per unit
+  type; target scans walk the spatial buckets inline and run less often when
+  a unit already has a target; stationary units are separated every other
+  tick; at most 24 new move orders are pathed per tick; path smoothing uses
+  shrinking strides; the minimap redraws 20 times a second from a
+  precomputed palette; selection lookups use a set.
+- `Performance.TIME_PROCESS` read 36 ms per frame in headless mode while
+  wall-clock frame time was 8 ms. Do not trust that monitor headless; the
+  frame benchmark measures wall-clock time between frames instead.
+- Match-length experiment (reverted): cutting hauler loads by a quarter and
+  lengthening harvesting from 4 s to 5 s (about -30% income) moved the
+  AI-vs-AI average only from about 9 to 10.6 minutes and shifted the win
+  rates to Aegis 58% / Foundry 33% / Nomad 58%. Income is not the main
+  driver of match length; the AI's early waves are. The next thing to try is
+  the AI's wave timing and the durability of headquarters and turrets.
+- Save/load (`sim/sim_save.gd`): the map is rebuilt from the match
+  configuration and everything else is written as plain values found by
+  reflection over script variables, so new fields are saved without touching
+  the save code. A restored match continues tick-for-tick identically (a
+  test plays on from both and compares state hashes). Pending commands and
+  the coverage/vision grids are part of the snapshot. Saves carry a version
+  number and are refused if it differs or if they name an unknown unit.
+- Godot 4 packed arrays are shared by reference: an early version of the
+  snapshot shared the cooldown arrays with the live world and the two
+  drifted apart. Everything is deep-copied in and out now.
+- Tutorials are simulation-side: a mission is a prepared world plus ordered
+  objectives, each a check on the simulation, so missions are testable with
+  no interface. The opponent is a non-AI player that only stands there and
+  defeat is switched off. Two flaws the tests caught and fixed: Haulers
+  salvaged the lesson's wreck before the player was asked to (it now appears
+  when that objective begins), and a relay objective sat inside enemy turret
+  range. Tutorials cannot be saved.
+- The test runner now fails any test during which an engine or script error
+  was raised (a `Logger` counts them). Before this a test that crashed
+  half-way was printed as ok and only `check.sh`'s grep caught it.
+- `export_presets.cfg` was listed in `.gitignore`. It is tracked now (the
+  line was removed and a comment explains why): the roadmap asks for the
+  preset and it holds no credentials. The preset adds `data/*.json` and
+  `data/maps/*.json` to the export, which Godot would otherwise leave out,
+  and leaves out `tools/`, `tests/` and `docs/`.
+- Second match-length experiment (also reverted): making every AI level wait
+  for a larger first wave (7 -> 11 units on Normal) with longer gaps between
+  waves left the average at about 9.6 minutes and swung the win rates to
+  Aegis 75% / Foundry 17% / Nomad 58%. Neither income nor wave timing moves
+  match length much; games end soon after the first army breaks through.
+  What is left to try is the defender's side: headquarters and turret
+  durability, and how quickly a base falls once its army is gone.
+- `check.sh` gained a `spectate` step: the real battle scene plays a whole
+  Nomad-vs-Foundry AI match at 30x speed (`-- --spectate=nomad,foundry`), so
+  every view, HUD, effect and sound path runs through a full match, not just
+  the first seconds.
