@@ -200,6 +200,25 @@ over three or four seeds per faction pairing, Normal vs Normal:
   reaction (thinks twice as often). Hard beat Normal 28 of 36 on seeds
   1-4 (Hard in the first seat), Normal beat Easy 18 of 18. Easy matches
   are short (about 9 minutes), which is fine for Easy.
+- Foundry vs Aegis (Foundry 6 of 16) looked at: Foundry's cheap infantry
+  armies lose the first head-on clash; no bug found. Left as is.
+- Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
+  [--faction=foundry]` on the battle scene): about 6,000 random clicks,
+  drags, wheel turns and hotkeys per run, pushed into the root viewport so
+  they pass through the HUD, minimap and command card before the camera
+  and selection code, with a deliberate select-builder / card / place
+  sequence every 90 frames. `check.sh` runs it as each faction (7 s each).
+  No script errors found so far.
+  - Gotchas: `Input.parse_input_event` is not dispatched by the headless
+    display server, and `Viewport.push_input` must be given local
+    coordinates (`push_input(ev, true)`), or the canvas-items stretch
+    rescales them (the headless viewport is 1600x1600).
+  - Once, in one run that could not be reproduced, the game ended up
+    paused. If it happens again the monkey prints "Monkey note: the game
+    paused" with the last inputs and unpauses.
+  - "ObjectDB instances leaked at exit" warnings in battle logs come from
+    sound streams still playing at quit. They predate this session and are
+    harmless.
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 

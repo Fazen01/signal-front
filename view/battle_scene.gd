@@ -125,6 +125,12 @@ func _ready() -> void:
 		smoke.name = "Smoke"
 		add_child(smoke)
 		smoke.setup(self)
+	for arg: String in OS.get_cmdline_user_args():
+		if arg == "--monkey" or arg.begins_with("--monkey="):
+			var monkey: MonkeyDriver = MonkeyDriver.new()
+			monkey.name = "Monkey"
+			add_child(monkey)
+			monkey.setup(self, int(arg.trim_prefix("--monkey=")) if arg.begins_with("--monkey=") else 1)
 	print("Battle scene ready: %s, %d entities" % [world.map.name, world.entities.size()])
 
 
@@ -274,6 +280,12 @@ func _read_spectate_args() -> void:
 			time_scale = 30.0
 		elif arg.begins_with("--speed="):
 			time_scale = float(arg.trim_prefix("--speed="))
+		elif arg.begins_with("--faction="):
+			# Play a skirmish as another faction (used by the monkey test).
+			var fc: MatchConfig = MatchConfig.skirmish(config.seed_value)
+			fc.factions = [arg.trim_prefix("--faction="), "aegis"]
+			config = fc
+			world = null
 
 
 func _build_environment() -> void:
