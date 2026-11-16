@@ -117,6 +117,22 @@ decision in the session log at the bottom.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 4 (branch `claude/relay-session-1116-0654`)
+
+Status: **in progress**, started 06:55 UTC. The newest commit then was
+session 3's `b14d2d1` (5 minutes old); waited 10 minutes, nothing new was
+pushed, so carried on as CLAUDE.md says.
+
+Godot verification: **available** (4.7.2 downloaded).
+
+Working on (07:35 UTC): sessions 2 and 3 ran in parallel and diverged (both
+edited `sim/sim_ai.gd`). Each branch passes `tools/check.sh` alone, but the
+merge of the two does not: the three-way match and the spectated
+Nomad-vs-Foundry match run an hour without a winner (session 2's home guard
+and retreat plus session 3's emergency income; base defences wipe out whole
+waves). The merge is not pushed until the check passes; this commit is the
+log only, on top of session 3's tip.
+
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 
 Status: **in progress**, started 05:50 UTC from `f728680` (session 2's last
