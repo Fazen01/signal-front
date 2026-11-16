@@ -19,6 +19,11 @@ const CONCEDE_AFTER_TICKS: int = 20 * 60 * 14  ## nobody gives up in the first f
 const CONCEDE_HOLD_TICKS: int = 20 * 150  ## hopeless for this long without a break
 const CONCEDE_RATIO: float = 2.5  ## the enemy has this many times our strength
 const CONCEDE_MAX_BUILDINGS: int = 8  ## and we are down to this many buildings
+const STARVED_AFTER_TICKS: int = 20 * 60 * 18  ## from here on, having no income counts against holding out
+const STARVED_WINDOW_TICKS: int = 20 * 240  ## income is measured over windows this long
+const STARVED_INCOME: int = 150  ## less than this in a window is no income
+const STARVED_BANK: int = 400  ## with less than this put by
+const STARVED_RATIO: float = 1.5  ## a starved side gives up against this much more strength
 const LEASH_LEAD: float = 9.0  ## how far ahead of the main body a wave unit may get
 const LEASH_NEAR: float = 14.0  ## no waiting this close to the target
 const LEASH_TICKS: int = 20 * 120  ## the wave stops waiting for stragglers after this long
@@ -53,7 +58,7 @@ var raids: bool = false  ## raider: goes for depots and relays before anything e
 var faction_tricks: bool = true  ## plays to its faction's own rule (Normal and Hard)
 var flanks: bool = true  ## every other big wave comes in from the side when the ground allows it
 var helps_allies: bool = true  ## defends an ally's headquarters and joins an ally's attack
-var concedes: bool = true  ## gives up a match that is plainly lost instead of dragging it out
+var concedes: bool = true  ## in a match with no person in it, gives up once it is plainly lost
 var ambushes: bool = false  ## waits hidden at its forward relay (factions that cloak inside coverage)
 var strikes: bool = false  ## sends idle aircraft at the enemy's relays and depots between waves
 var retreat_share: float = 0.4  ## a wave worn down to this share of its strength may pull back
@@ -97,6 +102,9 @@ var _ally_hqs: Array[SimEntity] = []
 var _ally_army: Array[SimEntity] = []  ## armed units of allies that are played by a person
 var _adapted: bool = false
 var _hopeless_since: int = -1  ## tick at which its position last became hopeless, or -1
+var _income_mark: int = 0  ## start of the window income is being measured over
+var _income_seen: int = 0  ## salvage collected up to that moment
+var _starving: bool = false  ## the last whole window brought in next to nothing
 var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have seen
 var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
 var _wish: Dictionary[int, String] = {}  ## building id -> unit it is saving up for
@@ -229,30 +237,46 @@ func _strength(w: SimWorld, team: int) -> int:
 	return total
 
 
-## True once the match has plainly been lost for a while: late in the game,
-## reduced to a handful of buildings, with the strongest enemy side at two
-## and a half times our side's strength for two and a half minutes on end.
-## A beaten AI otherwise holds its headquarters for as long as it has a
-## barrage to call, and the match never ends. An AI with a person on its
-## team never gives up: that is the person's decision.
+## True once the match has plainly been lost for a while. Two ways to be
+## beaten: reduced to a handful of buildings with the strongest enemy side
+## at two and a half times our side's strength; or, later in the game,
+## starved (next to no income for four minutes and nothing put by) with the
+## enemy at half again our strength. Either has to hold for two and a half
+## minutes on end. A beaten AI otherwise holds its headquarters for as long
+## as it has turrets and a barrage to call, and the match never ends.
+## This is for matches the AI plays against itself (watched, or in the
+## checks). While a person is still playing, on either side, no AI gives
+## up: the owner would rather fight an opponent to its last building.
 func _should_concede(w: SimWorld) -> bool:
-	if w.tick_count < CONCEDE_AFTER_TICKS or _buildings.size() > CONCEDE_MAX_BUILDINGS:
+	var me: SimPlayer = w.players[player_id]
+	for p: SimPlayer in w.players:
+		if not p.is_ai and not p.defeated:
+			_hopeless_since = -1
+			return false
+	if w.tick_count - _income_mark >= STARVED_WINDOW_TICKS:
+		_starving = me.stat_salvage_collected - _income_seen < STARVED_INCOME
+		_income_mark = w.tick_count
+		_income_seen = me.stat_salvage_collected
+	if w.tick_count < CONCEDE_AFTER_TICKS:
 		_hopeless_since = -1
 		return false
-	var my_team: int = w.players[player_id].team
+	var few: bool = _buildings.size() <= CONCEDE_MAX_BUILDINGS
+	var starved: bool = _starving and me.salvage < STARVED_BANK and w.tick_count >= STARVED_AFTER_TICKS
+	if not few and not starved:
+		_hopeless_since = -1
+		return false
+	var my_team: int = me.team
 	var best_enemy: int = 0
 	var seen: Dictionary[int, bool] = {}
 	for p: SimPlayer in w.players:
 		if p.defeated:
 			continue
-		if p.team == my_team:
-			if not p.is_ai:
-				_hopeless_since = -1
-				return false
-		elif not seen.has(p.team):
+		if p.team != my_team and not seen.has(p.team):
 			seen[p.team] = true
 			best_enemy = maxi(best_enemy, _strength(w, p.team))
-	if float(_strength(w, my_team)) * CONCEDE_RATIO > float(best_enemy):
+	var mine: float = float(_strength(w, my_team))
+	var beaten: bool = (few and mine * CONCEDE_RATIO <= float(best_enemy)) or (starved and mine * STARVED_RATIO <= float(best_enemy))
+	if not beaten:
 		_hopeless_since = -1
 		return false
 	if _hopeless_since < 0:
@@ -804,6 +828,11 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 	for e: SimEntity in _army:
 		if e.def.ai_role == "support":
 			support += 1
+	# Guns the enemy has built: what they out-range is worth having.
+	var turrets_known: int = 0
+	for b: SimEntity in _enemy_buildings:
+		if b.def.is_armed() and b.constructed and not b.def.is_mine() and not b.def.signal_root:
+			turrets_known += 1
 	var depth: int = 3 if me.salvage > 1000 else 2
 	for b: SimEntity in _buildings:
 		if b.def.produces.is_empty() or not b.linked or b.queue.size() >= depth:
@@ -849,6 +878,9 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 					# opponent with a few aircraft is not answered with a
 					# force that cannot fight what is on the ground.
 					wgt += minf(float(_enemy_air_seen) * 1.2, 3.6)
+				"artillery":
+					# An enemy behind turrets is answered with siege guns.
+					wgt += minf(float(turrets_known) * 0.45, 3.0)
 				"support":
 					if support + _queued(id) >= 2:
 						wgt = 0.0

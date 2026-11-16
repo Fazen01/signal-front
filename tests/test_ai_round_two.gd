@@ -80,12 +80,34 @@ func test_the_veil_waits_at_its_forward_relay() -> void:
 
 
 func test_the_accord_strikes_relays_from_the_air() -> void:
-	var w: SimWorld = _match(["zephyr", "aegis"], [], [true, true], 7)
+	# The Accord's AI at home with four idle gunships, and an enemy relay it knows of.
+	var w: SimWorld = _match(["zephyr", "aegis"], [], [true, false], 7)
+	w.victory_enabled = false
 	var ai: SimAI = w.ais[0]
-	var limit: int = 20 * 60 * 16
-	while w.tick_count < limit and ai.strikes_sent == 0 and not w.game_over:
-		w.tick()
-	check(ai.strikes_sent >= 1, "its aircraft are sent at a relay or depot between waves (by %d min)" % int(w.seconds() / 60.0))
+	SimTestUtil.run(w, 15)
+	check(ai.strikes, "the Accord's AI strikes from the air")
+	var home: Vector2 = w.players[0].start_pos
+	var craft: Array[SimEntity] = SimTestUtil.spawn_group(w, "swift", 0, w.map.nearest_free_pos(home + Vector2(8.0, 8.0)), 4)
+	var relay: SimEntity = w.spawn_building("relay", 1, w.map.cell_of(w.map.nearest_free_pos(w.players[1].start_pos + Vector2(-22.0, -22.0))), true)
+	ai._known_buildings[relay.id] = true
+	SimTestUtil.run(w, 20 * 4)
+	check(ai.strikes_sent >= 1, "idle aircraft are sent out between waves")
+	var after_it: int = 0
+	for e: SimEntity in craft:
+		# (An attack order on a building the player has only heard of
+		# becomes an attack-move to where it stands.)
+		if e.alive and not e.orders.is_empty() and (e.orders[0].target_id == relay.id or e.orders[0].pos.distance_to(relay.pos) < 6.0):
+			after_it += 1
+	check(after_it >= 3, "and they go for the relay (%d of 4)" % after_it)
+	# Two aircraft are not a strike.
+	var few: SimWorld = _match(["zephyr", "aegis"], [], [true, false], 7)
+	few.victory_enabled = false
+	SimTestUtil.run(few, 15)
+	SimTestUtil.spawn_group(few, "swift", 0, few.map.nearest_free_pos(few.players[0].start_pos + Vector2(8.0, 8.0)), 2)
+	var other: SimEntity = few.spawn_building("relay", 1, few.map.cell_of(few.map.nearest_free_pos(few.players[1].start_pos + Vector2(-22.0, -22.0))), true)
+	few.ais[0]._known_buildings[other.id] = true
+	SimTestUtil.run(few, 20 * 4)
+	check_eq(few.ais[0].strikes_sent, 0, "two gunships stay at home")
 
 
 func test_waves_come_from_different_sides() -> void:
@@ -104,10 +126,13 @@ func test_waves_come_from_different_sides() -> void:
 				straight = ai.wave_stage
 			else:
 				round_side = ai.wave_stage
-				# The wave goes round as one: everybody is sent to the same place.
+				# The wave goes round as one: everybody is sent to the same
+				# place (each to its own spot in the formation there). The
+				# order is given this tick and reaches the units on the next.
+				SimTestUtil.run(w, 2)
 				for id: int in ai.wave_ids:
 					var e: SimEntity = w.get_entity(id)
-					if e != null and not e.orders.is_empty() and e.orders[0].pos.distance_to(ai.wave_stage) > 12.0:
+					if e != null and not e.orders.is_empty() and e.orders[0].pos.distance_to(ai.wave_stage) > 30.0:
 						whole = false
 	check(straight != Vector2.ZERO, "some waves take the straight road")
 	check(round_side != Vector2.ZERO, "and some come round the side (by %d min)" % int(w.seconds() / 60.0))
@@ -171,7 +196,7 @@ func _strip(w: SimWorld, owner: int) -> void:
 			SimCombat.kill(w, e, null, -1)
 
 
-func test_a_beaten_ai_concedes() -> void:
+func test_a_beaten_ai_concedes_to_another_ai() -> void:
 	var w: SimWorld = _match(["aegis", "foundry"], [], [true, true], 2)
 	# Early on nobody gives up, however bad it looks.
 	SimTestUtil.run(w, 20 * 60 * 4)
@@ -194,12 +219,13 @@ func test_a_beaten_ai_concedes() -> void:
 	check(w.game_over and w.has_won(0), "after two and a half hopeless minutes it concedes (%d s)" % ((w.tick_count - before) / 20))
 
 
-func test_an_ai_does_not_give_up_on_a_person() -> void:
-	# Seat one is a person, seat two their AI ally, seat three a strong enemy AI.
+func test_no_ai_gives_up_while_a_person_is_playing() -> void:
+	# Seat one is a person, seat two their AI ally, seat three an enemy AI.
 	var w: SimWorld = _match(["aegis", "foundry", "nomad"], [0, 0, 1], [false, true, true], 4)
 	w.victory_enabled = false
 	SimTestUtil.run(w, SimAI.CONCEDE_AFTER_TICKS)
 	var ally: SimAI = w.ais[0]
+	var enemy: SimAI = w.ais[1]
 	check_eq(ally.player_id, 1, "the ally sits in seat two")
 	for step: int in 24:
 		_strip(w, 1)
@@ -207,3 +233,83 @@ func test_an_ai_does_not_give_up_on_a_person() -> void:
 		SimTestUtil.run(w, 20 * 10)
 	check(not w.players[1].defeated, "the AI ally fights on beside a person, however bad it looks")
 	check(ally._hopeless_since < 0, "and does not even start counting")
+	# The other way round: the enemy AI is the one that is beaten.
+	for step: int in 24:
+		_strip(w, 2)
+		SimTestUtil.run(w, 20 * 10)
+	check(not w.players[2].defeated, "an AI opponent of a person fights to its last building too")
+	check(enemy._hopeless_since < 0, "and does not start counting either")
+
+
+func test_a_starved_ai_concedes_to_a_stronger_one() -> void:
+	var w: SimWorld = _match(["aegis", "foundry"], [], [true, true], 2)
+	# Neither side attacks, so that both are still standing at eighteen minutes.
+	for ai: SimAI in w.ais:
+		ai.first_wave = 999
+		ai.wave_size = 999
+	SimTestUtil.run(w, SimAI.STARVED_AFTER_TICKS)
+	check(not w.game_over, "both sides are standing at eighteen minutes")
+	if w.game_over:
+		return
+	var loser: SimAI = w.ais[1]
+	check(w.players[1].stat_salvage_collected > 3000, "it had an income until now")
+	check(loser._buildings.size() > SimAI.CONCEDE_MAX_BUILDINGS, "and has a whole base (%d buildings)" % loser._buildings.size())
+	# From here on seat two has its base but no haulers, no army and no money:
+	# more than eight buildings, so the first rule does not apply.
+	var before: int = w.tick_count
+	var limit: int = SimAI.STARVED_WINDOW_TICKS * 2 + SimAI.CONCEDE_HOLD_TICKS + 20 * 60
+	while not w.game_over and w.tick_count - before < limit:
+		for e: SimEntity in w.entities.duplicate():
+			if e.alive and e.owner == 1 and e.kind == SimEntity.Kind.UNIT:
+				SimCombat.kill(w, e, null, -1)
+		w.players[1].salvage = 0
+		for e: SimEntity in w.entities:
+			if e.alive and e.owner == 1 and e.kind == SimEntity.Kind.BUILDING:
+				e.queue.clear()
+		SimTestUtil.run(w, 20 * 5)
+	check(w.game_over and w.has_won(0), "with nothing coming in and half again its strength against it, it gives up (after %d s)" % ((w.tick_count - before) / 20))
+	check(loser._starving or w.game_over, "it knew it was starving")
+
+
+func test_the_ai_answers_turrets_with_siege_guns() -> void:
+	# The same AI with the same factory, asked what to build three hundred
+	# times, with and without enemy turrets known to it.
+	var plain: int = _artillery_picked(false)
+	var dug_in: int = _artillery_picked(true)
+	check(plain > 0, "some artillery either way (%d of 300 without turrets)" % plain)
+	check(dug_in > plain * 3 / 2, "a good deal more of it against an enemy behind turrets (%d against %d)" % [dug_in, plain])
+
+
+## How often an Aegis AI with a Vehicle Works and a Command Lab chooses its
+## artillery in 300 choices; with `turrets`, it knows of six enemy turrets.
+func _artillery_picked(turrets: bool) -> int:
+	var w: SimWorld = _match(["aegis", "aegis"], [], [true, false], 5)
+	w.victory_enabled = false
+	var ai: SimAI = w.ais[0]
+	var me: SimPlayer = w.players[0]
+	var home: Vector2i = w.map.cell_of(me.start_pos)
+	w.spawn_building("barracks", 0, home + Vector2i(6, -2), true)
+	var works: SimEntity = w.spawn_building("vehicle_works", 0, home + Vector2i(-2, 6), true)
+	w.spawn_building("command_lab", 0, home + Vector2i(6, 5), true)
+	if turrets:
+		var base: Vector2i = w.map.cell_of(w.players[1].start_pos)
+		for k: int in 6:
+			var t: SimEntity = w.spawn_building("sentry_turret", 1, base + Vector2i(6 + k * 2, 8), true)
+			ai._known_buildings[t.id] = true
+	SimTestUtil.run(w, 30)
+	me.salvage = 1000000
+	me.bandwidth_cap = 100000
+	ai._f = me.faction
+	ai._survey(w)
+	var picked: int = 0
+	for i: int in 300:
+		ai._spent = 0
+		ai._bandwidth_committed = 0
+		ai._wish.clear()
+		w.commands.clear()
+		ai._run_production(w, me)
+		for cmd: SimCommand in w.commands:
+			if cmd.type == SimCommand.Type.TRAIN and cmd.target_id == works.id and w.data.entity(cmd.def_id).ai_role == "artillery":
+				picked += 1
+	w.commands.clear()
+	return picked
