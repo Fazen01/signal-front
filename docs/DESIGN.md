@@ -189,6 +189,17 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
   attack relays whose loss would unlink the most enemy coverage.
 - Easy / Normal / Hard differ in reaction time, build efficiency and
   aggression — not in cheating income.
+- Normal and Hard AIs play to their faction's rule (read from the faction's
+  data, not from its name): cloakers wait at the forward relay, bounty
+  hunters raid, menders retreat early, air powers strike relays between
+  waves. Every other big wave gathers round one side of its target; waves
+  are never split.
+- Allied AIs defend an ally's headquarters and share attack targets.
+- An AI that is plainly beaten concedes (`SimAI._should_concede`), so that
+  a match does not hang on a headquarters nobody can finish. An AI with a
+  person on its team never concedes.
+- Builders mend a building under fire at a fifth of the usual speed
+  (`repair_under_fire_mult`), and give up on a building that has gone Dark.
 
 ### Presentation
 

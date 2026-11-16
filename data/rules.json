@@ -16,6 +16,7 @@
 	"harvest_seconds": 6.0,
 	"unload_seconds": 1.0,
 	"repair_rate": 0.04,
+	"repair_under_fire_mult": 0.2,
 	"uplink_income_per_second": 3,
 	"emergency_income_per_second": 4,
 	"uplink_capture_seconds": 8.0,

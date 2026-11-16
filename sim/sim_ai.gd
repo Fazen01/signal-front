@@ -12,6 +12,13 @@ const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long w
 const THREAT_RANGE: float = 22.0
 const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
 const REINFORCE_TICKS: int = 20 * 240  ## a wave out this long no longer holds back the next one
+const FLANK_MIN_WAVE: int = 10  ## smaller waves take the straight road
+const FLANK_ANGLE: float = 0.95  ## how far round the target a flanking wave gathers (radians)
+const STRIKE_MIN_CRAFT: int = 3  ## aircraft needed for a strike between waves
+const CONCEDE_AFTER_TICKS: int = 20 * 60 * 14  ## nobody gives up in the first fourteen minutes
+const CONCEDE_HOLD_TICKS: int = 20 * 150  ## hopeless for this long without a break
+const CONCEDE_RATIO: float = 2.5  ## the enemy has this many times our strength
+const CONCEDE_MAX_BUILDINGS: int = 8  ## and we are down to this many buildings
 ## How an AI likes to fight. Normal and Hard opponents draw one from the
 ## seed, so two matches against the same difficulty need not feel alike.
 const DOCTRINES: Array[String] = ["balanced", "aggressor", "fortifier", "raider"]
@@ -39,6 +46,13 @@ var retreats: bool = true  ## pulls a beaten wave back instead of losing it to t
 var max_retreats: int = 2  ## how often in one match; after that the AI commits
 var scouts: bool = true  ## keeps one unit out looking for the enemy's buildings
 var raids: bool = false  ## raider: goes for depots and relays before anything else
+var faction_tricks: bool = true  ## plays to its faction's own rule (Normal and Hard)
+var flanks: bool = true  ## every other big wave comes in from the side when the ground allows it
+var helps_allies: bool = true  ## defends an ally's headquarters and joins an ally's attack
+var concedes: bool = true  ## gives up a match that is plainly lost instead of dragging it out
+var ambushes: bool = false  ## waits hidden at its forward relay (factions that cloak inside coverage)
+var strikes: bool = false  ## sends idle aircraft at the enemy's relays and depots between waves
+var retreat_share: float = 0.4  ## a wave worn down to this share of its strength may pull back
 var max_turrets: int = 5
 var turret_salvage: int = 1500  ## spare salvage above which more turrets go up
 
@@ -48,6 +62,11 @@ var wave_ids: Array[int] = []
 var wave_target: int = 0
 var wave_target_pos: Vector2 = Vector2.ZERO
 var wave_stage: Vector2 = Vector2.ZERO
+var wave_side: int = 0  ## 0: this wave comes straight in; 1 or -1: round one side of the target
+var flanks_sent: int = 0
+var strikes_sent: int = 0
+var ally_rescues: int = 0  ## times it sent its army to an ally's headquarters
+var _rescuing_tick: int = -1
 var wave_tick: int = 0
 var wave_size: int = 7
 var waves_sent: int = 0
@@ -70,6 +89,10 @@ var _buildings: Array[SimEntity] = []
 var _sites: Array[SimEntity] = []
 var _enemies: Array[SimEntity] = []
 var _enemy_buildings: Array[SimEntity] = []
+var _ally_hqs: Array[SimEntity] = []
+var _ally_army: Array[SimEntity] = []  ## armed units of allies that are played by a person
+var _adapted: bool = false
+var _hopeless_since: int = -1  ## tick at which its position last became hopeless, or -1
 var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have seen
 var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
 var _wish: Dictionary[int, String] = {}  ## building id -> unit it is saving up for
@@ -140,8 +163,14 @@ func update(w: SimWorld) -> void:
 	if me.defeated:
 		return
 	_f = me.faction
+	if not _adapted:
+		_adapt(w)
 	_survey(w)
 	if _hq == null:
+		return
+	if concedes and _should_concede(w):
+		w.alert(player_id, "%s concedes" % me.name, _hq.pos)
+		w.push_command(SimCommand.surrender(player_id))
 		return
 	_spent = 0
 	_bandwidth_committed = 0
@@ -154,6 +183,76 @@ func update(w: SimWorld) -> void:
 	_run_military(w)
 	_run_hijackers(w)
 	_run_directives(w, me)
+
+
+## Once, on the first think: a Normal or Hard AI plays to the rule its
+## faction has. Nothing here names a faction; it reads what the faction can do.
+func _adapt(w: SimWorld) -> void:
+	_adapted = true
+	if level == 0 or not faction_tricks:
+		return
+	# Hidden while standing still inside its own coverage: wait for the
+	# enemy at the forward relay instead of at the headquarters.
+	if _f.linked_cloak:
+		ambushes = true
+	# Paid for what it destroys: go where the value is and the guns are not.
+	if _f.kill_bounty > 0.0:
+		raids = true
+	# Grows back when left alone: pull back sooner and more often.
+	if _f.regrowth > 0.0:
+		max_retreats += 2
+		retreat_share = 0.6
+	# A real air arm: use it on the enemy's relays between waves.
+	var craft: int = 0
+	for def: EntityDef in w.data.entities.values():
+		if def.faction == _f.id and not def.is_building and def.is_air() and def.is_armed() and def.ai_weight > 0.0:
+			craft += 1
+	strikes = craft >= 2
+
+
+## What a side has left to fight with: its army counted twice over, and
+## its buildings other than headquarters.
+func _strength(w: SimWorld, team: int) -> int:
+	var total: int = 0
+	for e: SimEntity in w.entities:
+		if not e.alive or e.def == null or e.owner < 0 or w.players[e.owner].team != team:
+			continue
+		if e.kind == SimEntity.Kind.UNIT:
+			total += e.def.cost * (2 if e.def.is_armed() else 1)
+		elif e.kind == SimEntity.Kind.BUILDING and e.constructed and not e.def.signal_root:
+			total += e.def.cost
+	return total
+
+
+## True once the match has plainly been lost for a while: late in the game,
+## reduced to a handful of buildings, with the strongest enemy side at two
+## and a half times our side's strength for two and a half minutes on end.
+## A beaten AI otherwise holds its headquarters for as long as it has a
+## barrage to call, and the match never ends. An AI with a person on its
+## team never gives up: that is the person's decision.
+func _should_concede(w: SimWorld) -> bool:
+	if w.tick_count < CONCEDE_AFTER_TICKS or _buildings.size() > CONCEDE_MAX_BUILDINGS:
+		_hopeless_since = -1
+		return false
+	var my_team: int = w.players[player_id].team
+	var best_enemy: int = 0
+	var seen: Dictionary[int, bool] = {}
+	for p: SimPlayer in w.players:
+		if p.defeated:
+			continue
+		if p.team == my_team:
+			if not p.is_ai:
+				_hopeless_since = -1
+				return false
+		elif not seen.has(p.team):
+			seen[p.team] = true
+			best_enemy = maxi(best_enemy, _strength(w, p.team))
+	if float(_strength(w, my_team)) * CONCEDE_RATIO > float(best_enemy):
+		_hopeless_since = -1
+		return false
+	if _hopeless_since < 0:
+		_hopeless_since = w.tick_count
+	return w.tick_count - _hopeless_since >= CONCEDE_HOLD_TICKS
 
 
 # ------------------------------------------------------------------ survey
@@ -169,10 +268,17 @@ func _survey(w: SimWorld) -> void:
 	_sites.clear()
 	_enemies.clear()
 	_enemy_buildings.clear()
+	_ally_hqs.clear()
+	_ally_army.clear()
 	for e: SimEntity in w.entities:
 		if not e.alive or e.def == null:
 			continue
-		if e.owner == player_id:
+		if w.are_allies(player_id, e.owner):
+			if e.kind == SimEntity.Kind.BUILDING and e.def.signal_root and e.constructed:
+				_ally_hqs.append(e)
+			elif e.kind == SimEntity.Kind.UNIT and e.def.is_armed() and not w.players[e.owner].is_ai:
+				_ally_army.append(e)
+		elif e.owner == player_id:
 			if e.kind == SimEntity.Kind.BUILDING:
 				if e.constructed:
 					_buildings.append(e)
@@ -814,6 +920,12 @@ func _base_threat(w: SimWorld) -> SimEntity:
 func _run_military(w: SimWorld) -> void:
 	var toward_enemy: Vector2 = (_enemy_hq_pos(w) - _hq.pos).normalized()
 	var rally: Vector2 = w.map.nearest_free_pos(_hq.pos + toward_enemy * (_hq.radius + 12.0))
+	if ambushes:
+		# Lie in wait where the enemy has to come past, inside our own
+		# coverage, where nothing that stands still can be seen.
+		var forward: SimEntity = _forward_relay(w)
+		if forward != null and forward.pos.distance_to(_hq.pos) > 14.0:
+			rally = w.map.nearest_free_pos(forward.pos + toward_enemy * 3.0)
 
 	# Drop dead units from the wave.
 	var alive_wave: Array[int] = []
@@ -844,13 +956,28 @@ func _run_military(w: SimWorld) -> void:
 			w.push_command(SimCommand.attack_move(player_id, back, threat.pos))
 			_end_wave(w)
 	else:
-		# Idle units gather at the rally point.
-		var strays: Array[SimEntity] = []
-		for e: SimEntity in home:
-			if e.orders.is_empty() and e.pos.distance_to(rally) > 9.0:
-				strays.append(e)
-		if not strays.is_empty():
-			w.push_command(SimCommand.attack_move(player_id, _ids(strays), rally))
+		var in_need: SimEntity = _ally_threat() if helps_allies else null
+		if in_need != null and home.size() >= 4:
+			# An ally's headquarters is under attack and ours is not: go.
+			var rescuers: Array[SimEntity] = []
+			for e: SimEntity in home:
+				if e.orders.is_empty() or e.pos.distance_to(in_need.pos) > 30.0:
+					rescuers.append(e)
+			if not rescuers.is_empty():
+				if _rescuing_tick < 0 or w.tick_count - _rescuing_tick > 20 * 30:
+					ally_rescues += 1
+				_rescuing_tick = w.tick_count
+				w.push_command(SimCommand.attack_move(player_id, _ids(rescuers), in_need.pos))
+		else:
+			# Idle units gather at the rally point.
+			var strays: Array[SimEntity] = []
+			for e: SimEntity in home:
+				if e.orders.is_empty() and e.pos.distance_to(rally) > 9.0:
+					strays.append(e)
+			if not strays.is_empty():
+				w.push_command(SimCommand.attack_move(player_id, _ids(strays), rally))
+			if strikes:
+				_run_strike(w, home)
 
 	match wave_state:
 		Wave.NONE:
@@ -861,6 +988,9 @@ func _run_military(w: SimWorld) -> void:
 			if not ready and since >= STALL_TICKS and home.size() >= maxi(4, wave_size / 4):
 				ready = true
 				wave_size = maxi(first_wave, home.size())
+			# An ally is attacking: go with half a wave rather than wait for a whole one.
+			if not ready and helps_allies and since >= wave_cooldown_ticks / 2 and home.size() >= maxi(4, wave_size / 2) and _ally_target(w) != null:
+				ready = true
 			if threat == null and ready:
 				_launch_wave(w, home)
 		Wave.STAGING:
@@ -903,7 +1033,7 @@ func _should_retreat(w: SimWorld) -> bool:
 		mine += e.def.cost
 		centre += e.pos
 	centre /= float(wave_ids.size())
-	if mine * 5 > wave_launch_power * 2:
+	if float(mine) > float(wave_launch_power) * retreat_share:
 		return false
 	var theirs: int = 0
 	for e: SimEntity in _enemies:
@@ -1020,7 +1150,34 @@ func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 		wave_launch_power += e.def.cost
 	var back: Vector2 = (_hq.pos - wave_target_pos).normalized()
 	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(wave_target_pos + back * STAGE_DISTANCE))
+	wave_side = 0
+	# Every other big wave comes round the side instead: a defence built
+	# across the straight road does not cover everything. The wave stays
+	# whole; an attack split in two breaks on defences that one would carry.
+	if flanks and level > 0 and units.size() >= FLANK_MIN_WAVE and waves_sent % 2 == 0 and w.tick_count < LATE_GAME_TICKS:
+		_plan_flank(w, back)
 	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), wave_stage))
+
+
+## Moves the gathering place round to one side of the target, alternating
+## sides, unless the way there is blocked or much longer than the way
+## straight in.
+func _plan_flank(w: SimWorld, back: Vector2) -> void:
+	var side: int = 1 if flanks_sent % 2 == 0 else -1
+	for attempt: int in 2:
+		var spot: Vector2 = w.map.clamp_to_map(wave_target_pos + back.rotated(float(side) * FLANK_ANGLE) * STAGE_DISTANCE)
+		spot = w.map.nearest_free_pos(spot)
+		var direct: float = _hq.pos.distance_to(spot)
+		var path: PackedVector2Array = w.map.find_path(_hq.pos, spot, true)
+		var along: float = 0.0
+		for i: int in range(1, path.size()):
+			along += path[i - 1].distance_to(path[i])
+		if path.size() >= 2 and along <= direct * 1.5 and spot.distance_to(wave_stage) > 12.0:
+			wave_stage = spot
+			wave_side = side
+			flanks_sent += 1
+			return
+		side = -side
 
 
 func _end_wave(w: SimWorld) -> void:
@@ -1132,6 +1289,10 @@ func _run_directives(w: SimWorld, me: SimPlayer) -> void:
 func _pick_target(w: SimWorld) -> SimEntity:
 	if _enemy_buildings.is_empty():
 		return null
+	if helps_allies:
+		var joined: SimEntity = _ally_target(w)
+		if joined != null:
+			return joined
 	var from: Vector2 = _hq.pos
 	if not wave_ids.is_empty():
 		var lead: SimEntity = w.get_entity(wave_ids[0])
@@ -1158,6 +1319,94 @@ func _pick_target(w: SimWorld) -> SimEntity:
 			best_score = score
 			best = b
 	return best
+
+
+## What an ally is attacking, if any is: an allied AI's wave target, or the
+## enemy building nearest to where an allied person's army is fighting.
+func _ally_target(w: SimWorld) -> SimEntity:
+	for other: SimAI in w.ais:
+		if other == self or not w.are_allies(player_id, other.player_id) or other.wave_state == Wave.NONE:
+			continue
+		var theirs: SimEntity = w.get_entity(other.wave_target)
+		if theirs != null and theirs.alive and w.are_enemies(player_id, theirs.owner):
+			return theirs
+	if _ally_army.size() < 5:
+		return null
+	# Units of an allied person that are well away from that person's base.
+	var front: Vector2 = Vector2.ZERO
+	var away: int = 0
+	for e: SimEntity in _ally_army:
+		if e.pos.distance_to(w.players[e.owner].start_pos) > 45.0:
+			front += e.pos
+			away += 1
+	if away < 5:
+		return null
+	front /= float(away)
+	var best: SimEntity = null
+	var best_d: float = 30.0
+	for b: SimEntity in _enemy_buildings:
+		if b.def.is_mine():
+			continue
+		var d: float = b.pos.distance_to(front)
+		if d < best_d:
+			best_d = d
+			best = b
+	return best
+
+
+## An enemy near an ally's headquarters when that headquarters is under a
+## real attack (three or more armed enemies close by), or null.
+func _ally_threat() -> SimEntity:
+	for hq: SimEntity in _ally_hqs:
+		var near: SimEntity = null
+		var near_d: float = INF
+		var count: int = 0
+		for e: SimEntity in _enemies:
+			if not e.def.is_armed():
+				continue
+			var d: float = e.pos.distance_to(hq.pos)
+			if d < 28.0:
+				count += 1
+				if d < near_d:
+					near_d = d
+					near = e
+		if count >= 3:
+			return near
+	return null
+
+
+## Between waves, idle aircraft go for the enemy relay whose loss would cut
+## off the most, or failing that a depot: buildings that seldom shoot back.
+func _run_strike(w: SimWorld, home: Array[SimEntity]) -> void:
+	var craft: Array[SimEntity] = []
+	for e: SimEntity in home:
+		if e.def.is_air() and e.def.is_armed() and e.orders.is_empty():
+			craft.append(e)
+	if craft.size() < STRIKE_MIN_CRAFT:
+		return
+	var best: SimEntity = null
+	var best_score: float = -INF
+	for b: SimEntity in _enemy_buildings:
+		if b.def.signal_root or b.def.is_mine() or b.def.is_armed():
+			continue
+		var score: float = -_hq.pos.distance_to(b.pos) * 0.03
+		if b.def.signal_radius > 0.0 and b.constructed:
+			score += 2.0 + 2.5 * float(_downstream_count(w, b))
+		elif b.def.depot:
+			score += 2.5
+		else:
+			continue
+		# Leave alone what is ringed with guns that reach the sky.
+		for g: SimEntity in _enemy_buildings:
+			if g.def.is_armed() and g.constructed and g.pos.distance_to(b.pos) < 12.0:
+				score -= 1.5
+		if score > best_score:
+			best_score = score
+			best = b
+	if best == null:
+		return
+	strikes_sent += 1
+	w.push_command(SimCommand.attack(player_id, _ids(craft), best.id))
 
 
 ## How many other enemy emitters would lose their link if `relay` died.

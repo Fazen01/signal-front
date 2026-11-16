@@ -290,3 +290,55 @@ func test_emergency_trickle_when_no_hauler_can_be_afforded() -> void:
 	me.salvage = cost
 	SimTestUtil.run(w, 20 * 5)
 	check_eq(me.salvage, cost, "trickle stops once a hauler is affordable")
+
+
+func test_a_building_under_fire_is_repaired_slowly() -> void:
+	var config: MatchConfig = MatchConfig.skirmish(5)
+	config.is_ai = [false, false]
+	var w: SimWorld = SimSetup.create_match(config)
+	var hq: SimEntity = null
+	var builders: Array[SimEntity] = []
+	for e: SimEntity in w.entities:
+		if e.alive and e.owner == 0 and e.def != null:
+			if e.def.signal_root:
+				hq = e
+			elif e.def.builder:
+				builders.append(e)
+	check(hq != null and builders.size() == 2, "a headquarters and two builders")
+	# Left in peace: two builders mend it quickly.
+	hq.hp = hq.max_hp * 0.3
+	w.push_command(SimCommand.repair(0, SimTestUtil.ids_of(builders), hq.id))
+	SimTestUtil.run(w, 20 * 6)
+	var start: float = hq.hp
+	SimTestUtil.run(w, 20 * 4)
+	var in_peace: float = hq.hp - start
+	check(in_peace > hq.max_hp * 0.15, "in peace the builders mend it fast (%.0f in four seconds)" % in_peace)
+	# Under fire: the same work goes a fifth as fast.
+	hq.hp = hq.max_hp * 0.3
+	start = hq.hp
+	for i: int in 20 * 4:
+		hq.last_hit_tick = w.tick_count
+		w.tick()
+	var under_fire: float = hq.hp - start
+	check(under_fire > 0.0, "under fire they still mend something (%.0f)" % under_fire)
+	check(under_fire < in_peace * 0.3, "but far less (%.0f against %.0f)" % [under_fire, in_peace])
+
+
+func test_builders_give_up_on_a_building_that_went_dark() -> void:
+	var config: MatchConfig = MatchConfig.skirmish(5)
+	config.is_ai = [false, false]
+	var w: SimWorld = SimSetup.create_match(config)
+	var builder: SimEntity = null
+	for e: SimEntity in w.entities:
+		if e.alive and e.owner == 0 and e.def != null and e.def.builder:
+			builder = e
+	# A turret far outside the grid: built there by a relay that has since died.
+	var far: Vector2i = w.map.cell_of(w.map.nearest_free_pos(w.players[0].start_pos + Vector2(44.0, 30.0)))
+	var turret: SimEntity = w.spawn_building("sentry_turret", 0, far, true)
+	SimSignal.recompute(w)
+	check(not turret.linked, "the turret stands outside the grid")
+	turret.hp = turret.max_hp * 0.5
+	w.push_command(SimCommand.repair(0, PackedInt32Array([builder.id]), turret.id))
+	SimTestUtil.run(w, 20 * 3)
+	check(builder.orders.is_empty(), "a builder sent to mend it gives the job up")
+	check(is_equal_approx(turret.hp, turret.max_hp * 0.5), "and it is not mended")

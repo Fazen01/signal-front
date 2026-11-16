@@ -229,6 +229,17 @@ for relays and depots). They scout, they counter what you field, they cut
 your relay chain where it hurts most, and a couple of times a match they
 will pull a beaten army back instead of feeding it to you.
 
+They also play to their faction: the Umbral Veil's army waits unseen at its
+forward relay, the Crimson Tally raids where the bounties are, the
+Brackenfold pulls back early to grow whole again, and the Zephyr Accord
+sends its aircraft at your relays and depots between attacks. Every other
+big attack comes round the side instead of down the straight road. An AI
+on your team answers an attack on your headquarters and joins your attacks
+(or those of another AI ally). An AI opponent that is plainly beaten (down
+to a few buildings, outmatched two and a half to one for two and a half
+minutes, no earlier than fourteen minutes in) concedes; an AI on your team
+never does.
+
 ## Maps
 
 A seeded, symmetric generator (176 × 176 for two players, a compact 128 × 128

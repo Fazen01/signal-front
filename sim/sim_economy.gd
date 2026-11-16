@@ -4,6 +4,7 @@ extends RefCounted
 
 enum Job { TO_RESOURCE, LOADING, TO_DEPOT, UNLOADING }
 
+const UNDER_FIRE_TICKS: int = 60  ## a building hit in the last three seconds is under fire
 const RESOURCE_SEARCH: float = 30.0  ## how far a hauler looks for its next source
 const SQUARE: float = 1.45  ## footprint half-size to corner distance, with slack
 
@@ -434,7 +435,9 @@ static func _update_harvest(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 
 static func _update_repair(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 	var b: SimEntity = w.get_entity(o.target_id)
-	if b == null or b.owner != e.owner or (b.constructed and b.hp >= b.max_hp):
+	# A finished building that has gone Dark cannot be mended (it needs the
+	# grid), so the job is over; before, builders stood beside it for ever.
+	if b == null or b.owner != e.owner or (b.constructed and (b.hp >= b.max_hp or not b.linked)):
 		SimMovement.stop(e)
 		SimOrders.finish_order(e)
 		return
@@ -604,7 +607,12 @@ static func _update_building(w: SimWorld, b: SimEntity) -> void:
 			_check_mine(w, b)
 		return
 	if workers > 0 and b.hp < b.max_hp and b.linked:
-		b.hp = minf(b.max_hp, b.hp + b.max_hp * w.data.repair_rate * sqrt(float(workers)) * SimWorld.DT)
+		# Patching a wall while it is being shot at is slow work: without
+		# this, two builders could hold a headquarters against an army.
+		var rate: float = w.data.repair_rate
+		if w.tick_count - b.last_hit_tick < UNDER_FIRE_TICKS:
+			rate *= w.data.repair_under_fire_mult
+		b.hp = minf(b.max_hp, b.hp + b.max_hp * rate * sqrt(float(workers)) * SimWorld.DT)
 	if b.queue.is_empty() or b.owner < 0:
 		return
 	if not b.linked:

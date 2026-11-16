@@ -274,13 +274,16 @@ map generation itself to be improved.
 
 ## M31 — A better AI, round two (owner request)
 
-- [ ] Attacks from more than one direction when the map allows it
-- [ ] Guards its haulers and its relay chain, and rebuilds what it loses
-- [ ] Works with an allied player or AI (M29): defends an ally's base,
+- [x] Attacks from more than one direction when the map allows it (every
+      other big wave comes round the side; a wave is never split, see log)
+- [x] Guards its haulers and its relay chain, and rebuilds what it loses
+- [x] Works with an allied player or AI (M29): defends an ally's base,
       joins an ally's attack
-- [ ] Uses each faction's own trick on purpose (cloaked ambushes for the
+- [x] Uses each faction's own trick on purpose (cloaked ambushes for the
       Veil, air strikes on relays for the Accord, raids that pay for the
-      Tally)
+      Tally, early retreats for the Brackenfold)
+- [x] Matches end: a beaten AI concedes, and a headquarters cannot be
+      out-repaired while it is under fire (found while testing the above)
 
 ## M32 — Stronger faction design (owner request)
 
@@ -747,6 +750,48 @@ restarted three times; the background tuner died with it).**
   red fins, horns, bright eyes and jointed legs. Lesson for M34: a faction
   has to contrast with the ground it stands on, and crisp faceted shapes
   read better than balls at this size.
+
+- **M31: the AI, round two.** What went in:
+  - *Faction tricks*, read from the faction's data on the AI's first think
+    (`_adapt`), Normal and Hard only: `linked_cloak` -> the army waits at
+    the forward relay, unseen; `kill_bounty` -> raids; `regrowth` -> pulls
+    back at 60% strength instead of 40%, two more times a match; two or
+    more kinds of armed aircraft -> between waves, three or more idle
+    aircraft go for the relay whose loss cuts off the most, or a depot.
+  - *Allies*: an AI sends its home army to an ally's headquarters when
+    three or more armed enemies are within 28 of it and its own base is
+    quiet; it takes an allied AI's wave target as its own, or the enemy
+    building nearest to where an allied person's army is fighting, and
+    sets out with half a wave when an ally is already attacking.
+  - *Direction*: tried first as a split (the quicker third of a wave
+    gathered at a second point 55 degrees round the target). It made three
+    of eight test matches stall: an attack split in two breaks on defences
+    one would carry, and then nobody can finish. Dropped. Now every other
+    wave of ten or more gathers, whole, round one side (alternating sides,
+    only when the way round is no more than half again as long), and not
+    after 22 minutes, when waves go straight for the headquarters.
+  - *Rebuilding and guarding* were already there by design (the build
+    order refills what is missing; attacks on haulers and on any building
+    call the home army). The test for rebuilding found a bug instead:
+    builders told to mend a building that has since gone Dark stood beside
+    it for ever (repairs need the grid), which froze an AI's construction
+    for three minutes. Such a repair order now ends.
+- **Why matches would not end, found while testing M31.** Two causes, both
+  older than today: (1) builders mend 4% of a building's health a second
+  each (root of two for two builders), so two builders restored a
+  6000-point headquarters by about 340 a second *while it was being shot*:
+  more than a late-game wave of infantry can deal. Now a building hit in
+  the last three seconds is mended at a fifth of that
+  (`repair_under_fire_mult` in `data/rules.json`). (2) Once the map's
+  salvage is gone both sides field infantry from the emergency trickle,
+  and a beaten AI holds its headquarters with a Shell Barrage every 90
+  seconds on the wave that gathers in front of it. Decision: an AI that is
+  plainly beaten concedes (not before 14 minutes; eight buildings or
+  fewer; the strongest enemy side at 2.5 times its side's strength, army
+  counted double, for 150 seconds on end; never when a person is on its
+  team). This is a rule of the AI, not of the game: a person can still
+  fight to the last building. All eight matches I use for testing now end
+  between 9 and 21 minutes.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
