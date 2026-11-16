@@ -2,18 +2,24 @@ class_name TerrainView
 extends Node3D
 ## Builds the battlefield visuals from a SimMap: a smooth-shaded ground whose
 ## grass, forest floor, rock and shore are blended per pixel, water that
-## follows the lie of the land, and scattered trees, bushes, boulders and
-## grass. All geometry and textures are generated here; nothing is loaded
-## from disk.
+## follows the lie of the land, tracks worn along the routes between bases,
+## scattered trees, bushes, boulders, grass, flowers and reeds, and a shaded
+## border of the same country beyond the playable edge. All geometry and
+## textures are generated here; nothing is loaded from disk.
 
 const CHUNK: int = 24  ## scatter is split into chunks of this many cells so off-screen parts are culled
 const NOISE_SIZE: int = 256
+const BORDER: int = 16  ## cells of dressed, unplayable ground drawn around the map
+const MARK_SCALE: int = 2  ## texels per cell in the ground-marks texture
 
 const GROUND_SHADER: String = """
 shader_type spatial;
 render_mode cull_disabled;
 
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
+uniform sampler2D mark_tex : filter_linear, repeat_disable, hint_default_black;
+uniform sampler2D fog_tex : filter_linear, repeat_disable, hint_default_transparent;
+uniform vec2 map_size = vec2(1.0, 1.0);
 uniform vec3 lush : source_color = vec3(0.26, 0.39, 0.19);
 uniform vec3 dry : source_color = vec3(0.40, 0.44, 0.24);
 uniform vec3 soil : source_color = vec3(0.38, 0.33, 0.24);
@@ -50,6 +56,10 @@ void fragment() {
 	stone *= 0.94 + 0.08 * sin(wpos.y * 7.0 + mid.r * 9.0);
 	vec3 sand = mix(sand_dark, sand_light, fine.r);
 
+	// Worn ground: R = vehicle tracks, G = stains under scrap, B = the
+	// packed earth of a base. Looked up a little off-position so that tracks
+	// wander instead of running ruler-straight.
+	vec3 mark = texture(mark_tex, (p + (mid.rg - 0.5) * 5.0 + (fine.rg - 0.5) * 0.5) / map_size).rgb;
 	// Terrain weights: UV = (forest, rock), UV2.x = water.
 	float forest = smoothstep(0.30, 0.56, UV.x + wob);
 	float rock = smoothstep(0.22, 0.46, UV.y + wob * 0.8);
@@ -62,9 +72,26 @@ void fragment() {
 	col = mix(col, stone, rock);
 	float steep = smoothstep(0.90, 0.72, up) * (1.0 - under);
 	col = mix(col, stone * 0.8, steep);
+	float worn = max(smoothstep(0.16, 0.58, mark.r + wob * 0.12), smoothstep(0.25, 0.75, mark.b + wob * 0.35) * 0.8);
+	worn *= (1.0 - under) * (1.0 - rock * 0.8);
+	vec3 track = soil * mix(0.82, 1.12, fine.b);
+	// Twin ruts either side of the middle of a track.
+	track *= 1.0 - 0.22 * (1.0 - smoothstep(0.0, 0.07, abs(mark.r - 0.5)));
+	col = mix(col, track, worn);
+	col *= 1.0 - 0.42 * smoothstep(0.15, 0.8, mark.g + wob * 0.2);
 	col *= 0.90 + 0.20 * grit;
 	// Fine speckle so the ground still has grain with the camera right down.
 	col *= 0.93 + 0.14 * texture(noise_tex, p * 2.3).b;
+	// Cloud shadows drifting over the land.
+	float cloud = texture(noise_tex, p * 0.0032 + TIME * vec2(0.0042, 0.0023)).g;
+	col *= mix(0.78, 1.04, smoothstep(0.38, 0.62, cloud));
+	// Ground beyond the edge of the battlefield falls away into shade, and
+	// is as dark as the fog of war on the map edge beside it (the fog
+	// overlay itself only covers the map).
+	if (UV2.y > 0.0) {
+		float fog = texture(fog_tex, clamp(p / map_size, vec2(0.0), vec2(1.0))).a;
+		col *= (1.0 - UV2.y * 0.88) * clamp(1.0 - fog * 1.08, 0.09, 1.0);
+	}
 	ALBEDO = col;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.12;
@@ -117,6 +144,7 @@ shader_type spatial;
 render_mode %s;
 
 uniform sampler2D fog_tex : filter_linear, repeat_disable, hint_default_transparent;
+uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform vec2 map_size = vec2(1.0, 1.0);
 uniform float sway = 0.0;
 uniform float lift = 0.0;
@@ -126,6 +154,9 @@ void vertex() {
 	vec3 origin = MODEL_MATRIX[3].xyz;
 	float fog = textureLod(fog_tex, origin.xz / map_size, 0.0).a;
 	dim = clamp(1.0 - fog * 1.08, 0.09, 1.0);
+	// The same drifting cloud shadows as the ground.
+	float cloud = textureLod(noise_tex, origin.xz * 0.0032 + TIME * vec2(0.0042, 0.0023), 0.0).g;
+	dim *= mix(0.78, 1.04, smoothstep(0.38, 0.62, cloud));
 	float k = VERTEX.y * sway;
 	VERTEX.x += sin(TIME * 1.3 + origin.x * 0.35 + origin.z * 0.27) * k;
 	VERTEX.z += cos(TIME * 1.1 + origin.x * 0.21 - origin.z * 0.33) * k;
@@ -149,17 +180,24 @@ var _forest: PackedFloat32Array = PackedFloat32Array()  ## per corner: share of 
 var _rock: PackedFloat32Array = PackedFloat32Array()
 var _water: PackedFloat32Array = PackedFloat32Array()
 var _prop_mats: Array[ShaderMaterial] = []
+var _marks: PackedByteArray = PackedByteArray()  ## RGB per texel: tracks, stains, clearings
+var _mark_w: int = 0
+var _mark_h: int = 0
+var _mark_tex: ImageTexture = null
+var _ground_mat: ShaderMaterial = null
 
 
 func build(sim_map: SimMap, seed_value: int) -> void:
 	map = sim_map
 	_rng = SimRng.new(seed_value + 4711)
 	_corner_weights()
+	_build_marks()
 	_build_ground()
 	_build_water()
 	_build_trees()
 	_build_rocks()
 	_build_grass()
+	_build_litter()
 	_build_apron()
 
 
@@ -168,6 +206,8 @@ func build(sim_map: SimMap, seed_value: int) -> void:
 func set_fog_texture(tex: Texture2D) -> void:
 	for m: ShaderMaterial in _prop_mats:
 		m.set_shader_parameter("fog_tex", tex)
+	if _ground_mat != null:
+		_ground_mat.set_shader_parameter("fog_tex", tex)
 
 
 ## Three unrelated tiling noise fields packed into the channels of one texture.
@@ -227,28 +267,127 @@ func _corner(x: int, y: int) -> Vector3:
 	return Vector3(float(x) * SimMap.CELL, map.heights[y * (map.w + 1) + x], float(y) * SimMap.CELL)
 
 
+## Corner height. Past the edge of the map the ground carries on from the
+## nearest edge corner and sinks away with distance.
 func _height(x: int, y: int) -> float:
-	return map.heights[clampi(y, 0, map.h) * (map.w + 1) + clampi(x, 0, map.w)]
+	var edge: float = map.heights[clampi(y, 0, map.h) * (map.w + 1) + clampi(x, 0, map.w)]
+	var out: float = _outside(x, y)
+	if out <= 0.0:
+		return edge
+	return lerpf(edge, -2.4, out * out)
+
+
+## 0 on the map, rising to 1 at the far side of the border.
+func _outside(x: int, y: int) -> float:
+	var d: int = maxi(maxi(-x, x - map.w), maxi(-y, y - map.h))
+	return clampf(float(d) / float(BORDER), 0.0, 1.0)
+
+
+## Ground height at a world position, on the map or in the border.
+func _ground_y(p: Vector2) -> float:
+	var size: Vector2 = map.world_size()
+	if p.x >= 0.0 and p.y >= 0.0 and p.x <= size.x and p.y <= size.y:
+		return map.height_at(p)
+	return _height(roundi(p.x / SimMap.CELL), roundi(p.y / SimMap.CELL))
+
+
+## Terrain of a cell; cells in the border take after the nearest map cell.
+func _cell_type(x: int, y: int) -> int:
+	return map.terrain_cell(Vector2i(clampi(x, 0, map.w - 1), clampi(y, 0, map.h - 1)))
+
+
+func _in_map(x: int, y: int) -> bool:
+	return x >= 0 and y >= 0 and x < map.w and y < map.h
+
+
+# ------------------------------------------------------------ ground marks
+
+## Paints the texture of worn ground: tracks along the routes vehicles would
+## take between the bases, the middle of the map and the uplink sites,
+## packed earth where the bases stand, and stains under the salvage fields.
+func _build_marks() -> void:
+	_mark_w = map.w * MARK_SCALE
+	_mark_h = map.h * MARK_SCALE
+	_marks = PackedByteArray()
+	_marks.resize(_mark_w * _mark_h * 3)
+	var centre: Vector2 = map.world_size() * 0.5
+	for s: Vector2 in map.starts:
+		_stamp_path(map.find_path(s, centre, true), 2.6, 215)
+		_stamp(s, 17.0, 2, 150)
+	for u: Vector2 in map.uplink_spots:
+		var home: Vector2 = centre
+		for s: Vector2 in map.starts:
+			if s.distance_to(u) < home.distance_to(u):
+				home = s
+		_stamp_path(map.find_path(u, home, true), 2.0, 190)
+		_stamp(u, 5.0, 2, 170)
+	for f: Vector3 in map.field_spots:
+		_stamp(Vector2(f.x, f.y), 3.8, 1, 210)
+	var img: Image = Image.create_from_data(_mark_w, _mark_h, false, Image.FORMAT_RGB8, _marks)
+	_mark_tex = ImageTexture.create_from_image(img)
+
+
+## A soft disc of `strength` (0-255) in one channel; keeps the stronger value
+## where discs overlap.
+func _stamp(at: Vector2, radius: float, channel: int, strength: int) -> void:
+	var k: float = float(MARK_SCALE) / SimMap.CELL
+	var cx: float = at.x * k
+	var cy: float = at.y * k
+	var r: float = radius * k
+	for y: int in range(maxi(0, int(cy - r)), mini(_mark_h, int(cy + r) + 2)):
+		for x: int in range(maxi(0, int(cx - r)), mini(_mark_w, int(cx + r) + 2)):
+			var d: float = Vector2(float(x) + 0.5 - cx, float(y) + 0.5 - cy).length() / r
+			if d >= 1.0:
+				continue
+			var v: int = int(float(strength) * (1.0 - d * d))
+			var i: int = (y * _mark_w + x) * 3 + channel
+			if v > _marks[i]:
+				_marks[i] = v
+
+
+func _stamp_path(points: PackedVector2Array, radius: float, strength: int) -> void:
+	for i: int in range(1, points.size()):
+		var a: Vector2 = points[i - 1]
+		var b: Vector2 = points[i]
+		var steps: int = maxi(1, int(a.distance_to(b) / 0.8))
+		for k: int in steps + 1:
+			_stamp(a.lerp(b, float(k) / float(steps)), radius, 0, strength)
+
+
+## How worn the ground is at a world position (tracks or base earth), 0-255.
+func _worn_at(p: Vector2) -> int:
+	var k: float = float(MARK_SCALE) / SimMap.CELL
+	var x: int = int(p.x * k)
+	var y: int = int(p.y * k)
+	if x < 0 or y < 0 or x >= _mark_w or y >= _mark_h:
+		return 0
+	var i: int = (y * _mark_w + x) * 3
+	return maxi(_marks[i], _marks[i + 2])
 
 
 func _build_ground() -> void:
+	# The mesh runs BORDER cells past the map on every side: the same ground,
+	# sinking and darkening, so the battlefield does not end in a cliff.
 	var row: int = map.w + 1
+	var wide: int = map.w + 2 * BORDER + 1
 	var verts: PackedVector3Array = PackedVector3Array()
 	var normals: PackedVector3Array = PackedVector3Array()
 	var land: PackedVector2Array = PackedVector2Array()
 	var wet: PackedVector2Array = PackedVector2Array()
 	var indices: PackedInt32Array = PackedInt32Array()
-	for y: int in range(0, map.h + 1):
-		for x: int in range(0, map.w + 1):
-			var i: int = y * row + x
-			verts.append(_corner(x, y))
+	for y: int in range(-BORDER, map.h + BORDER + 1):
+		for x: int in range(-BORDER, map.w + BORDER + 1):
+			var i: int = clampi(y, 0, map.h) * row + clampi(x, 0, map.w)
+			var out: float = _outside(x, y)
+			verts.append(Vector3(float(x) * SimMap.CELL, _height(x, y), float(y) * SimMap.CELL))
 			normals.append(Vector3(_height(x - 1, y) - _height(x + 1, y), 2.0 * SimMap.CELL, _height(x, y - 1) - _height(x, y + 1)).normalized())
 			land.append(Vector2(_forest[i], _rock[i]))
-			wet.append(Vector2(_water[i], 0.0))
-	for y: int in map.h:
-		for x: int in map.w:
-			var i: int = y * row + x
-			indices.append_array(PackedInt32Array([i, i + 1, i + row + 1, i, i + row + 1, i + row]))
+			# UV2: water share, and how far outside the map this corner is.
+			wet.append(Vector2(_water[i] if out <= 0.0 else 0.0, 0.0 if out <= 0.0 else 0.42 + 0.58 * out))
+	for y: int in map.h + 2 * BORDER:
+		for x: int in map.w + 2 * BORDER:
+			var i: int = y * wide + x
+			indices.append_array(PackedInt32Array([i, i + 1, i + wide + 1, i, i + wide + 1, i + wide]))
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = verts
@@ -263,6 +402,9 @@ func _build_ground() -> void:
 	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = shader
 	mat.set_shader_parameter("noise_tex", noise_texture())
+	mat.set_shader_parameter("mark_tex", _mark_tex)
+	mat.set_shader_parameter("map_size", map.world_size())
+	_ground_mat = mat
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "Ground"
 	mi.mesh = mesh
@@ -390,50 +532,20 @@ func _build_water() -> void:
 	add_child(mi)
 
 
-## Dark ground sloping away from the map edge, so the battlefield does not
-## end in a floating slab.
+## A dark floor far below and around the border, so nothing shows through
+## where the border ends.
 func _build_apron() -> void:
-	var buf: MeshBuf = MeshBuf.new()
-	var near: Color = Color(0.10, 0.11, 0.09)
-	var far: Color = Color(0.03, 0.04, 0.05)
-	var reach: float = 14.0
-	var floor_y: float = -2.6
-	var below: Vector3 = Vector3(map.world_size().x * 0.5, -40.0, map.world_size().y * 0.5)
-	for x: int in map.w:
-		var a: Vector3 = _corner(x, 0)
-		var b: Vector3 = _corner(x + 1, 0)
-		buf.quad_grad(a, b, Vector3(b.x, floor_y, -reach), Vector3(a.x, floor_y, -reach), below, near, far)
-		a = _corner(x, map.h)
-		b = _corner(x + 1, map.h)
-		buf.quad_grad(a, b, Vector3(b.x, floor_y, b.z + reach), Vector3(a.x, floor_y, a.z + reach), below, near, far)
-	for y: int in map.h:
-		var a: Vector3 = _corner(0, y)
-		var b: Vector3 = _corner(0, y + 1)
-		buf.quad_grad(a, b, Vector3(-reach, floor_y, b.z), Vector3(-reach, floor_y, a.z), below, near, far)
-		a = _corner(map.w, y)
-		b = _corner(map.w, y + 1)
-		buf.quad_grad(a, b, Vector3(b.x + reach, floor_y, b.z), Vector3(a.x + reach, floor_y, a.z), below, near, far)
-	var slope_mat: StandardMaterial3D = StandardMaterial3D.new()
-	slope_mat.vertex_color_use_as_albedo = true
-	slope_mat.roughness = 1.0
-	slope_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var slope: MeshInstance3D = MeshInstance3D.new()
-	slope.name = "Apron"
-	slope.mesh = buf.commit()
-	slope.material_override = slope_mat
-	slope.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(slope)
 	var size: Vector2 = map.world_size()
 	var plane: PlaneMesh = PlaneMesh.new()
 	plane.size = size * 4.0
 	var mat: StandardMaterial3D = StandardMaterial3D.new()
-	mat.albedo_color = far
+	mat.albedo_color = Color(0.02, 0.03, 0.035)
 	mat.roughness = 1.0
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "Skirt"
 	mi.mesh = plane
 	mi.material_override = mat
-	mi.position = Vector3(size.x * 0.5, floor_y - 0.05, size.y * 0.5)
+	mi.position = Vector3(size.x * 0.5, -2.45, size.y * 0.5)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 
@@ -446,6 +558,7 @@ func _prop_material(sway: float, two_sided: bool, lift: float = 0.0) -> ShaderMa
 	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = shader
 	mat.set_shader_parameter("map_size", map.world_size())
+	mat.set_shader_parameter("noise_tex", noise_texture())
 	mat.set_shader_parameter("sway", sway)
 	mat.set_shader_parameter("lift", lift)
 	_prop_mats.append(mat)
@@ -459,7 +572,7 @@ func _spot(x: int, y: int, margin: float, scale_min: float, scale_max: float, st
 	)
 	var s: float = _rng.range_f(scale_min, scale_max)
 	var xf: Basis = Basis(Vector3.UP, _rng.range_f(0.0, TAU)).scaled(Vector3(s, s * _rng.range_f(1.0 - stretch, 1.0 + stretch), s))
-	return Transform3D(xf, Vector3(p.x, map.height_at(p) - sink, p.y))
+	return Transform3D(xf, Vector3(p.x, _ground_y(p) - sink, p.y))
 
 
 func _conifer(tiers: int, girth: float) -> ArrayMesh:
@@ -531,14 +644,31 @@ func _is(x: int, y: int, t: int) -> bool:
 	return map.terrain_cell(Vector2i(x, y)) == t
 
 
+## Scatter in the border is dimmer the further out it stands.
+func _border_dim(x: int, y: int) -> float:
+	return lerpf(0.5, 0.12, _outside(x, y))
+
+
 func _build_trees() -> void:
 	var s1: float = _rng.range_f(0.0, TAU)
 	var s2: float = _rng.range_f(0.0, TAU)
 	var kinds: Array[Array] = [[], [], [], [], []]  # conifer, tall conifer, broadleaf, broadleaf 2, bush
 	var tints: Array[PackedColorArray] = [PackedColorArray(), PackedColorArray(), PackedColorArray(), PackedColorArray(), PackedColorArray()]
-	for y: int in map.h:
-		for x: int in map.w:
-			var t: int = map.terrain_cell(Vector2i(x, y))
+	for y: int in range(-BORDER, map.h + BORDER):
+		for x: int in range(-BORDER, map.w + BORDER):
+			var t: int = _cell_type(x, y)
+			var inside: bool = _in_map(x, y)
+			if not inside:
+				# The border: woods carry on past the edge, with stray trees
+				# on open ground, all in shade.
+				if t == SimMap.Terrain.WATER or (t != SimMap.Terrain.FOREST and not _rng.chance(0.16)):
+					continue
+				var dim: float = _border_dim(x, y)
+				for i: int in _rng.range_i(1, 2):
+					var bk: int = _rng.range_i(0, 3)
+					kinds[bk].append(_spot(x, y, 0.1, 0.8, 1.5, 0.16, 0.0))
+					tints[bk].append(Color(dim, dim, dim))
+				continue
 			if t == SimMap.Terrain.FOREST:
 				# Groves lean towards one kind of tree.
 				var grove: float = sin(float(x) * 0.19 + s1) + cos(float(y) * 0.23 + s2) + sin(float(x + y) * 0.11)
@@ -572,9 +702,17 @@ func _build_rocks() -> void:
 	var big_tints: Array[PackedColorArray] = [PackedColorArray(), PackedColorArray(), PackedColorArray()]
 	var small: Array[Transform3D] = []
 	var small_tints: PackedColorArray = PackedColorArray()
-	for y: int in map.h:
-		for x: int in map.w:
-			var t: int = map.terrain_cell(Vector2i(x, y))
+	for y: int in range(-BORDER, map.h + BORDER):
+		for x: int in range(-BORDER, map.w + BORDER):
+			var t: int = _cell_type(x, y)
+			if not _in_map(x, y):
+				# Crags carry on into the border, and a few stand alone there.
+				if t == SimMap.Terrain.ROCK or (t == SimMap.Terrain.GROUND and _rng.chance(0.035)):
+					var dim: float = _border_dim(x, y)
+					var bk: int = _rng.range_i(0, 2)
+					big[bk].append(_spot(x, y, 0.2, 1.0, 2.4, 0.3, 0.1))
+					big_tints[bk].append(Color(dim, dim, dim))
+				continue
 			if t == SimMap.Terrain.ROCK:
 				if _rng.chance(0.62):
 					var k: int = _rng.range_i(0, 2)
@@ -612,9 +750,107 @@ func _build_grass() -> void:
 			if not _rng.chance(clampf(0.22 + drift * 0.3, 0.04, 0.6)):
 				continue
 			for i: int in _rng.range_i(1, 3):
-				spots.append(_spot(x, y, 0.05, 0.8, 1.5, 0.25, 0.0))
+				var tuft: Transform3D = _spot(x, y, 0.05, 0.8, 1.5, 0.25, 0.0)
+				if _worn_at(Vector2(tuft.origin.x, tuft.origin.z)) > 70:
+					continue
+				spots.append(tuft)
 				tints.append(Color(_rng.range_f(0.85, 1.0), 1.0, _rng.range_f(0.75, 1.0)) * _rng.range_f(0.82, 1.0))
 	_add_scatter("Grass", _tuft(), _prop_material(0.12, true), spots, tints, false)
+
+
+func _flower() -> ArrayMesh:
+	var rng: SimRng = SimRng.new(77)
+	var buf: MeshBuf = MeshBuf.new()
+	buf.soften = 50.0
+	var white: Color = Color(1.0, 1.0, 1.0)
+	for i: int in 5:
+		var ang: float = float(i) * 1.257
+		var at: Vector3 = Vector3(cos(ang) * 0.16 * float(i % 3), 0.13 + 0.03 * float(i % 2), sin(ang) * 0.16 * float(i % 3))
+		buf.cone(Vector3(at.x, 0.0, at.z), 0.012, 0.012, at.y, 3, Color(0.25, 0.4, 0.15), Color(0.3, 0.45, 0.18))
+		buf.blob(at, Vector3(0.055, 0.035, 0.055), 0, 0.1, white, white, rng)
+	return buf.commit()
+
+
+func _reed() -> ArrayMesh:
+	var buf: MeshBuf = MeshBuf.new()
+	buf.soften = 50.0
+	var low: Color = Color(0.24, 0.33, 0.14)
+	var high: Color = Color(0.55, 0.56, 0.28)
+	var above: Vector3 = Vector3(0.0, -5.0, 0.0)
+	for i: int in 7:
+		var ang: float = float(i) * 0.9 + 0.2
+		var out: Vector3 = Vector3(cos(ang), 0.0, sin(ang))
+		var side: Vector3 = Vector3(-out.z, 0.0, out.x)
+		var foot: Vector3 = out * (0.05 + 0.04 * float(i % 3))
+		var tip: Vector3 = foot + out * 0.1 + Vector3(0.0, 0.62 + 0.12 * float(i % 3), 0.0)
+		buf.tri(foot - side * 0.03, foot + side * 0.03, tip, above, low, low, high)
+	return buf.commit()
+
+
+func _log() -> ArrayMesh:
+	var buf: MeshBuf = MeshBuf.new()
+	buf.cone(Vector3(0.0, -0.8, 0.0), 0.17, 0.14, 1.6, 6, Color(0.20, 0.14, 0.10), Color(0.33, 0.24, 0.16))
+	return buf.commit()
+
+
+func _stump() -> ArrayMesh:
+	var buf: MeshBuf = MeshBuf.new()
+	buf.cone(Vector3.ZERO, 0.24, 0.18, 0.32, 6, Color(0.19, 0.13, 0.09), Color(0.36, 0.27, 0.18))
+	buf.cone(Vector3(0.0, 0.32, 0.0), 0.18, 0.0, 0.02, 6, Color(0.55, 0.45, 0.30), Color(0.6, 0.5, 0.34))
+	return buf.commit()
+
+
+## Small things that make the land look lived in: flowers in the meadows,
+## reeds along the water, fallen logs and stumps at the edge of the woods.
+func _build_litter() -> void:
+	var s1: float = _rng.range_f(0.0, TAU)
+	var s2: float = _rng.range_f(0.0, TAU)
+	var flowers: Array[Transform3D] = []
+	var flower_tints: PackedColorArray = PackedColorArray()
+	var reeds: Array[Transform3D] = []
+	var reed_tints: PackedColorArray = PackedColorArray()
+	var logs: Array[Transform3D] = []
+	var stumps: Array[Transform3D] = []
+	var wood_tints: PackedColorArray = PackedColorArray()
+	var stump_tints: PackedColorArray = PackedColorArray()
+	var petals: Array[Color] = [Color(1.0, 0.95, 0.75), Color(1.0, 0.82, 0.25), Color(0.85, 0.6, 1.0), Color(1.0, 0.55, 0.5)]
+	for y: int in map.h:
+		for x: int in map.w:
+			if map.terrain_cell(Vector2i(x, y)) != SimMap.Terrain.GROUND:
+				continue
+			var by_water: bool = _is(x - 1, y, SimMap.Terrain.WATER) or _is(x + 1, y, SimMap.Terrain.WATER) or _is(x, y - 1, SimMap.Terrain.WATER) or _is(x, y + 1, SimMap.Terrain.WATER)
+			var by_wood: bool = _is(x - 1, y, SimMap.Terrain.FOREST) or _is(x + 1, y, SimMap.Terrain.FOREST) or _is(x, y - 1, SimMap.Terrain.FOREST) or _is(x, y + 1, SimMap.Terrain.FOREST)
+			if by_water:
+				for i: int in _rng.range_i(1, 3):
+					reeds.append(_spot(x, y, 0.05, 0.8, 1.5, 0.25, 0.0))
+					reed_tints.append(Color.WHITE * _rng.range_f(0.8, 1.0))
+				continue
+			if by_wood and _rng.chance(0.09):
+				var lying: Transform3D = _spot(x, y, 0.2, 0.8, 1.3, 0.0, -0.13)
+				lying.basis = lying.basis * Basis(Vector3.RIGHT, PI * 0.5)
+				if _worn_at(Vector2(lying.origin.x, lying.origin.z)) < 40:
+					logs.append(lying)
+					wood_tints.append(Color.WHITE * _rng.range_f(0.75, 1.0))
+			elif by_wood and _rng.chance(0.07):
+				var cut: Transform3D = _spot(x, y, 0.2, 0.8, 1.3, 0.1, 0.0)
+				if _worn_at(Vector2(cut.origin.x, cut.origin.z)) < 40:
+					stumps.append(cut)
+					stump_tints.append(Color.WHITE * _rng.range_f(0.75, 1.0))
+			# Flowers come in patches of one colour.
+			var patch: float = sin(float(x) * 0.23 + s1) * cos(float(y) * 0.29 + s2)
+			if patch > 0.55 and _rng.chance(0.55):
+				var hue: Color = petals[posmod(int(float(x) * 0.05 + float(y) * 0.07 + s1 * 3.0), petals.size())]
+				for i: int in _rng.range_i(1, 3):
+					var bloom: Transform3D = _spot(x, y, 0.05, 0.8, 1.4, 0.2, 0.0)
+					if _worn_at(Vector2(bloom.origin.x, bloom.origin.z)) > 50:
+						continue
+					flowers.append(bloom)
+					flower_tints.append(hue * _rng.range_f(0.85, 1.0))
+	_add_scatter("Flowers", _flower(), _prop_material(0.1, true, 0.25), flowers, flower_tints, false)
+	_add_scatter("Reeds", _reed(), _prop_material(0.1, true), reeds, reed_tints, false)
+	var wood: ShaderMaterial = _prop_material(0.0, false)
+	_add_scatter("Logs", _log(), wood, logs, wood_tints, true)
+	_add_scatter("Stumps", _stump(), wood, stumps, stump_tints, false)
 
 
 ## Adds one MultiMesh per map chunk so scatter outside the view is culled.

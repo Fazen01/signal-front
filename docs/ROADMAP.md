@@ -149,6 +149,20 @@ The owner asked for the UI and main menu to look better. `ui/` only.
 - [x] Skirmish setup, pause, result, settings and tutorial panels share the
       theme; the main action of a panel is a highlighted button
 
+## M17 — Map dressing (owner request, 16 November)
+
+The owner asked for the map to be improved further. View layer only: the
+generator, the layouts and everything the simulation reads are untouched.
+
+- [x] Tracks worn along the routes vehicles would take between the bases,
+      the middle of the map and the uplink sites; packed earth where the
+      bases stand; stained ground under salvage fields
+- [x] A shaded border of the same country beyond the playable edge (ground,
+      woods, crags) instead of a drop into darkness; it follows the fog of war
+- [x] Cloud shadows drifting over the ground and the scatter
+- [x] Flowers in patches, reeds along the water, fallen logs and stumps at
+      the edge of the woods
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
@@ -240,6 +254,21 @@ then for more work on the map (M17).**
   over the Directive bar (it did, once the themed buttons got taller).
 - The HUD's public methods and node names are unchanged; the smoke drivers
   did not need touching. Icons are drawn (`HudIcon`), not images.
+- **Decision (M17): the map pass is cosmetic only.** "Improve the map" could
+  also mean new layouts or a richer generator. That was left alone on
+  purpose: match length and faction balance were tuned on the current
+  generator this morning, and two other session branches are still changing
+  `sim/sim_map_gen.gd`. If the owner wants different battlefields rather
+  than better-looking ones, that is a separate piece of work.
+- The tracks are not hand-placed: `TerrainView` asks the map for the path a
+  vehicle would take (`SimMap.find_path`, read-only) from each base to the
+  middle and from each uplink site to its nearest base, and paints those
+  into a texture the ground shader reads. Grass and flowers keep off them.
+- The border is 16 cells of the edge terrain carried outwards, sinking and
+  darkening. It samples the fog-of-war texture at the nearest map edge, so
+  it is never brighter than unexplored ground beside it. Nothing can enter
+  it: the simulation does not know it exists.
+- `tools/screenshot.sh scenery_edge 40 scenery_edge` looks at a map corner.
 Nothing is half-finished. What nobody has seen yet is all of this on a real
 GPU — the captures here are software-rendered.
 

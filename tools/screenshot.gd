@@ -240,7 +240,7 @@ func _run_script(battle: BattleScene) -> void:
 			if _count == 2:
 				battle.cam.set_distance(95.0)
 				battle.cam.center_on(battle.world.map.world_size() * 0.5)
-		"scenery_water", "scenery_forest", "scenery_rock", "scenery_wide":
+		"scenery_water", "scenery_forest", "scenery_rock", "scenery_wide", "scenery_edge":
 			# The bare landscape with fog and coverage switched off, looking at
 			# the nearest patch of one kind of terrain to the map centre.
 			if _count == 2:
@@ -264,5 +264,9 @@ func _run_script(battle: BattleScene) -> void:
 								if sp.distance_to(mid) < best_d:
 									best_d = sp.distance_to(mid)
 									best = sp
+				if _script_name == "scenery_edge":
+					# A corner of the map, to see how the battlefield ends.
+					best = Vector2(14.0, 14.0)
+					battle.cam.yaw += PI
 				battle.cam.center_on(best)
 				battle.cam.set_distance(110.0 if _script_name == "scenery_wide" else 38.0)
