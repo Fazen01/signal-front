@@ -221,3 +221,29 @@ func _run_script(battle: BattleScene) -> void:
 			if _count == 2:
 				battle.cam.set_distance(95.0)
 				battle.cam.center_on(battle.world.map.world_size() * 0.5)
+		"scenery_water", "scenery_forest", "scenery_rock", "scenery_wide":
+			# The bare landscape with fog and coverage switched off, looking at
+			# the nearest patch of one kind of terrain to the map centre.
+			if _count == 2:
+				battle.fog_view.visible = false
+				battle.terrain.set_fog_texture(null)
+				battle.signal_view.set_overlay_visible(false)
+				var smap: SimMap = battle.world.map
+				var want: int = SimMap.Terrain.WATER
+				if _script_name == "scenery_forest":
+					want = SimMap.Terrain.FOREST
+				elif _script_name == "scenery_rock":
+					want = SimMap.Terrain.ROCK
+				var mid: Vector2 = smap.world_size() * 0.5
+				var best: Vector2 = mid
+				var best_d: float = INF
+				if _script_name != "scenery_wide":
+					for sy: int in smap.h:
+						for sx: int in smap.w:
+							if smap.terrain_cell(Vector2i(sx, sy)) == want:
+								var sp: Vector2 = smap.cell_center(Vector2i(sx, sy))
+								if sp.distance_to(mid) < best_d:
+									best_d = sp.distance_to(mid)
+									best = sp
+				battle.cam.center_on(best)
+				battle.cam.set_distance(110.0 if _script_name == "scenery_wide" else 38.0)

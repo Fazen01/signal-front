@@ -5,19 +5,7 @@ extends Node3D
 
 func _ready() -> void:
 	var data: GameData = GameData.shared()
-	var sun: DirectionalLight3D = DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-50.0, -35.0, 0.0)
-	sun.shadow_enabled = true
-	add_child(sun)
-	var env: Environment = Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.1, 0.12, 0.14)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.65, 0.7, 0.8)
-	env.ambient_light_energy = 0.6
-	var we: WorldEnvironment = WorldEnvironment.new()
-	we.environment = env
-	add_child(we)
+	SceneLight.add_to(self, true)
 	var floor_mesh: PlaneMesh = PlaneMesh.new()
 	floor_mesh.size = Vector2(120.0, 120.0)
 	var floor_node: MeshInstance3D = MeshInstance3D.new()

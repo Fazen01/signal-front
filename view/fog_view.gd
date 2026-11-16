@@ -8,7 +8,7 @@ const EXPLORED_ALPHA: int = 105
 
 var world: SimWorld = null
 var player: int = 0
-var terrain: TerrainView = null  ## its trees and boulders are darkened too
+var terrain: TerrainView = null  ## its trees and boulders read the fog texture and darken too
 var _texture: ImageTexture = null
 var _version: int = -1
 
@@ -31,6 +31,8 @@ func setup(sim_world: SimWorld, local_player: int) -> void:
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
+	if terrain != null:
+		terrain.set_fog_texture(_texture)
 	refresh()
 
 
@@ -59,5 +61,3 @@ func refresh() -> void:
 		else:
 			bytes[o + 3] = UNEXPLORED_ALPHA
 	_texture.update(Image.create_from_data(map.w, map.h, false, Image.FORMAT_RGBA8, bytes))
-	if terrain != null:
-		terrain.apply_fog(vis, seen)

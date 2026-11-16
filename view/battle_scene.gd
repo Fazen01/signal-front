@@ -277,24 +277,7 @@ func _read_spectate_args() -> void:
 
 
 func _build_environment() -> void:
-	var sun: DirectionalLight3D = DirectionalLight3D.new()
-	sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
-	sun.light_energy = 1.25
-	sun.light_color = Color(1.0, 0.96, 0.88)
-	sun.shadow_enabled = GameSettings.shadows
-	sun.directional_shadow_max_distance = 140.0
-	add_child(sun)
-	var env: Environment = Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.05, 0.07, 0.09)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.62, 0.70, 0.82)
-	env.ambient_light_energy = 0.6
-	var we: WorldEnvironment = WorldEnvironment.new()
-	we.name = "Environment"
-	we.environment = env
-	add_child(we)
+	SceneLight.add_to(self, GameSettings.shadows)
 
 
 func _process(delta: float) -> void:
