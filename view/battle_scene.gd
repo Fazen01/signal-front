@@ -191,6 +191,20 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	hud.activate_directive(1)
 	driver.expect(targeting != null, "Shell Barrage targeting started")
 	driver.expect(on_right_click(Vector2.ZERO) and targeting == null, "right click cancels targeting")
+	# Right-click hijack: a Splicer on a Dark enemy vehicle next to it.
+	var wild: Vector2 = world.map.nearest_free_pos(hq.pos + (world.map.world_size() * 0.5 - hq.pos).normalized() * 44.0)
+	var prize: SimEntity = world.spawn_unit("hauler", 1 - local_player, wild)
+	var thief: SimEntity = world.spawn_unit("splicer", local_player, world.map.nearest_free_pos(wild + Vector2(3.0, 0.0)))
+	for i: int in 8:
+		world.tick()  # long enough for fog of war to notice the new units
+	world_view.sync(1.0)
+	cam.center_on(wild)
+	controller.set_selection([thief.id])
+	controller.context_order(controller.screen_pos(prize), false)
+	world.tick()
+	world.tick()
+	driver.expect(not thief.orders.is_empty() and thief.orders[0].type == SimOrder.Type.CAPTURE, "right click on a Dark vehicle orders a hijack")
+	cam.center_on(hq.pos)
 	# Idle-builder key and camera bookmarks.
 	world.push_command(SimCommand.stop(local_player, PackedInt32Array([eng.id])))
 	controller.clear_selection()

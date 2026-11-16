@@ -68,8 +68,8 @@ is invisible to the enemy unless they come close.
 
 ## What is in this build
 
-Two factions, each playable against a scripted AI (Easy / Normal / Hard) that
-can play either one, on seeded, mirrored 128 × 128 maps.
+Three factions, each playable against a scripted AI (Easy / Normal / Hard)
+that can play any of them, on seeded, mirrored 128 × 128 maps.
 
 **Aegis Directorate** — precise and networked. Long-range Relays, aircraft and
 artillery. Linked units gain weapon range; going Dark hurts them most.
@@ -97,6 +97,20 @@ artillery. Linked units gain weapon range; going Dark hurts them most.
   radius — build a dense web), Scrapyard, Muster Hall, Bastion (gun turret),
   Skyspike (anti-air), Arsenal (tier 3, faster Directives).
 
+**Nomad Circuit** — fast, light, elusive. Half again as much salvage from
+wrecks; ground units vanish when they stand still in forest.
+
+- Infantry: Drifter, Tinker (builder), Splicer — right-click an enemy vehicle
+  that is **Dark** and the Splicer hijacks it.
+- Vehicles: Skiff (fast hauler), Dart (raider bike), Sidewinder (missile
+  truck), Gnat (flak buggy), Prowler (light tank), **Jammer Buggy** (wipes
+  enemy coverage around itself) and the **Beacon Rig**: the Circuit has no
+  buildable relay — drive a rig out, press Y and click within link range of
+  your network to deploy it as a Beacon, press Y on the Beacon to pack it up.
+- Buildings: **Caravan Hub** (the headquarters; press Y to pack it into a
+  Caravan and relocate — your whole network is Dark while it rolls), Cache,
+  Camp, Chop Shop, Snare Turret, Signal Loom (tier 3).
+
 - Systems: salvage economy with wrecks, construction and production queues,
   Bandwidth cap, the Signal Grid (link chains, coverage, Linked/Dark effects,
   placement rules), fog of war with vision shared through coverage, minimap,
@@ -104,8 +118,8 @@ artillery. Linked units gain weapon range; going Dark hurts them most.
   against armor classes, projectiles, forest cover, win/lose with a stats
   screen.
 
-Not in yet (see the roadmap): the Nomad Circuit faction, hand-made maps and
-4-player games, sound, save/load.
+Not in yet (see the roadmap): hand-made maps and 4-player games, particle
+effects and sound, balance passes, settings, save/load, tutorials.
 
 ## For developers
 

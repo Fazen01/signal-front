@@ -30,10 +30,10 @@ func _ready() -> void:
 		print("BOOT FAILED: cannot load %s" % _scene_path)
 		get_tree().quit(1)
 		return
-	if _script_name == "foundry":
-		# Play as the Foundry Pact for this capture.
+	if _script_name == "foundry" or _script_name == "nomad":
+		# Play as another faction for this capture.
 		var config: MatchConfig = MatchConfig.skirmish(1)
-		config.factions = ["foundry", "aegis"]
+		config.factions = [_script_name, "aegis"]
 		var game: GameState = get_node_or_null("/root/Game") as GameState
 		if game != null:
 			game.pending_config = config
@@ -144,6 +144,26 @@ func _run_script(battle: BattleScene) -> void:
 				battle.controller.set_selection([cr.id])
 				battle.cam.set_distance(52.0)
 				battle.cam.center_on(core + Vector2(8.0, 6.0))
+		"nomad":
+			if _count == 3:
+				var nw: SimWorld = battle.world
+				var nme: int = battle.local_player
+				var hub: Vector2 = nw.players[nme].start_pos
+				nw.spawn_building("camp", nme, nw.map.cell_of(hub) + Vector2i(5, -2), true)
+				nw.spawn_building("chop_shop", nme, nw.map.cell_of(hub) + Vector2i(-1, 5), true)
+				nw.spawn_building("beacon", nme, nw.map.cell_of(hub) + Vector2i(10, 8), true)
+				nw.spawn_building("snare_turret", nme, nw.map.cell_of(hub) + Vector2i(7, 4), true)
+				nw.spawn_building("cache", nme, nw.map.cell_of(hub) + Vector2i(4, 8), true)
+				nw.spawn_unit("prowler", nme, hub + Vector2(15.0, 6.0))
+				nw.spawn_unit("sidewinder", nme, hub + Vector2(12.0, 9.0))
+				nw.spawn_unit("dart", nme, hub + Vector2(9.0, 12.0))
+				nw.spawn_unit("dart", nme, hub + Vector2(11.0, 13.0))
+				nw.spawn_unit("gnat", nme, hub + Vector2(16.0, 10.0))
+				nw.spawn_unit("splicer", nme, hub + Vector2(13.0, 4.0))
+				var jb: SimEntity = nw.spawn_unit("jammer_buggy", nme, hub + Vector2(18.0, 14.0))
+				battle.controller.set_selection([jb.id])
+				battle.cam.set_distance(56.0)
+				battle.cam.center_on(hub + Vector2(8.0, 6.0))
 		"result":
 			if _count == 5:
 				battle.world.push_command(SimCommand.surrender(battle.local_player))

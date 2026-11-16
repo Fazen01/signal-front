@@ -54,6 +54,11 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	select_ring = ModelFactory.ring(self, r, r + maxf(0.08, r * 0.09), Vector3(0.0, 0.14, 0.0), ring_mat)
 	select_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	select_ring.visible = false
+	if e.def != null and e.def.jam_radius > 0.0:
+		# Jammers show how far they reach.
+		var jr: float = e.def.jam_radius
+		var jam: MeshInstance3D = ModelFactory.ring(self, jr - 0.12, jr, Vector3(0.0, 0.3, 0.0), ModelFactory.mat(Color(0.75, 0.3, 1.0), 0.9))
+		jam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sync(e, world.map, 1.0)
 
 
@@ -71,14 +76,29 @@ func set_selected(on: bool) -> void:
 		select_ring.visible = on
 
 
-## Uplink sites change hands: rebuild the model in the new owner's colour.
-func refresh_owner(e: SimEntity, world: SimWorld) -> void:
-	if kind != SimEntity.Kind.UPLINK or e.owner == owner_id:
+## Ownership changed (an uplink was captured, a vehicle was hijacked):
+## rebuild the model and selection ring in the new owner's colours.
+func refresh_owner(e: SimEntity, world: SimWorld, local_player: int) -> void:
+	if e.owner == owner_id:
 		return
 	owner_id = e.owner
+	var team: Color = world.players[e.owner].color if e.owner >= 0 else Color(0.9, 0.9, 0.95)
 	model.queue_free()
-	model = ModelFactory.build_uplink(world.players[e.owner].color if e.owner >= 0 else Color(0.9, 0.9, 0.95))
+	_rotors.clear()
+	if kind == SimEntity.Kind.UPLINK:
+		model = ModelFactory.build_uplink(team)
+	else:
+		model = ModelFactory.build(e.def.model, team)
+		model.position.y = altitude
+		for child: Node in model.get_children():
+			if str(child.name).begins_with("Rotor"):
+				_rotors.append(child as Node3D)
 	add_child(model)
+	turret = model.get_node_or_null("Turret") as Node3D
+	var ring_color: Color = RING_NEUTRAL
+	if e.owner >= 0:
+		ring_color = RING_OWN if e.owner == local_player else RING_ENEMY
+	select_ring.material_override = ModelFactory.mat(ring_color, 1.0)
 
 
 func sync(e: SimEntity, map: SimMap, alpha: float) -> void:

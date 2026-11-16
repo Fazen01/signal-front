@@ -43,7 +43,8 @@ var last_wave_end: int = -100000
 # Per-think scratch lists
 var _f: FactionDef = null  ## this player's faction; roles map jobs to its definitions
 var _hq: SimEntity = null
-var _mobile: Array[SimEntity] = []  ## deployable factory units (Foundry Crawlers)
+var _mobile: Array[SimEntity] = []  ## deployable units (Crawlers, Beacon Rigs)
+var _hijackers: Array[SimEntity] = []
 var _engineers: Array[SimEntity] = []
 var _haulers: Array[SimEntity] = []
 var _army: Array[SimEntity] = []
@@ -102,8 +103,10 @@ func update(w: SimWorld) -> void:
 	_run_economy(w, me)
 	_run_construction(w, me)
 	_run_mobile_factory(w, me)
+	_run_mobile_relays(w, me)
 	_run_production(w, me)
 	_run_military(w)
+	_run_hijackers(w)
 	_run_directives(w, me)
 
 
@@ -113,6 +116,7 @@ func _survey(w: SimWorld) -> void:
 	_hq = null
 	_engineers.clear()
 	_mobile.clear()
+	_hijackers.clear()
 	_haulers.clear()
 	_army.clear()
 	_buildings.clear()
@@ -136,6 +140,8 @@ func _survey(w: SimWorld) -> void:
 				_haulers.append(e)
 			elif e.def.deploys_to != "":
 				_mobile.append(e)
+			elif e.def.hijacker:
+				_hijackers.append(e)
 			elif e.def.is_armed() or e.def.ai_role == "support":
 				_army.append(e)
 		elif w.are_enemies(player_id, e.owner):
@@ -333,17 +339,19 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 	# Short-range relays (Foundry Pylons) need to come in greater numbers.
 	var early_relays: int = 3 if w.data.entity(relay).signal_radius >= 15.0 else 6
 	var has_barracks: bool = me.has_building(barracks)
+	# Factions whose relays are deployed units expand in _run_mobile_relays.
+	var build_relays: bool = w.data.entity(relay).buildable
 	if _count(barracks) == 0:
 		return barracks
-	if relays == 0:
+	if build_relays and relays == 0:
 		return relay
-	if headroom < 6 and me.bandwidth_cap < w.data.bandwidth_max:
+	if build_relays and headroom < 6 and me.bandwidth_cap < w.data.bandwidth_max:
 		return relay
 	if works != "" and _count(works) == 0 and has_barracks:
 		return works
 	if _wants_depot(w):
 		return _r("depot")
-	if relays < early_relays and _relay_goal(w) != Vector2.INF:
+	if build_relays and relays < early_relays and _relay_goal(w) != Vector2.INF:
 		return relay
 	if builds_turrets and _can(w, me, ground) and _count(ground) < 1:
 		return ground
@@ -355,7 +363,7 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 		return tier3
 	if level > 0 and _can(w, me, airpad) and _count(airpad) == 0 and me.salvage > 550:
 		return airpad
-	if relays < early_relays * 2 and _relay_goal(w) != Vector2.INF and me.salvage > 500:
+	if build_relays and relays < early_relays * 2 and _relay_goal(w) != Vector2.INF and me.salvage > 500:
 		return relay
 	if me.salvage > 900 and _count(barracks) < max_barracks:
 		return barracks
@@ -432,16 +440,9 @@ func _site_for(w: SimWorld, def: EntityDef) -> Vector2i:
 	var around: Vector2 = _hq.pos
 	var spread: int = 10
 	if def.id == _r("relay"):
-		var goal: Vector2 = _relay_goal(w)
-		if goal == Vector2.INF:
-			goal = _hq.pos + toward_enemy * 40.0
-		var from: SimEntity = _nearest_linked_emitter(w, goal)
-		if from == null:
+		around = _relay_spot(w, def)
+		if around == Vector2.INF:
 			return Vector2i(-1, -1)
-		var gap: float = from.pos.distance_to(goal)
-		# Close enough that the goal ends up inside the new emitter's disc.
-		var step: float = clampf(gap - def.signal_radius * 0.4, 6.0, w.data.link_range - 4.0)
-		around = from.pos + (goal - from.pos).normalized() * step
 		spread = 5
 	elif def.id == _r("depot"):
 		var spot: Vector2 = _depot_spot(w)
@@ -459,6 +460,20 @@ func _site_for(w: SimWorld, def: EntityDef) -> Vector2i:
 	else:
 		around = _base_ring_spot(toward_enemy)
 	return _find_cell(w, def, around, spread, null)
+
+
+## Where the next relay should go: a step from the nearest linked emitter
+## towards the next uncovered goal, close enough to cover it.
+func _relay_spot(w: SimWorld, relay_def: EntityDef) -> Vector2:
+	var goal: Vector2 = _relay_goal(w)
+	if goal == Vector2.INF:
+		goal = _hq.pos + (_enemy_hq_pos(w) - _hq.pos).normalized() * 40.0
+	var from: SimEntity = _nearest_linked_emitter(w, goal)
+	if from == null:
+		return Vector2.INF
+	var gap: float = from.pos.distance_to(goal)
+	var step: float = clampf(gap - relay_def.signal_radius * 0.4, 6.0, w.data.link_range - 4.0)
+	return from.pos + (goal - from.pos).normalized() * step
 
 
 ## A spot in the ring around the HQ, biased away from the enemy.
@@ -540,11 +555,63 @@ func _run_mobile_factory(w: SimWorld, me: SimPlayer) -> void:
 		_train_at_any(w, me, unit_id)
 	var toward_enemy: Vector2 = (_enemy_hq_pos(w) - _hq.pos).normalized()
 	for c: SimEntity in _mobile:
-		if not c.orders.is_empty():
+		if c.def.id != unit_id or not c.orders.is_empty():
 			continue
 		var cell: Vector2i = _find_cell(w, factory_def, _base_ring_spot(toward_enemy), 10, c.def)
 		if cell.x >= 0:
 			w.push_command(SimCommand.deploy(player_id, PackedInt32Array([c.id]), cell))
+
+
+## Factions whose relays are deployed units (Nomad Beacon Rigs): build rigs
+## when the network needs to grow and drive them out to where a relay belongs.
+func _run_mobile_relays(w: SimWorld, me: SimPlayer) -> void:
+	var unit_id: String = _r("relay_unit")
+	if unit_id == "":
+		return
+	var relay_def: EntityDef = w.data.entity(_r("relay"))
+	var rigs: Array[SimEntity] = []
+	for c: SimEntity in _mobile:
+		if c.def.id == unit_id:
+			rigs.append(c)
+	var relays: int = _count(relay_def.id, false)
+	var pending: int = rigs.size() + _queued(unit_id)
+	var headroom: int = me.bandwidth_cap - me.bandwidth_used - _queued_bandwidth(w)
+	var want: bool = false
+	if relays + pending == 0:
+		want = true
+	elif pending == 0 and headroom < 6 and me.bandwidth_cap < w.data.bandwidth_max:
+		want = true
+	elif pending == 0 and relays < 7 and _relay_goal(w) != Vector2.INF and me.salvage > 250:
+		want = true
+	if want:
+		_train_at_any(w, me, unit_id)
+	for rig: SimEntity in rigs:
+		if not rig.orders.is_empty():
+			continue
+		var spot: Vector2 = _relay_spot(w, relay_def)
+		if spot == Vector2.INF:
+			continue
+		var cell: Vector2i = _find_cell(w, relay_def, spot, 5, rig.def)
+		if cell.x >= 0:
+			w.push_command(SimCommand.deploy(player_id, PackedInt32Array([rig.id]), cell))
+
+
+## Splicers go after any enemy vehicle seen outside its owner's signal.
+func _run_hijackers(w: SimWorld) -> void:
+	for h: SimEntity in _hijackers:
+		if not h.orders.is_empty():
+			continue
+		var best: SimEntity = null
+		var best_d: float = 55.0
+		for e: SimEntity in _enemies:
+			if SimEconomy.hijack_error(w, h, e) != "":
+				continue
+			var d: float = e.pos.distance_to(h.pos)
+			if d < best_d:
+				best_d = d
+				best = e
+		if best != null:
+			w.push_command(SimCommand.capture(player_id, PackedInt32Array([h.id]), best.id))
 
 
 func _run_production(w: SimWorld, me: SimPlayer) -> void:

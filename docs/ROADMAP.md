@@ -81,8 +81,8 @@ decision in the session log at the bottom.
 
 ## M10 — Nomad Circuit
 
-- [ ] Roster, Beacon Rigs, relocating HQ, jammers, forest cloak, hijack of Dark vehicles
-- [ ] AI plays Nomad Circuit
+- [x] Roster, Beacon Rigs, relocating HQ, jammers, forest cloak, hijack of Dark vehicles
+- [x] AI plays Nomad Circuit
 
 ## M11 — Maps
 
@@ -272,11 +272,15 @@ Notes on this session's pushes:
   `check.sh` also runs a Foundry-vs-Aegis match and drives the Crawler's
   Deploy/Pack through the real interface.
 
-Half-done / next: M10 Nomad Circuit — the roster, data, models and
-simulation mechanics are in and tested (Beacon Rigs, relocating Caravan Hub,
-Jammer Buggy, forest cloak, Splicer hijack, +50% wreck salvage). Still to do:
-the view (hijacked vehicles change colour, jam ring, right-click hijack) and
-the AI (it cannot yet expand a network made of deployable rigs).
+- M10 Nomad Circuit: full third faction (11 units, 7 buildings, own models
+  and palette), deployable Beacon Rigs instead of relays, the Caravan Hub
+  that packs up and relocates, Jammer Buggy, forest cloak, Splicer hijack of
+  Dark vehicles (right-click), +50% wreck salvage. The AI plays Nomad:
+  it builds and deploys rigs toward uncovered salvage and sends Splicers
+  after Dark vehicles. `check.sh` adds a Nomad-vs-Foundry match.
+
+Half-done / next: M11 maps (generator sizes, hand-tuned layouts, up to three
+AI opponents).
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -339,3 +343,21 @@ Fog decisions:
   turrets, tier3, airpad) to definitions and `data/units.json` gives each
   army unit an `ai_role` and `ai_weight`. A new faction needs only data.
 - Reinforcement Drop squads are per faction (`drop_squad`).
+- Nomad additions beyond the design's signature list: Drifter, Tinker
+  (builder), Skiff (hauler), Gnat (anti-air), Prowler (light tank), and the
+  buildings Cache, Camp, Chop Shop, Snare Turret, Signal Loom. No aircraft.
+- Deploy rules are shared by all deployable units: a headquarters deploys
+  anywhere buildable, an emitter (Beacon) within link range of a linked
+  emitter, anything else (Crawler) inside coverage.
+- A packed headquarters still counts as alive; while it is packed its owner
+  has no coverage and no bandwidth. The AI never relocates its HQ.
+- A jammer clears enemy coverage in an 11-unit disc that follows it; the
+  grid is rebuilt (at most 4x a second) while any jammer is alive.
+- Hijack: 4 seconds next to an enemy vehicle that is Dark and visible. The
+  vehicle changes owner with its hit points, the Splicer is consumed. Any
+  vehicle can be taken, including haulers, Crawlers and Beacon Rigs.
+- Forest cloak applies to Nomad ground units standing still in forest that
+  have not fired for 2.5 s; enemies within 5 units still see them.
+- Balance between the factions is untuned (M13). In the seed-3 samples the
+  Nomads beat Aegis from the first seat and lost from the second, and lost
+  to Foundry.

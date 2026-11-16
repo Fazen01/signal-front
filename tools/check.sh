@@ -58,6 +58,7 @@ run_step smoke_battle 600 "Smoke driver finished" --fixed-fps 60 --quit-after 40
 run_step flow 600 "Flow smoke finished" --fixed-fps 60 --quit-after 4000 -- --flow-smoke
 run_step ai_match 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=1 --max-minutes=45
 run_step ai_match_foundry 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=2 --max-minutes=45 --factions=foundry,aegis
+run_step ai_match_nomad 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=3 --max-minutes=45 --factions=nomad,foundry
 
 if [ "${failed}" -ne 0 ]; then
 	echo "CHECK FAILED"

@@ -62,8 +62,8 @@ func sync(alpha: float) -> void:
 			views[e.id] = v
 		v.set_shown(_should_show(e, v))
 		if v.shown:
-			if e.kind == SimEntity.Kind.UPLINK:
-				v.refresh_owner(e, world)
+			if v.owner_id != e.owner:
+				v.refresh_owner(e, world, local_player)
 			v.sync(e, world.map, alpha)
 	if views.size() != world.entities.size():
 		var gone: Array[int] = []

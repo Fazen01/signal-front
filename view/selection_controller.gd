@@ -391,6 +391,12 @@ func context_order(screen: Vector2, queued: bool) -> void:
 				battle.show_order_marker(at, Color(0.4, 0.8, 1.0))
 		return
 	if target != null and world.are_enemies(player, target.owner):
+		# Splicers take a Dark vehicle rather than shoot it; nobody else fires on the prize.
+		var hijackers: PackedInt32Array = _filter(ids, func(e: SimEntity) -> bool: return e.def.hijacker)
+		if not hijackers.is_empty() and SimEconomy.hijack_error(world, world.get_entity(hijackers[0]), target) == "":
+			world.push_command(SimCommand.capture(player, hijackers, target.id, queued))
+			battle.show_order_marker(target.pos, Color(0.6, 1.0, 0.9))
+			return
 		world.push_command(SimCommand.attack(player, ids, target.id, queued))
 		battle.show_order_marker(target.pos, Color(1.0, 0.3, 0.25))
 		return
