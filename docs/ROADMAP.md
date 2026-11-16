@@ -163,6 +163,21 @@ Match-length decisions:
 - Save files keep the map size they were made with, so older saves still
   load on the old map size.
 
+Working on (after the tick): held-out seeds 4-6 gave median 16.0 but 3 of
+27 games hit the 45-minute cap. Causes found and fixed so far:
+- The AI ignored salvage more than 90 units from a depot, a limit written for
+  the 128-unit map; on the larger map both sides sat broke beside 14,000
+  untouched salvage. The limit is now 0.7 x the map width (unchanged on the
+  compact map).
+- After 22 minutes AI waves head for the enemy HQ instead of outlying relays
+  (they were grinding through Pylons for twenty minutes).
+- Uplink sites now count as expansion goals alongside salvage fields
+  (nearest first); before, they were only considered once every field was
+  covered, which on the larger map never happened.
+What remains is a starved endgame: both sides out of salvage, one with only
+infantry against a Bastion and a double-health HQ that is repaired for free.
+A human on either side can still finish it; left as is.
+
 How it was found (27 games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
 12.2; HQ health x2.5 with tougher buildings and turrets -> 10.4. Traces show
 matches are decided by minute 3-6 when one army is wiped out; the rest is
