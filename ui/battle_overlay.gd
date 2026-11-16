@@ -9,7 +9,7 @@ var battle: BattleScene = null
 func setup(scene: BattleScene) -> void:
 	battle = scene
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _process(_delta: float) -> void:

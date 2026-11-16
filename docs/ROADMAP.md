@@ -35,9 +35,9 @@ decision in the session log at the bottom.
 ## M3 — Economy and construction
 
 - [x] Salvage Fields, Haulers, Depots, wreck harvesting
-- [ ] Builder units, placement ghost, construction progress, cancel/refund
+- [x] Builder units, placement ghost, construction progress, cancel/refund
 - [x] Production queues, rally points, Bandwidth cap
-- [ ] HUD: resources, selection panel, command card with hotkeys
+- [x] HUD: resources, selection panel, command card with hotkeys
 
 ## M4 — Signal Grid
 
@@ -190,6 +190,22 @@ View decisions:
 - Map heights are cosmetic (units are simulated in 2D) but are baked into
   `SimMap.heights` so the mesh and unit placement agree.
 
-Half-done / next: M3 — the economy simulation is done and tested (harvest,
-build, cancel/refund, production, rally, bandwidth); the HUD, command card and
-placement ghost are being written.
+- M3 Economy and construction: haulers work fields and wrecks and unload at
+  depots; engineers place construction sites (ghost tinted valid/invalid),
+  extra builders help with diminishing returns (sqrt), unfinished buildings
+  cancel for a full refund; production queues of 5 with rally points and the
+  bandwidth cap; HUD with resources, selection panel, command card with
+  hotkeys, production queue and alerts.
+
+Economy and HUD decisions:
+- Costs are paid up front (on placing a site or queueing a unit) and fully
+  refunded on cancel. Repair is free but only works on Linked buildings.
+- New haulers start harvesting the nearest field on their own unless the
+  building has a player-set rally point. Haulers pick up wrecks too.
+- Command-card hotkeys never use W, A, S, D, Q, E, G or H (camera and order
+  keys); a data test enforces it. Depot is P, Hauler is U, Warden is R.
+- A screenshot showed the HUD collapsed into a corner even though every
+  headless check passed (`set_anchors_preset` keeps the old zero size; use
+  `set_anchors_and_offsets_preset`). Look at screenshots after UI changes.
+
+Half-done / next: M4 Signal Grid.

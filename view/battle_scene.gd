@@ -14,7 +14,15 @@ var world_view: WorldView = null
 var cam: RtsCamera = null
 var controller: SelectionController = null
 var overlay: BattleOverlay = null
+var hud: Hud = null
 var ui_layer: CanvasLayer = null
+
+# Building placement
+var placing: EntityDef = null
+var ghost: Node3D = null
+var ghost_cell: Vector2i = Vector2i.ZERO
+var ghost_ok: bool = false
+var _ghost_shown_ok: int = -1
 
 var _accum: float = 0.0
 var _markers: Array[MeshInstance3D] = []
@@ -64,6 +72,10 @@ func _ready() -> void:
 	overlay.name = "Overlay"
 	ui_layer.add_child(overlay)
 	overlay.setup(self)
+	hud = Hud.new()
+	hud.name = "Hud"
+	ui_layer.add_child(hud)
+	hud.setup(self)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		var smoke: SmokeDriver = SmokeDriver.new()
 		smoke.name = "Smoke"
@@ -77,9 +89,40 @@ func _exit_tree() -> void:
 		print("Battle scene exit at tick %d" % world.tick_count)
 
 
-## Extra scripted steps for the headless smoke run (HUD, placement...).
-func smoke_extra(_driver: SmokeDriver) -> void:
-	pass
+## Extra scripted steps for the headless smoke run: HUD card, placement,
+## production. Prints BOOT FAILED lines that tools/check.sh treats as errors.
+func smoke_extra(driver: SmokeDriver) -> void:
+	var p: SimPlayer = world.players[local_player]
+	p.salvage = 5000
+	# Select an engineer, open the build card and place a relay next to the HQ.
+	var eng: SimEntity = null
+	var hq: SimEntity = null
+	for e: SimEntity in world.entities:
+		if e.owner == local_player and e.def != null:
+			if e.def.builder and eng == null:
+				eng = e
+			if e.def.signal_root:
+				hq = e
+	controller.set_selection([eng.id])
+	var entry: Hud.CardEntry = hud.find_entry("build", "relay")
+	driver.expect(entry != null, "builder card offers the relay")
+	driver.expect(hud.activate(entry), "relay entry activates")
+	driver.expect(placing != null and ghost != null, "placement mode started")
+	ghost_cell = world.map.cell_of(hq.pos) + Vector2i(5, 5)
+	driver.expect(on_left_click(Vector2.ZERO, false), "placement click consumed")
+	driver.expect(placing == null, "placement ended after the click")
+	# Cancel paths.
+	begin_placement(world.data.entity("depot"))
+	driver.expect(on_right_click(Vector2.ZERO), "right click cancels placement")
+	# Train from the HQ through the card and its hotkey.
+	controller.set_selection([hq.id])
+	var train: Hud.CardEntry = hud.find_entry("train", "hauler")
+	driver.expect(train != null and hud.activate(train), "HQ card trains a hauler")
+	var key: InputEventKey = InputEventKey.new()
+	key.physical_keycode = KEY_F
+	key.pressed = true
+	driver.expect(hud.handle_hotkey(key), "card hotkey F trains an engineer")
+	hud.push_alert("Smoke alert", Hud.GOLD)
 
 
 func _build_environment() -> void:
@@ -122,15 +165,30 @@ func _process(delta: float) -> void:
 	cam.wasd_free = controller.own_unit_ids().is_empty()
 	world_view.sync(clampf(_accum / SimWorld.DT, 0.0, 1.0))
 	_update_markers(delta)
+	_update_placement()
 
 
 func _handle_event(ev: SimEvent) -> void:
 	world_view.handle_event(ev)
+	match ev.type:
+		SimEvent.Type.ALERT:
+			if ev.player == local_player:
+				hud.push_alert(ev.text, Hud.RED)
+		SimEvent.Type.BUILDING_DONE:
+			if ev.player == local_player:
+				var done: SimEntity = world.get_entity(ev.id)
+				if done != null:
+					hud.push_alert("%s complete" % done.def.name, Hud.CYAN)
+				hud.rebuild_card()
 
 
 func _on_selection_changed() -> void:
 	for id: int in world_view.views.keys():
 		world_view.views[id].set_selected(controller.selected.has(id))
+	if placing != null and _selected_builders(placing.id).is_empty():
+		cancel_placement()
+	if hud != null:
+		hud.rebuild_card()
 
 
 # Hooks the controller calls before its default handling. They return true
@@ -140,16 +198,107 @@ func is_input_blocked() -> bool:
 	return paused
 
 
-func on_left_click(_screen: Vector2, _shift: bool) -> bool:
-	return false
+func on_left_click(_screen: Vector2, shift: bool) -> bool:
+	if placing == null:
+		return false
+	var builders: PackedInt32Array = _selected_builders(placing.id)
+	if builders.is_empty():
+		cancel_placement()
+		return true
+	var why: String = SimEconomy.placement_error(world, local_player, placing, ghost_cell)
+	if why == "" and world.players[local_player].salvage < placing.cost:
+		why = "Not enough salvage"
+	if why != "":
+		hud.push_alert(why, Hud.RED)
+		return true
+	world.push_command(SimCommand.build(local_player, builders, placing.id, ghost_cell, shift))
+	if not shift:
+		cancel_placement()
+	return true
 
 
 func on_right_click(_screen: Vector2) -> bool:
+	if placing != null:
+		cancel_placement()
+		return true
 	return false
 
 
-func on_hotkey(_key: InputEventKey) -> bool:
-	return false
+func on_hotkey(key: InputEventKey) -> bool:
+	if key.physical_keycode == KEY_ESCAPE:
+		if placing != null:
+			cancel_placement()
+			return true
+		if controller.mode != SelectionController.Mode.NORMAL:
+			return false  # the controller cancels its own mode
+		toggle_pause_menu()
+		return true
+	return hud.handle_hotkey(key)
+
+
+func toggle_pause_menu() -> void:
+	pass
+
+
+# ------------------------------------------------------ building placement
+
+func _selected_builders(def_id: String) -> PackedInt32Array:
+	var out: PackedInt32Array = PackedInt32Array()
+	for e: SimEntity in controller.selected_entities():
+		if e.owner == local_player and e.kind == SimEntity.Kind.UNIT and e.def.builds.has(def_id):
+			out.append(e.id)
+	return out
+
+
+## Starts placing a building: a ghost follows the mouse until the player
+## clicks (place) or right-clicks / presses Escape (cancel).
+func begin_placement(def: EntityDef) -> void:
+	cancel_placement()
+	placing = def
+	ghost = ModelFactory.build(def.model, world.players[local_player].color)
+	ghost.name = "Ghost"
+	add_child(ghost)
+	_ghost_shown_ok = -1
+	_update_placement()
+
+
+func cancel_placement() -> void:
+	placing = null
+	if ghost != null:
+		ghost.queue_free()
+		ghost = null
+
+
+func placement_cell_at(ground: Vector2, def: EntityDef) -> Vector2i:
+	return Vector2i(
+		int(roundf(ground.x / SimMap.CELL - float(def.footprint.x) * 0.5)),
+		int(roundf(ground.y / SimMap.CELL - float(def.footprint.y) * 0.5))
+	)
+
+
+func _update_placement() -> void:
+	if placing == null or ghost == null:
+		return
+	var ground: Vector2 = controller.ground_point(get_viewport().get_mouse_position())
+	ghost_cell = placement_cell_at(ground, placing)
+	var centre: Vector2 = Vector2(
+		(float(ghost_cell.x) + float(placing.footprint.x) * 0.5) * SimMap.CELL,
+		(float(ghost_cell.y) + float(placing.footprint.y) * 0.5) * SimMap.CELL
+	)
+	ghost.position = Vector3(centre.x, world.map.height_at(world.map.clamp_to_map(centre)) + 0.05, centre.y)
+	ghost_ok = SimEconomy.can_place(world, local_player, placing, ghost_cell) and world.players[local_player].salvage >= placing.cost
+	var state: int = 1 if ghost_ok else 0
+	if state != _ghost_shown_ok:
+		_ghost_shown_ok = state
+		var tint: Color = Color(0.3, 1.0, 0.45, 0.55) if ghost_ok else Color(1.0, 0.25, 0.2, 0.55)
+		var m: StandardMaterial3D = StandardMaterial3D.new()
+		m.albedo_color = tint
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		for child: Node in ghost.find_children("*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = child as MeshInstance3D
+			mi.material_override = m
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 # ----------------------------------------------------------- order marker

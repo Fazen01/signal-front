@@ -64,6 +64,23 @@ func _run_script(battle: BattleScene) -> void:
 					if e.owner == battle.local_player:
 						ids.append(e.id)
 				battle.controller.set_selection(ids)
+		"hud_builder":
+			if _count == 5:
+				for e: SimEntity in battle.world.entities:
+					if e.owner == battle.local_player and e.def != null and e.def.builder:
+						battle.controller.set_selection([e.id])
+						break
+			if _count == 8:
+				battle.begin_placement(battle.world.data.entity("barracks"))
+				Input.warp_mouse(Vector2(1050.0, 380.0))
+		"hud_hq":
+			if _count == 5:
+				for e: SimEntity in battle.world.entities:
+					if e.owner == battle.local_player and e.def != null and e.def.signal_root:
+						battle.controller.set_selection([e.id])
+						battle.world.push_command(SimCommand.train(battle.local_player, e.id, "hauler"))
+						battle.world.push_command(SimCommand.train(battle.local_player, e.id, "field_engineer"))
+				battle.hud.push_alert("Bandwidth limit reached - build Relays", Hud.RED)
 		"wide":
 			if _count == 2:
 				battle.cam.distance = 95.0

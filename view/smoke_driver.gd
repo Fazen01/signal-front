@@ -24,12 +24,12 @@ func _process(_delta: float) -> void:
 			# Click on an own unit.
 			var u: SimEntity = _first(me, SimEntity.Kind.UNIT)
 			_click(MOUSE_BUTTON_LEFT, ctl.screen_pos(u), false)
-			_expect(ctl.selected.size() == 1, "click selects one unit")
+			expect(ctl.selected.size() == 1, "click selects one unit")
 		20:
 			# Drag a box over the whole screen.
 			var size: Vector2 = get_viewport().get_visible_rect().size
 			_drag(Vector2(2.0, 2.0), size - Vector2(2.0, 2.0))
-			_expect(ctl.own_unit_ids().size() >= 2, "box select finds units")
+			expect(ctl.own_unit_ids().size() >= 2, "box select finds units")
 		30:
 			_key(KEY_1, true, false)  # Ctrl+1: set group
 			_click(MOUSE_BUTTON_RIGHT, get_viewport().get_visible_rect().size * 0.5 + Vector2(120.0, -80.0), false)
@@ -38,21 +38,21 @@ func _process(_delta: float) -> void:
 			for e: SimEntity in ctl.selected_entities():
 				if e.moving:
 					moving += 1
-			_expect(moving > 0, "right click moves the selection")
+			expect(moving > 0, "right click moves the selection")
 		50:
 			_key(KEY_S, false, false)
 		55:
 			_key(KEY_A, false, false)
-			_expect(ctl.mode == SelectionController.Mode.ATTACK_MOVE, "A arms attack-move")
+			expect(ctl.mode == SelectionController.Mode.ATTACK_MOVE, "A arms attack-move")
 			_click(MOUSE_BUTTON_LEFT, get_viewport().get_visible_rect().size * 0.5 + Vector2(-150.0, 60.0), false)
-			_expect(ctl.mode == SelectionController.Mode.NORMAL, "attack-move click returns to normal")
+			expect(ctl.mode == SelectionController.Mode.NORMAL, "attack-move click returns to normal")
 		70:
 			_key(KEY_H, false, false)
 			ctl.clear_selection()
-			_expect(ctl.selected.is_empty(), "selection cleared")
+			expect(ctl.selected.is_empty(), "selection cleared")
 		75:
 			_key(KEY_1, false, false)  # recall group
-			_expect(ctl.selected.size() >= 2, "control group recalled")
+			expect(ctl.selected.size() >= 2, "control group recalled")
 			_key(KEY_1, false, false)  # double tap: centre camera
 		80:
 			# Click the HQ, then double-click a unit type.
@@ -61,7 +61,7 @@ func _process(_delta: float) -> void:
 		82:
 			var hq2: SimEntity = _first(me, SimEntity.Kind.BUILDING)
 			_click(MOUSE_BUTTON_LEFT, ctl.screen_pos(hq2), false)
-			_expect(ctl.selected.size() == 1 and ctl.selected[0] == hq2.id, "click selects the HQ")
+			expect(ctl.selected.size() == 1 and ctl.selected[0] == hq2.id, "click selects the HQ")
 			_click(MOUSE_BUTTON_RIGHT, ctl.screen_pos(hq2) + Vector2(160.0, 40.0), false)  # rally
 		90:
 			var u2: SimEntity = _first(me, SimEntity.Kind.UNIT)
@@ -69,7 +69,7 @@ func _process(_delta: float) -> void:
 		92:
 			var u3: SimEntity = _first(me, SimEntity.Kind.UNIT)
 			_click(MOUSE_BUTTON_LEFT, ctl.screen_pos(u3), false, true)
-			_expect(ctl.selected.size() >= 1, "double click selects by type")
+			expect(ctl.selected.size() >= 1, "double click selects by type")
 		100:
 			# Attack order on an enemy unit, straight through the command path.
 			var foe: SimEntity = _first(1 - me, SimEntity.Kind.UNIT)
@@ -79,6 +79,18 @@ func _process(_delta: float) -> void:
 			battle.smoke_extra(self)
 		_:
 			pass
+	if _frame == 125:
+		# The relay ordered at frame 110 must exist as a site, and the HQ must
+		# have both units queued.
+		var sites: int = 0
+		var queued: int = 0
+		for e: SimEntity in w.entities:
+			if e.owner == me and e.def != null and e.def.id == "relay":
+				sites += 1
+			if e.owner == me and e.def != null and e.def.signal_root:
+				queued = e.queue.size()
+		expect(sites == 1, "relay site was placed through the HUD")
+		expect(queued == 2, "HQ queue holds the two HUD orders (has %d)" % queued)
 	if _frame == 130:
 		print("Smoke driver finished: %d checks" % _steps_run)
 
@@ -90,7 +102,7 @@ func _first(owner_id: int, kind: int) -> SimEntity:
 	return null
 
 
-func _expect(cond: bool, what: String) -> void:
+func expect(cond: bool, what: String) -> void:
 	_steps_run += 1
 	if not cond:
 		print("BOOT FAILED: smoke check '%s' (frame %d)" % [what, _frame])
