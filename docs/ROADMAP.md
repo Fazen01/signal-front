@@ -395,6 +395,29 @@ Array.**
 - `tools/screenshot.sh region_tundra 30 region_tundra` (or `region_desert`,
   `region_ashland`) shows seed 4 in that region.
 
+**12:10-12:45 UTC — a run of owner requests; work in progress, not all
+pushed yet.** In hand, committed locally and being checked:
+
+- A fifth faction, the Verdigris Order (armored knights and walkers; Linked
+  units take 15% less damage).
+- Every region generates its own kinds of country (mesas and oases, ice
+  rivers and pinewood, fissures and calderas). The owner did not like the
+  first Cinder Wastes (too many lava pools): lava is now a rare large
+  feature drawn as a dark crust with glowing cracks.
+- Playing: game speed keys, Ctrl+A, Space to the latest warning, Shift to
+  queue five, order lines, weapon range rings, an income readout.
+- AI: doctrines from the seed, a fighting retreat, a touring scout.
+- `tools/balance_league.py`: every faction against every other, in parallel.
+
+**`tools/check.sh` failed on that commit, so it has not been pushed:** the
+three-way AI match did not end in 90 minutes. The new retreat rule is too
+eager (one AI called back six of its first eight waves), both sides ran out
+of salvage and nobody could finish. Being fixed before anything goes up.
+
+Also asked for and being worked on: three more factions (Zephyr Accord,
+Crimson Tally, Umbral Veil), a Watch option (the AI plays every side),
+"Save and Quit", a balance pass over all factions, and a bug hunt.
+
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
 for whoever is next: the real-GPU frame rate, and the two session branches
