@@ -297,6 +297,41 @@ These are suggestions; nothing here has been started.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 5, 14:50 UTC (branch `claude/relay-session-1116-1450`)
+
+Status: **in progress** — M26, balance across eight factions.
+
+- Started from `claude/gracious-lovelace-fxl9n2` (`bcfa562`, the newest
+  remote commit, 73 minutes old at the time, so nobody else was running).
+  Godot verification: available.
+- **Lost with the last session:** its entry says the Accord rework, the
+  Aegis Dark penalty and a `balance_tune.py` run were "committed locally,
+  being measured". None of that was pushed, so it is being redone here.
+- `claude/relay-session-1116-0451` (session 2) and
+  `claude/relay-session-1116-0654` (session 4) are still not merged. Their
+  balance numbers were tuned for three factions on the old map generator
+  and their `sim/sim_ai.gd` conflicts with this one. One thing was taken
+  from session 2: its random-input test (next point).
+- **`tools/check.sh` now plays every faction through the real interface
+  with random input** (`view/monkey_driver.gd`, from session 2's commit
+  `577198b`, brought up to date): about 5,800 clicks, drags, wheel turns and
+  key presses a faction, plus a deliberate select-builder, press-a-card-button,
+  place-beside-the-headquarters sequence every 90 frames. All eight run with
+  no script errors and each places 20-40 construction sites (the Nomads 5).
+  What had to change to make it work on today's interface:
+  - The pause-menu button has a node name (`MenuButton`); the test finds it
+    by that rather than by its text or a fixed corner of the screen.
+  - **The building ghost now follows the last mouse event**
+    (`BattleScene.pointer()`), not `Viewport.get_mouse_position()`. On a real
+    machine the two are the same; headless, the window has no pointer, so
+    pushed-in clicks always tried to build at one fixed spot and failed.
+  - The test points first and clicks a frame later, as a hand does.
+- **A mistake to avoid:** do not edit scripts in the working tree while
+  `tools/check.sh` or a league is running there. Every step starts a fresh
+  Godot that reads whatever is on disk at that moment, so a half-made edit
+  fails the run (it did, once). Leagues in this session are played from a
+  copy of the tree in a scratch folder.
+
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
 Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for

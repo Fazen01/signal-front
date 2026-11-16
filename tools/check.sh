@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The gate for every push: import the project, run the unit tests, boot the
-# real scenes headless, drive the interface with synthetic input, walk the
+# real scenes headless, drive the interface with synthetic and random input, walk the
 # whole menu -> match -> result -> load -> tutorial flow, play headless
 # AI-vs-AI matches, and repeat the flow from an exported pack. Fails on any
 # script error, engine error or warning-treated-as-error in the output.
@@ -63,6 +63,12 @@ run_step tests 900 "TESTS PASSED" -s res://tests/run_tests.gd
 run_step boot_menu 300 "Main menu ready" --fixed-fps 60 --quit-after 300
 run_step boot_battle 600 "Battle scene exit at tick" --fixed-fps 60 --quit-after 600 res://scenes/battle.tscn
 run_step smoke_battle 600 "Smoke driver finished" --fixed-fps 60 --quit-after 400 res://scenes/battle.tscn -- --smoke
+# Random input through the real interface, as each faction in turn.
+monkey_seed=0
+for faction in aegis foundry nomad vesper verdigris zephyr tally veil; do
+	monkey_seed=$((monkey_seed + 1))
+	run_step "monkey_${faction}" 600 "Monkey finished" --fixed-fps 60 --quit-after 3100 res://scenes/battle.tscn -- "--monkey=${monkey_seed}" "--faction=${faction}"
+done
 run_step flow 600 "Flow smoke finished" --fixed-fps 60 --quit-after 4000 -- --flow-smoke
 run_step spectate 900 "Spectate finished" --fixed-fps 60 --quit-after 9000 res://scenes/battle.tscn -- --spectate=nomad,foundry
 run_step ai_match 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=1 --max-minutes=45

@@ -158,6 +158,7 @@ func _build_top_bar() -> void:
 	_clock = _stat(row, "clock", "", TEXT)
 	var menu: Button = Button.new()
 	menu.text = "Menu  Esc"
+	menu.name = "MenuButton"
 	menu.custom_minimum_size = Vector2(112.0, 30.0)
 	menu.focus_mode = Control.FOCUS_NONE
 	menu.pressed.connect(func() -> void: battle.toggle_pause_menu())
