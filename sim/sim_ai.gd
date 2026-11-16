@@ -19,6 +19,9 @@ const CONCEDE_AFTER_TICKS: int = 20 * 60 * 14  ## nobody gives up in the first f
 const CONCEDE_HOLD_TICKS: int = 20 * 150  ## hopeless for this long without a break
 const CONCEDE_RATIO: float = 2.5  ## the enemy has this many times our strength
 const CONCEDE_MAX_BUILDINGS: int = 8  ## and we are down to this many buildings
+const LEASH_LEAD: float = 9.0  ## how far ahead of the main body a wave unit may get
+const LEASH_NEAR: float = 14.0  ## no waiting this close to the target
+const LEASH_TICKS: int = 20 * 120  ## the wave stops waiting for stragglers after this long
 ## How an AI likes to fight. Normal and Hard opponents draw one from the
 ## seed, so two matches against the same difficulty need not feel alike.
 const DOCTRINES: Array[String] = ["balanced", "aggressor", "fortifier", "raider"]
@@ -42,6 +45,7 @@ var builds_turrets: bool = true
 var uses_directives: bool = true
 var hunts_relays: bool = true
 var doctrine: String = "balanced"
+var keeps_together: bool = false  ## fast wave units wait for the slow ones on the way in (off: see the session 5 log)
 var retreats: bool = true  ## pulls a beaten wave back instead of losing it to the last unit
 var max_retreats: int = 2  ## how often in one match; after that the AI commits
 var scouts: bool = true  ## keeps one unit out looking for the enemy's buildings
@@ -116,6 +120,7 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			builds_turrets = false
 			hunts_relays = false
 			uses_directives = false
+			keeps_together = false
 		2:
 			think_ticks = 10
 			max_haulers = 8
@@ -1199,11 +1204,30 @@ func _assault(w: SimWorld, fresh: bool) -> void:
 		wave_target_pos = goal
 	else:
 		wave_target_pos = target.pos
+	# Keep the wave together. Aircraft and scout cars are two or three times
+	# as fast as infantry and used to reach the enemy alone and die there
+	# before the rest arrived: anything well ahead of the main body waits.
+	var body: float = 0.0
+	var leashed: bool = keeps_together and wave_ids.size() >= 3 and w.tick_count - wave_tick < LEASH_TICKS
+	if leashed:
+		var dists: Array[float] = []
+		for id: int in wave_ids:
+			dists.append(w.get_entity(id).pos.distance_to(wave_target_pos))
+		dists.sort()
+		body = dists[(dists.size() * 2) / 3]
 	var who: PackedInt32Array = PackedInt32Array()
+	var wait: PackedInt32Array = PackedInt32Array()
 	for id: int in wave_ids:
 		var e: SimEntity = w.get_entity(id)
+		var d: float = e.pos.distance_to(wave_target_pos)
+		if leashed and d < body - LEASH_LEAD and d > LEASH_NEAR and e.target_id == 0:
+			if not e.orders.is_empty():
+				wait.append(id)
+			continue
 		if fresh or e.orders.is_empty():
 			who.append(id)
+	if not wait.is_empty():
+		w.push_command(SimCommand.stop(player_id, wait))
 	if not who.is_empty():
 		w.push_command(SimCommand.attack_move(player_id, who, wave_target_pos))
 

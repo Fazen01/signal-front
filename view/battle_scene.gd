@@ -39,6 +39,8 @@ var placing: EntityDef = null
 var placing_deploy: bool = false  ## placing a unit's deploy footprint, not a new building
 var ghost: Node3D = null
 var ghost_cell: Vector2i = Vector2i.ZERO
+var _pointer: Vector2 = Vector2.ZERO  ## position of the last mouse event
+var _pointer_seen: bool = false
 var ghost_ok: bool = false
 var _ghost_shown_ok: int = -1
 
@@ -137,6 +139,12 @@ func _ready() -> void:
 		smoke.name = "Smoke"
 		add_child(smoke)
 		smoke.setup(self)
+	for arg: String in OS.get_cmdline_user_args():
+		if arg == "--monkey" or arg.begins_with("--monkey="):
+			var monkey: MonkeyDriver = MonkeyDriver.new()
+			monkey.name = "Monkey"
+			add_child(monkey)
+			monkey.setup(self, int(arg.trim_prefix("--monkey=")) if arg.begins_with("--monkey=") else 1)
 	print("Battle scene ready: %s, %d entities" % [world.map.name, world.entities.size()])
 
 
@@ -337,6 +345,12 @@ func _read_spectate_args() -> void:
 			time_scale = 30.0
 		elif arg.begins_with("--speed="):
 			time_scale = float(arg.trim_prefix("--speed="))
+		elif arg.begins_with("--faction="):
+			# Play a skirmish as another faction (used by the monkey test).
+			var fc: MatchConfig = MatchConfig.skirmish(config.seed_value)
+			fc.factions = [arg.trim_prefix("--faction="), "aegis"]
+			config = fc
+			world = null
 
 
 func _build_environment() -> void:
@@ -442,6 +456,20 @@ func _on_selection_changed() -> void:
 		hud.rebuild_card()
 	if audio != null and not controller.selected.is_empty():
 		audio.play_ui("select", -12.0)
+
+
+## Where the pointer is. Taken from the last mouse event rather than asked
+## of the window, so that it is also right for events a test pushes in (the
+## headless display has no pointer of its own).
+func pointer() -> Vector2:
+	return _pointer if _pointer_seen else get_viewport().get_mouse_position()
+
+
+func _input(event: InputEvent) -> void:
+	var mouse: InputEventMouse = event as InputEventMouse
+	if mouse != null:
+		_pointer = mouse.position
+		_pointer_seen = true
 
 
 # Hooks the controller calls before its default handling. They return true
@@ -662,7 +690,7 @@ func cancel_directive() -> void:
 func _update_targeting() -> void:
 	if targeting == null or target_ring == null:
 		return
-	var at: Vector2 = controller.ground_point(get_viewport().get_mouse_position())
+	var at: Vector2 = controller.ground_point(pointer())
 	target_ring.position = Vector3(at.x, world.map.height_at(world.map.clamp_to_map(at)) + 0.4, at.y)
 	var ok: int = 1 if SimDirectives.use_error(world, local_player, targeting, at) == "" else 0
 	if ok != _target_ok:
@@ -739,7 +767,7 @@ func placement_cell_at(ground: Vector2, def: EntityDef) -> Vector2i:
 func _update_placement() -> void:
 	if placing == null or ghost == null:
 		return
-	var ground: Vector2 = controller.ground_point(get_viewport().get_mouse_position())
+	var ground: Vector2 = controller.ground_point(pointer())
 	ghost_cell = placement_cell_at(ground, placing)
 	var centre: Vector2 = Vector2(
 		(float(ghost_cell.x) + float(placing.footprint.x) * 0.5) * SimMap.CELL,
