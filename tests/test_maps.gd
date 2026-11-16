@@ -118,3 +118,15 @@ func test_too_many_players_for_a_layout_falls_back_to_generated() -> void:
 	config.add_ai("aegis", 1, "Third")
 	var w: SimWorld = SimSetup.create_match(config)
 	check(w.map.starts.size() >= 3, "a map with enough starts is used instead")
+
+
+func test_generated_two_player_sizes() -> void:
+	var standard: SimWorld = SimSetup.create_match(MatchConfig.skirmish(3))
+	check_eq(standard.map.w, SimMapGen.STANDARD_CELLS, "a skirmish uses the standard generated size")
+	var config: MatchConfig = MatchConfig.skirmish(3)
+	config.map_cells = SimMapGen.SMALL_CELLS
+	var compact: SimWorld = SimSetup.create_match(config)
+	check_eq(compact.map.w, SimMapGen.SMALL_CELLS, "the compact option is honoured")
+	# Fields must be reachable on the larger map too.
+	SimTestUtil.run(standard, 20 * 60)
+	check(standard.players[0].stat_salvage_collected > 0, "haulers find fields on the standard map")

@@ -142,9 +142,11 @@ game except through software-rendered screenshots, so:
   for taste.
 - Frame rate on a real GPU is unmeasured. Script-side cost with 300 units in
   one fight is about 7–8 ms a frame.
-- Balance is tuned with AI-vs-AI batches (roughly 58 / 54 / 38 % win rates for
-  Aegis / Foundry / Nomad at last measure). Matches between AIs last about 9
-  minutes, shorter than the 15–25 the design aims for.
+- Balance and pacing are tuned with AI-vs-AI batches. One-on-one matches
+  between AIs on the default map have a median of about 16½ minutes (the
+  design aims for 15–25), and win rates were roughly even across the three
+  factions at last measure. Whether that pacing feels right against a human
+  is untested. The compact map gives matches of about ten minutes.
 
 ## For developers
 
@@ -166,8 +168,8 @@ This imports the project, runs the unit tests, boots the menu and battle
 scenes headless, drives the interface with synthetic input, walks the whole
 menu → match → result → load → tutorial loop, plays five AI-vs-AI matches
 that must each end with a winner, then exports the game as a pack and walks
-the loop again from the export. It fails on any script error. About three
-minutes.
+the loop again from the export. It fails on any script error. About eight
+to ten minutes.
 
 Other tools:
 
@@ -190,6 +192,14 @@ hand-made layout).
 ```
 
 Plays every faction pairing over the seeds and prints win counts.
+
+```bash
+.godot-bin/godot --headless --path . -s res://tools/pace_batch.gd -- --seeds=1,2,3 --harvest=5.0 --scale=prowler.cost:0.9
+```
+
+Plays every faction pairing with pacing or stats changed in memory and prints
+match lengths and win rates; `--trace=1` adds a timeline of each match. See
+the comment at the top of the script for every option.
 
 ```bash
 .godot-bin/godot --headless --path . -s res://tools/perf_bench.gd

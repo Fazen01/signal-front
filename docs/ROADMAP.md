@@ -179,11 +179,22 @@ construction look, effects and a menu backdrop.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 
-Status: **in progress**, started 05:50 UTC from `f728680` (session 2's last
-commit, 43 minutes old with no later push, so session 2 was taken as cut
-off). Godot 4.7.2 downloaded; software GL to be confirmed below.
+Status: **finished** at about 09:30 UTC. Started 05:50 UTC from `f728680`
+(session 2's last commit was 43 minutes old with no later push, so session 2
+was taken as cut off).
 
 Godot verification: **available**, including software-GL screenshots.
+
+For whoever reads this first:
+- Every roadmap box is ticked except "Confirm 60 fps with 300 units on real
+  hardware", which needs a GPU. No session here can do it.
+- `tools/check.sh` passes on the last pushed commit (122 tests, five AI
+  matches, export flow) and now takes about nine minutes.
+- PR #3 (this branch into `main`) carries sessions 1-3; it supersedes #1.
+- Most useful next, if a session has no GPU either: a human play-through is
+  still the biggest unknown. Without one, candidates are a Nomad tier-3
+  answer to Aegis artillery and aircraft (the 5% cost cut is a stopgap), and
+  starved-endgame stalemates (about 4% of AI-vs-AI games, see below).
 
 Done so far:
 - Looked at screenshots of every screen (menu, setup, tutorials, settings,
@@ -251,6 +262,10 @@ points of noise), so the Nomads are now clearly behind.
   at 55:25, against a 60-minute cap, which is too thin a margin: the cap for
   that step is now 90 game minutes. It still has to end with a winner and
   takes about four minutes of wall time.
+- Difficulty still ranks correctly with the new pacing (`balance_batch.gd
+  --levels`, seeds 1-3): Hard beat Easy 9-0, Normal beat Easy 9-0, Hard beat
+  Normal 7-2. A test now pins the generated map sizes (standard 88 cells,
+  compact 64) and checks haulers find fields on the larger map.
 - `tools/pace_batch.gd --scale=id.field:mult` scales one field of any unit,
   building or weapon for an experiment.
 - Frame cost on the larger default map with 300 units (CPU only): average
