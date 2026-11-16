@@ -17,7 +17,11 @@ var bandwidth_used: int = 0
 var bandwidth_cap: int = 0
 var command_points: int = 0
 var last_attack_alert: int = -100000  ## tick of the last "under attack" alert
+var cp_progress: float = 0.0  ## destroyed value counted towards the next Command Point
+var unlocked: Dictionary[String, bool] = {}  ## Directive ids
+var directive_ready: Dictionary[String, int] = {}  ## Directive id -> tick it is ready again
 var signal_radius_mult: float = 1.0  ## raised temporarily by Signal Surge
+var surge_until: int = 0
 
 # Completed building counts by def id; drives tech requirements.
 var building_counts: Dictionary[String, int] = {}
@@ -31,6 +35,7 @@ var stat_kills: int = 0
 var stat_value_destroyed: int = 0
 var stat_salvage_collected: int = 0
 var stat_salvage_spent: int = 0
+var stat_directives_used: int = 0
 
 
 func has_building(def_id: String) -> bool:

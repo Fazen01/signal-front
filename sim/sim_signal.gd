@@ -121,6 +121,10 @@ static func recompute(w: SimWorld) -> void:
 		grid.resize(cells)
 		for e: SimEntity in frontier:
 			stamp_disc(w, grid, e.pos, emitter_radius(w, e))
+		# An enemy Blackout wipes our coverage inside its disc.
+		for b: Vector4 in w.blackouts:
+			if w.are_enemies(int(b.w), p.id):
+				_clear_disc(w, grid, Vector2(b.x, b.y), b.z)
 		w.coverage[p.id] = grid
 
 	# Everything that cannot move takes its state from the new grids.
@@ -128,6 +132,22 @@ static func recompute(w: SimWorld) -> void:
 		if e.alive and e.owner >= 0 and e.kind == SimEntity.Kind.BUILDING and not is_emitter(e):
 			e.linked = is_covered(w, e.owner, e.pos)
 	SimEconomy.recompute_bandwidth(w)
+
+
+static func _clear_disc(w: SimWorld, grid: PackedByteArray, centre: Vector2, radius: float) -> void:
+	var cw: int = w.map.w
+	var ch: int = w.map.h
+	var x0: int = clampi(int(floorf((centre.x - radius) / SimMap.CELL)), 0, cw - 1)
+	var x1: int = clampi(int(floorf((centre.x + radius) / SimMap.CELL)), 0, cw - 1)
+	var y0: int = clampi(int(floorf((centre.y - radius) / SimMap.CELL)), 0, ch - 1)
+	var y1: int = clampi(int(floorf((centre.y + radius) / SimMap.CELL)), 0, ch - 1)
+	var r2: float = radius * radius
+	for y: int in range(y0, y1 + 1):
+		var cy: float = (float(y) + 0.5) * SimMap.CELL - centre.y
+		for x: int in range(x0, x1 + 1):
+			var cx: float = (float(x) + 0.5) * SimMap.CELL - centre.x
+			if cx * cx + cy * cy <= r2:
+				grid[y * cw + x] = 0
 
 
 ## Marks every cell whose centre lies within `radius` of `centre`.

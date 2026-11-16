@@ -1,0 +1,28 @@
+{
+	"recon_sweep": {
+		"name": "Recon Sweep", "desc": "Reveals an area for 20 seconds. Usable anywhere.",
+		"cost": 1, "cooldown": 45.0, "radius": 16.0, "duration": 20.0, "target": "anywhere"
+	},
+	"shell_barrage": {
+		"name": "Shell Barrage", "desc": "Off-map artillery pounds an area. The target must be inside your coverage or within 15 of it.",
+		"cost": 3, "cooldown": 90.0, "radius": 7.0, "duration": 4.0, "target": "near_coverage",
+		"damage": 110.0, "shells": 10, "splash": 3.0
+	},
+	"field_repair": {
+		"name": "Field Repair", "desc": "Repairs your units and buildings in an area. Own coverage only.",
+		"cost": 2, "cooldown": 75.0, "radius": 9.0, "target": "coverage", "heal_fraction": 0.45
+	},
+	"signal_surge": {
+		"name": "Signal Surge", "desc": "+50% radius on all your emitters for 30 seconds.",
+		"cost": 2, "cooldown": 120.0, "duration": 30.0, "target": "none", "radius_mult": 1.5
+	},
+	"blackout": {
+		"name": "Blackout", "desc": "Removes enemy coverage in an area for 20 seconds. Usable anywhere you can see.",
+		"cost": 3, "cooldown": 120.0, "radius": 14.0, "duration": 20.0, "target": "revealed"
+	},
+	"reinforcement_drop": {
+		"name": "Reinforcement Drop", "desc": "Delivers a small infantry squad after a short delay. Own coverage only.",
+		"cost": 4, "cooldown": 150.0, "radius": 4.0, "duration": 3.0, "target": "coverage",
+		"squad": ["trooper", "trooper", "trooper", "lancer", "lancer"]
+	}
+}

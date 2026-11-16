@@ -32,9 +32,15 @@ var coverage_version: int = 0  ## bumps whenever coverage is rebuilt
 # Fog of war (see SimVision)
 var visible: Array[PackedByteArray] = []  ## per player: 1 where currently seen
 var explored: Array[PackedByteArray] = []  ## per player: 1 where ever seen
-var reveals: Array[Vector4] = []  ## temporary reveals: x, z, radius, player id
+var reveals: Array[Vector4] = []  ## reveals: x, z, radius, player id
+var reveal_until: PackedInt32Array = PackedInt32Array()  ## expiry tick per reveal, -1 = never
 var vision_next_tick: int = 0
 var vision_version: int = 0
+
+# Directives (see SimDirectives)
+var timed: Array[SimDirectives.Timed] = []
+var blackouts: Array[Vector4] = []  ## x, z, radius, player id of the caster
+var blackout_until: PackedInt32Array = PackedInt32Array()
 
 var ais: Array[SimAI] = []
 
@@ -76,6 +82,7 @@ func add_player(faction_id: String, color: Color, is_ai: bool, start_pos: Vector
 	p.start_pos = start_pos
 	p.name = player_name if player_name != "" else "Player %d" % (p.id + 1)
 	p.salvage = data.start_salvage
+	p.command_points = data.start_command_points
 	players.append(p)
 	var grid: PackedByteArray = PackedByteArray()
 	grid.resize(map.w * map.h)
@@ -249,6 +256,23 @@ func remove_entity(e: SimEntity) -> void:
 	_dead.append(e)
 
 
+# ---------------------------------------------------------------- reveals
+
+## Lets `player_id` see a disc until `until_tick` (-1 = for the whole match).
+func add_reveal(pos: Vector2, radius: float, player_id: int, until_tick: int) -> void:
+	reveals.append(Vector4(pos.x, pos.y, radius, float(player_id)))
+	reveal_until.append(until_tick)
+
+
+func expire_reveals() -> void:
+	var i: int = reveal_until.size() - 1
+	while i >= 0:
+		if reveal_until[i] >= 0 and tick_count >= reveal_until[i]:
+			reveals.remove_at(i)
+			reveal_until.remove_at(i)
+		i -= 1
+
+
 # ----------------------------------------------------------------- events
 
 func emit_event(type: int, id: int, player_id: int, pos: Vector2) -> SimEvent:
@@ -332,6 +356,7 @@ func tick() -> void:
 			if e.alive and e.kind == SimEntity.Kind.UNIT:
 				SimOrders.update_unit(self, e)
 		SimEconomy.update(self)
+		SimDirectives.update(self)
 		SimMovement.update(self)
 		SimCombat.update(self)
 		if victory_enabled and tick_count % 10 == 0:

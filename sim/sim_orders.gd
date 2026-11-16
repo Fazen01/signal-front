@@ -26,6 +26,8 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 				e.hold = true
 		SimCommand.Type.SURRENDER:
 			w.defeat_player(cmd.player)
+		SimCommand.Type.DIRECTIVE, SimCommand.Type.UNLOCK:
+			SimDirectives.apply_command(w, cmd)
 		_:
 			SimEconomy.apply_command(w, cmd)
 

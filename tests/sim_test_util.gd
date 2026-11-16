@@ -21,7 +21,7 @@ static func make_world(seed_value: int = 1, size_cells: int = 32) -> SimWorld:
 static func reveal_all(w: SimWorld) -> void:
 	var size: Vector2 = w.map.world_size()
 	for p: SimPlayer in w.players:
-		w.reveals.append(Vector4(size.x * 0.5, size.y * 0.5, size.length(), float(p.id)))
+		w.add_reveal(size * 0.5, size.length(), p.id, -1)
 	SimVision.recompute(w)
 
 

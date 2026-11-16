@@ -7,7 +7,7 @@ extends RefCounted
 
 enum Type {
 	MOVE, ATTACK, ATTACK_MOVE, STOP, HOLD, HARVEST, BUILD, REPAIR, TRAIN, CANCEL_TRAIN,
-	CANCEL_BUILDING, RALLY, CAPTURE, DIRECTIVE, SURRENDER,
+	CANCEL_BUILDING, RALLY, CAPTURE, DIRECTIVE, SURRENDER, UNLOCK,
 }
 
 var type: int = Type.MOVE
@@ -143,6 +143,25 @@ static func rally(p: int, building: int, at: Vector2) -> SimCommand:
 	c.type = Type.RALLY
 	c.player = p
 	c.target_id = building
+	c.pos = at
+	return c
+
+
+## Spend Command Points to unlock a Directive.
+static func unlock(p: int, directive_id: String) -> SimCommand:
+	var c: SimCommand = SimCommand.new()
+	c.type = Type.UNLOCK
+	c.player = p
+	c.def_id = directive_id
+	return c
+
+
+## Use an unlocked Directive at a position (ignored by untargeted ones).
+static func directive(p: int, directive_id: String, at: Vector2) -> SimCommand:
+	var c: SimCommand = SimCommand.new()
+	c.type = Type.DIRECTIVE
+	c.player = p
+	c.def_id = directive_id
 	c.pos = at
 	return c
 

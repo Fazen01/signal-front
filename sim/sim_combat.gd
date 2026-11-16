@@ -78,6 +78,9 @@ static func _update_combatant(w: SimWorld, e: SimEntity) -> void:
 	for i: int in e.cooldowns.size():
 		if e.cooldowns[i] > 0:
 			e.cooldowns[i] -= 1
+	# Top-rank veterans slowly repair themselves when left alone.
+	if e.rank >= w.data.rank_thresholds.size() and e.hp < e.max_hp and w.tick_count - e.last_hit_tick > 100:
+		e.hp = minf(e.max_hp, e.hp + e.max_hp * w.data.rank_self_repair * SimWorld.DT)
 
 	if w.tick_count >= e.scan_tick:
 		e.scan_tick = w.tick_count + SCAN_INTERVAL
@@ -157,7 +160,7 @@ static func _fire(w: SimWorld, e: SimEntity, t: SimEntity, wd: WeaponDef, slot: 
 	var ticks: float = wd.cooldown * float(SimWorld.TICK_RATE) / rof_mult(w, e)
 	e.cooldowns[slot] = maxi(1, int(roundf(ticks)))
 	e.last_fire_tick = w.tick_count
-	var damage: float = wd.damage * (1.0 + 0.15 * float(e.rank))
+	var damage: float = wd.damage * (1.0 + w.data.rank_damage_bonus * float(e.rank))
 	if wd.projectile_speed <= 0.0:
 		var ev: SimEvent = w.emit_event(SimEvent.Type.SHOT, e.id, e.owner, e.pos)
 		ev.other_id = t.id
@@ -260,6 +263,19 @@ static func apply_damage(w: SimWorld, t: SimEntity, amount: float, damage_type: 
 		kill(w, t, attacker, attacker_owner)
 
 
+## Veterancy: ranks are earned by destroying value worth multiples of the
+## unit's own cost. Each rank adds damage and health; the top rank self-repairs.
+static func _check_rank(w: SimWorld, e: SimEntity) -> void:
+	var base: float = maxf(float(e.def.cost), 100.0)
+	while e.rank < w.data.rank_thresholds.size() and e.xp >= base * w.data.rank_thresholds[e.rank]:
+		e.rank += 1
+		var old_max: float = e.max_hp
+		e.max_hp = e.def.hp * (1.0 + w.data.rank_health_bonus * float(e.rank))
+		e.hp += e.max_hp - old_max
+		var ev: SimEvent = w.emit_event(SimEvent.Type.RANK_UP, e.id, e.owner, e.pos)
+		ev.value = float(e.rank)
+
+
 static func kill(w: SimWorld, t: SimEntity, killer: SimEntity, killer_owner: int) -> void:
 	if not t.alive:
 		return
@@ -286,9 +302,11 @@ static func kill(w: SimWorld, t: SimEntity, killer: SimEntity, killer_owner: int
 		var kp: SimPlayer = w.players[killer_owner]
 		kp.stat_kills += 1
 		kp.stat_value_destroyed += value
+		SimDirectives.award(w, killer_owner, value)
 		if killer != null and killer.alive:
 			killer.kills += 1
 			killer.xp += float(value)
+			_check_rank(w, killer)
 	# Vehicles and buildings leave salvageable wrecks; infantry do not.
 	if t.kind == SimEntity.Kind.BUILDING or t.def.is_vehicle():
 		var amount: int = int(float(value) * w.data.wreck_fraction)

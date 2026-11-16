@@ -16,6 +16,10 @@ const ENTITY_KEYS: Array[String] = [
 	"hotkey", "requires", "buildable", "builder", "builds", "harvester", "capacity", "footprint",
 	"signal_radius", "signal_root", "depot", "produces", "stealth",
 ]
+const DIRECTIVE_KEYS: Array[String] = [
+	"name", "desc", "cost", "cooldown", "radius", "duration", "target", "damage", "shells",
+	"splash", "heal_fraction", "radius_mult", "squad",
+]
 const FACTION_KEYS: Array[String] = [
 	"name", "desc", "hq", "start_units", "linked_range_bonus", "dark_rof_mult", "playable",
 ]
@@ -25,6 +29,8 @@ static var _shared: GameData = null
 var weapons: Dictionary[String, WeaponDef] = {}
 var entities: Dictionary[String, EntityDef] = {}
 var factions: Dictionary[String, FactionDef] = {}
+var directives: Dictionary[String, DirectiveDef] = {}
+var directive_order: Array[String] = []  ## ids in Directive-bar order
 var armor_classes: Array[String] = []
 var damage_table: Array[PackedFloat32Array] = []  ## [damage_type][armor_class]
 var errors: Array[String] = []
@@ -49,6 +55,13 @@ var unload_seconds: float = 1.0
 var repair_rate: float = 0.04
 var uplink_income_per_second: int = 3
 var uplink_capture_seconds: float = 8.0
+var command_point_value: int = 300
+var start_command_points: int = 1
+var near_coverage_range: float = 15.0
+var rank_thresholds: Array[float] = [2.0, 4.0, 8.0]  ## multiples of the unit's own cost
+var rank_damage_bonus: float = 0.15
+var rank_health_bonus: float = 0.10
+var rank_self_repair: float = 0.01
 
 
 ## Shared instance, loaded once. Definitions are immutable after loading.
@@ -66,6 +79,7 @@ func load_all() -> bool:
 	_load_entities(_read_json("res://data/units.json"), false)
 	_load_entities(_read_json("res://data/buildings.json"), true)
 	_load_factions(_read_json("res://data/factions.json"))
+	_load_directives(_read_json("res://data/directives.json"))
 	_validate()
 	for e: String in errors:
 		push_error("GameData: " + e)
@@ -82,6 +96,10 @@ func weapon(id: String) -> WeaponDef:
 
 func faction(id: String) -> FactionDef:
 	return factions.get(id, null)
+
+
+func directive(id: String) -> DirectiveDef:
+	return directives.get(id, null)
 
 
 func damage_multiplier(damage_type: int, armor: int) -> float:
@@ -141,6 +159,17 @@ func _load_rules(d: Dictionary) -> void:
 	repair_rate = float(d.get("repair_rate", repair_rate))
 	uplink_income_per_second = int(d.get("uplink_income_per_second", uplink_income_per_second))
 	uplink_capture_seconds = float(d.get("uplink_capture_seconds", uplink_capture_seconds))
+	command_point_value = int(d.get("command_point_value", command_point_value))
+	start_command_points = int(d.get("start_command_points", start_command_points))
+	near_coverage_range = float(d.get("near_coverage_range", near_coverage_range))
+	rank_damage_bonus = float(d.get("rank_damage_bonus", rank_damage_bonus))
+	rank_health_bonus = float(d.get("rank_health_bonus", rank_health_bonus))
+	rank_self_repair = float(d.get("rank_self_repair", rank_self_repair))
+	if d.has("rank_thresholds"):
+		rank_thresholds.clear()
+		var raw_ranks: Array = d["rank_thresholds"]
+		for v: Variant in raw_ranks:
+			rank_thresholds.append(float(v))
 	armor_classes = _strings(d, "armor_classes")
 	damage_table.clear()
 	var table: Dictionary = d.get("damage_table", {})
@@ -261,6 +290,38 @@ func _load_factions(d: Dictionary) -> void:
 		f.dark_rof_mult = float(src.get("dark_rof_mult", -1.0))
 		f.playable = bool(src.get("playable", true))
 		factions[id] = f
+
+
+func _load_directives(d: Dictionary) -> void:
+	for key: Variant in d.keys():
+		var id: String = str(key)
+		var src: Dictionary = d[key]
+		_check_keys("directive " + id, src, DIRECTIVE_KEYS)
+		var dd: DirectiveDef = DirectiveDef.new()
+		dd.id = id
+		dd.name = str(src.get("name", id))
+		dd.desc = str(src.get("desc", ""))
+		dd.cost = int(src.get("cost", 1))
+		dd.cooldown = float(src.get("cooldown", 60.0))
+		dd.radius = float(src.get("radius", 0.0))
+		dd.duration = float(src.get("duration", 0.0))
+		dd.target = str(src.get("target", "anywhere"))
+		dd.damage = float(src.get("damage", 0.0))
+		dd.shells = int(src.get("shells", 0))
+		dd.splash = float(src.get("splash", 0.0))
+		dd.heal_fraction = float(src.get("heal_fraction", 0.0))
+		dd.radius_mult = float(src.get("radius_mult", 1.0))
+		dd.squad = _strings(src, "squad")
+		dd.slot = directive_order.size()
+		if not DirectiveDef.TARGET_MODES.has(dd.target):
+			errors.append("directive %s: bad target mode '%s'" % [id, dd.target])
+		if dd.cost < 1 or dd.cooldown <= 0.0:
+			errors.append("directive %s: bad cost or cooldown" % id)
+		for u: String in dd.squad:
+			if not entities.has(u):
+				errors.append("directive %s: unknown squad unit '%s'" % [id, u])
+		directives[id] = dd
+		directive_order.append(id)
 
 
 func _validate() -> void:

@@ -255,7 +255,9 @@ Notes on this session's pushes:
   alert pings), Uplink Sites captured by Field Engineers, double-click
   select, idle-builder key (period or F1), camera bookmarks (Ctrl+F5..F8).
 
-Half-done / next: M7 Directives and veterancy.
+Half-done / next: M7 — Command Points, all six Directives and veterancy are
+in the simulation and tested (`sim/sim_directives.gd`, `data/directives.json`).
+Still to do: Directive bar and targeting UI, rank indicators, AI use.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -277,3 +279,10 @@ Fog decisions:
   captures the site (8 s), and it pays 3 salvage a second only while inside
   its owner's coverage. An enemy engineer can flip it. Sites cannot be
   destroyed and go neutral if their owner is defeated.
+- Directives: 1 Command Point per 300 salvage of enemy value destroyed, plus
+  1 to start. Points unlock a Directive permanently; after that it is free to
+  use on its cooldown. Unlock costs: Recon 1, Repair 2, Surge 2, Barrage 3,
+  Blackout 3, Drop 4. The barrage never hurts its owner's units.
+- Veterancy: ranks at 2x, 4x and 8x the unit's own cost in value destroyed;
+  each rank +15% damage and +10% health; rank 3 repairs 1% health a second
+  after 5 s without taking damage.

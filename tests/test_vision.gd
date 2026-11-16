@@ -64,7 +64,7 @@ func test_marksman_is_hidden_while_still() -> void:
 	var w: SimWorld = SimTestUtil.make_world(5, 64)
 	var sniper: SimEntity = w.spawn_unit("marksman", 0, Vector2(40, 40))
 	# Player 1 has the area revealed (as a Recon Sweep would) but nobody close.
-	w.reveals.append(Vector4(40.0, 40.0, 12.0, 1.0))
+	w.add_reveal(Vector2(40.0, 40.0), 12.0, 1, -1)
 	SimTestUtil.run(w, 6)
 	check(SimVision.is_visible(w, 1, sniper.pos), "the enemy can see the ground the sniper stands on")
 	check(SimVision.is_stealthed(w, sniper), "a still marksman is stealthed")
