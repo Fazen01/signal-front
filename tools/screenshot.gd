@@ -30,6 +30,13 @@ func _ready() -> void:
 		print("BOOT FAILED: cannot load %s" % _scene_path)
 		get_tree().quit(1)
 		return
+	if _script_name == "midmatch":
+		# An AI-vs-AI match, fast-forwarded; the capture follows the fighting.
+		var mgame: GameState = get_node_or_null("/root/Game") as GameState
+		if mgame != null:
+			var mc: MatchConfig = MatchConfig.ai_vs_ai(7)
+			mc.factions = ["aegis", "foundry"]
+			mgame.pending_config = mc
 	if _script_name.begins_with("tutorial_"):
 		var tgame: GameState = get_node_or_null("/root/Game") as GameState
 		if tgame != null:
@@ -188,6 +195,22 @@ func _run_script(battle: BattleScene) -> void:
 				hurt.hp = hurt.max_hp * 0.3
 				battle.cam.set_distance(34.0)
 				battle.cam.center_on(front + Vector2(0.0, -3.0))
+		"midmatch":
+			if _count == 2:
+				battle.time_scale = 30.0
+			if _count > 2 and _count % 20 == 0:
+				# Look at wherever the local player's army is thickest.
+				var sum: Vector2 = Vector2.ZERO
+				var n: int = 0
+				for e: SimEntity in battle.world.entities:
+					if e.owner == battle.local_player and e.kind == SimEntity.Kind.UNIT and e.def.is_armed():
+						sum += e.pos
+						n += 1
+				if n > 0:
+					battle.cam.center_on(sum / float(n))
+				battle.cam.set_distance(46.0)
+			if _count == _frames - 30:
+				battle.time_scale = 1.0
 		"result":
 			if _count == 5:
 				battle.world.push_command(SimCommand.surrender(battle.local_player))
