@@ -145,7 +145,7 @@
 	},
 	"drifter": {
 		"name": "Drifter", "desc": "Fast light infantry. Vanishes when it stands still in forest.",
-		"faction": "nomad", "tier": 1, "cost": 55, "build_time": 6.5, "bandwidth": 1,
+		"faction": "nomad", "tier": 1, "cost": 52, "build_time": 6.5, "bandwidth": 1,
 		"hp": 88, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["drifter_smg"], "ai_role": "anti_infantry", "ai_weight": 3.0,
 		"model": "drifter", "hotkey": "T"
@@ -172,14 +172,14 @@
 	},
 	"dart": {
 		"name": "Dart", "desc": "Raider bike. Very fast, very cheap, shoots on the move.",
-		"faction": "nomad", "tier": 2, "cost": 90, "build_time": 8.0, "bandwidth": 1,
+		"faction": "nomad", "tier": 2, "cost": 86, "build_time": 8.0, "bandwidth": 1,
 		"hp": 160, "armor": "light", "move": "vehicle", "speed": 7.5, "turn_rate": 5.0,
 		"radius": 0.6, "sight": 12.0, "weapons": ["dart_gun"], "turret": true,
 		"ai_role": "anti_infantry", "ai_weight": 2.6, "model": "dart", "hotkey": "R"
 	},
 	"sidewinder": {
 		"name": "Sidewinder", "desc": "Missile truck. Out-ranges tanks and cannot take a hit.",
-		"faction": "nomad", "tier": 2, "cost": 190, "build_time": 15.5, "bandwidth": 2,
+		"faction": "nomad", "tier": 2, "cost": 181, "build_time": 15.5, "bandwidth": 2,
 		"hp": 290, "armor": "light", "move": "vehicle", "speed": 5.0, "turn_rate": 3.4,
 		"radius": 0.95, "sight": 12.0, "weapons": ["sidewinder_missile"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 2.8, "model": "sidewinder", "hotkey": "B"
@@ -193,7 +193,7 @@
 	},
 	"prowler": {
 		"name": "Prowler", "desc": "Light tank with an armor-piercing gun. The heaviest thing the Circuit builds, and still quick.",
-		"faction": "nomad", "tier": 2, "cost": 280, "build_time": 21.0, "bandwidth": 3,
+		"faction": "nomad", "tier": 2, "cost": 266, "build_time": 21.0, "bandwidth": 3,
 		"hp": 480, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.0,
 		"radius": 1.05, "sight": 11.0, "weapons": ["prowler_cannon"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 3.0, "model": "prowler", "hotkey": "P"

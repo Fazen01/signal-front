@@ -181,6 +181,19 @@ With these fixes, seeds 1-6 across all nine pairings (54 games): average
 17.8, median 16.6, range 11-45, 2 draws (4%), 53% inside 15-25. Win rates:
 Aegis 54%, Foundry 54%, Nomad 33% (24 non-mirror games each, about +/-10
 points of noise), so the Nomads are now clearly behind.
+- Nomad rebalance for the longer matches: they were even with Foundry but
+  lost to Aegis 2-9, whose tier 3 (artillery, aircraft) now comes online in
+  most games. The Nomad army units cost 5% less: Drifter 55 -> 52, Dart
+  90 -> 86, Sidewinder 190 -> 181, Prowler 280 -> 266. Nomad then won 12 of
+  24 on seeds 1-6 (7-5 against Aegis, 5-7 against Foundry). A 10% cut, or
+  15% faster Nomad production, each swung the Aegis matchup to 8-4.
+- `tools/pace_batch.gd --scale=id.field:mult` scales one field of any unit,
+  building or weapon for an experiment.
+- Frame cost on the larger default map with 300 units (CPU only): average
+  7.5-8 ms as before; the worst frame was 30-33 ms (was 24-25 on the old
+  map). Switching the minimap, fog or signal view off does not change it,
+  and the simulation benchmark's worst tick (18 ms) is inside session 1's
+  17-31 ms range, so it is not treated as a regression.
 
 How it was found (27 games each): build and harvest times x1.5 -> median 11.1; unit build x2 ->
 12.2; HQ health x2.5 with tougher buildings and turrets -> 10.4. Traces show

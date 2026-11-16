@@ -10,6 +10,9 @@ extends SceneTree
 ##          [--fields=1.5]  salvage in every field
 ##          [--map-cells=88]  generated map size (64 is the shipped two-player size)
 ##          [--ai.<field>=value]  set any SimAI variable on every AI
+##          [--scale=prowler.cost:0.9,rail_gun.damage:1.1]  scale one field of a
+##                    unit, building or weapon definition (cost, build_time, hp,
+##                    speed, sight, damage, cooldown, max_range)
 ##          [--trace=1]  a status line for every 30 seconds of each match
 ## Prints one "PACE" line per pairing and a "PACE TOTAL" line.
 
@@ -19,6 +22,7 @@ func _init() -> void:
 	var pairs: Array[String] = []
 	var max_minutes: float = 60.0
 	var knobs: Dictionary[String, float] = {}
+	var scales: Array[String] = []
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--seeds="):
 			seeds.clear()
@@ -29,12 +33,17 @@ func _init() -> void:
 				pairs.append(part)
 		elif arg.begins_with("--max-minutes="):
 			max_minutes = float(arg.trim_prefix("--max-minutes="))
+		elif arg.begins_with("--scale="):
+			for part: String in arg.trim_prefix("--scale=").split(","):
+				scales.append(part)
 		elif arg.begins_with("--") and arg.contains("="):
 			var kv: PackedStringArray = arg.trim_prefix("--").split("=")
 			knobs[kv[0]] = float(kv[1])
 
 	var data: GameData = GameData.shared()
 	_apply(data, knobs)
+	for spec: String in scales:
+		_scale(data, spec)
 	if pairs.is_empty():
 		for a: FactionDef in data.factions.values():
 			for b: FactionDef in data.factions.values():
@@ -196,3 +205,21 @@ func _trace_line(w: SimWorld) -> String:
 			sites += 1
 	parts.append("salvage left %d, uplink sites %d" % [left, sites])
 	return " | ".join(parts)
+
+
+func _scale(data: GameData, spec: String) -> void:
+	var id_field: PackedStringArray = spec.split(":")[0].split(".")
+	var mult: float = float(spec.split(":")[1])
+	var obj: Object = null
+	if data.entities.has(id_field[0]):
+		obj = data.entities[id_field[0]]
+	elif data.weapons.has(id_field[0]):
+		obj = data.weapons[id_field[0]]
+	if obj == null or obj.get(id_field[1]) == null:
+		push_error("pace_batch: cannot scale %s" % spec)
+		return
+	var current: Variant = obj.get(id_field[1])
+	if current is int:
+		obj.set(id_field[1], int(round(float(current) * mult)))
+	else:
+		obj.set(id_field[1], float(current) * mult)
