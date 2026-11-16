@@ -201,6 +201,89 @@ map generation itself to be improved.
       fields and uplinks are identical in all four
 - [x] Minimap colours follow the region
 
+## M22 — Verdigris Order, and regions that generate differently (owner request)
+
+- [x] Fifth faction: nine units, eight buildings, `linked_damage_resist`
+- [x] Four kinds of country per region (sixteen in all), each region with
+      its own mix of rock, water and woods
+- [x] Cinder Wastes reworked after the owner disliked it: lava is a rare
+      large feature, drawn as dark crust with glowing cracks
+
+## M23 — Playing it (owner request)
+
+- [x] Game speed (+ / -), Ctrl+A or F2 for the whole army, Space to the
+      latest warning, Shift to queue five
+- [x] Order lines and rally lines for the selection; weapon range rings
+- [x] Income readout in the top bar
+- [x] **Watch**: the AI plays every side, no fog of war, no orders
+- [x] **Save and Quit to Menu**; "Continue Saved Game" on the main menu
+
+## M24 — AI design (owner request)
+
+- [x] Doctrines from the seed: balanced, aggressor, fortifier, raider
+- [x] A fighting retreat, at most a few times a match
+- [x] A touring scout
+
+## M25 — Three more factions (owner request)
+
+- [x] Zephyr Accord: aircraft; `linked_sight_bonus`
+- [x] Crimson Tally: bounties; `kill_bounty`
+- [x] Umbral Veil: hidden while still inside its coverage; `linked_cloak`
+- [x] Models, tests and an AI match in `tools/check.sh` for each
+
+## M26 — Balance across eight factions (owner request)
+
+- [x] `tools/balance_league.py`: every pairing, both seats, in parallel
+- [ ] Every faction within about ten points of even over a league of at
+      least 48 games a faction
+- [ ] Match length still 15-25 minutes for most pairings
+
+## M27 — Bug hunt (owner request)
+
+- [ ] An invariant checker that plays matches and stops on impossible states
+- [ ] Fix what it finds
+
+## Ideas for later (proposed by session 1, not yet asked for)
+
+These are suggestions; nothing here has been started.
+
+### M28 — A campaign
+
+- [ ] Six to eight linked missions that teach one faction's tricks each,
+      with a briefing screen and objectives beyond "destroy the HQ"
+      (hold an uplink for five minutes, escort a Caravan, cut a relay chain)
+- [ ] A world map that shows the four regions and what has been won
+
+### M29 — Depth in a fight
+
+- [ ] One active ability per signature unit (a Bulwark's smoke, a Splicer's
+      jam burst, a Castellan's brace), on a cooldown, used by the AI too
+- [ ] Unit stances: aggressive, hold fire, return fire
+- [ ] A patrol order, and formations that put tanks in front of artillery
+- [ ] Garrisons: infantry inside a building fire from cover
+
+### M30 — More to fight over
+
+- [ ] Neutral structures to capture besides uplinks: a repair yard, an
+      observation post, a salvage rig that pays out slowly
+- [ ] Destructible bridges on river maps; fords that flood on a timer
+- [ ] Weather per region that touches the Signal Grid: dust storms shorten
+      relay reach in the Dustlands, blizzards slow vehicles on the Frostline
+
+### M31 — Other people
+
+- [ ] Two players on one network (the simulation is already deterministic
+      and command-driven, which is what lockstep play needs)
+- [ ] Replays: save the seed and the command stream, play it back, scrub
+- [ ] Teams: two against two with shared coverage
+
+### M32 — Comfort
+
+- [ ] Rebindable keys; a colour-blind palette for team colours
+- [ ] Autosave every few minutes, and more than one save slot
+- [ ] A map editor for the hand-made layouts (they are JSON already)
+- [ ] An in-game encyclopedia of every unit with its counters
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
@@ -417,6 +500,34 @@ of salvage and nobody could finish. Being fixed before anything goes up.
 Also asked for and being worked on: three more factions (Zephyr Accord,
 Crimson Tally, Umbral Veil), a Watch option (the AI plays every side),
 "Save and Quit", a balance pass over all factions, and a bug hunt.
+
+**13:10 UTC — the retreat rule is fixed and the rest is in.**
+
+- **Decision: an AI may retreat only a few times a match** (twice; once for
+  an aggressor, three times for a fortifier), only when the wave is down to
+  two fifths of its strength against something 1.6 times stronger, and
+  never after minute 22. The same three-way match that ran out the clock
+  now ends in 39 minutes.
+- **Finding: the AI already knew where the enemy HQ was within three
+  seconds**, because it unlocks Recon Sweep with its first Command Point
+  and uses it on the enemy start. The scout therefore matters for relays
+  and depots, not for the HQ; a soldier is only pressed into scouting when
+  nothing at all is known.
+- **Three more factions.** Each plugs into the same role table the AI
+  already uses and adds one rule in the simulation:
+  `linked_sight_bonus` (Zephyr Accord), `kill_bounty` (Crimson Tally),
+  `linked_cloak` (Umbral Veil). The Veil's Sentinel turret uses the stealth
+  flag that mines already had. All names are new.
+- The Accord's aircraft use the roles `anti_infantry`, `anti_armor` and
+  `artillery` rather than `air`, so the AI picks them by what the enemy
+  fields, and its works building (the Flight Deck) builds them.
+- **Watch** is `MatchConfig.watch`: every seat is an AI, fog is off, and the
+  interface refuses every order (selection, camera, speed and the pause
+  menu still work). `tools/check.sh`'s spectate step now runs in this mode.
+- **Not yet balanced.** Eight factions make 28 pairings. First numbers for
+  the newest are in the M26 entry when the league has run.
+- `tools/screenshot.sh base_tally 60 base_tally` (any faction id) shows a
+  full base with one of every unit; `watch` shows a watched match.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

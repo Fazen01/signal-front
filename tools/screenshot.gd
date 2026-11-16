@@ -58,6 +58,24 @@ func _ready() -> void:
 		var lgame: GameState = get_node_or_null("/root/Game") as GameState
 		if lgame != null:
 			lgame.pending_config = lconfig
+	if _script_name.begins_with("base_"):
+		# "base_<faction>": play as that faction, with a full base and one of
+		# everything it builds set out in front of it.
+		var bgame: GameState = get_node_or_null("/root/Game") as GameState
+		if bgame != null:
+			var bconfig: MatchConfig = MatchConfig.skirmish(1)
+			bconfig.factions = [_script_name.trim_prefix("base_"), "aegis"]
+			bconfig.region = "temperate"
+			bgame.pending_config = bconfig
+	if _script_name == "watch":
+		# A match nobody plays, as the Watch option in the skirmish setup starts it.
+		var wgame: GameState = get_node_or_null("/root/Game") as GameState
+		if wgame != null:
+			var wconfig: MatchConfig = MatchConfig.ai_vs_ai(3)
+			wconfig.factions = ["zephyr", "tally"]
+			wconfig.names = ["Zephyr Accord", "Crimson Tally"]
+			wconfig.watch = true
+			wgame.pending_config = wconfig
 	if _script_name.begins_with("region_"):
 		# "region_<id>": seed 4 in that region, seen whole.
 		var rgame: GameState = get_node_or_null("/root/Game") as GameState
@@ -103,6 +121,35 @@ func _save(shot: String) -> void:
 
 
 func _run_script(battle: BattleScene) -> void:
+	if _script_name.begins_with("base_") and _count == 3:
+		var bw: SimWorld = battle.world
+		var bme: int = battle.local_player
+		var bf: FactionDef = bw.players[bme].faction
+		var bhq: Vector2 = bw.players[bme].start_pos
+		var bcell: Vector2i = bw.map.cell_of(bhq)
+		var spots: Array[Vector2i] = [Vector2i(5, -2), Vector2i(-1, 5), Vector2i(-6, -1), Vector2i(5, 4), Vector2i(10, 8), Vector2i(9, 1), Vector2i(-6, 4)]
+		var jobs: Array[String] = ["barracks", "works", "depot", "tier3", "relay", "turret_ground", "turret_air"]
+		var placed: Dictionary[String, bool] = {}
+		var line: Array[String] = []
+		for k: int in jobs.size():
+			var id: String = bf.role(jobs[k])
+			if id == "" or placed.has(id) or not bw.data.entities.has(id) or not bw.data.entity(id).is_building:
+				continue
+			placed[id] = true
+			bw.spawn_building(id, bme, bcell + spots[k], true)
+			for made: String in bw.data.entity(id).produces:
+				if not line.has(made) and not bw.data.entity(made).harvester and not bw.data.entity(made).builder:
+					line.append(made)
+		for k: int in line.size():
+			bw.spawn_unit(line[k], bme, bhq + Vector2(-10.0 + float(k % 4) * 3.4, 12.0 + float(k / 4) * 3.6))
+		battle.cam.set_distance(54.0)
+		battle.cam.center_on(bhq + Vector2(4.0, 6.0))
+	if _script_name == "watch" and _count == 2:
+		battle.time_scale = 30.0
+	if _script_name == "watch" and _count == _frames - 20:
+		battle.time_scale = 1.0
+		battle.cam.center_on(battle.world.players[0].start_pos)
+		battle.cam.set_distance(60.0)
 	if (_script_name.begins_with("seed_") or _script_name.begins_with("region_")) and _count == 2:
 		battle.fog_view.visible = false
 		battle.terrain.set_fog_texture(null)

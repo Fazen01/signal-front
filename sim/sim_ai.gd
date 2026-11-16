@@ -35,6 +35,7 @@ var uses_directives: bool = true
 var hunts_relays: bool = true
 var doctrine: String = "balanced"
 var retreats: bool = true  ## pulls a beaten wave back instead of losing it to the last unit
+var max_retreats: int = 2  ## how often in one match; after that the AI commits
 var scouts: bool = true  ## keeps one unit out looking for the enemy's buildings
 var raids: bool = false  ## raider: goes for depots and relays before anything else
 var max_turrets: int = 5
@@ -113,12 +114,14 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 				first_wave = maxi(4, first_wave - 2)
 				wave_growth = maxi(2, wave_growth - 1)
 				wave_cooldown_ticks = int(float(wave_cooldown_ticks) * 0.75)
+				max_retreats = 1
 			"fortifier":
 				# Digs in behind turrets, then comes with a big army.
 				first_wave += 3
 				wave_growth += 1
 				max_turrets = 8
 				turret_salvage = 1000
+				max_retreats = 3
 			"raider":
 				# Goes for the enemy's relays and depots rather than its guns.
 				raids = true
@@ -873,11 +876,14 @@ func _run_military(w: SimWorld) -> void:
 				_assault(w, false)
 
 
-## True when the wave has lost more than half of what it set out with and
-## what it faces is clearly stronger: time to save what is left. Late in a
-## long match the AI commits instead, so that games still end.
+## True when the wave is down to two fifths of what it set out with and what
+## it faces is clearly stronger: time to save what is left. An AI only does
+## this a couple of times in a match, and never late in a long one: an army
+## that keeps pulling back never finishes anything, and both sides starve.
 func _should_retreat(w: SimWorld) -> bool:
 	if wave_ids.is_empty() or wave_launch_power <= 0 or w.tick_count > LATE_GAME_TICKS:
+		return false
+	if retreats_made >= max_retreats:
 		return false
 	var mine: int = 0
 	var centre: Vector2 = Vector2.ZERO
@@ -886,7 +892,7 @@ func _should_retreat(w: SimWorld) -> bool:
 		mine += e.def.cost
 		centre += e.pos
 	centre /= float(wave_ids.size())
-	if mine * 2 > wave_launch_power:
+	if mine * 5 > wave_launch_power * 2:
 		return false
 	var theirs: int = 0
 	for e: SimEntity in _enemies:
@@ -895,7 +901,7 @@ func _should_retreat(w: SimWorld) -> bool:
 	for b: SimEntity in _enemy_buildings:
 		if b.def.is_armed() and b.constructed and not b.def.is_mine() and b.pos.distance_to(centre) < 16.0:
 			theirs += b.def.cost
-	return theirs * 10 > mine * 14
+	return theirs * 10 > mine * 16
 
 
 ## Calls the wave home. The next one will be bigger.

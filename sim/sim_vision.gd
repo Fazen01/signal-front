@@ -60,7 +60,10 @@ static func is_stealthed(w: SimWorld, e: SimEntity) -> bool:
 		return true
 	if e.kind != SimEntity.Kind.UNIT or e.owner < 0 or e.def.is_air():
 		return false
-	return w.players[e.owner].faction.forest_cloak and w.map.terrain_at(e.pos) == SimMap.Terrain.FOREST
+	var f: FactionDef = w.players[e.owner].faction
+	if f.linked_cloak and e.linked:
+		return true
+	return f.forest_cloak and w.map.terrain_at(e.pos) == SimMap.Terrain.FOREST
 
 
 ## Can this player currently see this entity?

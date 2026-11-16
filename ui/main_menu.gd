@@ -69,6 +69,7 @@ var _map_players: Array[int] = []
 var _map_blurb: Label = null
 var _opponents: OptionButton = null
 var _region: OptionButton = null
+var _role: OptionButton = null
 var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
@@ -196,7 +197,7 @@ func _build_main() -> void:
 	_main_box.add_child(gap)
 	var buttons: Array[Button] = [
 		_menu_button("Skirmish", open_skirmish),
-		_menu_button("Load Saved Game", load_saved),
+		_menu_button("Continue Saved Game", load_saved),
 		_menu_button("Tutorials", func() -> void: _show(_tutorials)),
 		_menu_button("How to Play", func() -> void: _show(_help)),
 		_menu_button("Settings", open_settings),
@@ -264,6 +265,11 @@ func _build_setup() -> void:
 	_map_blurb.custom_minimum_size = Vector2(520.0, 22.0)
 	box.add_child(_map_blurb)
 	_map.item_selected.connect(func(_i: int) -> void: _update_map())
+	_role = OptionButton.new()
+	_role.add_item("Play as the commander")
+	_role.add_item("Watch: the AI plays every side")
+	_role.tooltip_text = "Watching shows the whole battlefield with no fog of war. Use + and - to change the speed."
+	_row(box, "You", _role)
 	_region = OptionButton.new()
 	_region.add_item("From the seed")
 	for id: String in SimMapGen.REGIONS:
@@ -416,6 +422,11 @@ func _update_blurb() -> void:
 	_faction_blurb.text = f.desc
 
 
+## For automated runs: watch the match instead of playing it.
+func choose_watch(on: bool) -> void:
+	_role.select(1 if on else 0)
+
+
 ## For automated runs: pick factions by id before starting.
 func choose_factions(mine: String, theirs: String) -> void:
 	_faction.select(maxi(_faction_ids.find(mine), 0))
@@ -471,6 +482,17 @@ func start_skirmish() -> void:
 		if opponents > 1:
 			label = "%s %d" % [label, i + 1]
 		config.add_ai(enemy_id, _level.selected, label)
+	if _role.selected == 1:
+		# Watching: the first seat goes to an AI as well, and the sides are
+		# called after their factions.
+		config.watch = true
+		config.is_ai[0] = true
+		config.ai_levels[0] = _level.selected
+		var used: Dictionary[String, int] = {}
+		for i: int in config.player_count():
+			var side: String = GameData.shared().faction(config.factions[i]).name
+			used[side] = int(used.get(side, 0)) + 1
+			config.names[i] = side if used[side] == 1 else "%s %d" % [side, used[side]]
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
 		game.start_match(config)

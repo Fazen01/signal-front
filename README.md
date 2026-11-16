@@ -20,9 +20,12 @@ From the main menu:
 
 - **Tutorials** — three short missions (economy, the Signal Grid, Directives).
   Start here.
-- **Skirmish** — pick a map, one to three AI opponents, the factions, a
-  difficulty and a seed.
-- **Load Saved Game** — continue the match saved from the pause menu.
+- **Skirmish** — pick a map, a region, one to three AI opponents, the
+  factions, a difficulty and a seed. Set "You" to **Watch** to let the AI
+  play every side while you look on: no fog of war, and + and - change the
+  speed.
+- **Continue Saved Game** — pick up the match you saved from the pause menu
+  ("Save Game", or "Save and Quit to Menu"), exactly where it stopped.
 - **Settings** — volumes, fullscreen, vsync, shadows, anti-aliasing, hotkey
   hints.
 
@@ -71,6 +74,7 @@ coverage is visible, plus a circle around each unit.
 | Right click | Context order: move, attack, harvest, repair/assist, capture, hijack, set rally point |
 | A, then left click | Attack-move |
 | S / H | Stop / hold position |
+| Ctrl+A or F2 | Select the whole army (every armed unit) |
 | Shift + order | Queue the order |
 | Ctrl+1..9, then 1..9 | Set / recall a control group (double-tap centres the camera) |
 | G | Toggle the signal coverage overlay |
@@ -78,7 +82,9 @@ coverage is visible, plus a circle around each unit.
 | Ctrl+F5..F8, then F5..F8 | Save / recall a camera bookmark |
 | Minimap: left click / right click | Move the camera / order the selection there |
 | Alt+1..6, or click the Directive bar | Unlock or use a Directive (left click to target, right click to cancel) |
-| Letter in [brackets] on the command card | Build or train that item |
+| Letter on a command card button | Build or train that item (hold Shift to queue five) |
+| Space | Look at the latest warning |
+| + / - | Game speed, from half to three times |
 | Y | Deploy a deployable unit, or pack a deployed building back up |
 | Esc | Cancel placement, targeting or attack-move; otherwise open the pause menu (save, settings, surrender) |
 
@@ -138,6 +144,60 @@ network. It has no aircraft and no heavy tank.
   reach), Cradle, Assembler, Ward Node (fires at ground and air), Oracle
   (tier 3).
 
+**Verdigris Order** — few, costly and hard to kill. Linked units shrug off
+15% of every hit; Dark ones fire at barely half rate, so the Order fights
+best on ground it has wired.
+
+- Knights: Vigil (armored rifleman with a shield), Pike (anti-armor lance),
+  Mason (builds, repairs, captures).
+- Walkers: Dray (four-legged hauler), Outrider (scout), Thresher (twin
+  cannons), Castellan (the heaviest gun and armor on the field), Canopy
+  (anti-air), Mangonel (siege, tier 3).
+- Buildings: Keep, Tithe Barn, **Lantern** (a costly relay with the longest
+  reach), Chapterhouse, Armoury, Rampart (gun tower), Watchfire (anti-air),
+  Reliquary (tier 3).
+
+**Zephyr Accord** — rules the sky. A thin ground force screens a fleet of
+aircraft that fly over any terrain. Linked units see a quarter further.
+Flak is its bane.
+
+- Ground: Ranger, Flare (missiles that hit vehicles and aircraft), Rigger
+  (builder), Tender (hauler), Lookout (spotter car), Squall (flak truck).
+- Aircraft: Swift (light gunship), Lanner (strike craft, anti-armor), Condor
+  (heavy bomber, tier 3).
+- Buildings: Aerie, Hangar, Mast, Roost, Flight Deck, Gun Pit (fires at
+  ground and air), Control Tower (tier 3).
+
+**Crimson Tally** — mercenaries. Everything they destroy pays a bounty of
+15% of its value in salvage, so an army that keeps attacking pays for
+itself.
+
+- Infantry: Gunhand, Petard (rockets), Tallyman (builder).
+- Vehicles: Strongbox (armored hauler), Jackal (raider), Brigand (gun
+  truck), Ravager (quick-firing tank), Flakjack (anti-air), Ransom (rocket
+  artillery, tier 3).
+- Buildings: Counting House, Vault, Signal Post, Billet, Motor Pool, Gun
+  Nest, Exchange (tier 3).
+
+**Umbral Veil** — ambushers. Inside their own coverage Veil ground units
+vanish whenever they stand still, and their **Sentinel** turrets stay hidden
+until they fire. Fragile and costly, with the longest guns on the field.
+
+- Infantry: Shade, Needle (anti-armor sharpshooter), Veilwright (builder).
+- Vehicles: Gleaner (hauler), Wisp (the fastest scout), Mirage (gun car),
+  Stalker (tank hunter), Pall (anti-air), Eclipse (siege mortar, tier 3).
+- Buildings: Sanctum, Reservoir, Obelisk, Hollow, Shroudworks, Sentinel,
+  Occulus (tier 3).
+
+### The AI
+
+One to three opponents at Easy, Normal or Hard. Normal and Hard opponents
+draw a **doctrine** from the seed: balanced, an aggressor (small waves, early
+and often), a fortifier (turrets first, then a big army) or a raider (goes
+for relays and depots). They scout, they counter what you field, they cut
+your relay chain where it hurts most, and a couple of times a match they
+will pull a beaten army back instead of feeding it to you.
+
 ## Maps
 
 A seeded, symmetric generator (176 × 176 for two players, a compact 128 × 128
@@ -167,11 +227,15 @@ game except through software-rendered screenshots, so:
   for taste.
 - Frame rate on a real GPU is unmeasured. Script-side cost with 300 units in
   one fight is about 7–8 ms a frame.
-- Balance and pacing are tuned with AI-vs-AI batches. One-on-one matches
-  between AIs on the default map have a median of about 16½ minutes (the
-  design aims for 15–25), and win rates were roughly even across the three
-  factions at last measure. Whether that pacing feels right against a human
-  is untested. The compact map gives matches of about ten minutes.
+- Balance and pacing are measured with AI-vs-AI leagues
+  (`tools/balance_league.py`), which says how the AI fares with each
+  faction, not how a person will. The session log in `docs/ROADMAP.md` has
+  the latest table. One-on-one matches between AIs on the default map last
+  about a quarter of an hour (the design aims for 15–25 minutes); the
+  compact map gives about ten.
+- Five of the eight factions were added in one day. They share the AI and
+  most rules with the first three, each with one rule of its own, and have
+  had far less testing.
 
 ## For developers
 
@@ -229,6 +293,14 @@ Plays every faction pairing over the seeds and prints win counts.
 Plays every faction pairing with pacing or stats changed in memory and prints
 match lengths and win rates; `--trace=1` adds a timeline of each match. See
 the comment at the top of the script for every option.
+
+```bash
+tools/balance_league.py --seeds 1-8
+```
+
+Plays every faction against every other, in parallel, and prints a win-rate
+table with the margin to read it by. `--scale mote.cost:1.1` tries a change
+without editing the data.
 
 ```bash
 .godot-bin/godot --headless --path . -s res://tools/perf_bench.gd

@@ -180,6 +180,16 @@ func test_a_wave_that_is_winning_presses_on() -> void:
 	ai2._f = weak_enemy.players[ai2.player_id].faction
 	ai2._survey(weak_enemy)
 	check(not ai2._should_retreat(weak_enemy), "a battered wave that still outguns what it faces fights on")
+	# An AI that has already pulled back as often as it may commits instead.
+	var spent: SimWorld = _wave_world(4, 12)
+	var ai3: SimAI = spent.ais[0]
+	SimTestUtil.spawn_group(spent, "bulwark", 0, spent.map.nearest_free_pos(mid + Vector2(7.0, 0.0)), 4)
+	spent.tick()
+	ai3._f = spent.players[ai3.player_id].faction
+	ai3._survey(spent)
+	check(ai3._should_retreat(spent), "the same beaten wave would retreat")
+	ai3.retreats_made = ai3.max_retreats
+	check(not ai3._should_retreat(spent), "but not once the AI has used up its retreats")
 	ai2.retreats = false
 	check(ai2.wave_state == SimAI.Wave.ASSAULT, "and stays in the assault")
 

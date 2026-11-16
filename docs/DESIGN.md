@@ -114,6 +114,18 @@ short radius, so the network is a dense, tough web. Linked vehicles self-repair.
   Mauler (heavy tank), Anvil (siege mortar carrier), Ratchet (repair truck),
   Levy (cheap massed infantry), Sapper (builder, lays mines).
 
+**Added on 16 November at the owner's request**, each with one rule of its
+own on top of the shared Signal Grid:
+
+- **Verdigris Order** — few, costly, armored knights and walkers. Linked
+  units take 15% less damage; Dark ones fire at 55%.
+- **Zephyr Accord** — air power: gunships, strike craft and bombers over a
+  thin ground force. Linked units see 25% further.
+- **Crimson Tally** — mercenaries paid a bounty of 15% of the value of
+  everything they destroy.
+- **Umbral Veil** — ambushers: Linked ground units are hidden while they
+  stand still, and their turrets are hidden until they fire.
+
 **Vesper Array** (added 16 November at the owner's request) — an automated
 legion of drone frames: cheap, quick and many, but fragile. Linked frames
 move 15% faster; Dark frames keep 92% of their rate of fire. No aircraft and

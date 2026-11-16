@@ -271,6 +271,11 @@ func _box_select(rect: Rect2, add: bool) -> void:
 
 func _on_key(key: InputEventKey) -> void:
 	var code: Key = key.physical_keycode
+	if battle.watching and not (code >= KEY_F5 and code <= KEY_F8):
+		# A spectator has the camera, the overlay and the clock, and no orders.
+		if battle.on_hotkey(key):
+			get_viewport().set_input_as_handled()
+		return
 	if code >= KEY_1 and code <= KEY_6 and key.alt_pressed:
 		battle.hud.activate_directive(int(code) - int(KEY_1))
 		get_viewport().set_input_as_handled()
@@ -384,6 +389,8 @@ func order_attack_move(at: Vector2, queued: bool) -> void:
 
 ## An order given on the minimap: move (or attack-move while A is armed).
 func order_at_world(at: Vector2, queued: bool) -> void:
+	if battle.watching:
+		return
 	var ids: PackedInt32Array = own_unit_ids()
 	if ids.is_empty():
 		return
@@ -397,6 +404,8 @@ func order_at_world(at: Vector2, queued: bool) -> void:
 
 ## Right-click: decide what the selection should do with whatever is there.
 func context_order(screen: Vector2, queued: bool) -> void:
+	if battle.watching:
+		return
 	var at: Vector2 = ground_point(screen)
 	var target: SimEntity = pick_entity(screen)
 	var ids: PackedInt32Array = own_unit_ids()

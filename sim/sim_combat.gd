@@ -43,6 +43,8 @@ static func rof_mult(w: SimWorld, e: SimEntity) -> float:
 
 static func sight_range(w: SimWorld, e: SimEntity) -> float:
 	if e.linked:
+		if e.owner >= 0:
+			return e.def.sight * (1.0 + w.players[e.owner].faction.linked_sight_bonus)
 		return e.def.sight
 	return e.def.sight * w.data.dark_sight_mult
 
@@ -333,6 +335,8 @@ static func kill(w: SimWorld, t: SimEntity, killer: SimEntity, killer_owner: int
 		var kp: SimPlayer = w.players[killer_owner]
 		kp.stat_kills += 1
 		kp.stat_value_destroyed += value
+		# Mercenaries are paid for what they destroy.
+		kp.salvage += int(float(value) * kp.faction.kill_bounty)
 		SimDirectives.award(w, killer_owner, value)
 		if killer != null and killer.alive:
 			killer.kills += 1

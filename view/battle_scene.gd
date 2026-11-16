@@ -43,6 +43,7 @@ var _ghost_shown_ok: int = -1
 
 var _accum: float = 0.0
 var spectating: bool = false  ## an AI-vs-AI match run for checking, not played
+var watching: bool = false  ## every side is an AI; the person at the screen only watches
 var perf_enabled: bool = false  ## tools/frame_bench.gd: time the stages of _process
 var perf: Dictionary[String, int] = {}  ## stage -> microseconds, plus "frames"
 var _markers: Array[MeshInstance3D] = []
@@ -61,6 +62,7 @@ func _ready() -> void:
 		if not config.is_ai[i]:
 			local_player = i
 			break
+	watching = config.watch
 
 	_build_environment()
 	terrain = TerrainView.new()
@@ -87,6 +89,11 @@ func _ready() -> void:
 	add_child(fog_view)
 	fog_view.terrain = terrain
 	fog_view.setup(world, local_player)
+	if watching:
+		# A spectator sees the whole battlefield.
+		world_view.fog_enabled = false
+		fog_view.visible = false
+		terrain.set_fog_texture(null)
 
 	cam = RtsCamera.new()
 	cam.name = "CameraRig"
@@ -317,6 +324,7 @@ func _read_spectate_args() -> void:
 			c.names.clear()
 			for fname: String in arg.trim_prefix("--spectate=").split(","):
 				c.add_ai(fname, 1, "%s AI" % fname.capitalize())
+			c.watch = true
 			config = c
 			world = null
 			spectating = true
@@ -404,7 +412,7 @@ func _handle_event(ev: SimEvent) -> void:
 		SimEvent.Type.MATCH_OVER:
 			cancel_placement()
 			cancel_directive()
-			menus.show_result(world, local_player)
+			menus.show_result(world, local_player, watching)
 			if spectating:
 				var secs: int = int(world.seconds())
 				print("Spectate finished: winner %d at %d:%02d, %d views, %d sounds played" % [
@@ -570,6 +578,13 @@ func _update_tutorial(delta: float) -> void:
 
 
 ## Writes the match to the save slot (from the pause menu).
+## Saves, then leaves for the main menu; "Continue Saved Game" there picks
+## the match up where it stopped.
+func save_and_quit() -> void:
+	if save_game():
+		quit_to_menu()
+
+
 func save_game() -> bool:
 	if world.tutorial != null:
 		hud.push_alert("Tutorial missions cannot be saved", Hud.RED)
@@ -588,6 +603,8 @@ func apply_settings() -> void:
 
 
 func surrender() -> void:
+	if watching:
+		return
 	paused = false
 	menus.set_pause_open(false)
 	world.push_command(SimCommand.surrender(local_player))

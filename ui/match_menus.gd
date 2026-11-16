@@ -56,8 +56,10 @@ func _build_pause() -> void:
 	box.add_child(title)
 	box.add_child(_button("Resume", func() -> void: battle.toggle_pause_menu()))
 	box.add_child(_button("Save Game", func() -> void: battle.save_game()))
+	box.add_child(_button("Save and Quit to Menu", func() -> void: battle.save_and_quit()))
 	box.add_child(_button("Settings", open_settings))
-	box.add_child(_button("Surrender", func() -> void: battle.surrender()))
+	if not battle.watching:
+		box.add_child(_button("Surrender", func() -> void: battle.surrender()))
 	box.add_child(_button("Quit to Main Menu", func() -> void: battle.quit_to_menu()))
 
 
@@ -123,7 +125,7 @@ func show_tutorial_complete(tutorial_id: String) -> void:
 
 
 ## Shows the end-of-match summary for the local player.
-func show_result(world: SimWorld, local_player: int) -> void:
+func show_result(world: SimWorld, local_player: int, watching: bool = false) -> void:
 	if result_shown:
 		return
 	result_shown = true
@@ -138,7 +140,12 @@ func show_result(world: SimWorld, local_player: int) -> void:
 	var headline: String = "VICTORY" if won else "DEFEAT"
 	if world.winner < 0:
 		headline = "DRAW"
-	var title: Label = Hud.make_label(headline, 56, Color(0.5, 1.0, 0.6) if won else Color(1.0, 0.45, 0.4))
+	var headline_color: Color = Color(0.5, 1.0, 0.6) if won else Color(1.0, 0.45, 0.4)
+	if watching:
+		# A spectator neither wins nor loses.
+		headline = "MATCH OVER"
+		headline_color = UiTheme.GOLD
+	var title: Label = Hud.make_label(headline, 56, headline_color)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	var secs: int = int(world.seconds())

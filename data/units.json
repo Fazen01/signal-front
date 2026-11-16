@@ -328,5 +328,173 @@
 		"hp": 340, "armor": "light", "move": "vehicle", "speed": 2.5, "turn_rate": 2.0,
 		"radius": 1.15, "sight": 10.0, "weapons": ["mangonel_shot"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "mangonel", "hotkey": "L",
 		"requires": ["reliquary"]
+	},
+	"ranger": {
+		"name": "Ranger", "desc": "Light rifle infantry that screens the airfields.",
+		"faction": "zephyr", "tier": 1, "cost": 55, "build_time": 8.0, "bandwidth": 1,
+		"hp": 85, "armor": "infantry", "move": "infantry", "speed": 2.7, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["ranger_rifle"], "ai_role": "anti_infantry", "ai_weight": 2.6, "model": "ranger", "hotkey": "T"
+	},
+	"flare": {
+		"name": "Flare", "desc": "Missile trooper. Its homing missiles hit vehicles and aircraft alike.",
+		"faction": "zephyr", "tier": 1, "cost": 115, "build_time": 11.5, "bandwidth": 1,
+		"hp": 75, "armor": "infantry", "move": "infantry", "speed": 2.5, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["flare_missile"], "ai_role": "anti_armor", "ai_weight": 1.8, "model": "flare", "hotkey": "L"
+	},
+	"rigger": {
+		"name": "Rigger", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "zephyr", "tier": 1, "cost": 80, "build_time": 9.0, "bandwidth": 1,
+		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 2.7, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "rigger", "hotkey": "F",
+		"builds": ["hangar", "mast", "roost", "flight_deck", "gun_pit", "control_tower"]
+	},
+	"tender": {
+		"name": "Tender", "desc": "Collects salvage from fields and wrecks and carries it to a Hangar.",
+		"faction": "zephyr", "tier": 1, "cost": 120, "build_time": 13.0, "bandwidth": 2,
+		"hp": 260, "armor": "light", "move": "vehicle", "speed": 3.6, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 8.0, "harvester": true, "capacity": 100, "model": "tender", "hotkey": "U"
+	},
+	"lookout": {
+		"name": "Lookout", "desc": "Fast spotter car with a light gun and very long sight.",
+		"faction": "zephyr", "tier": 2, "cost": 100, "build_time": 10.5, "bandwidth": 1,
+		"hp": 170, "armor": "light", "move": "vehicle", "speed": 6.4, "turn_rate": 4.0,
+		"radius": 0.8, "sight": 17.0, "weapons": ["lookout_mg"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "lookout", "hotkey": "C"
+	},
+	"squall": {
+		"name": "Squall", "desc": "Flak truck. Keeps enemy aircraft off the airfields; weak against armor.",
+		"faction": "zephyr", "tier": 2, "cost": 230, "build_time": 17.5, "bandwidth": 3,
+		"hp": 340, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 12.0, "weapons": ["squall_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "squall", "hotkey": "K"
+	},
+	"swift": {
+		"name": "Swift", "desc": "Light gunship. Flies over any terrain and rakes infantry and light vehicles; helpless against flak.",
+		"faction": "zephyr", "tier": 2, "cost": 240, "build_time": 18.0, "bandwidth": 3,
+		"hp": 230, "armor": "air", "move": "air", "speed": 7.0, "turn_rate": 4.5,
+		"radius": 1.0, "sight": 12.0, "weapons": ["swift_guns"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.2, "model": "swift", "hotkey": "R"
+	},
+	"lanner": {
+		"name": "Lanner", "desc": "Strike craft. Its missiles break tanks and turrets; it cannot fire at other aircraft.",
+		"faction": "zephyr", "tier": 2, "cost": 360, "build_time": 25.0, "bandwidth": 4,
+		"hp": 290, "armor": "air", "move": "air", "speed": 6.6, "turn_rate": 4.0,
+		"radius": 1.1, "sight": 12.0, "weapons": ["lanner_missile"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "lanner", "hotkey": "B"
+	},
+	"condor": {
+		"name": "Condor", "desc": "Heavy bomber. Slow, and it must fly right over its target, but its bombs flatten whatever is beneath.",
+		"faction": "zephyr", "tier": 3, "cost": 480, "build_time": 30.0, "bandwidth": 4,
+		"hp": 380, "armor": "air", "move": "air", "speed": 5.2, "turn_rate": 3.0,
+		"radius": 1.3, "sight": 11.0, "weapons": ["condor_bombs"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "condor", "hotkey": "L",
+		"requires": ["control_tower"]
+	},
+	"gunhand": {
+		"name": "Gunhand", "desc": "Hired rifle. A little tougher and a little dearer than other riflemen.",
+		"faction": "tally", "tier": 1, "cost": 60, "build_time": 8.0, "bandwidth": 1,
+		"hp": 95, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["gunhand_rifle"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "gunhand", "hotkey": "T"
+	},
+	"petard": {
+		"name": "Petard", "desc": "Rocket team. Slow to fire, deadly to vehicles.",
+		"faction": "tally", "tier": 1, "cost": 110, "build_time": 11.5, "bandwidth": 1,
+		"hp": 85, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["petard_rocket"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "petard", "hotkey": "L"
+	},
+	"tallyman": {
+		"name": "Tallyman", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "tally", "tier": 1, "cost": 85, "build_time": 9.5, "bandwidth": 1,
+		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "tallyman", "hotkey": "F",
+		"builds": ["vault", "signal_post", "billet", "motor_pool", "gun_nest", "exchange"]
+	},
+	"strongbox": {
+		"name": "Strongbox", "desc": "Armored hauler. Collects salvage and carries it to a Vault.",
+		"faction": "tally", "tier": 1, "cost": 135, "build_time": 14.0, "bandwidth": 2,
+		"hp": 340, "armor": "light", "move": "vehicle", "speed": 3.2, "turn_rate": 2.8,
+		"radius": 1.0, "sight": 8.0, "harvester": true, "capacity": 100, "model": "strongbox", "hotkey": "U"
+	},
+	"jackal": {
+		"name": "Jackal", "desc": "Fast raider with a machine gun. Made for running down haulers.",
+		"faction": "tally", "tier": 2, "cost": 110, "build_time": 11.0, "bandwidth": 1,
+		"hp": 200, "armor": "light", "move": "vehicle", "speed": 6.3, "turn_rate": 4.0,
+		"radius": 0.8, "sight": 14.0, "weapons": ["jackal_mg"], "turret": true, "ai_role": "scout", "ai_weight": 0.6, "model": "jackal", "hotkey": "C"
+	},
+	"brigand": {
+		"name": "Brigand", "desc": "Gun truck with an autocannon. Shreds infantry and light vehicles.",
+		"faction": "tally", "tier": 2, "cost": 225, "build_time": 18.0, "bandwidth": 3,
+		"hp": 420, "armor": "light", "move": "vehicle", "speed": 4.4, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 11.0, "weapons": ["brigand_cannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "brigand", "hotkey": "R"
+	},
+	"ravager": {
+		"name": "Ravager", "desc": "Battle tank with a quick-firing cannon. Hits less hard than other tanks and far more often.",
+		"faction": "tally", "tier": 2, "cost": 370, "build_time": 25.5, "bandwidth": 4,
+		"hp": 700, "armor": "heavy", "move": "vehicle", "speed": 3.6, "turn_rate": 2.4,
+		"radius": 1.15, "sight": 11.0, "weapons": ["ravager_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "ravager", "hotkey": "B"
+	},
+	"flakjack": {
+		"name": "Flakjack", "desc": "Anti-air gun truck. Its flak is weak against armor.",
+		"faction": "tally", "tier": 2, "cost": 235, "build_time": 18.0, "bandwidth": 3,
+		"hp": 370, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
+		"radius": 1.0, "sight": 12.0, "weapons": ["flakjack_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "flakjack", "hotkey": "K"
+	},
+	"ransom": {
+		"name": "Ransom", "desc": "Rocket artillery. Rains rockets over a wide area from far away; it cannot hit close targets and needs spotters.",
+		"faction": "tally", "tier": 3, "cost": 430, "build_time": 28.5, "bandwidth": 4,
+		"hp": 310, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.4,
+		"radius": 1.1, "sight": 10.0, "weapons": ["ransom_rockets"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "ransom", "hotkey": "L",
+		"requires": ["exchange"]
+	},
+	"shade": {
+		"name": "Shade", "desc": "Light infantry with a long carbine. Fragile; best met from hiding.",
+		"faction": "veil", "tier": 1, "cost": 60, "build_time": 8.0, "bandwidth": 1,
+		"hp": 75, "armor": "infantry", "move": "infantry", "speed": 2.8, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.5, "weapons": ["shade_carbine"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "shade", "hotkey": "T"
+	},
+	"needle": {
+		"name": "Needle", "desc": "Anti-armor sharpshooter. Out-ranges most guns and falls to a stiff breeze.",
+		"faction": "veil", "tier": 1, "cost": 125, "build_time": 12.0, "bandwidth": 1,
+		"hp": 65, "armor": "infantry", "move": "infantry", "speed": 2.5, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 13.0, "weapons": ["needle_rifle"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "needle", "hotkey": "L"
+	},
+	"veilwright": {
+		"name": "Veilwright", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "veil", "tier": 1, "cost": 85, "build_time": 9.5, "bandwidth": 1,
+		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 2.8, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "veilwright", "hotkey": "F",
+		"builds": ["reservoir", "obelisk", "hollow", "shroudworks", "sentinel", "occulus"]
+	},
+	"gleaner": {
+		"name": "Gleaner", "desc": "Collects salvage from fields and wrecks and carries it to a Reservoir.",
+		"faction": "veil", "tier": 1, "cost": 120, "build_time": 13.0, "bandwidth": 2,
+		"hp": 240, "armor": "light", "move": "vehicle", "speed": 3.8, "turn_rate": 3.2,
+		"radius": 0.95, "sight": 8.0, "harvester": true, "capacity": 95, "model": "gleaner", "hotkey": "U"
+	},
+	"wisp": {
+		"name": "Wisp", "desc": "The fastest scout there is, with a light gun.",
+		"faction": "veil", "tier": 2, "cost": 95, "build_time": 10.0, "bandwidth": 1,
+		"hp": 140, "armor": "light", "move": "vehicle", "speed": 7.0, "turn_rate": 4.4,
+		"radius": 0.75, "sight": 16.0, "weapons": ["wisp_gun"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "wisp", "hotkey": "C"
+	},
+	"mirage": {
+		"name": "Mirage", "desc": "Low, quick gun car. Cuts down infantry and light vehicles.",
+		"faction": "veil", "tier": 2, "cost": 215, "build_time": 17.5, "bandwidth": 3,
+		"hp": 330, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.2,
+		"radius": 1.0, "sight": 11.5, "weapons": ["mirage_cannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "mirage", "hotkey": "R"
+	},
+	"stalker": {
+		"name": "Stalker", "desc": "Tank hunter. The longest direct-fire gun on the field on a thin-skinned hull.",
+		"faction": "veil", "tier": 2, "cost": 360, "build_time": 25.0, "bandwidth": 4,
+		"hp": 520, "armor": "light", "move": "vehicle", "speed": 3.8, "turn_rate": 2.6,
+		"radius": 1.1, "sight": 12.5, "weapons": ["stalker_lance"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "stalker", "hotkey": "B"
+	},
+	"pall": {
+		"name": "Pall", "desc": "Anti-air gun car. Its flak is weak against armor.",
+		"faction": "veil", "tier": 2, "cost": 225, "build_time": 17.5, "bandwidth": 3,
+		"hp": 320, "armor": "light", "move": "vehicle", "speed": 4.4, "turn_rate": 3.2,
+		"radius": 1.0, "sight": 12.0, "weapons": ["pall_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "pall", "hotkey": "K"
+	},
+	"eclipse": {
+		"name": "Eclipse", "desc": "Siege mortar. Huge range and splash; it cannot hit close targets and needs spotters.",
+		"faction": "veil", "tier": 3, "cost": 430, "build_time": 28.5, "bandwidth": 4,
+		"hp": 280, "armor": "light", "move": "vehicle", "speed": 2.9, "turn_rate": 2.2,
+		"radius": 1.1, "sight": 10.0, "weapons": ["eclipse_beam"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "eclipse", "hotkey": "L",
+		"requires": ["occulus"]
 	}
 }

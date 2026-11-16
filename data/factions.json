@@ -77,5 +77,50 @@
 			"tier3": "reliquary"
 		},
 		"playable": true
+	},
+	"zephyr": {
+		"name": "Zephyr Accord",
+		"desc": "Rules the sky. A thin ground force screens a fleet of gunships, strike craft and bombers that fly over any terrain. Linked units see a quarter further. Flak is its bane.",
+		"hq": "aerie",
+		"start_units": ["rigger", "rigger", "tender", "tender", "ranger", "ranger"],
+		"linked_sight_bonus": 0.25,
+		"drop_squad": ["ranger", "ranger", "ranger", "flare", "flare"],
+		"roles": {
+			"builder": "rigger", "hauler": "tender", "relay": "mast",
+			"barracks": "roost", "works": "flight_deck", "depot": "hangar",
+			"turret_ground": "gun_pit", "turret_armor": "gun_pit", "turret_air": "gun_pit",
+			"tier3": "control_tower"
+		},
+		"playable": true
+	},
+	"tally": {
+		"name": "Crimson Tally",
+		"desc": "Mercenaries who fight for pay: everything they destroy pays a bounty in salvage, so an army that keeps attacking pays for itself. Tough, fast-firing vehicles and little subtlety.",
+		"hq": "counting_house",
+		"start_units": ["tallyman", "tallyman", "strongbox", "strongbox", "gunhand", "gunhand"],
+		"kill_bounty": 0.15,
+		"drop_squad": ["gunhand", "gunhand", "gunhand", "petard", "petard"],
+		"roles": {
+			"builder": "tallyman", "hauler": "strongbox", "relay": "signal_post",
+			"barracks": "billet", "works": "motor_pool", "depot": "vault",
+			"turret_ground": "gun_nest", "turret_armor": "gun_nest", "turret_air": "gun_nest",
+			"tier3": "exchange"
+		},
+		"playable": true
+	},
+	"veil": {
+		"name": "Umbral Veil",
+		"desc": "Ambushers. Inside their own coverage Veil units vanish whenever they stand still, and their Sentinel turrets stay hidden until they fire. Fragile and costly, with the longest guns on the field.",
+		"hq": "sanctum",
+		"start_units": ["veilwright", "veilwright", "gleaner", "gleaner", "shade", "shade"],
+		"linked_cloak": true,
+		"drop_squad": ["shade", "shade", "shade", "needle", "needle"],
+		"roles": {
+			"builder": "veilwright", "hauler": "gleaner", "relay": "obelisk",
+			"barracks": "hollow", "works": "shroudworks", "depot": "reservoir",
+			"turret_ground": "sentinel", "turret_armor": "sentinel", "turret_air": "sentinel",
+			"tier3": "occulus"
+		},
+		"playable": true
 	}
 }

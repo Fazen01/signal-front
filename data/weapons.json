@@ -172,5 +172,101 @@
 	"watchfire_flak": {
 		"name": "Watchfire Flak", "damage_type": "flak", "damage": 24.0, "range": 13.5,
 		"cooldown": 0.5, "hits_air": true, "hits_ground": false, "fx": "tracer_heavy"
+	},
+	"ranger_rifle": {
+		"name": "Ranger Rifle", "damage_type": "ballistic", "damage": 7.0, "range": 8.0,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"flare_missile": {
+		"name": "Flare Missile", "damage_type": "piercing", "damage": 42.0, "range": 10.5,
+		"cooldown": 2.8, "projectile_speed": 17.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"lookout_mg": {
+		"name": "Lookout Gun", "damage_type": "ballistic", "damage": 5.0, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"squall_flak": {
+		"name": "Squall Flak", "damage_type": "flak", "damage": 16.0, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"swift_guns": {
+		"name": "Swift Guns", "damage_type": "ballistic", "damage": 13.0, "range": 8.5,
+		"cooldown": 0.4, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"lanner_missile": {
+		"name": "Lanner Missiles", "damage_type": "piercing", "damage": 58.0, "range": 9.5,
+		"cooldown": 2.2, "projectile_speed": 26.0, "homing": true, "fx": "missile"
+	},
+	"condor_bombs": {
+		"name": "Condor Bombs", "damage_type": "explosive", "damage": 85.0, "range": 7.0,
+		"cooldown": 4.5, "projectile_speed": 14.0, "splash": 2.8, "fx": "shell"
+	},
+	"gun_pit_gun": {
+		"name": "Pit Gun", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"gunhand_rifle": {
+		"name": "Gunhand Rifle", "damage_type": "ballistic", "damage": 7.5, "range": 8.0,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"petard_rocket": {
+		"name": "Petard Rocket", "damage_type": "piercing", "damage": 45.0, "range": 9.5,
+		"cooldown": 2.9, "projectile_speed": 15.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"jackal_mg": {
+		"name": "Jackal Gun", "damage_type": "ballistic", "damage": 5.5, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"brigand_cannon": {
+		"name": "Brigand Autocannon", "damage_type": "ballistic", "damage": 15.5, "range": 9.0,
+		"cooldown": 0.45, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"ravager_cannon": {
+		"name": "Ravager Cannon", "damage_type": "piercing", "damage": 44.0, "range": 10.0,
+		"cooldown": 1.6, "projectile_speed": 34.0, "splash": 0.7, "fx": "shell"
+	},
+	"flakjack_flak": {
+		"name": "Flakjack Guns", "damage_type": "flak", "damage": 16.0, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"ransom_rockets": {
+		"name": "Ransom Rockets", "damage_type": "explosive", "damage": 60.0, "range": 20.0,
+		"min_range": 6.0, "cooldown": 3.2, "projectile_speed": 17.0, "splash": 2.4, "scatter": 2.4, "fx": "artillery"
+	},
+	"gun_nest_gun": {
+		"name": "Nest Gun", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"shade_carbine": {
+		"name": "Shade Carbine", "damage_type": "ballistic", "damage": 7.5, "range": 8.5,
+		"cooldown": 0.6, "hits_air": true, "fx": "tracer"
+	},
+	"needle_rifle": {
+		"name": "Needle Rifle", "damage_type": "piercing", "damage": 50.0, "range": 12.0,
+		"cooldown": 3.0, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"wisp_gun": {
+		"name": "Wisp Gun", "damage_type": "ballistic", "damage": 5.0, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"mirage_cannon": {
+		"name": "Mirage Cannon", "damage_type": "ballistic", "damage": 15.0, "range": 9.5,
+		"cooldown": 0.45, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"stalker_lance": {
+		"name": "Stalker Lance", "damage_type": "piercing", "damage": 70.0, "range": 12.0,
+		"cooldown": 2.6, "projectile_speed": 38.0, "splash": 0.6, "fx": "shell"
+	},
+	"pall_flak": {
+		"name": "Pall Flak", "damage_type": "flak", "damage": 15.5, "range": 11.5,
+		"cooldown": 0.35, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"eclipse_beam": {
+		"name": "Eclipse Mortar", "damage_type": "explosive", "damage": 90.0, "range": 22.0,
+		"min_range": 7.0, "cooldown": 5.4, "projectile_speed": 16.0, "splash": 2.6, "scatter": 1.6, "fx": "artillery"
+	},
+	"sentinel_gun": {
+		"name": "Sentinel Gun", "damage_type": "ballistic", "damage": 11.0, "range": 11.0,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
 	}
 }

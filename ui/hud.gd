@@ -144,6 +144,13 @@ func _build_top_bar() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(spacer)
+	if battle.watching:
+		var sides: Array[String] = []
+		for wp: SimPlayer in world.players:
+			sides.append(wp.name)
+		var banner: Label = UiTheme.caption("WATCHING   " + "  vs  ".join(sides), GOLD)
+		banner.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(banner)
 	_speed = UiTheme.label("", 15, CYAN)
 	_speed.add_theme_font_override("font", UiTheme.strong_font())
 	_speed.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -273,6 +280,7 @@ func _build_alerts() -> void:
 func _build_directive_bar() -> void:
 	var bar: PanelContainer = PanelContainer.new()
 	bar.name = "DirectiveBar"
+	bar.visible = not battle.watching
 	bar.add_theme_stylebox_override("panel", panel_style(Color(1.0, 0.82, 0.35, 0.6)))
 	bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -319,7 +327,7 @@ Unlock: %d Command Points.   Cooldown: %d s." % [def.name, index + 1, def.desc, 
 ## Click or Alt+number on a Directive: unlock it, or use it (starting
 ## targeting when it needs a target).
 func activate_directive(index: int) -> bool:
-	if index < 0 or index >= _directive_defs.size():
+	if battle.watching or index < 0 or index >= _directive_defs.size():
 		return false
 	var def: DirectiveDef = _directive_defs[index]
 	var p: SimPlayer = world.players[player]
@@ -405,6 +413,8 @@ func _selected_own() -> Array[SimEntity]:
 func rebuild_card() -> void:
 	_entries.clear()
 	var own: Array[SimEntity] = _selected_own()
+	if battle.watching:
+		own.clear()
 	var units: Array[SimEntity] = []
 	var buildings: Array[SimEntity] = []
 	for e: SimEntity in own:
@@ -525,6 +535,8 @@ func _on_card_pressed(index: int) -> void:
 ## Runs a card entry. Returns false when it is not available right now.
 ## `times` above one repeats a training order (Shift queues five).
 func activate(entry: CardEntry, times: int = 1) -> bool:
+	if battle.watching:
+		return false
 	var blocked: String = _entry_blocked(entry)
 	if blocked != "":
 		push_alert(blocked, RED)
@@ -628,6 +640,8 @@ func _refresh_selection() -> void:
 	if sel.is_empty():
 		_sel_title.text = ""
 		_sel_detail.text = "Left-drag to select. Right-click to order. Select a builder to build." if GameSettings.key_hints else ""
+		if battle.watching:
+			_sel_detail.text = "You are watching. + and - change the speed, Space looks at the latest warning, click anything to inspect it."
 	elif sel.size() == 1:
 		var e: SimEntity = sel[0]
 		_sel_title.text = _entity_name(e)
@@ -718,4 +732,6 @@ func _refresh_queue(b: SimEntity) -> void:
 
 
 func _on_queue_pressed(building_id: int, index: int) -> void:
+	if battle.watching:
+		return
 	world.push_command(SimCommand.cancel_train(player, building_id, index))

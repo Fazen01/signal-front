@@ -272,5 +272,141 @@
 		"hp": 1700, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"directive_cooldown_mult": 0.75, "model": "reliquary",
 		"hotkey": "C", "requires": ["armoury"]
+	},
+	"aerie": {
+		"name": "Aerie", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "zephyr", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 5400, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["rigger", "tender"], "model": "aerie", "buildable": false
+	},
+	"mast": {
+		"name": "Mast", "desc": "Extends your signal grid and adds bandwidth. Must link back to the Aerie.",
+		"faction": "zephyr", "tier": 1, "cost": 150, "build_time": 15.5,
+		"hp": 560, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "mast", "hotkey": "R"
+	},
+	"hangar": {
+		"name": "Hangar", "desc": "Drop-off point for salvage. Builds Tenders.",
+		"faction": "zephyr", "tier": 1, "cost": 250, "build_time": 26.0,
+		"hp": 1150, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["tender"], "model": "hangar", "hotkey": "P"
+	},
+	"roost": {
+		"name": "Roost", "desc": "Trains the ground crews: Rangers, Flares and Riggers.",
+		"faction": "zephyr", "tier": 1, "cost": 200, "build_time": 23.5,
+		"hp": 1250, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["ranger", "flare", "rigger"], "model": "roost", "hotkey": "B"
+	},
+	"flight_deck": {
+		"name": "Flight Deck", "desc": "Builds the Accord's aircraft and its few vehicles. Unlocks tier 2.",
+		"faction": "zephyr", "tier": 2, "cost": 420, "build_time": 36.5,
+		"hp": 1600, "armor": "structure", "footprint": [4, 3], "sight": 9.0,
+		"produces": ["tender", "lookout", "squall", "swift", "lanner", "condor"], "model": "flight_deck",
+		"hotkey": "V", "requires": ["roost"]
+	},
+	"gun_pit": {
+		"name": "Gun Pit", "desc": "Light defensive gun that fires at ground and air alike.",
+		"faction": "zephyr", "tier": 2, "cost": 150, "build_time": 14.0,
+		"hp": 700, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["gun_pit_gun"], "turret": true, "model": "gun_pit", "hotkey": "T", "requires": ["roost"]
+	},
+	"control_tower": {
+		"name": "Control Tower", "desc": "Tier 3: unlocks the Condor bomber. Directives recharge 25% faster.",
+		"faction": "zephyr", "tier": 3, "cost": 480, "build_time": 38.0,
+		"hp": 1500, "armor": "structure", "footprint": [3, 3], "sight": 12.0,
+		"directive_cooldown_mult": 0.75, "model": "control_tower",
+		"hotkey": "C", "requires": ["flight_deck"]
+	},
+	"counting_house": {
+		"name": "Counting House", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "tally", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 6000, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["tallyman", "strongbox"], "model": "counting_house", "buildable": false
+	},
+	"signal_post": {
+		"name": "Signal Post", "desc": "Extends your signal grid and adds bandwidth. Must link back to the Counting House.",
+		"faction": "tally", "tier": 1, "cost": 150, "build_time": 15.5,
+		"hp": 600, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "signal_post", "hotkey": "R"
+	},
+	"vault": {
+		"name": "Vault", "desc": "Drop-off point for salvage. Builds Strongboxes.",
+		"faction": "tally", "tier": 1, "cost": 250, "build_time": 26.0,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["strongbox"], "model": "vault", "hotkey": "P"
+	},
+	"billet": {
+		"name": "Billet", "desc": "Hires infantry: Gunhands, Petards and Tallymen.",
+		"faction": "tally", "tier": 1, "cost": 200, "build_time": 23.5,
+		"hp": 1350, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["gunhand", "petard", "tallyman"], "model": "billet", "hotkey": "B"
+	},
+	"motor_pool": {
+		"name": "Motor Pool", "desc": "Builds the Tally's vehicles. Unlocks tier 2.",
+		"faction": "tally", "tier": 2, "cost": 400, "build_time": 36.5,
+		"hp": 1800, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
+		"produces": ["strongbox", "jackal", "brigand", "ravager", "flakjack", "ransom"], "model": "motor_pool",
+		"hotkey": "V", "requires": ["billet"]
+	},
+	"gun_nest": {
+		"name": "Gun Nest", "desc": "Light defensive gun that fires at ground and air alike.",
+		"faction": "tally", "tier": 2, "cost": 160, "build_time": 14.5,
+		"hp": 760, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["gun_nest_gun"], "turret": true, "model": "gun_nest", "hotkey": "T", "requires": ["billet"]
+	},
+	"exchange": {
+		"name": "Exchange", "desc": "Tier 3: unlocks Ransom rocket artillery. Directives recharge 25% faster.",
+		"faction": "tally", "tier": 3, "cost": 500, "build_time": 39.0,
+		"hp": 1600, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "exchange",
+		"hotkey": "C", "requires": ["motor_pool"]
+	},
+	"sanctum": {
+		"name": "Sanctum", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "veil", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 5200, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["veilwright", "gleaner"], "model": "sanctum", "buildable": false
+	},
+	"obelisk": {
+		"name": "Obelisk", "desc": "Extends your signal grid and adds bandwidth; units standing still inside it are hidden. Must link back to the Sanctum.",
+		"faction": "veil", "tier": 1, "cost": 150, "build_time": 15.5,
+		"hp": 520, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 18.0, "bandwidth_provided": 10, "model": "obelisk", "hotkey": "R"
+	},
+	"reservoir": {
+		"name": "Reservoir", "desc": "Drop-off point for salvage. Builds Gleaners.",
+		"faction": "veil", "tier": 1, "cost": 240, "build_time": 25.0,
+		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["gleaner"], "model": "reservoir", "hotkey": "P"
+	},
+	"hollow": {
+		"name": "Hollow", "desc": "Trains infantry: Shades, Needles and Veilwrights.",
+		"faction": "veil", "tier": 1, "cost": 200, "build_time": 23.5,
+		"hp": 1200, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["shade", "needle", "veilwright"], "model": "hollow", "hotkey": "B"
+	},
+	"shroudworks": {
+		"name": "Shroudworks", "desc": "Builds the Veil's vehicles. Unlocks tier 2.",
+		"faction": "veil", "tier": 2, "cost": 400, "build_time": 36.0,
+		"hp": 1650, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["gleaner", "wisp", "mirage", "stalker", "pall", "eclipse"], "model": "shroudworks",
+		"hotkey": "V", "requires": ["hollow"]
+	},
+	"sentinel": {
+		"name": "Sentinel", "desc": "Defensive gun that fires at ground and air alike. Hidden until it opens fire or an enemy comes very close.",
+		"faction": "veil", "tier": 2, "cost": 170, "build_time": 15.0,
+		"hp": 620, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["sentinel_gun"], "turret": true, "stealth": true, "detect_range": 4.0,
+		"model": "sentinel", "hotkey": "T", "requires": ["hollow"]
+	},
+	"occulus": {
+		"name": "Occulus", "desc": "Tier 3: unlocks the Eclipse siege mortar. Directives recharge 25% faster.",
+		"faction": "veil", "tier": 3, "cost": 470, "build_time": 38.0,
+		"hp": 1400, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "occulus",
+		"hotkey": "C", "requires": ["shroudworks"]
 	}
 }

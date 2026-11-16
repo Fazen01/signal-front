@@ -4,7 +4,7 @@ extends Node3D
 ## slowly circling camera. No fog, no sound and no input; when the match
 ## ends another starts on a new seed.
 
-const FACTIONS: Array[String] = ["aegis", "foundry", "nomad", "vesper", "verdigris"]
+const FACTIONS: Array[String] = ["aegis", "foundry", "nomad", "vesper", "verdigris", "zephyr", "tally", "veil"]
 
 var world: SimWorld = null
 var _stage: Node3D = null  ## terrain and entities of the current match
