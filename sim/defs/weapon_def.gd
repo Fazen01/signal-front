@@ -16,3 +16,4 @@ var scatter: float = 0.0  ## max miss distance for unguided shells
 var hits_ground: bool = true
 var hits_air: bool = false
 var fx: String = "tracer"
+var burst: bool = false  ## the unit blows itself up: `splash` round where it stands, once

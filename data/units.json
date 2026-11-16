@@ -608,5 +608,35 @@
 		"hp": 300, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.4, "radius": 1.1, "sight": 10.0,
 		"weapons": ["solenoid_shot"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "solenoid",
 		"hotkey": "L", "requires": ["resonator"]
+	},
+	"tether": {
+		"name": "Tether", "desc": "Carries the signal with it: every Array unit near it counts as Linked, wherever it is. Unarmed.",
+		"faction": "vesper", "tier": 2, "cost": 180, "build_time": 16.0, "bandwidth": 2,
+		"hp": 260, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.2, "radius": 0.9, "sight": 12.0,
+		"aura_radius": 9.0, "aura_link": true, "ai_role": "support", "ai_weight": 0.9, "model": "tether", "hotkey": "T"
+	},
+	"wardrum": {
+		"name": "Wardrum", "desc": "A truck with a great drum on its back: Tally guns within earshot fire a fifth faster. Unarmed.",
+		"faction": "tally", "tier": 2, "cost": 200, "build_time": 17.0, "bandwidth": 2,
+		"hp": 380, "armor": "light", "move": "vehicle", "speed": 4.0, "turn_rate": 3.0, "radius": 1.0, "sight": 10.0,
+		"aura_radius": 8.0, "aura_rof": 0.2, "ai_role": "support", "ai_weight": 1.0, "model": "wardrum", "hotkey": "M"
+	},
+	"mantle": {
+		"name": "Mantle", "desc": "Carries a shroud: Veil ground units near it vanish whenever they stand still, even far outside your coverage. Unarmed.",
+		"faction": "veil", "tier": 2, "cost": 210, "build_time": 17.0, "bandwidth": 2,
+		"hp": 260, "armor": "light", "move": "vehicle", "speed": 4.4, "turn_rate": 3.2, "radius": 0.9, "sight": 11.0,
+		"aura_radius": 8.0, "aura_cloak": true, "ai_role": "support", "ai_weight": 1.0, "model": "mantle", "hotkey": "M"
+	},
+	"dragline": {
+		"name": "Dragline", "desc": "Field engine: every enemy unit within its reach moves two fifths slower. Unarmed.",
+		"faction": "lodestone", "tier": 2, "cost": 220, "build_time": 18.0, "bandwidth": 3,
+		"hp": 400, "armor": "light", "move": "vehicle", "speed": 3.8, "turn_rate": 2.8, "radius": 1.0, "sight": 11.0,
+		"aura_radius": 9.0, "aura_slow": 0.4, "ai_role": "support", "ai_weight": 1.0, "model": "dragline", "hotkey": "M"
+	},
+	"burster": {
+		"name": "Burster", "desc": "Runs at the enemy and bursts, wrecking everything around it. It does this once.",
+		"faction": "bracken", "tier": 1, "cost": 70, "build_time": 8.0, "bandwidth": 1,
+		"hp": 60, "armor": "infantry", "move": "infantry", "speed": 4.2, "turn_rate": 12.0, "radius": 0.4, "sight": 9.0,
+		"weapons": ["burster_burst"], "ai_role": "anti_infantry", "ai_weight": 1.0, "model": "burster", "hotkey": "R"
 	}
 }

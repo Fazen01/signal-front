@@ -206,7 +206,7 @@
 		"name": "Assembler", "desc": "Builds the Array's skimmers. Unlocks tier 2.",
 		"faction": "vesper", "tier": 2, "cost": 360, "build_time": 32.0,
 		"hp": 1650, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
-		"produces": ["porter", "glint", "lash", "halberd", "aureole", "prism"], "model": "assembler",
+		"produces": ["porter", "glint", "lash", "halberd", "aureole", "prism", "tether"], "model": "assembler",
 		"hotkey": "V", "requires": ["cradle"]
 	},
 	"ward_node": {
@@ -347,7 +347,7 @@
 		"name": "Motor Pool", "desc": "Builds the Tally's vehicles. Unlocks tier 2.",
 		"faction": "tally", "tier": 2, "cost": 400, "build_time": 36.5,
 		"hp": 1800, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
-		"produces": ["strongbox", "jackal", "brigand", "ravager", "flakjack", "ransom"], "model": "motor_pool",
+		"produces": ["strongbox", "jackal", "brigand", "ravager", "flakjack", "ransom", "wardrum"], "model": "motor_pool",
 		"hotkey": "V", "requires": ["billet"]
 	},
 	"gun_nest": {
@@ -392,7 +392,7 @@
 		"name": "Shroudworks", "desc": "Builds the Veil's vehicles. Unlocks tier 2.",
 		"faction": "veil", "tier": 2, "cost": 400, "build_time": 36.0,
 		"hp": 1650, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
-		"produces": ["gleaner", "wisp", "mirage", "stalker", "pall", "eclipse"], "model": "shroudworks",
+		"produces": ["gleaner", "wisp", "mirage", "stalker", "pall", "eclipse", "mantle"], "model": "shroudworks",
 		"hotkey": "V", "requires": ["hollow"]
 	},
 	"sentinel": {
@@ -432,7 +432,7 @@
 		"name": "Seedbed", "desc": "Raises infantry: Thornlings, Lashers and Grafters.",
 		"faction": "bracken", "tier": 1, "cost": 190, "build_time": 22.5,
 		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
-		"produces": ["thornling", "lasher", "grafter"], "model": "seedbed", "hotkey": "B"
+		"produces": ["thornling", "lasher", "grafter", "burster"], "model": "seedbed", "hotkey": "B"
 	},
 	"bloomworks": {
 		"name": "Bloomworks", "desc": "Grows the Brackenfold's war beasts. Unlocks tier 2.",
@@ -483,7 +483,7 @@
 		"name": "Winding Shed", "desc": "Builds the Circle's vehicles. Unlocks tier 2.",
 		"faction": "lodestone", "tier": 2, "cost": 400, "build_time": 36.5,
 		"hp": 1750, "armor": "structure", "footprint": [4, 3], "sight": 8.0,
-		"produces": ["lodecart", "compass", "dynamo", "armature", "stator", "solenoid"], "model": "winding_shed",
+		"produces": ["lodecart", "compass", "dynamo", "armature", "stator", "solenoid", "dragline"], "model": "winding_shed",
 		"hotkey": "V", "requires": ["ring_hall"]
 	},
 	"arc_pole": {

@@ -731,6 +731,16 @@ static func _assemble(model: String, team: Color) -> Node3D:
 			_arc_pole(root, team)
 		"resonator":
 			_resonator(root, team)
+		"tether":
+			_tether(root, team)
+		"wardrum":
+			_wardrum(root, team)
+		"mantle":
+			_mantle(root, team)
+		"dragline":
+			_dragline(root, team)
+		"burster":
+			_burster(root, team)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -3599,6 +3609,89 @@ static func _resonator(root: Node3D, team: Color) -> void:
 	box(halo, Vector3(0.14, 0.14, 0.14), Vector3(-0.9, 0.0, 0.0), mat(FLUX, 1.8))
 	ball(root, 0.5, Vector3(0.0, 2.7, 0.0), mat(FLUX, 1.5), 10)
 	cyl(root, 0.2, 0.3, 1.2, Vector3(0.0, 1.5, 0.0), mat(GRAPHITE), 8)
+
+
+# ---------------------------------------------------------- signature units
+
+## Vesper Array: a skimmer under a tall mast; a cross of violet lights
+## turns at its top.
+static func _tether(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 1.9, 1.0, 0.44)
+	cyl(root, 0.3, 0.36, 0.2, Vector3(-0.1, 0.86, 0.0), mat(FRAME), 6)
+	cyl(root, 0.05, 0.1, 1.8, Vector3(-0.1, 1.85, 0.0), mat(SHELL), 6)
+	ring(root, 0.4, 0.48, Vector3(-0.1, 1.45, 0.0), team_mat(team))
+	ring(root, 0.26, 0.33, Vector3(-0.1, 2.1, 0.0), mat(VIOLET, 1.3))
+	var halo: Node3D = group(root, "Spin", Vector3(-0.1, 2.8, 0.0))
+	box(halo, Vector3(1.0, 0.04, 0.04), Vector3.ZERO, mat(FRAME))
+	box(halo, Vector3(0.04, 0.04, 1.0), Vector3.ZERO, mat(FRAME))
+	for at: Vector3 in [Vector3(0.5, 0.0, 0.0), Vector3(-0.5, 0.0, 0.0), Vector3(0.0, 0.0, 0.5), Vector3(0.0, 0.0, -0.5)]:
+		box(halo, Vector3(0.11, 0.11, 0.11), at, mat(VIOLET, 1.8))
+	ball(root, 0.17, Vector3(-0.1, 2.82, 0.0), mat(VIOLET, 1.8), 6)
+
+
+## Crimson Tally: a rig with a great drum slung across its back.
+static func _wardrum(root: Node3D, team: Color) -> void:
+	_war_rig(root, team, 2.3, 1.2, 3, 0.3)
+	box(root, Vector3(0.6, 0.5, 1.0), Vector3(0.72, 1.17, 0.0), mat(SLATE))
+	box(root, Vector3(0.05, 0.14, 0.8), Vector3(1.03, 1.24, 0.0), mat(WINDOW_WARM, 0.9, 0.2, 0.3))
+	for z: float in [-0.52, 0.52]:
+		box(root, Vector3(1.0, 0.5, 0.08), Vector3(-0.42, 1.15, z), mat(PITCH))
+	cyl(root, 0.62, 0.62, 0.9, Vector3(-0.42, 1.62, 0.0), mat(OXBLOOD), 12, Vector3(PI * 0.5, 0.0, 0.0))
+	cyl(root, 0.64, 0.64, 0.14, Vector3(-0.42, 1.62, 0.0), team_mat(team), 12, Vector3(PI * 0.5, 0.0, 0.0))
+	for side: float in [-1.0, 1.0]:
+		cyl(root, 0.67, 0.67, 0.07, Vector3(-0.42, 1.62, side * 0.46), mat(GILT, 0.0, 0.7, 0.4), 12, Vector3(PI * 0.5, 0.0, 0.0))
+		cyl(root, 0.56, 0.56, 0.03, Vector3(-0.42, 1.62, side * 0.5), mat(Color(0.88, 0.82, 0.68)), 12, Vector3(PI * 0.5, 0.0, 0.0))
+		# A beater on each side, raised.
+		box(root, Vector3(0.06, 0.7, 0.06), Vector3(-1.0, 1.9, side * 0.62), mat(GILT, 0.0, 0.7, 0.4), Vector3(0.0, 0.0, -0.5))
+		ball(root, 0.1, Vector3(-0.82, 2.2, side * 0.62), mat(OXBLOOD), 6)
+	aerial(root, Vector3(0.7, 1.42, -0.4), 1.0, GILT)
+
+
+## Umbral Veil: a low car under a cowl of two leaning fins; a ball of
+## ghost-light hangs between them inside a turning hoop.
+static func _mantle(root: Node3D, team: Color) -> void:
+	_facet_car(root, team, 2.0, 1.1, 0.38)
+	cyl(root, 0.3, 0.42, 0.2, Vector3(-0.1, 1.0, 0.0), mat(UMBRA), 6)
+	for side: float in [-1.0, 1.0]:
+		wedge(root, Vector3(1.3, 1.5, 0.08), Vector3(-0.25, 1.75, side * 0.4), mat(UMBRA_LIGHT), 0.25, Vector3(side * 0.3, 0.0, 0.0))
+		box(root, Vector3(0.9, 0.05, 0.05), Vector3(-0.2, 1.2, side * 0.56), mat(GHOST, 1.4))
+	ball(root, 0.24, Vector3(-0.1, 1.7, 0.0), mat(GHOST, 1.8), 8)
+	var veil: Node3D = group(root, "Spin", Vector3(-0.1, 1.7, 0.0))
+	ring(veil, 0.52, 0.58, Vector3.ZERO, mat(UMBRA_LIGHT, 0.0, 0.6, 0.4))
+	box(veil, Vector3(0.1, 0.1, 0.1), Vector3(0.55, 0.0, 0.0), mat(GHOST, 1.8))
+	box(veil, Vector3(0.1, 0.1, 0.1), Vector3(-0.55, 0.0, 0.0), mat(GHOST, 1.8))
+
+
+## Lodestone Circle: a car carrying a great horseshoe magnet, poles
+## forward, inside a turning ring of flux.
+static func _dragline(root: Node3D, team: Color) -> void:
+	_coil_car(root, team, 2.3, 1.25, 3, 0.4)
+	cyl(root, 0.4, 0.5, 0.3, Vector3(-0.2, 1.15, 0.0), mat(GRAPHITE), 8)
+	_winding(root, Vector3(-0.75, 1.62, 0.0), 0.3, 0.4)
+	_horseshoe(root, Vector3(0.1, 1.62, 0.0), 1.5, 0.8, 0.26)
+	ball(root, 0.2, Vector3(0.75, 1.62, 0.0), mat(FLUX, 1.8), 8)
+	var field: Node3D = group(root, "Spin", Vector3(-0.2, 1.3, 0.0))
+	ring(field, 0.98, 1.05, Vector3.ZERO, mat(PORCELAIN))
+	for i: int in 3:
+		var ang: float = float(i) * TAU / 3.0
+		box(field, Vector3(0.14, 0.14, 0.14), Vector3(cos(ang) * 1.02, 0.0, sin(ang) * 1.02), mat(FLUX, 1.8))
+
+
+## Brackenfold: a round pod of horn on four short legs, swollen with sap
+## and bristling with thorns.
+static func _burster(root: Node3D, team: Color) -> void:
+	for sx: float in [-0.16, 0.16]:
+		for sz: float in [-0.2, 0.2]:
+			box(root, Vector3(0.1, 0.34, 0.1), Vector3(sx, 0.17, sz), mat(BARK), Vector3(signf(sz) * -0.3, 0.0, 0.0))
+	var pod: MeshInstance3D = ball(root, 0.34, Vector3(0.0, 0.56, 0.0), mat(BONE), 8)
+	pod.scale = Vector3(1.15, 0.9, 1.0)
+	box(root, Vector3(0.5, 0.1, 0.72), Vector3(0.0, 0.5, 0.0), team_mat(team))
+	var sac: MeshInstance3D = ball(root, 0.27, Vector3(-0.08, 0.78, 0.0), mat(SAP, 1.5), 8)
+	sac.scale = Vector3(1.0, 0.8, 1.0)
+	for at: Vector3 in [Vector3(0.2, 0.86, 0.0), Vector3(-0.1, 0.9, 0.24), Vector3(-0.1, 0.9, -0.24), Vector3(-0.34, 0.8, 0.0)]:
+		cyl(root, 0.0, 0.05, 0.28, at, mat(BONE_DARK), 4, Vector3(at.z * 2.0, 0.0, -at.x * 2.0))
+	for z: float in [-0.12, 0.12]:
+		box(root, Vector3(0.05, 0.06, 0.07), Vector3(0.38, 0.6, z), mat(SAP, 1.9))
 
 
 # ------------------------------------------------------------------ detail

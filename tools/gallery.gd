@@ -23,6 +23,11 @@ func _ready() -> void:
 	# "page<N>" as the capture script shows eight models at a time, close up:
 	# tools/screenshot.sh gallery_p0 10 page0 res://tools/gallery.tscn
 	for arg: String in OS.get_cmdline_user_args():
+		# "upage<N>": the same, counting units only (so that the last units
+		# do not share a page with the first buildings).
+		if arg.begins_with("--script=upage"):
+			_show_page(units, int(arg.trim_prefix("--script=upage")))
+			return
 		if arg.begins_with("--script=page"):
 			_show_page(units + buildings, int(arg.trim_prefix("--script=page")))
 			return

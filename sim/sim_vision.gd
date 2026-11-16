@@ -71,6 +71,8 @@ static func is_stealthed(w: SimWorld, e: SimEntity) -> bool:
 		return false
 	if e.def.stealth:
 		return true
+	if w.tick_count < e.cloak_until:
+		return true
 	if e.kind != SimEntity.Kind.UNIT or e.owner < 0 or e.def.is_air():
 		return false
 	var f: FactionDef = w.players[e.owner].faction

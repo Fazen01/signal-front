@@ -332,5 +332,9 @@
 	"arc_pole_gun": {
 		"name": "Pole Arc", "damage_type": "ballistic", "damage": 9.5, "range": 10.5,
 		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"burster_burst": {
+		"name": "Burst", "damage_type": "explosive", "damage": 120.0, "range": 1.4,
+		"cooldown": 1.0, "splash": 2.8, "burst": true, "fx": "artillery"
 	}
 }

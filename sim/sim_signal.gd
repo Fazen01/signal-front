@@ -76,7 +76,7 @@ static func update(w: SimWorld) -> void:
 		if e.kind != SimEntity.Kind.UNIT or e.owner < 0:
 			continue
 		var c: Vector2i = w.map.cell_of(e.pos)
-		e.linked = w.map.in_bounds(c) and w.coverage[e.owner][c.y * cells_w + c.x] != 0
+		e.linked = w.tick_count < e.link_until or (w.map.in_bounds(c) and w.coverage[e.owner][c.y * cells_w + c.x] != 0)
 
 
 ## Rebuilds the link graph and every player's coverage grid.

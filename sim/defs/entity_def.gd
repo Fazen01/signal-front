@@ -43,6 +43,12 @@ var repair_rate: float = 0.0  ## hp per second this unit repairs on nearby frien
 var repair_radius: float = 0.0
 var jam_radius: float = 0.0  ## > 0: removes enemy coverage this far around the unit
 var hijacker: bool = false  ## can take over enemy vehicles that are Dark
+# Auras: what a unit does to everything within `aura_radius` of it.
+var aura_radius: float = 0.0
+var aura_rof: float = 0.0  ## friends fire this much faster (0.2 = a fifth)
+var aura_cloak: bool = false  ## friendly ground units are hidden while they stand still
+var aura_slow: float = 0.0  ## enemy units move this much slower
+var aura_link: bool = false  ## friendly units count as Linked, wherever they are
 var ai_role: String = ""  ## how the skirmish AI classes this unit
 var ai_weight: float = 0.0  ## base production weight for the AI (0 = never built for the army)
 var capacity: int = 0

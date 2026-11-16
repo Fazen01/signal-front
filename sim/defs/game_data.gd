@@ -8,7 +8,7 @@ const MOVE_NAMES: Array[String] = ["none", "infantry", "vehicle", "air"]
 
 const WEAPON_KEYS: Array[String] = [
 	"name", "damage_type", "damage", "range", "min_range", "cooldown", "projectile_speed",
-	"homing", "splash", "scatter", "hits_ground", "hits_air", "fx",
+	"homing", "splash", "scatter", "hits_ground", "hits_air", "fx", "burst",
 ]
 const ENTITY_KEYS: Array[String] = [
 	"name", "desc", "faction", "tier", "cost", "build_time", "bandwidth", "bandwidth_provided",
@@ -17,7 +17,7 @@ const ENTITY_KEYS: Array[String] = [
 	"signal_radius", "signal_root", "depot", "produces", "stealth", "directive_cooldown_mult",
 	"radius", "blocks", "needs_coverage", "packs_to", "deploys_to", "mine_trigger", "mine_damage",
 	"mine_splash", "detect_range", "repair_rate", "repair_radius", "ai_role", "ai_weight",
-	"jam_radius", "hijacker",
+	"jam_radius", "hijacker", "aura_radius", "aura_rof", "aura_cloak", "aura_slow", "aura_link",
 ]
 const DIRECTIVE_KEYS: Array[String] = [
 	"name", "desc", "cost", "cooldown", "radius", "duration", "target", "damage", "shells",
@@ -253,6 +253,7 @@ func _load_weapons(d: Dictionary) -> void:
 		w.hits_ground = bool(src.get("hits_ground", true))
 		w.hits_air = bool(src.get("hits_air", false))
 		w.fx = str(src.get("fx", "tracer"))
+		w.burst = bool(src.get("burst", false))
 		weapons[id] = w
 
 
@@ -324,6 +325,11 @@ func _load_entities(d: Dictionary, building: bool) -> void:
 		e.repair_radius = float(src.get("repair_radius", 0.0))
 		e.jam_radius = float(src.get("jam_radius", 0.0))
 		e.hijacker = bool(src.get("hijacker", false))
+		e.aura_radius = float(src.get("aura_radius", 0.0))
+		e.aura_rof = float(src.get("aura_rof", 0.0))
+		e.aura_cloak = bool(src.get("aura_cloak", false))
+		e.aura_slow = float(src.get("aura_slow", 0.0))
+		e.aura_link = bool(src.get("aura_link", false))
 		e.ai_role = str(src.get("ai_role", ""))
 		e.ai_weight = float(src.get("ai_weight", 0.0))
 		if not AI_ROLES.has(e.ai_role):

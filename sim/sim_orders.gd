@@ -2,6 +2,7 @@ class_name SimOrders
 extends RefCounted
 ## Applies player commands and runs each unit's order queue.
 
+const AURA_INTERVAL: int = 5  ## ticks between two passes of a unit's aura
 const LEASH: float = 18.0  ## idle units stop chasing this far from where they stood
 
 
@@ -154,6 +155,28 @@ static func finish_order(e: SimEntity) -> void:
 		e.chasing = false
 
 
+## Lays a unit's aura over everything in reach. Each effect lasts a little
+## longer than the gap between two calls, so it holds while the unit is
+## near and lapses soon after it leaves or dies.
+static func _spread_aura(w: SimWorld, e: SimEntity) -> void:
+	var def: EntityDef = e.def
+	var until: int = w.tick_count + AURA_INTERVAL * 2 + 2
+	for n: SimEntity in w.query_radius(e.pos, def.aura_radius):
+		if n.def == null or n.owner < 0 or n.kind != SimEntity.Kind.UNIT:
+			continue
+		if n.owner == e.owner or w.are_allies(e.owner, n.owner):
+			if def.aura_rof > 0.0 and n != e:
+				n.boost_rof = maxf(def.aura_rof, n.boost_rof if w.tick_count < n.boost_until else 0.0)
+				n.boost_until = until
+			if def.aura_cloak and not n.def.is_air():
+				n.cloak_until = until
+			if def.aura_link:
+				n.link_until = until
+		elif def.aura_slow > 0.0 and w.are_enemies(e.owner, n.owner):
+			n.slow_amount = maxf(def.aura_slow, n.slow_amount if w.tick_count < n.slow_until else 0.0)
+			n.slow_until = maxi(n.slow_until, until)
+
+
 ## Passive effects that run whatever the unit is doing.
 static func _upkeep(w: SimWorld, e: SimEntity) -> void:
 	var f: FactionDef = w.players[e.owner].faction
@@ -164,6 +187,8 @@ static func _upkeep(w: SimWorld, e: SimEntity) -> void:
 	# Brackenfold: anything left alone for a few seconds grows back.
 	if f.regrowth > 0.0 and e.hp < e.max_hp and w.tick_count - e.last_hit_tick > SimCombat.REGROW_DELAY:
 		e.hp = minf(e.max_hp, e.hp + e.max_hp * f.regrowth * SimWorld.DT)
+	if e.def.aura_radius > 0.0 and (w.tick_count + e.id) % AURA_INTERVAL == 0:
+		_spread_aura(w, e)
 	# Repair trucks mend the most damaged friendly vehicle or building nearby.
 	if e.def.repair_rate > 0.0 and (w.tick_count + e.id) % 5 == 0:
 		var worst: SimEntity = null

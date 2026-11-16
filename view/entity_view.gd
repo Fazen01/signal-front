@@ -90,6 +90,8 @@ static func weapon_reach(def: EntityDef) -> float:
 	if def != null:
 		for wd: WeaponDef in def.weapons:
 			reach = maxf(reach, wd.max_range)
+		# A unit with an aura shows how far that reaches instead.
+		reach = maxf(reach, def.aura_radius)
 	return reach
 
 

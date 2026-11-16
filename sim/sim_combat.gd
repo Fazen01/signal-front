@@ -35,12 +35,13 @@ static func range_mult(w: SimWorld, e: SimEntity) -> float:
 
 ## Rate-of-fire multiplier for this entity right now (1 = normal).
 static func rof_mult(w: SimWorld, e: SimEntity) -> float:
+	var boost: float = 1.0 + e.boost_rof if w.tick_count < e.boost_until else 1.0
 	if e.linked or e.owner < 0:
-		return 1.0
+		return boost
 	if e.kind == SimEntity.Kind.BUILDING:
-		return w.data.dark_turret_rof_mult
+		return w.data.dark_turret_rof_mult * boost
 	var f: FactionDef = w.players[e.owner].faction
-	return f.dark_rof_mult if f.dark_rof_mult > 0.0 else w.data.dark_rof_mult
+	return (f.dark_rof_mult if f.dark_rof_mult > 0.0 else w.data.dark_rof_mult) * boost
 
 
 static func sight_range(w: SimWorld, e: SimEntity) -> float:
@@ -194,6 +195,9 @@ static func _fire(w: SimWorld, e: SimEntity, t: SimEntity, wd: WeaponDef, slot: 
 	e.cooldowns[slot] = maxi(1, int(roundf(ticks)))
 	e.last_fire_tick = w.tick_count
 	var damage: float = wd.damage * (1.0 + w.data.rank_damage_bonus * float(e.rank))
+	if wd.burst:
+		_burst(w, e, wd, damage)
+		return
 	if wd.projectile_speed <= 0.0:
 		var ev: SimEvent = w.emit_event(SimEvent.Type.SHOT, e.id, e.owner, e.pos)
 		ev.other_id = t.id
@@ -221,6 +225,23 @@ static func _fire(w: SimWorld, e: SimEntity, t: SimEntity, wd: WeaponDef, slot: 
 	pe.other_id = p.id
 	pe.pos2 = p.target_pos
 	pe.text = wd.fx
+
+
+## A unit that is its own bomb: everything hostile within the weapon's
+## splash of where it stands is hit, and the unit is gone.
+static func _burst(w: SimWorld, e: SimEntity, wd: WeaponDef, damage: float) -> void:
+	var ev: SimEvent = w.emit_event(SimEvent.Type.IMPACT, e.id, e.owner, e.pos)
+	ev.text = wd.fx
+	ev.value = wd.splash
+	for n: SimEntity in w.query_radius(e.pos, wd.splash + BIG_RADIUS):
+		if n.def == null or not w.are_enemies(e.owner, n.owner) or not can_hit(wd, n):
+			continue
+		var d: float = e.pos.distance_to(n.pos) - n.radius
+		if d > wd.splash:
+			continue
+		var falloff: float = 1.0 if d <= 0.0 else lerpf(1.0, 0.4, d / wd.splash)
+		apply_damage(w, n, damage * falloff, wd.damage_type, e, e.owner)
+	kill(w, e, null, -1)
 
 
 # ------------------------------------------------------------ projectiles
