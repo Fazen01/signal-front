@@ -68,6 +68,7 @@ run_step spectate 900 "Spectate finished" --fixed-fps 60 --quit-after 9000 res:/
 run_step ai_match 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=1 --max-minutes=45
 run_step ai_match_foundry 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=2 --max-minutes=45 --factions=foundry,aegis
 run_step ai_match_nomad 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=3 --max-minutes=45 --factions=nomad,foundry
+run_step ai_match_vesper 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=4 --max-minutes=45 --factions=vesper,aegis
 run_step ai_match_layout 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=45 --map=twin_fords --factions=aegis,foundry
 # Three-way free-for-alls run 17-55 game minutes since the 1v1 pacing change
 # (this seed is the slowest measured); the cap only has to catch stalemates.

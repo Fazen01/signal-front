@@ -45,5 +45,21 @@
 			"tier3": "signal_loom"
 		},
 		"playable": true
+	},
+	"vesper": {
+		"name": "Vesper Array",
+		"desc": "An automated legion of drone frames: cheap, quick and many, but fragile. Linked frames move faster along the grid, and frames that go Dark keep nearly all of their rate of fire.",
+		"hq": "nexus",
+		"start_units": ["weaver", "weaver", "porter", "porter", "mote", "mote", "mote"],
+		"dark_rof_mult": 0.92,
+		"linked_speed_bonus": 0.15,
+		"drop_squad": ["mote", "mote", "mote", "mote", "shard", "shard"],
+		"roles": {
+			"builder": "weaver", "hauler": "porter", "relay": "spire",
+			"barracks": "cradle", "works": "assembler", "depot": "cistern",
+			"turret_ground": "ward_node", "turret_armor": "ward_node", "turret_air": "ward_node",
+			"tier3": "oracle"
+		},
+		"playable": true
 	}
 }

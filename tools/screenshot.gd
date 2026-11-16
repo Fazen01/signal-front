@@ -41,7 +41,7 @@ func _ready() -> void:
 		var tgame: GameState = get_node_or_null("/root/Game") as GameState
 		if tgame != null:
 			tgame.pending_config = SimTutorial.config_for(_script_name.trim_prefix("tutorial_"))
-	if _script_name == "foundry" or _script_name == "nomad":
+	if _script_name == "foundry" or _script_name == "nomad" or _script_name == "vesper":
 		# Play as another faction for this capture.
 		var config: MatchConfig = MatchConfig.skirmish(1)
 		config.factions = [_script_name, "aegis"]
@@ -181,6 +181,23 @@ func _run_script(battle: BattleScene) -> void:
 				battle.controller.set_selection([cr.id])
 				battle.cam.set_distance(52.0)
 				battle.cam.center_on(core + Vector2(8.0, 6.0))
+		"vesper":
+			if _count == 3:
+				var vw: SimWorld = battle.world
+				var vme: int = battle.local_player
+				var vhq: Vector2 = vw.players[vme].start_pos
+				var vcell: Vector2i = vw.map.cell_of(vhq)
+				vw.spawn_building("cradle", vme, vcell + Vector2i(5, -2), true)
+				vw.spawn_building("assembler", vme, vcell + Vector2i(-1, 5), true)
+				vw.spawn_building("cistern", vme, vcell + Vector2i(-6, -1), true)
+				vw.spawn_building("oracle", vme, vcell + Vector2i(5, 4), true)
+				vw.spawn_building("spire", vme, vcell + Vector2i(10, 8), true)
+				vw.spawn_building("ward_node", vme, vcell + Vector2i(8, 2), true)
+				var vkinds: Array[String] = ["halberd", "lash", "aureole", "prism", "glint", "shard"]
+				for k: int in vkinds.size():
+					vw.spawn_unit(vkinds[k], vme, vhq + Vector2(-9.0 + float(k % 3) * 3.4, 12.0 + float(k / 3) * 3.6))
+				battle.cam.set_distance(52.0)
+				battle.cam.center_on(vhq + Vector2(5.0, 5.0))
 		"nomad":
 			if _count == 3:
 				var nw: SimWorld = battle.world

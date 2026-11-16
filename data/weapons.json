@@ -104,5 +104,37 @@
 	"snare_gun": {
 		"name": "Snare Gun", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
 		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
+	},
+	"mote_pulse": {
+		"name": "Pulse Carbine", "damage_type": "ballistic", "damage": 6.0, "range": 7.5,
+		"cooldown": 0.5, "hits_air": true, "fx": "tracer"
+	},
+	"shard_lance": {
+		"name": "Shard Lance", "damage_type": "piercing", "damage": 40.0, "range": 10.0,
+		"cooldown": 2.6, "projectile_speed": 18.0, "homing": true, "hits_air": true, "fx": "missile"
+	},
+	"glint_pulse": {
+		"name": "Glint Repeater", "damage_type": "ballistic", "damage": 5.0, "range": 7.5,
+		"cooldown": 0.3, "hits_air": true, "fx": "tracer"
+	},
+	"lash_repeater": {
+		"name": "Lash Repeater", "damage_type": "ballistic", "damage": 14.0, "range": 9.0,
+		"cooldown": 0.42, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"halberd_beam": {
+		"name": "Halberd Lance", "damage_type": "piercing", "damage": 54.0, "range": 10.5,
+		"cooldown": 2.1, "projectile_speed": 40.0, "splash": 0.6, "fx": "shell"
+	},
+	"aureole_flak": {
+		"name": "Aureole Burst", "damage_type": "flak", "damage": 15.0, "range": 11.5,
+		"cooldown": 0.34, "hits_air": true, "fx": "tracer_heavy"
+	},
+	"prism_ray": {
+		"name": "Prism Mortar", "damage_type": "explosive", "damage": 82.0, "range": 20.0,
+		"min_range": 6.5, "cooldown": 5.2, "projectile_speed": 16.0, "splash": 2.6, "scatter": 1.8, "fx": "artillery"
+	},
+	"ward_pulse": {
+		"name": "Ward Pulse", "damage_type": "ballistic", "damage": 10.0, "range": 10.5,
+		"cooldown": 0.25, "hits_air": true, "fx": "tracer"
 	}
 }

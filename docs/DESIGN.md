@@ -114,6 +114,15 @@ short radius, so the network is a dense, tough web. Linked vehicles self-repair.
   Mauler (heavy tank), Anvil (siege mortar carrier), Ratchet (repair truck),
   Levy (cheap massed infantry), Sapper (builder, lays mines).
 
+**Vesper Array** (added 16 November at the owner's request) — an automated
+legion of drone frames: cheap, quick and many, but fragile. Linked frames
+move 15% faster; Dark frames keep 92% of their rate of fire. No aircraft and
+no heavy tank; its relay, the Spire, is cheaper than a Relay and reaches less
+far.
+
+- Signature: Mote (cheap walking drone), Halberd (battle skimmer), Prism
+  (siege skimmer); everything with wheels elsewhere hovers here.
+
 **Nomad Circuit** — fast, light, elusive. No fixed relays: signal comes from
 mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 

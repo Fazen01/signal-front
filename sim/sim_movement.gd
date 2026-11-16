@@ -47,6 +47,8 @@ static func _advance(w: SimWorld, e: SimEntity) -> void:
 	var to: Vector2 = target - e.pos
 	var dist: float = to.length()
 	var speed: float = e.def.speed
+	if e.linked and e.owner >= 0:
+		speed *= 1.0 + w.players[e.owner].faction.linked_speed_bonus
 	if e.def.is_vehicle() and w.map.terrain_at(e.pos) == SimMap.Terrain.FOREST:
 		speed *= w.data.forest_vehicle_speed_mult
 	var step: float = speed * SimWorld.DT

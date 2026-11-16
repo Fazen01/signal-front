@@ -35,6 +35,11 @@ const SAND: Color = Color(0.70, 0.60, 0.42)
 const SAND_DARK: Color = Color(0.44, 0.37, 0.26)
 const CANVAS: Color = Color(0.82, 0.76, 0.62)
 const PATCH: Color = Color(0.20, 0.50, 0.50)
+# Vesper Array palette: pale ceramic shells over dark frames, violet light.
+const SHELL: Color = Color(0.56, 0.58, 0.68)
+const SHELL_DARK: Color = Color(0.32, 0.34, 0.45)
+const FRAME: Color = Color(0.11, 0.12, 0.17)
+const VIOLET: Color = Color(0.66, 0.46, 1.0)
 const SKIN: Color = Color(0.76, 0.58, 0.45)
 const LAMP: Color = Color(1.0, 0.93, 0.72)
 const LAMP_RED: Color = Color(1.0, 0.25, 0.18)
@@ -375,6 +380,54 @@ static func _assemble(model: String, team: Color) -> Node3D:
 			box(st, Vector3(0.25, 0.08, 0.52), Vector3(-0.1, 0.38, 0.0), team_mat(team))
 		"signal_loom":
 			_signal_loom(root, team)
+		"mote":
+			_drone(root, team)
+			# An arm gun on each side.
+			for z: float in [-0.36, 0.36]:
+				box(root, Vector3(0.3, 0.12, 0.12), Vector3(0.1, 1.02, z), mat(SHELL_DARK))
+				barrel(root, 0.035, 0.42, Vector3(0.22, 1.02, z), mat(FRAME))
+				box(root, Vector3(0.05, 0.07, 0.07), Vector3(0.65, 1.02, z), mat(VIOLET, 1.6))
+		"shard":
+			_drone(root, team)
+			# A lance tube over one shoulder, a counterweight on the other.
+			barrel(root, 0.11, 1.05, Vector3(-0.42, 1.36, 0.3), mat(SHELL_DARK))
+			cyl(root, 0.13, 0.13, 0.1, Vector3(0.63, 1.36, 0.3), mat(VIOLET, 1.5), 8, Vector3(0.0, 0.0, -PI * 0.5))
+			cyl(root, 0.13, 0.13, 0.08, Vector3(-0.42, 1.36, 0.3), mat(FRAME), 8, Vector3(0.0, 0.0, -PI * 0.5))
+			box(root, Vector3(0.24, 0.22, 0.16), Vector3(-0.05, 1.12, -0.36), mat(SHELL_DARK))
+		"weaver":
+			_drone(root, team)
+			# A fabricator pack and two working arms.
+			box(root, Vector3(0.24, 0.46, 0.44), Vector3(-0.3, 1.04, 0.0), mat(HAZARD))
+			box(root, Vector3(0.05, 0.3, 0.3), Vector3(-0.43, 1.08, 0.0), mat(VIOLET, 1.2))
+			for z: float in [-0.34, 0.34]:
+				box(root, Vector3(0.46, 0.06, 0.06), Vector3(0.24, 0.96, z), mat(FRAME), Vector3(0.0, 0.0, -0.3))
+				box(root, Vector3(0.12, 0.14, 0.1), Vector3(0.46, 0.88, z), mat(HAZARD))
+		"porter":
+			_porter(root, team)
+		"glint":
+			_glint(root, team)
+		"lash":
+			_lash(root, team)
+		"halberd":
+			_halberd(root, team)
+		"aureole":
+			_aureole(root, team)
+		"prism":
+			_prism(root, team)
+		"nexus":
+			_nexus(root, team)
+		"spire":
+			_spire(root, team)
+		"cistern":
+			_cistern(root, team)
+		"cradle":
+			_cradle(root, team)
+		"assembler":
+			_assembler(root, team)
+		"ward_node":
+			_ward_node(root, team)
+		"oracle":
+			_oracle(root, team)
 		"hq":
 			_hq(root, team)
 		"depot":
@@ -1221,6 +1274,265 @@ static func _signal_loom(root: Node3D, team: Color) -> void:
 	ring(root, 0.85, 0.95, Vector3(0.0, 3.9, 0.0), mat(Color(0.6, 1.0, 0.9), 1.2))
 	ball(root, 0.3, Vector3(0.0, 4.5, 0.0), mat(team, 1.5))
 	_tent(root, 1.6, 0.9, 1.4, Vector3(2.0, 0.15, 2.0), CANVAS)
+
+
+# ------------------------------------------------------------ Vesper Array
+
+## A drone frame on two stilt legs: the Array's infantry. A six-sided body
+## over jointed legs, shoulder pods, and a visor that glows.
+static func _drone(root: Node3D, team: Color) -> void:
+	for z: float in [-0.16, 0.16]:
+		box(root, Vector3(0.28, 0.07, 0.15), Vector3(0.1, 0.035, z), mat(FRAME))
+		box(root, Vector3(0.09, 0.46, 0.09), Vector3(0.07, 0.29, z), mat(SHELL_DARK), Vector3(0.0, 0.0, 0.28))
+		box(root, Vector3(0.11, 0.3, 0.11), Vector3(-0.01, 0.6, z), mat(SHELL), Vector3(0.0, 0.0, -0.4))
+		box(root, Vector3(0.08, 0.08, 0.12), Vector3(0.0, 0.47, z), mat(FRAME))
+		box(root, Vector3(0.22, 0.16, 0.15), Vector3(0.0, 1.14, z * 2.05), mat(SHELL_DARK))
+	box(root, Vector3(0.22, 0.14, 0.4), Vector3(0.0, 0.76, 0.0), mat(FRAME))
+	cyl(root, 0.24, 0.3, 0.44, Vector3(0.0, 1.02, 0.0), mat(SHELL), 6)
+	cyl(root, 0.31, 0.31, 0.1, Vector3(0.0, 0.88, 0.0), team_mat(team), 6)
+	box(root, Vector3(0.1, 0.22, 0.3), Vector3(0.22, 1.02, 0.0), team_mat(team))
+	cyl(root, 0.16, 0.2, 0.12, Vector3(0.0, 1.3, 0.0), mat(SHELL_DARK), 6)
+	var dome: MeshInstance3D = ball(root, 0.15, Vector3(0.03, 1.37, 0.0), mat(SHELL), 6)
+	dome.scale = Vector3(1.0, 0.8, 1.0)
+	box(root, Vector3(0.06, 0.07, 0.22), Vector3(0.16, 1.37, 0.0), mat(VIOLET, 1.7))
+	aerial(root, Vector3(-0.1, 1.42, -0.1), 0.34, VIOLET)
+
+
+## The Array's hover chassis. A dark keel, a two-step ceramic hull with a
+## sloped nose, an engine block with glowing vents at the back, and a lift
+## pod along each side instead of wheels. The deck is at 0.32 + `deck`.
+static func _skimmer(root: Node3D, team: Color, length: float, width: float, deck: float = 0.5) -> void:
+	var body: float = deck - 0.1
+	var top: float = 0.42 + body
+	# Keel and lower hull.
+	box(root, Vector3(length * 0.96, 0.16, width * 0.78), Vector3(0.0, 0.34, 0.0), mat(FRAME))
+	box(root, Vector3(length * 0.8, body * 0.6, width), Vector3(-length * 0.08, 0.42 + body * 0.3, 0.0), mat(SHELL_DARK))
+	wedge(root, Vector3(length * 0.28, body * 0.6, width), Vector3(length * 0.46, 0.42 + body * 0.3, 0.0), mat(SHELL_DARK), 0.0)
+	# Upper hull, stepped in.
+	box(root, Vector3(length * 0.66, body * 0.42, width * 0.8), Vector3(-length * 0.1, top - body * 0.21, 0.0), mat(SHELL))
+	wedge(root, Vector3(length * 0.3, body * 0.42, width * 0.8), Vector3(length * 0.38, top - body * 0.21, 0.0), mat(SHELL), 0.0)
+	# Team colour: a band round the waist and a plate on the nose.
+	box(root, Vector3(length * 0.82, 0.07, width + 0.03), Vector3(-length * 0.08, 0.42 + body * 0.6, 0.0), team_mat(team))
+	box(root, Vector3(length * 0.16, 0.05, width * 0.5), Vector3(length * 0.4, top - body * 0.2, 0.0), team_mat(team), Vector3(0.0, 0.0, -0.62))
+	# Engine block with two glowing vents.
+	box(root, Vector3(length * 0.14, body * 0.9, width * 0.72), Vector3(-length * 0.5, 0.42 + body * 0.45, 0.0), mat(FRAME))
+	for z: float in [-0.2, 0.2]:
+		box(root, Vector3(0.05, body * 0.3, width * 0.22), Vector3(-length * 0.575, 0.42 + body * 0.5, z * width), mat(VIOLET, 1.5))
+	# Lift pods.
+	for side: float in [-1.0, 1.0]:
+		var z: float = side * (width * 0.5 + 0.06)
+		cyl(root, 0.19, 0.19, length * 0.74, Vector3(-length * 0.02, 0.32, z), mat(SHELL), 8, Vector3(0.0, 0.0, -PI * 0.5))
+		cyl(root, 0.2, 0.2, 0.1, Vector3(length * 0.35, 0.32, z), mat(FRAME), 8, Vector3(0.0, 0.0, -PI * 0.5))
+		cyl(root, 0.14, 0.14, 0.06, Vector3(-length * 0.4, 0.32, z), mat(VIOLET, 1.6), 8, Vector3(0.0, 0.0, -PI * 0.5))
+		box(root, Vector3(length * 0.62, 0.04, 0.2), Vector3(-length * 0.02, 0.12, z), mat(VIOLET, 1.3))
+		box(root, Vector3(length * 0.3, 0.06, 0.1), Vector3(0.0, 0.5, z), mat(FRAME))
+	lamp(root, Vector3(length * 0.56, 0.5, width * 0.3), VIOLET, 0.09)
+	lamp(root, Vector3(length * 0.56, 0.5, -width * 0.3), VIOLET, 0.09)
+
+
+## A six-sided turret with a sensor band, for the skimmers.
+static func _hex_turret(t: Node3D, team: Color, radius: float, height: float) -> void:
+	cyl(t, radius * 0.86, radius, height, Vector3(0.0, height * 0.5, 0.0), mat(SHELL), 6)
+	cyl(t, radius * 1.02, radius * 1.02, 0.07, Vector3(0.0, height * 0.35, 0.0), mat(FRAME), 6)
+	cyl(t, radius * 0.5, radius * 0.6, 0.08, Vector3(-radius * 0.15, height + 0.04, 0.0), team_mat(team), 6)
+	box(t, Vector3(0.07, height * 0.3, radius * 0.9), Vector3(radius * 0.84, height * 0.62, 0.0), mat(VIOLET, 1.5))
+
+
+static func _porter(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 2.2, 1.15, 0.45)
+	box(root, Vector3(0.6, 0.5, 1.0), Vector3(0.62, 1.02, 0.0), mat(SHELL))
+	box(root, Vector3(0.05, 0.2, 0.8), Vector3(0.93, 1.08, 0.0), mat(VIOLET, 0.7, 0.3, 0.2))
+	box(root, Vector3(1.3, 0.3, 1.2), Vector3(-0.42, 0.92, 0.0), mat(SHELL_DARK))
+	box(root, Vector3(1.32, 0.08, 1.22), Vector3(-0.42, 1.06, 0.0), team_mat(team))
+	_cargo(root, Vector3(-0.42, 1.1, 0.0), Vector3(1.1, 0.5, 1.0))
+
+
+static func _glint(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 1.6, 0.85, 0.36)
+	wedge(root, Vector3(0.5, 0.3, 0.06), Vector3(-0.62, 0.84, 0.3), mat(SHELL_DARK), 0.0)
+	wedge(root, Vector3(0.5, 0.3, 0.06), Vector3(-0.62, 0.84, -0.3), mat(SHELL_DARK), 0.0)
+	aerial(root, Vector3(-0.6, 0.7, 0.0), 0.8, VIOLET)
+	var t: Node3D = _turret(root, Vector3(0.0, 0.68, 0.0))
+	_hex_turret(t, team, 0.22, 0.18)
+	barrel(t, 0.03, 0.6, Vector3(0.14, 0.1, 0.0), mat(FRAME))
+
+
+static func _lash(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 2.1, 1.25, 0.5)
+	hatch(root, Vector3(0.62, 0.84, 0.3), 0.15, SHELL_DARK)
+	box(root, Vector3(0.4, 0.2, 0.3), Vector3(-0.78, 0.92, -0.32), mat(SHELL_DARK))
+	var t: Node3D = _turret(root, Vector3(-0.15, 0.82, 0.0))
+	_hex_turret(t, team, 0.5, 0.32)
+	for z: float in [-0.17, 0.17]:
+		box(t, Vector3(0.36, 0.16, 0.14), Vector3(0.5, 0.2, z), mat(SHELL_DARK))
+		barrel(t, 0.05, 0.95, Vector3(0.62, 0.2, z), mat(FRAME))
+		cyl(t, 0.07, 0.07, 0.08, Vector3(1.5, 0.2, z), mat(VIOLET, 1.5), 6, Vector3(0.0, 0.0, -PI * 0.5))
+
+
+static func _halberd(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 2.7, 1.45, 0.55)
+	hatch(root, Vector3(0.8, 0.89, 0.42), 0.17, SHELL_DARK)
+	for z: float in [-0.5, 0.5]:
+		box(root, Vector3(0.5, 0.18, 0.3), Vector3(-1.0, 0.96, z), mat(SHELL_DARK))
+	var t: Node3D = _turret(root, Vector3(-0.2, 0.87, 0.0))
+	_hex_turret(t, team, 0.68, 0.44)
+	# The lance: a long rail in a heavy cradle, ringed with emitters.
+	box(t, Vector3(0.5, 0.34, 0.5), Vector3(0.72, 0.24, 0.0), mat(SHELL_DARK))
+	barrel(t, 0.09, 2.0, Vector3(0.9, 0.24, 0.0), mat(FRAME))
+	box(t, Vector3(1.2, 0.07, 0.07), Vector3(1.6, 0.4, 0.0), mat(SHELL))
+	for x: float in [1.4, 1.9, 2.4]:
+		cyl(t, 0.14, 0.14, 0.07, Vector3(x, 0.24, 0.0), mat(VIOLET, 1.5), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	cyl(t, 0.12, 0.12, 0.2, Vector3(2.92, 0.24, 0.0), mat(SHELL_DARK), 8, Vector3(0.0, 0.0, -PI * 0.5))
+	box(t, Vector3(0.36, 0.22, 0.9), Vector3(-0.72, 0.2, 0.0), mat(SHELL_DARK))
+	aerial(t, Vector3(-0.5, 0.44, -0.42), 0.9, VIOLET)
+
+
+static func _aureole(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 2.1, 1.2, 0.48)
+	var t: Node3D = _turret(root, Vector3(-0.1, 0.8, 0.0))
+	_hex_turret(t, team, 0.5, 0.34)
+	# Two racks of emitters angled at the sky, and a tracking dish.
+	for side: float in [-1.0, 1.0]:
+		box(t, Vector3(0.5, 0.3, 0.26), Vector3(0.15, 0.56, side * 0.5), mat(SHELL_DARK), Vector3(0.0, 0.0, 0.62))
+		for k: float in [-0.07, 0.07]:
+			cyl(t, 0.035, 0.035, 1.0, Vector3(0.56, 0.86, side * 0.5 + k), mat(FRAME), 5, Vector3(0.0, 0.0, -0.95))
+			box(t, Vector3(0.07, 0.07, 0.07), Vector3(0.97, 1.15, side * 0.5 + k), mat(VIOLET, 1.6))
+	cyl(t, 0.03, 0.03, 0.4, Vector3(-0.3, 0.54, 0.0), mat(FRAME), 5)
+	cyl(t, 0.3, 0.1, 0.12, Vector3(-0.3, 0.8, 0.0), mat(SHELL), 8, Vector3(0.0, 0.0, 0.5))
+
+
+static func _prism(root: Node3D, team: Color) -> void:
+	_skimmer(root, team, 2.5, 1.3, 0.5)
+	# Stabiliser legs for firing.
+	for z: float in [-0.85, 0.85]:
+		box(root, Vector3(0.5, 0.1, 0.16), Vector3(-1.0, 0.3, z), mat(FRAME), Vector3(0.0, 0.0, 0.3))
+		box(root, Vector3(0.3, 0.06, 0.3), Vector3(-1.2, 0.2, z), mat(SHELL_DARK))
+	var t: Node3D = _turret(root, Vector3(-0.3, 0.82, 0.0))
+	_hex_turret(t, team, 0.56, 0.4)
+	# The projector: a tapering tube braced by two struts, a crystal at its mouth.
+	cyl(t, 0.13, 0.22, 2.2, Vector3(0.82, 1.0, 0.0), mat(SHELL), 8, Vector3(0.0, 0.0, -0.95))
+	for z: float in [-0.26, 0.26]:
+		box(t, Vector3(1.3, 0.06, 0.06), Vector3(0.55, 0.72, z), mat(FRAME), Vector3(0.0, 0.0, 0.5))
+	for d: float in [0.5, 1.0, 1.5]:
+		cyl(t, 0.2, 0.2, 0.06, Vector3(0.82 - 0.895 + d * 0.81, 1.0 - 0.64 + d * 0.58, 0.0), mat(VIOLET, 1.3), 8, Vector3(0.0, 0.0, -0.95))
+	wedge(t, Vector3(0.42, 0.62, 0.42), Vector3(1.82, 1.74, 0.0), mat(VIOLET, 1.6), 0.5, Vector3(0.0, 0.0, -0.95))
+
+
+## The six-sided slab the Array's buildings stand on.
+static func _hex_base(root: Node3D, radius: float, height: float = 0.4) -> void:
+	cyl(root, radius, radius + 0.15, height, Vector3(0.0, 0.0, 0.0), mat(FRAME), 6)
+	cyl(root, radius - 0.45, radius - 0.45, 0.05, Vector3(0.0, height * 0.5 + 0.02, 0.0), mat(SHELL_DARK), 6)
+	cyl(root, radius - 0.2, radius - 0.2, 0.03, Vector3(0.0, height * 0.5 + 0.01, 0.0), mat(VIOLET, 0.8), 6)
+	# A short lit post on every corner.
+	for i: int in 6:
+		var ang: float = float(i) * TAU / 6.0 + TAU / 12.0
+		var at: Vector3 = Vector3(cos(ang) * (radius - 0.25), height * 0.5, sin(ang) * (radius - 0.25))
+		cyl(root, 0.1, 0.13, 0.5, at + Vector3(0.0, 0.25, 0.0), mat(SHELL), 6)
+		box(root, Vector3(0.12, 0.1, 0.12), at + Vector3(0.0, 0.54, 0.0), mat(VIOLET, 1.6))
+
+
+static func _nexus(root: Node3D, team: Color) -> void:
+	_hex_base(root, 4.0, 0.5)
+	cyl(root, 2.7, 3.1, 2.3, Vector3(0.0, 1.4, 0.0), mat(SHELL), 6)
+	cyl(root, 3.05, 3.05, 0.3, Vector3(0.0, 1.95, 0.0), team_mat(team), 6)
+	cyl(root, 1.7, 2.2, 1.5, Vector3(0.0, 3.3, 0.0), mat(SHELL_DARK), 6)
+	cyl(root, 1.9, 1.9, 0.14, Vector3(0.0, 4.1, 0.0), mat(FRAME), 6)
+	for i: int in 6:
+		var ang: float = float(i) * TAU / 6.0 + TAU / 12.0
+		box(root, Vector3(1.0, 0.32, 0.1), Vector3(cos(ang) * 2.56, 1.1, sin(ang) * 2.56), mat(VIOLET, 0.9), Vector3(0.0, -ang + PI * 0.5, 0.0))
+		box(root, Vector3(0.6, 0.26, 0.1), Vector3(cos(ang) * 1.7, 3.3, sin(ang) * 1.7), mat(VIOLET, 0.9), Vector3(0.0, -ang + PI * 0.5, 0.0))
+		wedge(root, Vector3(1.0, 1.6, 0.3), Vector3(cos(ang + 0.52) * 3.4, 0.95, sin(ang + 0.52) * 3.4), mat(SHELL_DARK), 0.0, Vector3(0.0, -ang - 0.52, 0.0))
+	# Command mast: the root of the signal grid.
+	cyl(root, 0.16, 0.3, 3.8, Vector3(0.9, 6.0, 0.9), mat(SHELL), 6)
+	ring(root, 0.75, 0.9, Vector3(0.9, 6.5, 0.9), team_mat(team))
+	ring(root, 0.45, 0.58, Vector3(0.9, 7.2, 0.9), mat(VIOLET, 1.0))
+	ball(root, 0.24, Vector3(0.9, 8.0, 0.9), mat(team, 1.4))
+	_spin_arms(root, Vector3(0.9, 5.6, 0.9), 0.6, SHELL)
+	var t: Node3D = _turret(root, Vector3(-0.9, 4.18, -0.9))
+	box(t, Vector3(0.8, 0.4, 0.7), Vector3(0.0, 0.2, 0.0), mat(FRAME))
+	barrel(t, 0.06, 0.9, Vector3(0.35, 0.25, 0.14), mat(GUNMETAL))
+	barrel(t, 0.06, 0.9, Vector3(0.35, 0.25, -0.14), mat(GUNMETAL))
+
+
+static func _spire(root: Node3D, team: Color) -> void:
+	cyl(root, 0.7, 0.85, 0.4, Vector3(0.0, 0.2, 0.0), mat(FRAME), 6)
+	cyl(root, 0.1, 0.42, 4.0, Vector3(0.0, 2.4, 0.0), mat(SHELL), 6)
+	for i: int in 3:
+		var ang: float = float(i) * TAU / 3.0
+		wedge(root, Vector3(0.6, 1.2, 0.12), Vector3(cos(ang) * 0.55, 1.0, sin(ang) * 0.55), mat(SHELL_DARK), 0.0, Vector3(0.0, -ang, 0.0))
+	ring(root, 0.5, 0.62, Vector3(0.0, 2.9, 0.0), team_mat(team))
+	ring(root, 0.3, 0.4, Vector3(0.0, 3.7, 0.0), mat(VIOLET, 1.0))
+	ball(root, 0.2, Vector3(0.0, 4.6, 0.0), mat(team, 1.4))
+	_spin_arms(root, Vector3(0.0, 2.2, 0.0), 0.45, SHELL)
+
+
+static func _cistern(root: Node3D, team: Color) -> void:
+	_hex_base(root, 3.0)
+	cyl(root, 1.6, 1.8, 1.5, Vector3(-0.5, 0.95, -0.5), mat(SHELL), 8)
+	var dome: MeshInstance3D = ball(root, 1.6, Vector3(-0.5, 1.7, -0.5), mat(SHELL_DARK), 8)
+	dome.scale = Vector3(1.0, 0.5, 1.0)
+	cyl(root, 1.82, 1.82, 0.2, Vector3(-0.5, 1.2, -0.5), team_mat(team), 8)
+	barrel(root, 0.1, 1.5, Vector3(1.0, 0.6, -0.5), mat(FRAME))
+	box(root, Vector3(1.0, 0.7, 0.9), Vector3(1.5, 0.55, 1.2), mat(SHELL_DARK))
+	box(root, Vector3(0.9, 0.6, 0.8), Vector3(0.4, 0.5, 1.7), mat(FRAME))
+	box(root, Vector3(0.8, 0.5, 0.7), Vector3(1.0, 1.1, 1.4), mat(SHELL))
+	_pole_lamp(root, Vector3(2.0, 0.2, -1.6), 1.6, VIOLET)
+
+
+static func _cradle(root: Node3D, team: Color) -> void:
+	_hex_base(root, 3.0)
+	for i: int in 3:
+		var ang: float = float(i) * TAU / 3.0 + 0.5
+		var at: Vector3 = Vector3(cos(ang) * 1.3, 0.0, sin(ang) * 1.3)
+		cyl(root, 0.85, 0.95, 1.5, at + Vector3(0.0, 0.95, 0.0), mat(SHELL), 6)
+		var cap: MeshInstance3D = ball(root, 0.85, at + Vector3(0.0, 1.7, 0.0), mat(SHELL_DARK), 6)
+		cap.scale = Vector3(1.0, 0.55, 1.0)
+		cyl(root, 0.97, 0.97, 0.16, at + Vector3(0.0, 1.3, 0.0), team_mat(team), 6)
+		box(root, Vector3(0.1, 0.7, 0.5), Vector3(cos(ang) * 2.22, 0.6, sin(ang) * 2.22), mat(VIOLET, 0.9), Vector3(0.0, -ang, 0.0))
+	cyl(root, 0.3, 0.4, 2.6, Vector3(0.0, 1.5, 0.0), mat(FRAME), 6)
+	ball(root, 0.22, Vector3(0.0, 2.9, 0.0), mat(VIOLET, 1.4))
+
+
+static func _assembler(root: Node3D, team: Color) -> void:
+	_hex_base(root, 3.0)
+	box(root, Vector3(4.0, 1.7, 2.6), Vector3(0.0, 1.05, -0.7), mat(SHELL))
+	box(root, Vector3(4.05, 0.22, 2.65), Vector3(0.0, 1.6, -0.7), team_mat(team))
+	for x: float in [-1.4, 0.0, 1.4]:
+		box(root, Vector3(0.3, 0.3, 2.8), Vector3(x, 2.05, -0.7), mat(FRAME))
+	box(root, Vector3(2.2, 1.3, 0.1), Vector3(0.0, 0.85, 0.62), mat(GUNMETAL))
+	box(root, Vector3(2.5, 0.12, 0.14), Vector3(0.0, 1.55, 0.66), mat(VIOLET, 1.0))
+	cyl(root, 0.1, 0.1, 2.4, Vector3(2.0, 1.4, 1.5), mat(SHELL_DARK), 5)
+	box(root, Vector3(1.6, 0.14, 0.14), Vector3(1.3, 2.55, 1.5), mat(SHELL_DARK))
+	box(root, Vector3(0.3, 0.3, 0.3), Vector3(0.6, 2.3, 1.5), mat(FRAME))
+	box(root, Vector3(1.5, 0.3, 0.85), Vector3(-0.9, 0.55, 1.5), mat(FRAME))
+	box(root, Vector3(1.2, 0.25, 0.9), Vector3(-0.95, 0.8, 1.5), mat(SHELL))
+
+
+static func _ward_node(root: Node3D, team: Color) -> void:
+	cyl(root, 0.75, 0.9, 0.4, Vector3(0.0, 0.2, 0.0), mat(FRAME), 6)
+	cyl(root, 0.35, 0.5, 0.5, Vector3(0.0, 0.65, 0.0), mat(SHELL_DARK), 6)
+	ring(root, 0.78, 0.86, Vector3(0.0, 0.42, 0.0), team_mat(team))
+	var t: Node3D = _turret(root, Vector3(0.0, 0.9, 0.0))
+	ball(t, 0.42, Vector3(0.0, 0.3, 0.0), mat(SHELL), 8)
+	for z: float in [-0.15, 0.15]:
+		barrel(t, 0.045, 0.8, Vector3(0.25, 0.32, z), mat(FRAME))
+	box(t, Vector3(0.08, 0.1, 0.3), Vector3(0.4, 0.44, 0.0), mat(VIOLET, 1.6))
+	box(t, Vector3(0.3, 0.08, 0.3), Vector3(-0.15, 0.7, 0.0), team_mat(team))
+
+
+static func _oracle(root: Node3D, team: Color) -> void:
+	_hex_base(root, 3.0)
+	cyl(root, 1.6, 2.0, 0.9, Vector3(0.0, 0.65, 0.0), mat(SHELL), 6)
+	cyl(root, 1.65, 1.65, 0.16, Vector3(0.0, 1.0, 0.0), team_mat(team), 6)
+	for i: int in 6:
+		var ang: float = float(i) * TAU / 6.0
+		cyl(root, 0.06, 0.1, 3.0, Vector3(cos(ang) * 1.9, 2.2, sin(ang) * 1.9), mat(SHELL_DARK), 4, Vector3(sin(ang) * 0.25, 0.0, -cos(ang) * 0.25))
+	ring(root, 1.2, 1.32, Vector3(0.0, 3.0, 0.0), team_mat(team))
+	# A slowly turning crystal hangs in the middle.
+	var crystal: Node3D = group(root, "Spin", Vector3(0.0, 3.0, 0.0))
+	wedge(crystal, Vector3(0.9, 1.1, 0.9), Vector3(0.0, 0.55, 0.0), mat(VIOLET, 1.4), 0.5)
+	wedge(crystal, Vector3(0.9, 1.1, 0.9), Vector3(0.0, -0.55, 0.0), mat(VIOLET, 1.4), 0.5, Vector3(PI, 0.0, 0.0))
+	_pole_lamp(root, Vector3(-2.2, 0.2, 1.4), 1.6, VIOLET)
 
 
 # ------------------------------------------------------------------ detail

@@ -176,5 +176,50 @@
 		"hp": 1250, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"directive_cooldown_mult": 0.75, "model": "signal_loom",
 		"hotkey": "C", "requires": ["chop_shop"]
+	},
+	"nexus": {
+		"name": "Nexus", "desc": "The root of your signal network. Lose it and you lose the match.",
+		"faction": "vesper", "tier": 1, "cost": 2000, "build_time": 78.0,
+		"hp": 5600, "armor": "structure", "footprint": [4, 4], "sight": 14.0,
+		"signal_radius": 28.0, "signal_root": true, "bandwidth_provided": 20, "depot": true,
+		"weapons": ["hq_gun"], "turret": true, "produces": ["weaver", "porter"], "model": "nexus", "buildable": false
+	},
+	"spire": {
+		"name": "Spire", "desc": "Extends your signal grid and adds bandwidth. Cheaper than a Relay, with a shorter reach. Must link back to the Nexus.",
+		"faction": "vesper", "tier": 1, "cost": 130, "build_time": 13.5,
+		"hp": 520, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
+		"signal_radius": 16.0, "bandwidth_provided": 10, "model": "spire", "hotkey": "R"
+	},
+	"cistern": {
+		"name": "Cistern", "desc": "Drop-off point for salvage. Builds Porters.",
+		"faction": "vesper", "tier": 1, "cost": 230, "build_time": 22.0,
+		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"depot": true, "produces": ["porter"], "model": "cistern", "hotkey": "P"
+	},
+	"cradle": {
+		"name": "Cradle", "desc": "Turns out walking frames: Motes, Shards and Weavers.",
+		"faction": "vesper", "tier": 1, "cost": 180, "build_time": 20.0,
+		"hp": 1200, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["mote", "shard", "weaver"], "model": "cradle", "hotkey": "B"
+	},
+	"assembler": {
+		"name": "Assembler", "desc": "Builds the Array's skimmers. Unlocks tier 2.",
+		"faction": "vesper", "tier": 2, "cost": 360, "build_time": 32.0,
+		"hp": 1650, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
+		"produces": ["porter", "glint", "lash", "halberd", "aureole", "prism"], "model": "assembler",
+		"hotkey": "V", "requires": ["cradle"]
+	},
+	"ward_node": {
+		"name": "Ward Node", "desc": "Light defensive gun that fires at ground and air alike.",
+		"faction": "vesper", "tier": 2, "cost": 140, "build_time": 13.0,
+		"hp": 660, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"weapons": ["ward_pulse"], "turret": true, "model": "ward_node", "hotkey": "T", "requires": ["cradle"]
+	},
+	"oracle": {
+		"name": "Oracle", "desc": "Tier 3: unlocks the Prism. Directives recharge 25% faster.",
+		"faction": "vesper", "tier": 3, "cost": 440, "build_time": 34.0,
+		"hp": 1300, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
+		"directive_cooldown_mult": 0.75, "model": "oracle",
+		"hotkey": "C", "requires": ["assembler"]
 	}
 }

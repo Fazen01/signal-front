@@ -4,7 +4,7 @@ extends Node3D
 ## slowly circling camera. No fog, no sound and no input; when the match
 ## ends another starts on a new seed.
 
-const FACTIONS: Array[String] = ["aegis", "foundry", "nomad"]
+const FACTIONS: Array[String] = ["aegis", "foundry", "nomad", "vesper"]
 
 var world: SimWorld = null
 var _stage: Node3D = null  ## terrain and entities of the current match
@@ -36,7 +36,7 @@ func _start() -> void:
 	_stage.name = "Stage"
 	add_child(_stage)
 	var config: MatchConfig = MatchConfig.ai_vs_ai(31 + _round * 7)
-	config.factions = [FACTIONS[_round % 3], FACTIONS[(_round + 1) % 3]]
+	config.factions = [FACTIONS[_round % FACTIONS.size()], FACTIONS[(_round + 1) % FACTIONS.size()]]
 	world = SimSetup.create_match(config)
 	caption = "Live match:  %s  vs  %s" % [world.data.faction(config.factions[0]).name, world.data.faction(config.factions[1]).name]
 	var terrain: TerrainView = TerrainView.new()

@@ -216,5 +216,61 @@
 		"faction": "nomad", "tier": 1, "cost": 2000, "build_time": 78.0, "bandwidth": 1,
 		"hp": 5200, "armor": "heavy", "move": "vehicle", "speed": 2.2, "turn_rate": 1.6,
 		"radius": 2.0, "sight": 12.0, "deploys_to": "caravan_hub", "model": "caravan", "hotkey": "Y"
+	},
+	"mote": {
+		"name": "Mote", "desc": "The Array's basic frame: a cheap walking drone with a pulse carbine. Weak alone, built in dozens.",
+		"faction": "vesper", "tier": 1, "cost": 50, "build_time": 7.0, "bandwidth": 1,
+		"hp": 70, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["mote_pulse"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "mote", "hotkey": "T"
+	},
+	"shard": {
+		"name": "Shard", "desc": "Anti-armor frame. Its homing lance is slow to fire and deadly to vehicles.",
+		"faction": "vesper", "tier": 1, "cost": 100, "build_time": 10.5, "bandwidth": 1,
+		"hp": 68, "armor": "infantry", "move": "infantry", "speed": 2.8, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 11.0, "weapons": ["shard_lance"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "shard", "hotkey": "L"
+	},
+	"weaver": {
+		"name": "Weaver", "desc": "Builds and repairs structures and captures uplinks. Unarmed.",
+		"faction": "vesper", "tier": 1, "cost": 80, "build_time": 9.0, "bandwidth": 1,
+		"hp": 65, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
+		"radius": 0.4, "sight": 10.0, "builder": true, "model": "weaver", "hotkey": "F",
+		"builds": ["cistern", "spire", "cradle", "assembler", "ward_node", "oracle"]
+	},
+	"porter": {
+		"name": "Porter", "desc": "Hover hauler. Collects salvage from fields and wrecks and carries it to a Cistern.",
+		"faction": "vesper", "tier": 1, "cost": 110, "build_time": 12.0, "bandwidth": 2,
+		"hp": 230, "armor": "light", "move": "vehicle", "speed": 3.9, "turn_rate": 3.2,
+		"radius": 0.95, "sight": 8.0, "harvester": true, "capacity": 90, "model": "porter", "hotkey": "U"
+	},
+	"glint": {
+		"name": "Glint", "desc": "Fast scout skimmer with a light repeater.",
+		"faction": "vesper", "tier": 2, "cost": 95, "build_time": 10.0, "bandwidth": 1,
+		"hp": 150, "armor": "light", "move": "vehicle", "speed": 6.6, "turn_rate": 4.2,
+		"radius": 0.8, "sight": 15.0, "weapons": ["glint_pulse"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "glint", "hotkey": "C"
+	},
+	"lash": {
+		"name": "Lash", "desc": "Skimmer with twin repeaters. Shreds infantry and light vehicles.",
+		"faction": "vesper", "tier": 2, "cost": 205, "build_time": 16.5, "bandwidth": 3,
+		"hp": 330, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.2,
+		"radius": 1.0, "sight": 11.0, "weapons": ["lash_repeater"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "lash", "hotkey": "R"
+	},
+	"halberd": {
+		"name": "Halberd", "desc": "The Array's battle skimmer: armored, with a long armor-piercing lance. Lighter than other tanks and quicker.",
+		"faction": "vesper", "tier": 2, "cost": 350, "build_time": 24.5, "bandwidth": 4,
+		"hp": 590, "armor": "heavy", "move": "vehicle", "speed": 3.7, "turn_rate": 2.4,
+		"radius": 1.1, "sight": 11.0, "weapons": ["halberd_beam"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "halberd", "hotkey": "B"
+	},
+	"aureole": {
+		"name": "Aureole", "desc": "Anti-air skimmer. Its bursts tear up aircraft and do little to armor.",
+		"faction": "vesper", "tier": 2, "cost": 220, "build_time": 17.0, "bandwidth": 3,
+		"hp": 330, "armor": "light", "move": "vehicle", "speed": 4.4, "turn_rate": 3.2,
+		"radius": 1.0, "sight": 12.0, "weapons": ["aureole_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "aureole", "hotkey": "K"
+	},
+	"prism": {
+		"name": "Prism", "desc": "Siege skimmer. Lobs heavy bolts a long way; it cannot hit close targets and needs spotters.",
+		"faction": "vesper", "tier": 3, "cost": 400, "build_time": 27.0, "bandwidth": 4,
+		"hp": 270, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.2,
+		"radius": 1.1, "sight": 10.0, "weapons": ["prism_ray"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "prism", "hotkey": "L",
+		"requires": ["oracle"]
 	}
 }

@@ -124,6 +124,20 @@ wrecks; ground units vanish when they stand still in forest.
   Caravan and relocate — your whole network is Dark while it rolls), Cache,
   Camp, Chop Shop, Snare Turret, Signal Loom (tier 3).
 
+**Vesper Array** — an automated legion of drone frames: cheap, quick and
+many, but fragile. Linked frames move 15% faster, and frames that go Dark
+keep nearly all of their rate of fire, so the Array can raid beyond its own
+network. It has no aircraft and no heavy tank.
+
+- Frames: Mote (cheap walking drone), Shard (anti-armor), Weaver (builds,
+  repairs, captures).
+- Skimmers (hover vehicles): Porter (hauler), Glint (scout), Lash (twin
+  repeaters), Halberd (battle skimmer), Aureole (anti-air), Prism (siege,
+  tier 3).
+- Buildings: Nexus, Cistern, **Spire** (a cheaper relay with a shorter
+  reach), Cradle, Assembler, Ward Node (fires at ground and air), Oracle
+  (tier 3).
+
 ## Maps
 
 A seeded, symmetric generator (176 × 176 for two players, a compact 128 × 128

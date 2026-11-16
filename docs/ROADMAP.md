@@ -177,6 +177,20 @@ map generation itself to be improved.
       determinism, symmetry and river crossings
 - [x] Match length checked against the old generator
 
+## M20 — A fourth faction: the Vesper Array (owner request, 16 November)
+
+- [x] Design: drone frames that are cheap, quick and fragile; faster while
+      Linked, nearly unaffected by going Dark; hover skimmers, no aircraft
+- [x] Data: nine units, seven buildings, eight weapons, AI roles
+- [x] One new rule in the simulation: `linked_speed_bonus` on a faction
+- [x] Models for all sixteen, in their own palette (pale shells, dark
+      frames, violet light)
+- [x] Tests, an AI match in `tools/check.sh`, README and design updated
+- [x] Second look pass after the owner said it looked bad: a calmer
+      palette instead of stark white, stepped hulls, six-sided turrets, lift
+      pods, chunkier frames, lit corner posts on every base
+- [ ] Balance against the other three measured over a larger batch
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
@@ -325,6 +339,36 @@ buildings. It was tried and withdrawn.**
   kept toned down (they read as confetti in a fight).
 - For whoever tries again: change one thing at a time and show it before
   building on it. Which of the four parts was disliked is not known.
+
+**11:25 UTC — the owner asked for one more faction (M20): the Vesper
+Array.**
+
+- **Design.** An automated legion of drone frames: cheap, quick, many and
+  fragile. Its two rules are that Linked frames move 15% faster
+  (`linked_speed_bonus`, the one new rule in the simulation) and that Dark
+  frames keep 92% of their rate of fire (`dark_rof_mult`, which already
+  existed). It has no aircraft, no heavy tank, no stealth and nothing like
+  the Crawler or the Beacon Rig: it plays like a faster, thinner Aegis that
+  can afford to raid outside its own network. Its relay, the Spire, costs
+  130 against 150 and reaches 16 against 18.
+- **Everything else is data**: nine units, seven buildings, eight weapons
+  and the AI's role table, in the same files as the other factions. The AI
+  plays it without any change to `SimAI`.
+- All names are new: Mote, Shard, Weaver, Porter, Glint, Lash, Halberd,
+  Aureole, Prism; Nexus, Spire, Cistern, Cradle, Assembler, Ward Node, Oracle.
+- **Balance, AI against AI, `tools/pace_batch.gd`.** First numbers: the
+  Array won 12 of 18 (seeds 1-6, against each other faction). After making
+  the Mote, Lash and Halberd dearer and weaker it won 10 of 24 (seeds 1-8).
+  The shipped numbers sit between the two and have **not** been measured:
+  Mote 50 salvage / 70 hp, Lash 205 / 330, Halberd 350 / 590. That is the
+  open box in M20. Matches with it last 13-15 minutes, a little under the
+  others.
+- **The owner said the first models looked bad** (stark white boxes). They
+  were redone straight away: lavender-grey shells, a two-step hull with an
+  engine block and lift pods, six-sided turrets, chunkier frames with
+  shoulder pods, violet rims and lit posts on every base.
+- `tools/check.sh` gained `ai_match_vesper` (Array against Aegis, seed 4).
+  `tools/screenshot.sh vesper 60 vesper` shows an Array base.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
