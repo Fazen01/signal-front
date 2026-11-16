@@ -102,7 +102,15 @@ func _process(_delta: float) -> void:
 	var menu: MainMenu = _scene as MainMenu
 	if menu != null and _script_name == "setup" and _count == 3:
 		menu.open_skirmish()
-	if menu != null and _script_name.begins_with("setup_") and _count == 3:
+	if menu != null and _script_name == "seats" and _count == 3:
+		# The skirmish panel set up for two against two.
+		menu.choose_map("", 3)
+		menu.choose_seat(0, MainMenu.WHO_YOU, "foundry", 0)
+		menu.choose_seat(1, MainMenu.WHO_AI, "", 0, 2)
+		menu.choose_seat(2, MainMenu.WHO_AI, "nomad", 1, 0)
+		menu.choose_seat(3, MainMenu.WHO_AI, "veil", 1)
+		menu.open_skirmish()
+	elif menu != null and _script_name.begins_with("setup_") and _count == 3:
 		# "setup_<faction>": the skirmish panel dressed for that faction.
 		menu.choose_factions(_script_name.trim_prefix("setup_"), "")
 		menu.open_skirmish()

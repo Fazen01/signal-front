@@ -259,12 +259,12 @@ map generation itself to be improved.
 
 ## M29 — Teams, and a new match setup (owner request)
 
-- [ ] Players belong to teams; allies do not shoot each other, share what
+- [x] Players belong to teams; allies do not shoot each other, share what
       they see, and win or lose together
-- [ ] The AI can be on the player's team and fights alongside
-- [ ] A match setup screen with one row per seat: who plays it (you, an AI,
+- [x] The AI can be on the player's team and fights alongside
+- [x] A match setup screen with one row per seat: who plays it (you, an AI,
       nobody), its faction, its team, its difficulty
-- [ ] Saved games, the Watch option and the result screen know about teams
+- [x] Saved games, the Watch option and the result screen know about teams
 
 ## M30 — Two more factions (owner request)
 
@@ -341,7 +341,8 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 6, 15:50 UTC (branch `claude/relay-session-1116-1550`)
 
-Status: **in progress** — merged the two live branches, checking the result.
+Status: **in progress** — M29 (teams) done; a balance league is being
+played for M26 in the background.
 
 - Newest remote commit at the start was `720b5c0` on
   `claude/relay-session-1116-1450` (session 5), 31 minutes old, with nothing
@@ -352,7 +353,62 @@ Status: **in progress** — merged the two live branches, checking the result.
   interface, two balance steps, the roadmap with M29-M34). The merge was
   clean. Sessions 2 and 4 (`-0451`, `-0654`) are still not merged, for the
   reasons session 5 gives.
-- Godot verification: available.
+- Godot verification: available, software-GL screenshots included.
+  `tools/check.sh` passed on the merged tree before anything else was done.
+- **Order of work.** The first unticked items are the 60 fps check (needs
+  the owner's machine) and the two balance items (M20, M26), which are
+  hours of AI matches. The league runs in the background from a copy of
+  the tree while the next owner request, M29, is built in the foreground.
+
+**M29 — teams and the new match setup (done).**
+
+- The simulation already had a team number per player and used it for
+  targeting, splash damage, mines, hijacks and Blackout; nothing set it.
+  `MatchConfig.teams` now does (same number = allies; no entry = alone).
+- **Allies share sight** (`SimVision`): each team's fog-of-war grids are
+  merged four times a second, so an ally's units, coverage and Recon Sweeps
+  show for the whole team, and an ally's unit beside a hidden enemy
+  uncovers it for everyone. It ends when the ally falls.
+- **Allies do not fight**: no automatic fire (already so), and an attack
+  order on an ally's or your own unit is now a move order. Allies do not
+  take each other's uplink sites.
+- **Win or lose together**: `SimWorld.winner_team`, `has_won(player)`,
+  `team_defeated(player)`. `winner` is still a player id (the last one
+  standing on the winning side), so the tools that read it are unchanged.
+  A player who loses their headquarters still loses everything they own, as
+  before, but shares the win if an ally finishes the job.
+- **Decision: allies start side by side.** When a match has allies and
+  more than two players, starts are handed out team by team going round the
+  map (`SimSetup.start_seats`). A free-for-all is exactly as before: player
+  i on start i, so earlier seeds and saved games are unaffected.
+- **Fixed in passing: losing in a free-for-all showed nothing.** With three
+  or four players the result screen only came up when the whole match
+  ended, so a defeated player sat looking at an empty base while the AIs
+  fought on. It now comes up (DEFEAT, "The others fight on") as soon as you
+  and every ally are out. With an ally still standing you keep watching
+  through their eyes, and get VICTORY if they win.
+- **The setup screen** has a line per seat (see README). Rules: at most one
+  "You" (choosing it in a second seat turns the first into an AI); nobody
+  set to "You" is Watch mode, which replaces the old "You: play / watch"
+  dropdown; seats the map has no room for are closed; Start is disabled,
+  with the reason in red, when fewer than two seats are taken or everyone
+  is on one team. A line under the table says what the seats add up to
+  ("Two against two, with an AI ally at your side, on the larger map").
+  AIs are named for what they are to you: "Hard Ally", "Normal AI 2".
+- Selection rings: green yours, **blue an ally's**, red an enemy's. The
+  result screen has a Team row and says which side "hold the field".
+- Not done here, and belonging to M31: the allied AI does not yet
+  coordinate (it does not come to defend your base or time its waves with
+  yours). It fights the same enemies on its own plan.
+- Checks: `tests/test_teams.gd` (ten tests: setup, starts, no friendly
+  fire by gun or shell, shared sight, uplinks, team victory, an eight-minute
+  two-against-two with no unit hit by its own side, save and reload);
+  `tools/check.sh` plays a headless two-against-two
+  (`tools/headless_match.gd --teams=1,1,2,2`), and the flow test now drives
+  the seat table and plays a team match through the real menu, from seat
+  three, to a shared victory. `tools/screenshot.sh seats 30 seats
+  res://scenes/main.tscn` shows the setup filled in for two against two; it
+  was looked at and nothing overlaps.
 
 ### 2026-11-16 — session 5, 14:50 UTC (branch `claude/relay-session-1116-1450`)
 

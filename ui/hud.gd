@@ -777,14 +777,14 @@ func _entity_detail(e: SimEntity) -> String:
 			var rate: int = world.data.uplink_income_per_second
 			if e.owner < 0:
 				return "Neutral. Capture it with a Field Engineer; it then pays %d salvage a second while it is inside your signal coverage." % rate
-			var who: String = "You hold" if e.owner == player else "%s holds" % world.players[e.owner].name
+			var who: String = "You hold" if e.owner == player else "%s%s holds" % ["Your ally " if world.are_allies(player, e.owner) else "", world.players[e.owner].name]
 			if e.linked:
 				return "%s this site. Paying %d salvage a second." % [who, rate]
 			return "%s this site, but it is outside their coverage and pays nothing." % who
 		return "Salvage remaining: %d. Send a Hauler to collect it." % e.salvage
 	var lines: Array[String] = []
 	if e.owner >= 0 and e.owner != player:
-		lines.append("Belongs to %s" % world.players[e.owner].name)
+		lines.append("Belongs to %s%s" % [world.players[e.owner].name, ", your ally" if world.are_allies(player, e.owner) else ""])
 	if e.kind == SimEntity.Kind.BUILDING and not e.constructed:
 		lines.append("Under construction: %d%%" % int(e.build_progress * 100.0))
 	elif e.owner >= 0 and not e.linked:

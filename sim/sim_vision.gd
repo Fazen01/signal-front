@@ -2,7 +2,8 @@ class_name SimVision
 extends RefCounted
 ## Fog of war. Each player sees the cells inside their own signal coverage
 ## (the network shares what it sees) plus a disc around every unit and
-## building they own. Rebuilt four times a second.
+## building they own, and everything their allies see. Rebuilt four times a
+## second.
 
 const INTERVAL: int = 5
 const STEALTH_REVEAL_TICKS: int = 50  ## how long firing keeps a stealth unit visible
@@ -28,12 +29,35 @@ static func recompute(w: SimWorld) -> void:
 		for r: Vector4 in w.reveals:
 			if int(r.w) == p.id:
 				SimSignal.stamp_disc(w, vis, Vector2(r.x, r.y), r.z)
+		w.visible[p.id] = vis
+	# Allies see what each other see.
+	for p: SimPlayer in w.players:
+		var mates: Array[int] = []
+		for q: SimPlayer in w.players:
+			if q.team == p.team and q.id > p.id:
+				mates.append(q.id)
+		var first_of_team: bool = true
+		for q: SimPlayer in w.players:
+			if q.team == p.team and q.id < p.id:
+				first_of_team = false
+		if not first_of_team or mates.is_empty():
+			continue
+		var shared: PackedByteArray = w.visible[p.id]
+		for m: int in mates:
+			var other: PackedByteArray = w.visible[m]
+			for i: int in cells:
+				if other[i] != 0:
+					shared[i] = 1
+		w.visible[p.id] = shared
+		for m: int in mates:
+			w.visible[m] = shared.duplicate()
+	for p: SimPlayer in w.players:
+		var vis: PackedByteArray = w.visible[p.id]
 		var seen: PackedByteArray = w.explored[p.id]
 		for i: int in cells:
 			if vis[i] != 0:
 				seen[i] = 1
 		w.explored[p.id] = seen
-		w.visible[p.id] = vis
 
 
 static func is_visible(w: SimWorld, player_id: int, pos: Vector2) -> bool:
@@ -68,13 +92,13 @@ static func is_stealthed(w: SimWorld, e: SimEntity) -> bool:
 
 ## Can this player currently see this entity?
 static func can_see(w: SimWorld, player_id: int, e: SimEntity) -> bool:
-	if e.owner == player_id:
+	if e.owner == player_id or w.are_allies(player_id, e.owner):
 		return true
 	if not is_visible(w, player_id, e.pos):
 		return false
 	if is_stealthed(w, e):
 		for n: SimEntity in w.query_radius(e.pos, e.def.detect_range):
-			if n.owner == player_id and n.def != null:
+			if n.def != null and (n.owner == player_id or w.are_allies(player_id, n.owner)):
 				return true
 		return false
 	return true

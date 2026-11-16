@@ -500,7 +500,7 @@ static func _update_capture(w: SimWorld, e: SimEntity, o: SimOrder) -> void:
 	if site != null and site.kind == SimEntity.Kind.UNIT:
 		_update_hijack(w, e, o, site)
 		return
-	if site == null or site.kind != SimEntity.Kind.UPLINK or site.owner == e.owner:
+	if site == null or site.kind != SimEntity.Kind.UPLINK or site.owner == e.owner or w.are_allies(site.owner, e.owner):
 		SimMovement.stop(e)
 		SimOrders.finish_order(e)
 		return

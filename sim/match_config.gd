@@ -19,6 +19,9 @@ var factions: Array[String] = ["aegis", "aegis"]
 var is_ai: Array[bool] = [false, true]
 var ai_levels: Array[int] = [1, 1]
 var names: Array[String] = ["Commander", "Opponent"]
+## Team number per player. Players with the same number are allies. Empty
+## (or too short) means every player without an entry is on a team alone.
+var teams: Array[int] = []
 
 
 func player_count() -> int:
@@ -32,8 +35,29 @@ static func skirmish(seed_number: int, ai_level: int = 1) -> MatchConfig:
 	return c
 
 
-## Adds an AI opponent.
-func add_ai(faction_id: String, level: int, ai_name: String) -> void:
+## The team of player `i`: its entry in `teams`, or a team of its own.
+func team_of(i: int) -> int:
+	if i < teams.size():
+		return teams[i]
+	return 100 + i
+
+
+## True when at least two players share a team.
+func has_allies() -> bool:
+	for i: int in player_count():
+		for j: int in range(i + 1, player_count()):
+			if team_of(i) == team_of(j):
+				return true
+	return false
+
+
+## Adds an AI player. `team` -1 puts it on a team of its own.
+func add_ai(faction_id: String, level: int, ai_name: String, team: int = -1) -> void:
+	if team >= 0:
+		# Everyone before it needs an entry first.
+		while teams.size() < factions.size():
+			teams.append(100 + teams.size())
+		teams.append(team)
 	factions.append(faction_id)
 	is_ai.append(true)
 	ai_levels.append(level)

@@ -356,7 +356,7 @@ func _run_construction(w: SimWorld, me: SimPlayer) -> void:
 	# A spare engineer claims any uplink site our network already reaches.
 	if free.size() >= 2 or w.tick_count > 20 * 90:
 		for e: SimEntity in w.entities:
-			if e.kind == SimEntity.Kind.UPLINK and e.owner != player_id and SimSignal.is_covered(w, player_id, e.pos):
+			if e.kind == SimEntity.Kind.UPLINK and e.owner != player_id and not w.are_allies(player_id, e.owner) and SimSignal.is_covered(w, player_id, e.pos):
 				if _threat_near(e.pos, 16.0) == null:
 					var one: Array[SimEntity] = [free[free.size() - 1]]
 					w.push_command(SimCommand.capture(player_id, _ids(one), e.id))

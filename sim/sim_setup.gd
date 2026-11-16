@@ -17,12 +17,14 @@ static func create_match(config: MatchConfig) -> SimWorld:
 			cells = maxi(cells, SimMapGen.LARGE_CELLS)
 		map = SimMapGen.generate(config.seed_value, cells, config.starts_needed(), config.region)
 	var w: SimWorld = SimWorld.new(data, map, config.seed_value)
+	var seats: Array[int] = start_seats(config, map)
 	for i: int in config.player_count():
 		var p: SimPlayer = w.add_player(
 			config.factions[i], MatchConfig.TEAM_COLORS[i % MatchConfig.TEAM_COLORS.size()],
-			config.is_ai[i], map.starts[i], config.names[i]
+			config.is_ai[i], map.starts[seats[i]], config.names[i]
 		)
 		p.ai_level = config.ai_levels[i]
+		p.team = config.team_of(i)
 	for f: Vector3 in map.field_spots:
 		w.spawn_field(Vector2(f.x, f.y), int(f.z))
 	for u: Vector2 in map.uplink_spots:
@@ -39,6 +41,39 @@ static func create_match(config: MatchConfig) -> SimWorld:
 	SimVision.recompute(w)
 	w.vision_next_tick = 0
 	return w
+
+
+## Which of the map's starts each player gets. Without allies it is simply
+## player i on start i. With allies, the starts are taken in order round the
+## map and handed out team by team, so that allies begin side by side.
+static func start_seats(config: MatchConfig, map: SimMap) -> Array[int]:
+	var n: int = config.player_count()
+	var seats: Array[int] = []
+	for i: int in n:
+		seats.append(i)
+	if n <= 2 or map.starts.size() < n or not config.has_allies():
+		return seats
+	var centre: Vector2 = map.world_size() * 0.5
+	var first: float = (map.starts[0] - centre).angle()
+	var ring: Array[int] = []
+	for s: int in map.starts.size():
+		ring.append(s)
+	ring.sort_custom(func(a: int, b: int) -> bool:
+		var aa: float = fposmod((map.starts[a] - centre).angle() - first, TAU)
+		var ab: float = fposmod((map.starts[b] - centre).angle() - first, TAU)
+		return aa < ab if absf(aa - ab) > 0.0001 else a < b
+	)
+	# Players in team order, teams in the order they first appear.
+	var order: Array[int] = []
+	for i: int in n:
+		if order.has(i):
+			continue
+		for j: int in range(i, n):
+			if config.team_of(j) == config.team_of(i) and not order.has(j):
+				order.append(j)
+	for k: int in n:
+		seats[order[k]] = ring[k]
+	return seats
 
 
 ## Puts the faction's HQ on the player's start position with the starting

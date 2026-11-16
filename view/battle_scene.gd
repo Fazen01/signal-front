@@ -376,6 +376,12 @@ func _process(delta: float) -> void:
 			t_events += Time.get_ticks_usec() - e0
 		if steps >= 10:
 			_accum = 0.0  # too far behind: drop the backlog rather than spiral
+		if not watching and not menus.result_shown and world.tutorial == null and world.team_defeated(local_player):
+			# Out of the match with no ally left standing: it is over for
+			# the person playing, even if the others fight on.
+			cancel_placement()
+			cancel_directive()
+			menus.show_result(world, local_player, watching)
 	var t1: int = Time.get_ticks_usec()
 	controller.prune()
 	audio.listener = cam.focus

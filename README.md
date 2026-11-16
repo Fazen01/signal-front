@@ -20,10 +20,15 @@ From the main menu:
 
 - **Tutorials** — three short missions (economy, the Signal Grid, Directives).
   Start here.
-- **Skirmish** — pick a map, a region, one to three AI opponents, the
-  factions, a difficulty and a seed. Set "You" to **Watch** to let the AI
-  play every side while you look on: no fog of war, and + and - change the
-  speed.
+- **Skirmish** — pick a map, a region and a seed, then fill the seats. Each
+  of the four seats has its own line: who plays it (you, an AI or nobody),
+  its faction, its **team** and, for an AI, its difficulty. Seats on the
+  same team are allies: they do not fire on each other, they share what
+  they see, and they win or lose together, so you can play one against one,
+  a free-for-all, two against two, or with an AI ally against one or two
+  opponents. Allies start side by side. Leave no seat set to "You" to
+  **Watch**: the AI plays every side while you look on, with no fog of war,
+  and + and - change the speed.
   The setup panel dresses itself in the interface of the faction you pick:
   each of the eight has its own colours, shapes, lettering and emblem, and
   the match's HUD wears the same.
@@ -194,7 +199,8 @@ until they fire. Fragile and costly, with the longest guns on the field.
 
 ### The AI
 
-One to three opponents at Easy, Normal or Hard. Normal and Hard opponents
+Up to three AI players, each at Easy, Normal or Hard, against you or on
+your team. Normal and Hard opponents
 draw a **doctrine** from the seed: balanced, an aggressor (small waves, early
 and often), a fortifier (turrets first, then a big army) or a raider (goes
 for relays and depots). They scout, they counter what you field, they cut

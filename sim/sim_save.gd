@@ -53,7 +53,7 @@ static func config_to_dict(c: MatchConfig) -> Dictionary:
 		"seed_value": c.seed_value, "map_cells": c.map_cells, "map_id": c.map_id,
 		"region": c.region, "watch": c.watch,
 		"factions": _copy(c.factions), "is_ai": _copy(c.is_ai),
-		"ai_levels": _copy(c.ai_levels), "names": _copy(c.names),
+		"ai_levels": _copy(c.ai_levels), "names": _copy(c.names), "teams": _copy(c.teams),
 	}
 
 
@@ -68,6 +68,7 @@ static func config_from_dict(d: Dictionary) -> MatchConfig:
 	c.is_ai.assign(d.get("is_ai", []))
 	c.ai_levels.assign(d.get("ai_levels", []))
 	c.names.assign(d.get("names", []))
+	c.teams.assign(d.get("teams", []))
 	return c
 
 
@@ -107,7 +108,7 @@ static func to_dict(w: SimWorld, config: MatchConfig) -> Dictionary:
 		"version": VERSION,
 		"config": config_to_dict(config),
 		"tick_count": w.tick_count, "next_id": w.next_id, "rng_state": w.rng.state,
-		"game_over": w.game_over, "winner": w.winner, "victory_enabled": w.victory_enabled,
+		"game_over": w.game_over, "winner": w.winner, "winner_team": w.winner_team, "victory_enabled": w.victory_enabled,
 		"entities": entities, "players": players, "projectiles": projectiles, "timed": timed, "ais": ais,
 		"commands": commands,
 		"explored": _copy(w.explored), "reveals": _copy(w.reveals), "reveal_until": _copy(w.reveal_until),
@@ -197,6 +198,7 @@ static func from_dict(d: Dictionary) -> SimWorld:
 	w.rng.state = int(d["rng_state"])
 	w.game_over = bool(d["game_over"])
 	w.winner = int(d["winner"])
+	w.winner_team = int(d.get("winner_team", w.players[w.winner].team if w.winner >= 0 else -1))
 	w.victory_enabled = bool(d.get("victory_enabled", true))
 	w.explored.assign(_copy(d["explored"]))
 	w.reveals.assign(_copy(d["reveals"]))

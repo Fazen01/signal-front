@@ -5,6 +5,7 @@ extends Node3D
 const RING_OWN: Color = Color(0.35, 1.0, 0.45)
 const RING_ENEMY: Color = Color(1.0, 0.3, 0.25)
 const RING_NEUTRAL: Color = Color(1.0, 0.9, 0.4)
+const RING_ALLY: Color = Color(0.45, 0.75, 1.0)
 
 var entity_id: int = 0
 var kind: int = SimEntity.Kind.UNIT
@@ -60,7 +61,7 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	_find_parts()
 	var ring_color: Color = RING_NEUTRAL
 	if e.owner >= 0:
-		ring_color = RING_OWN if e.owner == local_player else RING_ENEMY
+		ring_color = RING_OWN if e.owner == local_player else RING_ALLY if world.are_allies(local_player, e.owner) else RING_ENEMY
 	var ring_mat: StandardMaterial3D = ModelFactory.mat(ring_color, 1.0)
 	var r: float = maxf(e.radius * 1.15, 0.55)
 	if e.kind == SimEntity.Kind.BUILDING:
@@ -134,7 +135,7 @@ func refresh_owner(e: SimEntity, world: SimWorld, local_player: int) -> void:
 	_find_parts()
 	var ring_color: Color = RING_NEUTRAL
 	if e.owner >= 0:
-		ring_color = RING_OWN if e.owner == local_player else RING_ENEMY
+		ring_color = RING_OWN if e.owner == local_player else RING_ALLY if world.are_allies(local_player, e.owner) else RING_ENEMY
 	select_ring.material_override = ModelFactory.mat(ring_color, 1.0)
 
 

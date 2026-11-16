@@ -51,7 +51,8 @@ var path_budget: int = 0  ## new move orders that may still be pathed this tick
 var profiling: bool = false  ## collect per-stage tick timings in `profile`
 var profile: Dictionary[String, int] = {}  ## stage -> microseconds
 var game_over: bool = false
-var winner: int = -1  ## player id, -1 = nobody (yet)
+var winner: int = -1  ## player id, -1 = nobody (yet); with teams, a surviving member of the winning team
+var winner_team: int = -1  ## team number of the winners, -1 = nobody (yet)
 
 var _dead: Array[SimEntity] = []
 var bucket_w: int = 0
@@ -108,6 +109,50 @@ func are_enemies(a: int, b: int) -> bool:
 	if a < 0 or b < 0 or a == b:
 		return false
 	return players[a].team != players[b].team
+
+
+## Two different players on the same team.
+func are_allies(a: int, b: int) -> bool:
+	if a < 0 or b < 0 or a == b:
+		return false
+	return players[a].team == players[b].team
+
+
+## True when the match has teams of more than one player.
+func has_allies() -> bool:
+	for p: SimPlayer in players:
+		for q: SimPlayer in players:
+			if q.id > p.id and q.team == p.team:
+				return true
+	return false
+
+
+## The team of a player as people count them: 1 for the first player's team,
+## 2 for the next team to appear, and so on.
+func team_number(id: int) -> int:
+	var seen: Array[int] = []
+	for p: SimPlayer in players:
+		if not seen.has(p.team):
+			seen.append(p.team)
+		if p.id == id:
+			return seen.find(p.team) + 1
+	return 0
+
+
+## True once the match is over and this player's team won it (a member who
+## lost their own headquarters on the way still shares the win).
+func has_won(id: int) -> bool:
+	return game_over and winner_team >= 0 and id >= 0 and id < players.size() and players[id].team == winner_team
+
+
+## True when this player and every ally are out of the match.
+func team_defeated(id: int) -> bool:
+	if id < 0 or id >= players.size():
+		return false
+	for p: SimPlayer in players:
+		if p.team == players[id].team and not p.defeated:
+			return false
+	return true
 
 
 # --------------------------------------------------------------- entities
@@ -426,6 +471,7 @@ func _check_victory() -> void:
 	if teams.size() <= 1 and players.size() > 1:
 		game_over = true
 		winner = last if teams.size() == 1 else -1
+		winner_team = players[last].team if winner >= 0 else -1
 		var ev: SimEvent = emit_event(SimEvent.Type.MATCH_OVER, 0, winner, Vector2.ZERO)
 		ev.value = seconds()
 

@@ -9,6 +9,7 @@ var _result: PanelContainer = null
 var _dim: ColorRect = null
 var _settings: SettingsPanel = null
 var result_shown: bool = false
+var result_headline: String = ""  ## what the result screen says at the top
 
 
 func setup(scene: BattleScene) -> void:
@@ -127,6 +128,18 @@ func show_tutorial_complete(tutorial_id: String) -> void:
 	box.add_child(buttons)
 
 
+## "Aegis holds the field", or for a team "Aegis and Foundry hold the field".
+static func winners_line(world: SimWorld) -> String:
+	var names: Array[String] = []
+	for p: SimPlayer in world.players:
+		if p.team == world.winner_team:
+			names.append(p.name)
+	if names.size() == 1:
+		return "%s holds the field" % names[0]
+	var last: String = names.pop_back()
+	return "%s and %s hold the field" % [", ".join(names), last]
+
+
 ## Shows the end-of-match summary for the local player.
 func show_result(world: SimWorld, local_player: int, watching: bool = false) -> void:
 	if result_shown:
@@ -139,22 +152,26 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	_result.add_child(box)
-	var won: bool = world.winner == local_player
+	var won: bool = world.has_won(local_player)
 	var headline: String = "VICTORY" if won else "DEFEAT"
-	if world.winner < 0:
+	if world.game_over and world.winner_team < 0:
 		headline = "DRAW"
 	var headline_color: Color = Color(0.5, 1.0, 0.6) if won else Color(1.0, 0.45, 0.4)
 	if watching:
 		# A spectator neither wins nor loses.
 		headline = "MATCH OVER"
 		headline_color = skin.second
+	result_headline = headline
 	var title: Label = Hud.make_label(headline, 56, headline_color)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	var secs: int = int(world.seconds())
 	var sub: String = "Match length %d:%02d" % [secs / 60, secs % 60]
-	if world.winner >= 0:
-		sub = "%s holds the field.   %s" % [world.players[world.winner].name, sub]
+	var teams: bool = world.has_allies()
+	if world.game_over and world.winner_team >= 0:
+		sub = "%s.   %s" % [winners_line(world), sub]
+	elif not world.game_over:
+		sub = "The others fight on.   %s" % sub
 	var subtitle: Label = Hud.make_label(sub, 16, skin.dim)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(subtitle)
@@ -178,6 +195,16 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	grid.add_child(Hud.make_label("", 16, skin.dim))
 	for p: SimPlayer in world.players:
 		grid.add_child(Hud.make_label(p.name, 18, p.color.lightened(0.3)))
+	if teams:
+		# Who stood with whom, and which side took it.
+		grid.add_child(Hud.make_label("Team", 16, skin.dim))
+		for p: SimPlayer in world.players:
+			var mark: String = "Team %d" % world.team_number(p.id)
+			if world.game_over and p.team == world.winner_team:
+				mark += "  (won)"
+			var side: Label = Hud.make_label(mark, 16, skin.accent if world.has_won(p.id) else skin.text)
+			side.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			grid.add_child(side)
 	var rows: Array[String] = ["Units built", "Units lost", "Buildings built", "Buildings lost", "Kills", "Value destroyed", "Salvage collected"]
 	for r: int in rows.size():
 		grid.add_child(Hud.make_label(rows[r], 16, skin.dim))

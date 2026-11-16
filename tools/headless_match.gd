@@ -5,6 +5,7 @@ extends SceneTree
 ## Usage: godot --headless --path . -s res://tools/headless_match.gd -- \
 ##          [--seed=N] [--max-minutes=M] [--levels=1,1] [--quiet]
 ##          [--factions=aegis,foundry[,nomad[,aegis]]] [--map=twin_fords]
+##          [--teams=1,1,2,2]   (one number per faction; same number = allies)
 ## Prints "MATCH RESULT: ..." on a win and "MATCH FAILED: ..." otherwise.
 
 
@@ -15,6 +16,7 @@ func _init() -> void:
 	var quiet: bool = false
 	var factions: Array[String] = ["aegis", "aegis"]
 	var map_id: String = ""
+	var teams: Array[int] = []
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--seed="):
 			seed_value = int(arg.trim_prefix("--seed="))
@@ -28,6 +30,9 @@ func _init() -> void:
 			factions.clear()
 			for fname: String in arg.trim_prefix("--factions=").split(","):
 				factions.append(fname)
+		elif arg.begins_with("--teams="):
+			for t: String in arg.trim_prefix("--teams=").split(","):
+				teams.append(int(t))
 		elif arg.begins_with("--map="):
 			map_id = arg.trim_prefix("--map=")
 		elif arg == "--quiet":
@@ -42,6 +47,8 @@ func _init() -> void:
 	config.names.clear()
 	for i: int in factions.size():
 		config.add_ai(factions[i], levels[i % levels.size()], "P%d %s" % [i + 1, factions[i].capitalize()])
+	if teams.size() == factions.size():
+		config.teams = teams
 	var w: SimWorld = SimSetup.create_match(config)
 	w.collect_events = false
 	var started: int = Time.get_ticks_msec()
@@ -59,6 +66,12 @@ func _init() -> void:
 		print("MATCH RESULT: seed %d, winner %s (player %d) at %s, %d ticks in %.1fs wall, peak %d entities" % [
 			seed_value, win.name, w.winner, game_time, w.tick_count, wall, peak_entities,
 		])
+		if config.has_allies():
+			var side: Array[String] = []
+			for p: SimPlayer in w.players:
+				if p.team == w.winner_team:
+					side.append(p.name + (" (fell)" if p.defeated else ""))
+			print("  winning team %d: %s" % [w.winner_team, ", ".join(side)])
 		for p: SimPlayer in w.players:
 			print("  %s: built %d units / %d buildings, lost %d / %d, kills %d, collected %d" % [
 				p.name, p.stat_units_built, p.stat_buildings_built, p.stat_units_lost, p.stat_buildings_lost,

@@ -26,6 +26,7 @@ func _process(_delta: float) -> void:
 			if menu != null:
 				menu.open_skirmish()
 				_expect(menu.is_setup_open(), "skirmish setup opens")
+				_seat_table_checks(menu)
 				_next(5)
 		1:
 			var menu: MainMenu = scene as MainMenu
@@ -126,12 +127,92 @@ func _process(_delta: float) -> void:
 				battle.quit_to_menu()
 				_next(10)
 		12:
+			# Two against two through the real setup screen: the person in
+			# seat three with an AI ally in seat one.
+			var menu: MainMenu = scene as MainMenu
+			if menu != null:
+				menu.open_skirmish()
+				menu.choose_map("", 3)
+				menu.choose_seat(0, MainMenu.WHO_AI, "verdigris", 1, 2)
+				menu.choose_seat(1, MainMenu.WHO_AI, "nomad", 0, 0)
+				menu.choose_seat(2, MainMenu.WHO_YOU, "aegis", 1)
+				menu.choose_seat(3, MainMenu.WHO_AI, "tally", 0, 1)
+				_expect(menu.seats_error() == "", "two against two can be started")
+				menu.start_skirmish()
+				_next(60)
+		13:
+			var battle: BattleScene = scene as BattleScene
+			if battle != null and battle.world != null:
+				var w: SimWorld = battle.world
+				var me: int = battle.local_player
+				_expect(w.players.size() == 4 and me == 2, "four players, the person in seat three")
+				_expect(w.players[me].faction.id == "aegis" and w.players[0].faction.id == "verdigris", "the factions picked per seat are in play")
+				_expect(w.are_allies(me, 0) and w.are_enemies(me, 1) and w.are_enemies(me, 3), "the teams are as set up")
+				_expect(w.players[0].name == "Hard Ally" and w.players[0].ai_level == 2, "the ally is named as one and plays at its own level")
+				_expect(SimVision.is_visible(w, me, w.players[0].start_pos), "the ally's base is in sight from the start")
+				_expect(not SimVision.is_visible(w, me, w.players[1].start_pos), "the enemy's is not")
+				var ally_ring: bool = false
+				for id: int in battle.world_view.views:
+					var v: EntityView = battle.world_view.views[id]
+					if v.owner_id == 0 and v.visible:
+						ally_ring = true
+				_expect(ally_ring, "the ally's units are drawn")
+				battle.surrender()
+				_next(30)
+		14:
+			var battle: BattleScene = scene as BattleScene
+			if battle != null:
+				_expect(battle.world.players[battle.local_player].defeated and not battle.world.game_over, "falling does not end a team match")
+				_expect(not battle.menus.result_shown, "no result while the ally fights on")
+				battle.world.push_command(SimCommand.surrender(1))
+				battle.world.push_command(SimCommand.surrender(3))
+				_next(30)
+		15:
+			var battle: BattleScene = scene as BattleScene
+			if battle != null:
+				_expect(battle.world.game_over and battle.world.has_won(battle.local_player), "the ally's win is the team's")
+				_expect(battle.menus.result_shown and battle.menus.result_headline == "VICTORY", "the result screen says victory (%s)" % battle.menus.result_headline)
+				battle.quit_to_menu()
+				_next(10)
+		16:
 			if scene is MainMenu:
-				print("Flow smoke finished: menu -> skirmish -> match -> result -> menu -> load -> tutorial -> menu in %d frames" % _frames)
+				print("Flow smoke finished: menu -> skirmish -> match -> result -> menu -> load -> tutorial -> menu -> team match -> menu in %d frames" % _frames)
 				get_tree().quit(0)
 	if _frames > 3000:
 		print("BOOT FAILED: flow smoke stuck at stage %d" % _stage)
 		get_tree().quit(1)
+
+
+## The seat table of the skirmish setup: what it accepts, what it refuses,
+## and what match it builds. Leaves the table as it found it.
+func _seat_table_checks(menu: MainMenu) -> void:
+	var c: MatchConfig = menu.build_config()
+	_expect(c != null and c.player_count() == 2 and not c.has_allies() and not c.watch, "the setup starts as one against one")
+	menu.choose_seat(2, MainMenu.WHO_AI, "", 0, 2)
+	c = menu.build_config()
+	_expect(c != null and c.player_count() == 3 and c.has_allies() and c.team_of(0) == c.team_of(2), "a third seat on your team is an ally")
+	_expect(c != null and c.ai_levels[2] == 2 and c.names[2] == "Hard Ally", "with its own difficulty and a name that says so")
+	menu.choose_seat(1, MainMenu.WHO_AI, "", 0)
+	_expect(menu.seats_error() != "" and menu.build_config() == null, "everyone on one team is refused")
+	menu.choose_seat(1, MainMenu.WHO_NOBODY, "", 1)
+	menu.choose_seat(2, MainMenu.WHO_NOBODY, "", 2)
+	_expect(menu.seats_error() != "", "one seat alone is refused")
+	menu.choose_seat(1, MainMenu.WHO_YOU, "nomad", 1)
+	_expect(menu.your_seat() == 1 and menu.taken_seats().size() == 2, "taking another seat gives up the first")
+	c = menu.build_config()
+	_expect(c != null and c.is_ai[0] and not c.is_ai[1] and c.factions[1] == "nomad", "the person can sit in any seat")
+	menu.choose_watch(true)
+	c = menu.build_config()
+	_expect(c != null and c.watch and c.is_ai[0] and c.is_ai[1], "nobody set to You means watching")
+	menu.choose_seat(3, MainMenu.WHO_AI, "", 3)
+	menu.choose_map(MainMenu.COMPACT_MAP, 1)
+	_expect(menu.taken_seats().size() == 2, "a two-player map closes the other seats")
+	# Back to how it was.
+	menu.choose_map("", 1)
+	menu.choose_seat(0, MainMenu.WHO_YOU, "aegis", 0)
+	menu.choose_seat(1, MainMenu.WHO_AI, "", 1)
+	c = menu.build_config()
+	_expect(c != null and c.player_count() == 2 and not c.is_ai[0] and c.is_ai[1], "and the table is back to one against one")
 
 
 ## Drives the Foundry-only interface paths: the Deploy card entry, the
