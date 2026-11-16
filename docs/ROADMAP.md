@@ -113,10 +113,43 @@ decision in the session log at the bottom.
 - [x] Three scripted tutorial missions teaching economy, signal and Directives
 - [x] Windows export preset; final README
 
+## M15 — Visual upgrade (owner request, 16 November)
+
+The owner asked for the units, buildings and map to look better. View layer
+only (`view/`): nothing here changes the simulation or the data.
+
+- [ ] Terrain: blended ground colours instead of per-cell checks, shores,
+      ground scatter, better trees and rocks, animated water, sky and lighting
+- [ ] Models: bevelled geometry and richer materials for every unit and
+      building; more detail on the shared shapes (tracks, wheels, soldiers,
+      foundations)
+- [ ] Life: turret recoil, spinning dishes, hauler cargo, walking bob,
+      contact shadows
+- [ ] Buildings: lit windows, roof detail, construction scaffolding
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
+
+### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
+
+Status: **in progress**. The owner wrote in at about 09:05 UTC asking for
+better graphics (units, buildings, map) and to carry on; that is M15 above.
+
+- This branch was fast-forwarded to `claude/relay-session-1116-0550` (the
+  newest remote commit, `3043c77`) before starting. Sessions 2 and 3 were
+  still pushing at the time. The stand-down rule in `CLAUDE.md` was not
+  applied because the owner asked for this work directly and it touches
+  only `view/`, which neither of them is changing.
+- `claude/relay-session-1116-0451` and `claude/relay-session-1116-0654` do
+  not merge cleanly into this branch (`sim/sim_ai.gd` and
+  `sim/sim_map_gen.gd` conflict with session 3's changes). They are left for
+  the owner or a later session to reconcile; nothing from them is here.
+- Godot verification: available, software-GL screenshots included. Baseline
+  screenshots of the old look were taken first for comparison.
+
+Working on: M15, starting with the models.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 
