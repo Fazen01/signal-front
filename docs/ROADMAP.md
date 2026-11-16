@@ -251,18 +251,68 @@ map generation itself to be improved.
 - [x] Whole matches of the new factions through the real battle scene
 - [x] Fixed what these found (three bugs, listed in the session log)
 
+## M28 — An interface of its own for each faction (owner request)
+
+- [x] Each faction's HUD has its own accent colours, panel and button
+      shapes, lettering and emblem
+- [x] The skirmish setup previews the chosen faction's style
+
+## M29 — Teams, and a new match setup (owner request)
+
+- [ ] Players belong to teams; allies do not shoot each other, share what
+      they see, and win or lose together
+- [ ] The AI can be on the player's team and fights alongside
+- [ ] A match setup screen with one row per seat: who plays it (you, an AI,
+      nobody), its faction, its team, its difficulty
+- [ ] Saved games, the Watch option and the result screen know about teams
+
+## M30 — Two more factions (owner request)
+
+- [ ] Ninth faction: design, data, one rule of its own, models, tests
+- [ ] Tenth faction: the same
+- [ ] Both in `tools/check.sh` and in the balance league
+
+## M31 — A better AI, round two (owner request)
+
+- [ ] Attacks from more than one direction when the map allows it
+- [ ] Guards its haulers and its relay chain, and rebuilds what it loses
+- [ ] Works with an allied player or AI (M29): defends an ally's base,
+      joins an ally's attack
+- [ ] Uses each faction's own trick on purpose (cloaked ambushes for the
+      Veil, air strikes on relays for the Accord, raids that pay for the
+      Tally)
+
+## M32 — Stronger faction design (owner request)
+
+- [ ] Every faction has at least one unit or building no other has in any
+      form, and plays visibly differently in the first five minutes
+- [ ] The three plainest rosters (Vesper, Tally, Veil share one template
+      with Aegis) get units that break the template
+- [ ] Faction descriptions, the How to Play screen and the tutorials say
+      what is special about each
+
+## M33 — Maps and map generation, round three (owner request)
+
+- [ ] More shapes within each region, and features that matter in play:
+      high ground, chokepoints, islands of salvage worth fighting for
+- [ ] Three more hand-made layouts, one for each new region
+- [ ] A preview of the map in the match setup
+
+## M34 — Look, round two (owner request)
+
+- [ ] Units and buildings: one change at a time, shown to the owner before
+      building on it (the first attempt at this was withdrawn)
+- [ ] Combat: bigger and more varied explosions, smoke that lingers,
+      wrecks that burn, weapon effects per faction
+- [ ] The game as a whole: lighting per time of day, water and sky
+
 ## Ideas for later (proposed by session 1, not yet asked for)
 
-These are suggestions; nothing here has been started.
+These are suggestions; nothing here has been started. The owner struck a
+campaign, play against other people and a map editor from this list. They
+are not to be built.
 
-### M28 — A campaign
-
-- [ ] Six to eight linked missions that teach one faction's tricks each,
-      with a briefing screen and objectives beyond "destroy the HQ"
-      (hold an uplink for five minutes, escort a Caravan, cut a relay chain)
-- [ ] A world map that shows the four regions and what has been won
-
-### M29 — Depth in a fight
+### Depth in a fight
 
 - [ ] One active ability per signature unit (a Bulwark's smoke, a Splicer's
       jam burst, a Castellan's brace), on a cooldown, used by the AI too
@@ -270,7 +320,7 @@ These are suggestions; nothing here has been started.
 - [ ] A patrol order, and formations that put tanks in front of artillery
 - [ ] Garrisons: infantry inside a building fire from cover
 
-### M30 — More to fight over
+### More to fight over
 
 - [ ] Neutral structures to capture besides uplinks: a repair yard, an
       observation post, a salvage rig that pays out slowly
@@ -278,18 +328,10 @@ These are suggestions; nothing here has been started.
 - [ ] Weather per region that touches the Signal Grid: dust storms shorten
       relay reach in the Dustlands, blizzards slow vehicles on the Frostline
 
-### M31 — Other people
-
-- [ ] Two players on one network (the simulation is already deterministic
-      and command-driven, which is what lockstep play needs)
-- [ ] Replays: save the seed and the command stream, play it back, scrub
-- [ ] Teams: two against two with shared coverage
-
-### M32 — Comfort
+### Comfort
 
 - [ ] Rebindable keys; a colour-blind palette for team colours
 - [ ] Autosave every few minutes, and more than one save slot
-- [ ] A map editor for the hand-made layouts (they are JSON already)
 - [ ] An in-game encyclopedia of every unit with its counters
 
 ## Session log
@@ -618,6 +660,50 @@ Crimson Tally, Umbral Veil), a Watch option (the AI plays every side),
 - `tools/balance_tune.py` is running two more league rounds on that, seeded
   with the first league's result. Each round is about half an hour here.
   Prices will be written into `data/units.json` when it settles.
+
+**14:55 UTC — after a break of about an hour (the session's worker was
+restarted three times; the background tuner died with it).**
+
+- Tuner round 1, 168 games, with prices seeded from the first league (Aegis
+  x0.925, Foundry x1.075, Nomad x1.07, Zephyr x0.92) and the Accord's
+  aircraft strengthened: Nomad 71%, Foundry 57%, Aegis 55%, Vesper 52%,
+  Tally 52%, Verdigris 48%, Veil 40%, Zephyr 19%. Aegis is back in the
+  pack; Nomad and Zephyr are still far out. The multipliers after that
+  round are kept in `.godot-bin/balance_state.json`.
+- The owner struck two proposed milestones (a campaign; play against other
+  people) and the map editor from the ideas list, and asked for a different
+  interface design for each faction (M28 now).
+- **15:00 UTC — the owner added seven things to the roadmap** (M28-M34):
+  an interface per faction, teams with AI allies and a new match setup,
+  two more factions, a better AI, stronger faction design, more work on
+  maps, and another pass on the look of units, buildings and combat. The
+  order above is the order they will be worked in, after the balance pass
+  that is already running. The three ideas of mine that were not struck are
+  kept below them without numbers.
+
+- **15:25 UTC — M28 done: an interface for each faction.** `ui/ui_skin.gd`
+  holds one skin per faction (colours, corner and border shapes, slant,
+  lettering, emblem) and builds a whole theme from it; the HUD, pause menu,
+  result screen, settings and tutorial panel take the local player's skin,
+  and the skirmish setup panel puts on the skin of the faction picked.
+  Aegis: cool glass, thin lines. Foundry: square iron plates, heavy lower
+  edge, furnace orange. Nomad: canvas brown and teal, opposite corners
+  folded. Vesper: violet pills, wide lettering. Verdigris: eight-sided
+  plates with a bronze edge. Zephyr: pale slate, slanted flight strips,
+  orange. Tally: black ledger ruled in gold above and below, oxblood when
+  pressed. Veil: dusk with ghost-green hairlines and two cut corners.
+  Watch mode uses a neutral skin. Checked by screenshot for all eight
+  (`tools/screenshot.sh hud_x 40 base_<faction>`, and `setup_<faction>`
+  with the menu scene); tests check that every faction's skin is its own
+  and that text stays readable on it.
+- **The owner said the "CP" box takes up a lot of the screen.** It did: the
+  Directive bar floated over the battlefield, 1040 x 70. Decision: the
+  Directives now sit inside the bottom bar, between the selection panel and
+  the command card (a 2 x 3 grid of short chips: name, and "Unlock 3 CP" /
+  seconds left / "Ready Alt+3"). Nothing covers the playfield any more and
+  the bar is no taller than before. While there: the selection panel has a
+  health bar (green, amber, red; for a group, the whole group's health)
+  and a line of facts (armour class, speed, sight).
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

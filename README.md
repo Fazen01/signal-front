@@ -24,6 +24,9 @@ From the main menu:
   factions, a difficulty and a seed. Set "You" to **Watch** to let the AI
   play every side while you look on: no fog of war, and + and - change the
   speed.
+  The setup panel dresses itself in the interface of the faction you pick:
+  each of the eight has its own colours, shapes, lettering and emblem, and
+  the match's HUD wears the same.
 - **Continue Saved Game** — pick up the match you saved from the pause menu
   ("Save Game", or "Save and Quit to Menu"), exactly where it stopped.
 - **Settings** — volumes, fullscreen, vsync, shadows, anti-aliasing, hotkey
@@ -81,7 +84,7 @@ coverage is visible, plus a circle around each unit.
 | . (period) or F1 | Select the next idle builder |
 | Ctrl+F5..F8, then F5..F8 | Save / recall a camera bookmark |
 | Minimap: left click / right click | Move the camera / order the selection there |
-| Alt+1..6, or click the Directive bar | Unlock or use a Directive (left click to target, right click to cancel) |
+| Alt+1..6, or click a Directive in the bottom bar | Unlock or use a Directive (left click to target, right click to cancel) |
 | Letter on a command card button | Build or train that item (hold Shift to queue five) |
 | Space | Look at the latest warning |
 | + / - | Game speed, from half to three times |

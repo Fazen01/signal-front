@@ -3,6 +3,7 @@ extends Control
 ## The pause menu and the victory / defeat summary shown over a match.
 
 var battle: BattleScene = null
+var skin: UiSkin = null
 var _pause: PanelContainer = null
 var _result: PanelContainer = null
 var _dim: ColorRect = null
@@ -13,7 +14,8 @@ var result_shown: bool = false
 func setup(scene: BattleScene) -> void:
 	# Set here as well as on the root window: themes do not pass down
 	# through a CanvasLayer.
-	theme = UiTheme.theme()
+	skin = scene.skin if scene.skin != null else UiSkin.of("")
+	theme = skin.theme()
 	battle = scene
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -27,7 +29,7 @@ func setup(scene: BattleScene) -> void:
 
 func _centre_panel() -> PanelContainer:
 	var p: PanelContainer = PanelContainer.new()
-	p.add_theme_stylebox_override("panel", Hud.panel_style())
+	p.add_theme_stylebox_override("panel", skin.panel(18.0))
 	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	p.grow_vertical = Control.GROW_DIRECTION_BOTH
@@ -51,7 +53,7 @@ func _build_pause() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
 	_pause.add_child(box)
-	var title: Label = UiTheme.title("PAUSED", 26)
+	var title: Label = skin.title("PAUSED", 26)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	box.add_child(_button("Resume", func() -> void: battle.toggle_pause_menu()))
@@ -71,6 +73,7 @@ func is_pause_open() -> bool:
 func open_settings() -> void:
 	if _settings == null:
 		_settings = SettingsPanel.new()
+		_settings.skin = skin
 		_settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 		_settings.grow_horizontal = Control.GROW_DIRECTION_BOTH
 		_settings.grow_vertical = Control.GROW_DIRECTION_BOTH
@@ -108,7 +111,7 @@ func show_tutorial_complete(tutorial_id: String) -> void:
 	var title: Label = Hud.make_label("MISSION COMPLETE", 44, Color(0.5, 1.0, 0.6))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
-	var sub: Label = Hud.make_label(SimTutorial.TITLES.get(tutorial_id, ""), 18, Hud.DIM)
+	var sub: Label = Hud.make_label(SimTutorial.TITLES.get(tutorial_id, ""), 18, skin.dim)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(sub)
 	var buttons: HBoxContainer = HBoxContainer.new()
@@ -144,7 +147,7 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	if watching:
 		# A spectator neither wins nor loses.
 		headline = "MATCH OVER"
-		headline_color = UiTheme.GOLD
+		headline_color = skin.second
 	var title: Label = Hud.make_label(headline, 56, headline_color)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
@@ -152,21 +155,32 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	var sub: String = "Match length %d:%02d" % [secs / 60, secs % 60]
 	if world.winner >= 0:
 		sub = "%s holds the field.   %s" % [world.players[world.winner].name, sub]
-	var subtitle: Label = Hud.make_label(sub, 16, Hud.DIM)
+	var subtitle: Label = Hud.make_label(sub, 16, skin.dim)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(subtitle)
+	# Now that it is over, say how each AI had been playing.
+	var styles: Array[String] = []
+	for ai: SimAI in world.ais:
+		if ai.level > 0:
+			styles.append("%s played as %s" % [world.players[ai.player_id].name, "an aggressor" if ai.doctrine == "aggressor" else "a " + ai.doctrine if ai.doctrine != "balanced" else "an all-rounder"])
+	if not styles.is_empty():
+		var manner: Label = Hud.make_label(".   ".join(styles) + ".", 14, skin.dim)
+		manner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		manner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		manner.custom_minimum_size = Vector2(560.0, 0.0)
+		box.add_child(manner)
 
 	var grid: GridContainer = GridContainer.new()
 	grid.columns = world.players.size() + 1
 	grid.add_theme_constant_override("h_separation", 36)
 	grid.add_theme_constant_override("v_separation", 6)
 	box.add_child(grid)
-	grid.add_child(Hud.make_label("", 16, Hud.DIM))
+	grid.add_child(Hud.make_label("", 16, skin.dim))
 	for p: SimPlayer in world.players:
 		grid.add_child(Hud.make_label(p.name, 18, p.color.lightened(0.3)))
 	var rows: Array[String] = ["Units built", "Units lost", "Buildings built", "Buildings lost", "Kills", "Value destroyed", "Salvage collected"]
 	for r: int in rows.size():
-		grid.add_child(Hud.make_label(rows[r], 16, Hud.DIM))
+		grid.add_child(Hud.make_label(rows[r], 16, skin.dim))
 		for p: SimPlayer in world.players:
 			var v: int = 0
 			match r:
@@ -184,7 +198,7 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 					v = p.stat_value_destroyed
 				_:
 					v = p.stat_salvage_collected
-			var cell: Label = Hud.make_label(str(v), 16, Hud.TEXT)
+			var cell: Label = Hud.make_label(str(v), 16, skin.text)
 			cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			grid.add_child(cell)
 

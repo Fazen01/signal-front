@@ -18,7 +18,7 @@ GETTING STARTED
   3. Build a Vehicle Works for tanks, then destroy the enemy Headquarters.
   4. Right-click an Uplink Site with a Field Engineer to capture it: it pays
      salvage while it is inside your coverage.
-  5. Kills earn Command Points. Spend them on the Directive bar to unlock
+  5. Kills earn Command Points. Spend them in the Directives panel to unlock
      commander powers (Recon Sweep, Shell Barrage, Field Repair, Signal Surge,
      Blackout, Reinforcement Drop), then use them when they are ready.
 You only see what your coverage and your units see.
@@ -40,7 +40,7 @@ SELECTION AND ORDERS
   . (period) or F1                   select the next idle Field Engineer
   Ctrl+F5..F8, then F5..F8           save and recall camera bookmarks
   Minimap                            left click moves the camera, right click orders
-  Alt+1..6 or the Directive bar      unlock / use a Directive
+  Alt+1..6 or the Directives panel   unlock / use a Directive
   Shift + train                      queue five of a unit
   Space                              look at the latest warning
   + / -                              game speed (x0.5 to x3)
@@ -76,6 +76,10 @@ var _time: float = 0.0
 var _backdrop: MenuBackdrop = null
 var _shade: GradientTexture2D = null  ## dark on the left, clear on the right
 var _live: Label = null  ## says which match is playing in the background
+var _setup_title: Label = null
+var _setup_plate: Label = null
+var _setup_emblem: HudIcon = null
+var setup_skin: UiSkin = null  ## the interface the setup panel is wearing
 
 
 func _ready() -> void:
@@ -242,9 +246,21 @@ func _build_setup() -> void:
 	_setup.grow_vertical = Control.GROW_DIRECTION_BOTH
 	add_child(_setup)
 	var box: VBoxContainer = VBoxContainer.new()
-	box.add_theme_constant_override("separation", 14)
+	box.add_theme_constant_override("separation", 9)
 	_setup.add_child(box)
-	box.add_child(UiTheme.title("SKIRMISH", 28))
+	var head: HBoxContainer = HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	box.add_child(head)
+	_setup_title = UiTheme.title("SKIRMISH", 28)
+	_setup_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(_setup_title)
+	# The chosen faction's mark: the panel wears that faction's interface.
+	_setup_plate = UiTheme.caption("")
+	_setup_plate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(_setup_plate)
+	_setup_emblem = HudIcon.new()
+	_setup_emblem.custom_minimum_size = Vector2(34.0, 34.0)
+	head.add_child(_setup_emblem)
 	box.add_child(Hud.make_label("Destroy every enemy headquarters. Starts are always symmetric.", 15, Hud.DIM))
 
 	_map = OptionButton.new()
@@ -398,7 +414,7 @@ func _update_map() -> void:
 	var index: int = maxi(_map.selected, 0)
 	var capacity: int = _map_players[index]
 	if _map_ids[index] == "":
-		_map_blurb.text = "A new battlefield from the seed: plains, highlands, lakeland or a river valley. 176 x 176 for two players, 192 x 192 for three or four."
+		_map_blurb.text = "A new battlefield from the seed, in one of four regions with four kinds of country each. 176 x 176 for two players, 192 x 192 for three or four."
 	elif _map_ids[index] == COMPACT_MAP:
 		_map_blurb.text = "A small 128 x 128 battlefield from the seed. The armies meet early; expect a match of about ten minutes."
 	else:
@@ -420,6 +436,25 @@ func choose_map(map_id: String, opponents: int) -> void:
 func _update_blurb() -> void:
 	var f: FactionDef = GameData.shared().faction(_faction_ids[maxi(_faction.selected, 0)])
 	_faction_blurb.text = f.desc
+	_dress_setup(f.id)
+
+
+## Dresses the setup panel in the interface of the faction picked: what the
+## match's HUD will look like.
+func _dress_setup(faction_id: String) -> void:
+	var skin: UiSkin = UiSkin.of(faction_id)
+	setup_skin = skin
+	_setup.theme = skin.theme()
+	_setup.add_theme_stylebox_override("panel", skin.panel(22.0))
+	_setup_title.add_theme_color_override("font_color", skin.accent)
+	_setup_title.add_theme_font_override("font", skin.heading_font())
+	_setup_plate.text = skin.plate
+	_setup_plate.add_theme_color_override("font_color", skin.accent)
+	_setup_plate.add_theme_font_override("font", skin.heading_font())
+	_setup_emblem.kind = skin.emblem
+	_setup_emblem.color = skin.accent
+	_setup_emblem.queue_redraw()
+	_faction_blurb.add_theme_color_override("font_color", skin.dim)
 
 
 ## For automated runs: watch the match instead of playing it.

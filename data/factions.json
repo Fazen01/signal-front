@@ -5,7 +5,7 @@
 		"hq": "hq",
 		"start_units": ["field_engineer", "field_engineer", "hauler", "hauler", "trooper", "trooper"],
 		"linked_range_bonus": 0.15,
-		"dark_rof_mult": 0.6,
+		"dark_rof_mult": 0.65,
 		"drop_squad": ["trooper", "trooper", "trooper", "lancer", "lancer"],
 		"roles": {
 			"builder": "field_engineer", "hauler": "hauler", "relay": "relay", "barracks": "barracks",

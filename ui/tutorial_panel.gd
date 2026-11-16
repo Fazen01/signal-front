@@ -11,12 +11,14 @@ var _shown_index: int = -1
 var _refresh_in: float = 0.0
 
 
-func setup(sim_world: SimWorld) -> void:
+func setup(sim_world: SimWorld, skin: UiSkin = null) -> void:
+	if skin == null:
+		skin = UiSkin.of("")
 	# Set here as well as on the root window: themes do not pass down
 	# through a CanvasLayer.
-	theme = UiTheme.theme()
+	theme = skin.theme()
 	world = sim_world
-	add_theme_stylebox_override("panel", Hud.panel_style(Color(1.0, 0.82, 0.35, 0.8)))
+	add_theme_stylebox_override("panel", skin.panel(10.0, Color(skin.second.r, skin.second.g, skin.second.b, 0.8)))
 	set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	grow_horizontal = Control.GROW_DIRECTION_BOTH
 	offset_top = 48.0
@@ -29,16 +31,16 @@ func setup(sim_world: SimWorld) -> void:
 	var head: HBoxContainer = HBoxContainer.new()
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(head)
-	_title = Hud.make_label(SimTutorial.TITLES.get(world.tutorial.id, "Tutorial"), 16, Hud.GOLD)
+	_title = Hud.make_label(SimTutorial.TITLES.get(world.tutorial.id, "Tutorial"), 16, skin.second)
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(_title)
-	_progress = Hud.make_label("", 14, Hud.DIM)
+	_progress = Hud.make_label("", 14, skin.dim)
 	head.add_child(_progress)
-	_text = Hud.make_label("", 17, Hud.TEXT)
+	_text = Hud.make_label("", 17, skin.text)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text.custom_minimum_size = Vector2(600.0, 0.0)
 	box.add_child(_text)
-	_hint = Hud.make_label("", 14, Hud.CYAN)
+	_hint = Hud.make_label("", 14, skin.accent)
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.custom_minimum_size = Vector2(600.0, 0.0)
 	box.add_child(_hint)

@@ -102,6 +102,10 @@ func _process(_delta: float) -> void:
 	var menu: MainMenu = _scene as MainMenu
 	if menu != null and _script_name == "setup" and _count == 3:
 		menu.open_skirmish()
+	if menu != null and _script_name.begins_with("setup_") and _count == 3:
+		# "setup_<faction>": the skirmish panel dressed for that faction.
+		menu.choose_factions(_script_name.trim_prefix("setup_"), "")
+		menu.open_skirmish()
 	if menu != null and _script_name == "tutorials" and _count == 3:
 		menu.call("_show", menu.get("_tutorials"))
 	if menu != null and _script_name == "settings" and _count == 3:
@@ -144,6 +148,9 @@ func _run_script(battle: BattleScene) -> void:
 			bw.spawn_unit(line[k], bme, bhq + Vector2(-10.0 + float(k % 4) * 3.4, 12.0 + float(k / 4) * 3.6))
 		battle.cam.set_distance(54.0)
 		battle.cam.center_on(bhq + Vector2(4.0, 6.0))
+	if _script_name.begins_with("base_") and _count == 8:
+		# Select a builder so the command card is filled in.
+		battle.controller.select_next_idle_builder()
 	if _script_name == "watch" and _count == 2:
 		battle.time_scale = 30.0
 	if _script_name == "watch" and _count == _frames - 20:
