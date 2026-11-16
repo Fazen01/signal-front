@@ -487,12 +487,18 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (22:03 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
-read.** This session's worker was down from about 16:45 to 20:54 UTC and
-again from 21:10 to 22:00; the owner has told it to continue both times.
-Each restart kills the check that is running, which is why the work below
-is still local: `tools/check.sh` takes a quarter of an hour and has not
-yet been allowed to finish. It is running again now. Nothing was lost:
+**Working now (22:46 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
+read.** M28 to M31 and session 7's branch are pushed (check passed, 32
+steps). M32 (a unit of its own for six factions, the Paymaster in place of
+the Wardrum the owner disliked, a factions page in How to Play) is
+committed locally: `tools/check.sh` failed on it once, on the Lodestone
+match, which ran past 45 minutes with both sides out of salvage. The fix
+(the AI builds siege guns against turrets; an AI with no income that is
+outmatched concedes) is written and being tested. M33 (map preview in the
+setup, a fifth kind of country per region, three more layouts) and the
+combat half of M34 (weapon fire in each faction's colour, bigger
+explosions, burning wrecks) are in the working tree. This session's worker
+has been restarted four times today; each restart kills a running check.
 
 - **M31 exists here**, committed locally (faction tricks, allied AIs,
   waves that come round the side, a beaten AI concedes, repairs slow under
