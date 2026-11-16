@@ -8,6 +8,8 @@ extends Node
 var _stage: int = 0
 var _wait: int = 0
 var _frames: int = 0
+var _saved_tick: int = 0
+var _saved_entities: int = 0
 
 
 func _process(_delta: float) -> void:
@@ -62,6 +64,9 @@ func _process(_delta: float) -> void:
 			var battle: BattleScene = scene as BattleScene
 			if battle != null:
 				_expect(battle.world.tick_count == int(battle.get_meta("paused_at")), "simulation holds while paused")
+				_expect(battle.save_game(), "the match saves from the pause menu")
+				_saved_tick = battle.world.tick_count
+				_saved_entities = battle.world.entities.size()
 				battle.surrender()
 				_next(30)
 		5:
@@ -79,8 +84,23 @@ func _process(_delta: float) -> void:
 				battle.quit_to_menu()
 				_next(10)
 		7:
+			var menu: MainMenu = scene as MainMenu
+			if menu != null:
+				_expect(SimSave.has_save(), "a save exists for the menu to load")
+				menu.load_saved()
+				_next(10)
+		8:
+			var battle: BattleScene = scene as BattleScene
+			if battle != null and battle.world != null:
+				_expect(battle.world.tick_count >= _saved_tick and battle.world.tick_count < _saved_tick + 40, "the loaded match resumes where it was saved (tick %d)" % battle.world.tick_count)
+				_expect(absi(battle.world.entities.size() - _saved_entities) <= 3, "with the same forces on the field")
+				_expect(battle.world.players[0].faction.id == "foundry", "and the same factions")
+				DirAccess.remove_absolute(ProjectSettings.globalize_path(SimSave.PATH))
+				battle.quit_to_menu()
+				_next(10)
+		9:
 			if scene is MainMenu:
-				print("Flow smoke finished: menu -> skirmish -> match -> result -> menu in %d frames" % _frames)
+				print("Flow smoke finished: menu -> skirmish -> match -> result -> menu -> load -> menu in %d frames" % _frames)
 				get_tree().quit(0)
 	if _frames > 3000:
 		print("BOOT FAILED: flow smoke stuck at stage %d" % _stage)

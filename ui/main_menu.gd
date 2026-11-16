@@ -133,14 +133,18 @@ func _build_main() -> void:
 	var gap: Control = Control.new()
 	gap.custom_minimum_size = Vector2(0.0, 40.0)
 	_main_box.add_child(gap)
-	for b: Button in [
+	var buttons: Array[Button] = [
 		_menu_button("Skirmish", open_skirmish),
+		_menu_button("Load Saved Game", load_saved),
 		_menu_button("How to Play", func() -> void: _show(_help)),
 		_menu_button("Settings", open_settings),
 		_menu_button("Quit", func() -> void: get_tree().quit()),
-	]:
+	]
+	for b: Button in buttons:
 		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		_main_box.add_child(b)
+	# Loading is only offered when there is something to load.
+	buttons[1].disabled = not SimSave.has_save()
 
 
 func _row(parent: VBoxContainer, caption: String, control: Control) -> void:
@@ -304,6 +308,12 @@ func _show(which: Control) -> void:
 	_setup.visible = which == _setup
 	_help.visible = which == _help
 	_settings.visible = which == _settings
+
+
+func load_saved() -> void:
+	var game: GameState = get_node_or_null("/root/Game") as GameState
+	if game != null:
+		game.load_saved_match()
 
 
 func open_settings() -> void:

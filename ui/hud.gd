@@ -356,10 +356,11 @@ func rebuild_card() -> void:
 		if i < _entries.size():
 			var entry: CardEntry = _entries[i]
 			b.visible = true
+			var hint: String = "[%s] " % entry.hotkey if GameSettings.key_hints else ""
 			if entry.def != null:
-				b.text = "[%s] %s\n%d" % [entry.hotkey, entry.title, entry.def.cost]
+				b.text = "%s%s\n%d" % [hint, entry.title, entry.def.cost]
 			else:
-				b.text = "[%s] %s" % [entry.hotkey, entry.title]
+				b.text = "%s%s" % [hint, entry.title]
 		else:
 			b.visible = false
 	_update_card_state()
@@ -513,7 +514,7 @@ func _refresh_selection() -> void:
 	var queue_owner: SimEntity = null
 	if sel.is_empty():
 		_sel_title.text = ""
-		_sel_detail.text = "Left-drag to select. Right-click to order. Select a Field Engineer to build."
+		_sel_detail.text = "Left-drag to select. Right-click to order. Select a builder to build." if GameSettings.key_hints else ""
 	elif sel.size() == 1:
 		var e: SimEntity = sel[0]
 		_sel_title.text = _entity_name(e)

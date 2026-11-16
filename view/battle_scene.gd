@@ -44,7 +44,9 @@ var _marker_age: Array[float] = []
 func _ready() -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	config = game.take_config() if game != null else MatchConfig.skirmish(1)
-	world = SimSetup.create_match(config)
+	world = game.take_world() if game != null else null
+	if world == null:
+		world = SimSetup.create_match(config)
 	local_player = 0
 	for i: int in config.player_count():
 		if not config.is_ai[i]:
@@ -248,7 +250,7 @@ func _build_environment() -> void:
 	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
 	sun.light_energy = 1.25
 	sun.light_color = Color(1.0, 0.96, 0.88)
-	sun.shadow_enabled = true
+	sun.shadow_enabled = GameSettings.shadows
 	sun.directional_shadow_max_distance = 140.0
 	add_child(sun)
 	var env: Environment = Environment.new()
@@ -426,6 +428,21 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if key != null and key.pressed and not key.echo and key.physical_keycode == KEY_ESCAPE and paused:
 		toggle_pause_menu()
 		get_viewport().set_input_as_handled()
+
+
+## Writes the match to the save slot (from the pause menu).
+func save_game() -> bool:
+	var ok: bool = SimSave.save_to_file(world, config)
+	hud.push_alert("Game saved" if ok else "Could not write the save file", Hud.CYAN if ok else Hud.RED)
+	return ok
+
+
+## Picks up settings changed in the pause menu.
+func apply_settings() -> void:
+	var sun: DirectionalLight3D = get_node_or_null("Sun") as DirectionalLight3D
+	if sun != null:
+		sun.shadow_enabled = GameSettings.shadows
+	hud.rebuild_card()
 
 
 func surrender() -> void:

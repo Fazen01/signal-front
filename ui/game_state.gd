@@ -7,12 +7,14 @@ const MENU_SCENE: String = "res://scenes/main.tscn"
 const BATTLE_SCENE: String = "res://scenes/battle.tscn"
 
 var pending_config: MatchConfig = null
+var pending_world: SimWorld = null  ## a loaded save waiting for the battle scene
 var last_config: MatchConfig = null
 
 
 func _ready() -> void:
 	# Menus keep working while a match is paused.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	GameSettings.ensure_loaded()
 	if OS.get_cmdline_user_args().has("--flow-smoke"):
 		var smoke: FlowSmoke = FlowSmoke.new()
 		smoke.name = "FlowSmoke"
@@ -34,6 +36,29 @@ func take_config() -> MatchConfig:
 		c = MatchConfig.skirmish(1)
 		last_config = c
 	return c
+
+
+## Loads the save slot and continues that match. Returns false if there is
+## no usable save.
+func load_saved_match() -> bool:
+	var d: Dictionary = SimSave.read_file()
+	if d.is_empty():
+		return false
+	var world: SimWorld = SimSave.from_dict(d)
+	if world == null:
+		return false
+	pending_world = world
+	pending_config = SimSave.config_from_dict(d["config"])
+	last_config = pending_config
+	get_tree().change_scene_to_file(BATTLE_SCENE)
+	return true
+
+
+## The battle scene calls this once: a loaded world, or null for a new match.
+func take_world() -> SimWorld:
+	var w: SimWorld = pending_world
+	pending_world = null
+	return w
 
 
 func to_menu() -> void:

@@ -108,7 +108,7 @@ decision in the session log at the bottom.
 
 ## M14 — Finish
 
-- [ ] Settings (video, audio, key hints), pause menu, save/load of a skirmish
+- [x] Settings (video, audio, key hints), pause menu, save/load of a skirmish
 - [ ] Three scripted tutorial missions teaching economy, signal and Directives
 - [ ] Windows export preset; final README
 
@@ -303,9 +303,13 @@ Notes on this session's pushes:
   ordered faction pairing over a list of seeds; four tuning passes;
   difficulty levels measured; simulation and view profiled and optimised.
 
-Half-done / next: the two open M13 items need things this session did not
-have (a GPU, and a decision on economy pace). After them comes M14: settings
-beyond volume, save/load, tutorials, Windows export preset.
+- M14, first item: settings for audio, video (fullscreen, vsync, shadows,
+  anti-aliasing) and hotkey hints; Save Game in the pause menu and Load
+  Saved Game on the main menu (one slot, `user://skirmish.sav`).
+
+Half-done / next: M14 tutorials and the Windows export preset. Two M13
+items are open and need things this session did not have (a GPU, and a
+better lever on match length than income).
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -442,3 +446,19 @@ Fog decisions:
 - `Performance.TIME_PROCESS` read 36 ms per frame in headless mode while
   wall-clock frame time was 8 ms. Do not trust that monitor headless; the
   frame benchmark measures wall-clock time between frames instead.
+- Match-length experiment (reverted): cutting hauler loads by a quarter and
+  lengthening harvesting from 4 s to 5 s (about -30% income) moved the
+  AI-vs-AI average only from about 9 to 10.6 minutes and shifted the win
+  rates to Aegis 58% / Foundry 33% / Nomad 58%. Income is not the main
+  driver of match length; the AI's early waves are. The next thing to try is
+  the AI's wave timing and the durability of headquarters and turrets.
+- Save/load (`sim/sim_save.gd`): the map is rebuilt from the match
+  configuration and everything else is written as plain values found by
+  reflection over script variables, so new fields are saved without touching
+  the save code. A restored match continues tick-for-tick identically (a
+  test plays on from both and compares state hashes). Pending commands and
+  the coverage/vision grids are part of the snapshot. Saves carry a version
+  number and are refused if it differs or if they name an unknown unit.
+- Godot 4 packed arrays are shared by reference: an early version of the
+  snapshot shared the cooldown arrays with the live world and the two
+  drifted apart. Everything is deep-copied in and out now.

@@ -52,6 +52,7 @@ func _build_pause() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	box.add_child(_button("Resume", func() -> void: battle.toggle_pause_menu()))
+	box.add_child(_button("Save Game", func() -> void: battle.save_game()))
 	box.add_child(_button("Settings", open_settings))
 	box.add_child(_button("Surrender", func() -> void: battle.surrender()))
 	box.add_child(_button("Quit to Main Menu", func() -> void: battle.quit_to_menu()))
@@ -72,6 +73,7 @@ func open_settings() -> void:
 		_settings.closed.connect(func() -> void:
 			_settings.visible = false
 			_pause.visible = true
+			battle.apply_settings()
 		)
 	_pause.visible = false
 	_settings.visible = true
