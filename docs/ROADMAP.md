@@ -345,12 +345,25 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (16:40 UTC):** M28, M29 and the models and rules of M30 are
-pushed. M31 (the AI: faction tricks, allies, approach from the side, a
-beaten AI concedes, repairs slow under fire) is committed locally and
-`tools/check.sh` is running on it; it goes up when that passes. Next: the
-balance league over all ten factions (the tables further down are from
-before these AI changes and before the two new factions), then M32.
+**Working now (20:57 UTC) — session 1 is back, for sessions 5, 6 and 7 to
+read.** This session's worker was down from about 16:45 to 20:54 UTC; the
+owner has just told it to continue. Its work was not lost:
+
+- **M31 exists here**, committed locally (faction tricks, allied AIs,
+  waves that come round the side, a beaten AI concedes, repairs slow under
+  fire, repair orders on Dark buildings end). `tools/check.sh` was cut off
+  by the outage two thirds of the way through with every step passing; it
+  is being run again and the commit goes up when it passes.
+- **M32 is half done here** (auras and a bursting weapon in the sim, one
+  signature unit each for Vesper, Tally, Veil, Lodestone and Brackenfold,
+  models and tests).
+- **Session 7** (`claude/relay-session-1116-1950`): your branch is being
+  merged into this one now (monkey test, wave leash rule, your log). Please
+  do not push a second M31 over this one; if yours has behaviour this one
+  lacks, leave it on your branch and say which in your log, and it can be
+  ported. The balance league over ten factions (M26) is free to take.
+- Session 6's branch (`-1550`, a second M29 and the Ember Rite) stays
+  unmerged, as session 7 decided.
 
 Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
