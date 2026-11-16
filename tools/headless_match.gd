@@ -3,7 +3,8 @@ extends SceneTree
 ## the winner. This is the main regression test for the simulation and AI.
 ##
 ## Usage: godot --headless --path . -s res://tools/headless_match.gd -- \
-##          [--seed=N] [--max-minutes=M] [--levels=1,1] [--factions=aegis,foundry] [--quiet]
+##          [--seed=N] [--max-minutes=M] [--levels=1,1] [--quiet]
+##          [--factions=aegis,foundry[,nomad[,aegis]]] [--map=twin_fords]
 ## Prints "MATCH RESULT: ..." on a win and "MATCH FAILED: ..." otherwise.
 
 
@@ -13,6 +14,7 @@ func _init() -> void:
 	var levels: Array[int] = [1, 1]
 	var quiet: bool = false
 	var factions: Array[String] = ["aegis", "aegis"]
+	var map_id: String = ""
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--seed="):
 			seed_value = int(arg.trim_prefix("--seed="))
@@ -23,16 +25,23 @@ func _init() -> void:
 			if parts.size() == 2:
 				levels = [int(parts[0]), int(parts[1])]
 		elif arg.begins_with("--factions="):
-			var names: PackedStringArray = arg.trim_prefix("--factions=").split(",")
-			if names.size() == 2:
-				factions = [names[0], names[1]]
+			factions.clear()
+			for fname: String in arg.trim_prefix("--factions=").split(","):
+				factions.append(fname)
+		elif arg.begins_with("--map="):
+			map_id = arg.trim_prefix("--map=")
 		elif arg == "--quiet":
 			quiet = true
 
+	# Any number of AI players from two to four: one per faction listed.
 	var config: MatchConfig = MatchConfig.ai_vs_ai(seed_value)
-	config.ai_levels = levels
-	config.factions = factions
-	config.names = ["North %s" % factions[0].capitalize(), "South %s" % factions[1].capitalize()]
+	config.map_id = map_id
+	config.factions.clear()
+	config.is_ai.clear()
+	config.ai_levels.clear()
+	config.names.clear()
+	for i: int in factions.size():
+		config.add_ai(factions[i], levels[i % levels.size()], "P%d %s" % [i + 1, factions[i].capitalize()])
 	var w: SimWorld = SimSetup.create_match(config)
 	w.collect_events = false
 	var started: int = Time.get_ticks_msec()
@@ -89,6 +98,6 @@ func _status_line(w: SimWorld) -> String:
 			if ai.player_id == p.id:
 				wave = " wave%d:%d/%d" % [ai.waves_sent, ai.wave_ids.size(), ai.wave_size]
 		parts.append("%s $%d bw %d/%d units %d army %d bld %d relays %d%s" % [
-			p.name.left(5), p.salvage, p.bandwidth_used, p.bandwidth_cap, units, army, buildings, relays, wave,
+			p.name.left(6) + ("(out)" if p.defeated else ""), p.salvage, p.bandwidth_used, p.bandwidth_cap, units, army, buildings, relays, wave,
 		])
 	return " | ".join(parts)

@@ -11,6 +11,7 @@ const TEAM_COLORS: Array[Color] = [
 
 var seed_value: int = 1
 var map_cells: int = 64
+var map_id: String = ""  ## a layout in data/maps, or "" for a generated map
 var factions: Array[String] = ["aegis", "aegis"]
 var is_ai: Array[bool] = [false, true]
 var ai_levels: Array[int] = [1, 1]
@@ -26,6 +27,19 @@ static func skirmish(seed_number: int, ai_level: int = 1) -> MatchConfig:
 	c.seed_value = seed_number
 	c.ai_levels = [1, ai_level]
 	return c
+
+
+## Adds an AI opponent.
+func add_ai(faction_id: String, level: int, ai_name: String) -> void:
+	factions.append(faction_id)
+	is_ai.append(true)
+	ai_levels.append(level)
+	names.append(ai_name)
+
+
+## How many starts the map needs: generated maps come in two sizes.
+func starts_needed() -> int:
+	return 4 if player_count() > 2 else 2
 
 
 ## Both sides played by the AI; used by the headless match and demos.

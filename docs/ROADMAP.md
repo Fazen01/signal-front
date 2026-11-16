@@ -86,8 +86,8 @@ decision in the session log at the bottom.
 
 ## M11 — Maps
 
-- [ ] Seeded mirrored map generator; 2- and 4-player sizes
-- [ ] Three hand-tuned layouts; up to 3 AI opponents
+- [x] Seeded mirrored map generator; 2- and 4-player sizes
+- [x] Three hand-tuned layouts; up to 3 AI opponents
 
 ## M12 — Feel
 
@@ -279,8 +279,13 @@ Notes on this session's pushes:
   it builds and deploys rigs toward uncovered salvage and sends Splicers
   after Dark vehicles. `check.sh` adds a Nomad-vs-Foundry match.
 
-Half-done / next: M11 maps (generator sizes, hand-tuned layouts, up to three
-AI opponents).
+- M11 Maps: the generator makes two-player (128 x 128, half-turn symmetric)
+  and four-player (192 x 192, quarter-turn symmetric) maps; three hand-made
+  layouts in `data/maps/` (Twin Fords, Crater Ring, Crossroads); skirmish
+  setup chooses the map and one to three AI opponents (free-for-all).
+  `check.sh` adds a match on a layout and a three-way match.
+
+Half-done / next: M12 feel (particles, procedural sound, order feedback).
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -361,3 +366,17 @@ Fog decisions:
 - Balance between the factions is untuned (M13). In the seed-3 samples the
   Nomads beat Aegis from the first seat and lost from the second, and lost
   to Foundry.
+- Layouts are JSON grids of characters (legend in `sim/sim_map_gen.gd`).
+  They are produced by `tools/make_layouts.py`, which paints explicit shapes
+  together with their rotated images; edit and re-run it to change a layout.
+- With more than two players every AI is its own team (free-for-all) and
+  attacks the nearest surviving enemy. Three players use three of the four
+  starts on a four-start map. A layout with too few starts falls back to a
+  generated map.
+- AI fixes found by the first stalemates (two matches ran 60 minutes with no
+  winner): it now keeps enough salvage back for a hauler and a builder when
+  it has none, attacks with whatever it has after 2.5 minutes without a wave
+  instead of waiting for an ever-larger one, adds production buildings when
+  salvage piles up, and saves up for the unit it picked rather than always
+  buying the cheapest thing it can afford.
+- `check.sh` now takes about three minutes (five AI matches).

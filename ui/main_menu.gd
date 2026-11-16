@@ -52,6 +52,11 @@ var _seed: SpinBox = null
 var _faction: OptionButton = null
 var _level: OptionButton = null
 var _enemy_faction: OptionButton = null
+var _map: OptionButton = null
+var _map_ids: Array[String] = []  ## "" = generated
+var _map_players: Array[int] = []
+var _map_blurb: Label = null
+var _opponents: OptionButton = null
 var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
@@ -152,7 +157,27 @@ func _build_setup() -> void:
 	box.add_theme_constant_override("separation", 14)
 	_setup.add_child(box)
 	box.add_child(Hud.make_label("SKIRMISH", 32, Color(0.55, 0.85, 1.0)))
-	box.add_child(Hud.make_label("One opponent on a mirrored 128 x 128 battlefield. Destroy the enemy headquarters.", 15, Hud.DIM))
+	box.add_child(Hud.make_label("Destroy every enemy headquarters. Starts are always symmetric.", 15, Hud.DIM))
+
+	_map = OptionButton.new()
+	_map.add_item("Generated from the seed")
+	_map_ids.append("")
+	_map_players.append(4)
+	for id: String in SimMapGen.layout_ids():
+		var info: Dictionary = SimMapGen.layout_info(id)
+		_map.add_item("%s (%d players)" % [str(info["name"]), int(info["players"])])
+		_map_ids.append(id)
+		_map_players.append(int(info["players"]))
+	_row(box, "Map", _map)
+	_map_blurb = Hud.make_label("", 14, Hud.DIM)
+	_map_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_map_blurb.custom_minimum_size = Vector2(520.0, 22.0)
+	box.add_child(_map_blurb)
+	_map.item_selected.connect(func(_i: int) -> void: _update_map())
+	_opponents = OptionButton.new()
+	for n: int in [1, 2, 3]:
+		_opponents.add_item("%d opponent%s" % [n, "" if n == 1 else "s (free-for-all, larger map)"])
+	_row(box, "Opponents", _opponents)
 
 	var seed_row: HBoxContainer = HBoxContainer.new()
 	seed_row.add_theme_constant_override("separation", 8)
@@ -186,12 +211,13 @@ func _build_setup() -> void:
 		_enemy_faction.add_item(data.faction(id).name)
 	_row(box, "Enemy faction", _enemy_faction)
 	_update_blurb()
+	_update_map()
 
 	_level = OptionButton.new()
 	for n: String in LEVEL_NAMES:
 		_level.add_item(n)
 	_level.select(1)
-	_row(box, "Opponent", _level)
+	_row(box, "Difficulty", _level)
 
 	var buttons: HBoxContainer = HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 12)
@@ -230,6 +256,28 @@ func _build_help() -> void:
 	box.add_child(back)
 
 
+## Shows the chosen map's description and limits the opponent count to it.
+func _update_map() -> void:
+	var index: int = maxi(_map.selected, 0)
+	var capacity: int = _map_players[index]
+	if _map_ids[index] == "":
+		_map_blurb.text = "A new battlefield from the seed: 128 x 128 for two players, 192 x 192 for three or four."
+	else:
+		_map_blurb.text = str(SimMapGen.layout_info(_map_ids[index])["desc"])
+	for i: int in 3:
+		_opponents.set_item_disabled(i, i + 2 > capacity)
+	if _opponents.selected + 2 > capacity:
+		_opponents.select(capacity - 2)
+
+
+## For automated runs: pick a map by id ("" = generated) and opponent count.
+func choose_map(map_id: String, opponents: int) -> void:
+	_map.select(maxi(_map_ids.find(map_id), 0))
+	_update_map()
+	_opponents.select(clampi(opponents, 1, 3) - 1)
+	_update_map()
+
+
 func _update_blurb() -> void:
 	var f: FactionDef = GameData.shared().faction(_faction_ids[maxi(_faction.selected, 0)])
 	_faction_blurb.text = f.desc
@@ -259,12 +307,20 @@ func is_setup_open() -> bool:
 ## Builds the MatchConfig from the setup panel and starts the match.
 func start_skirmish() -> void:
 	var config: MatchConfig = MatchConfig.skirmish(int(_seed.value), _level.selected)
-	var faction_id: String = _faction_ids[maxi(_faction.selected, 0)]
-	var enemy_id: String = _faction_ids[randi_range(0, _faction_ids.size() - 1)]
-	if _enemy_faction.selected > 0:
-		enemy_id = _faction_ids[_enemy_faction.selected - 1]
-	config.factions = [faction_id, enemy_id]
-	config.names = ["Commander", "%s AI" % LEVEL_NAMES[_level.selected]]
+	config.map_id = _map_ids[maxi(_map.selected, 0)]
+	config.factions = [_faction_ids[maxi(_faction.selected, 0)]]
+	config.is_ai = [false]
+	config.ai_levels = [1]
+	config.names = ["Commander"]
+	var opponents: int = mini(_opponents.selected + 1, _map_players[maxi(_map.selected, 0)] - 1)
+	for i: int in opponents:
+		var enemy_id: String = _faction_ids[randi_range(0, _faction_ids.size() - 1)]
+		if _enemy_faction.selected > 0:
+			enemy_id = _faction_ids[_enemy_faction.selected - 1]
+		var label: String = "%s AI" % LEVEL_NAMES[_level.selected]
+		if opponents > 1:
+			label = "%s %d" % [label, i + 1]
+		config.add_ai(enemy_id, _level.selected, label)
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
 		game.start_match(config)

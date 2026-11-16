@@ -68,8 +68,13 @@ is invisible to the enemy unless they come close.
 
 ## What is in this build
 
-Three factions, each playable against a scripted AI (Easy / Normal / Hard)
-that can play any of them, on seeded, mirrored 128 × 128 maps.
+Three factions, each playable against one to three scripted AI opponents
+(Easy / Normal / Hard) that can play any of them.
+
+Maps: a seeded, symmetric generator (128 × 128 for two players, 192 × 192 for
+three or four) and three hand-made layouts — **Twin Fords** (a river with
+three crossings), **Crater Ring** (rich salvage inside a rock ring) and
+**Crossroads** (four players, ridges and a central plaza).
 
 **Aegis Directorate** — precise and networked. Long-range Relays, aircraft and
 artillery. Linked units gain weapon range; going Dark hurts them most.
@@ -118,8 +123,8 @@ wrecks; ground units vanish when they stand still in forest.
   against armor classes, projectiles, forest cover, win/lose with a stats
   screen.
 
-Not in yet (see the roadmap): hand-made maps and 4-player games, particle
-effects and sound, balance passes, settings, save/load, tutorials.
+Not in yet (see the roadmap): particle effects and sound, balance passes,
+settings, save/load, tutorials.
 
 ## For developers
 
@@ -146,8 +151,12 @@ tools/screenshot.sh battle 120
 
 Captures `screenshots/battle.png` with software rendering (needs `xvfb-run`).
 
-Run one AI-vs-AI match from the command line:
+Run one AI-vs-AI match from the command line (two to four factions; add
+`--map=twin_fords` for a hand-made layout):
 
 ```bash
-.godot-bin/godot --headless --path . -s res://tools/headless_match.gd -- --seed=7
+.godot-bin/godot --headless --path . -s res://tools/headless_match.gd -- --seed=7 --factions=aegis,nomad
 ```
+
+The hand-made layouts in `data/maps/` are written by `tools/make_layouts.py`;
+edit the shapes there and re-run it.

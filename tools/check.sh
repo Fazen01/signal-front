@@ -59,6 +59,8 @@ run_step flow 600 "Flow smoke finished" --fixed-fps 60 --quit-after 4000 -- --fl
 run_step ai_match 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=1 --max-minutes=45
 run_step ai_match_foundry 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=2 --max-minutes=45 --factions=foundry,aegis
 run_step ai_match_nomad 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=3 --max-minutes=45 --factions=nomad,foundry
+run_step ai_match_layout 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=45 --map=twin_fords --factions=aegis,foundry
+run_step ai_match_three 900 "MATCH RESULT" -s res://tools/headless_match.gd -- --seed=5 --max-minutes=60 --factions=foundry,nomad,aegis
 
 if [ "${failed}" -ne 0 ]; then
 	echo "CHECK FAILED"

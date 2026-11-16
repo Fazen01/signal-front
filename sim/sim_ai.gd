@@ -8,6 +8,7 @@ extends RefCounted
 enum Wave { NONE, STAGING, ASSAULT }
 
 const STAGE_DISTANCE: float = 26.0
+const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
 const THREAT_RANGE: float = 22.0
 
 var player_id: int = 0
@@ -54,6 +55,8 @@ var _enemies: Array[SimEntity] = []
 var _enemy_buildings: Array[SimEntity] = []
 var _known_buildings: Dictionary[int, bool] = {}  ## enemy buildings we have seen
 var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
+var _wish: Dictionary[int, String] = {}  ## building id -> unit it is saving up for
+var _wish_tick: Dictionary[int, int] = {}
 var _spent: int = 0  ## salvage committed by commands issued this think
 var _bandwidth_committed: int = 0  ## bandwidth of units ordered this think
 
@@ -191,14 +194,23 @@ func _can_afford(me: SimPlayer, cost: int) -> bool:
 	return me.salvage - _spent >= cost
 
 
+## Where the nearest surviving enemy's headquarters is (or started).
 func _enemy_hq_pos(w: SimWorld) -> Vector2:
-	for b: SimEntity in _enemy_buildings:
-		if b.def.signal_root:
-			return b.pos
+	var from: Vector2 = _hq.pos if _hq != null else w.players[player_id].start_pos
+	var best: Vector2 = w.map.world_size() * 0.5
+	var best_d: float = INF
 	for p: SimPlayer in w.players:
-		if w.are_enemies(player_id, p.id) and not p.defeated:
-			return p.start_pos
-	return w.map.world_size() * 0.5
+		if not w.are_enemies(player_id, p.id) or p.defeated:
+			continue
+		var at: Vector2 = p.start_pos
+		for b: SimEntity in _enemy_buildings:
+			if b.owner == p.id and b.def.signal_root:
+				at = b.pos
+		var d: float = at.distance_to(from)
+		if d < best_d:
+			best_d = d
+			best = at
+	return best
 
 
 # ---------------------------------------------------------------- economy
@@ -365,9 +377,11 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 		return airpad
 	if build_relays and relays < early_relays * 2 and _relay_goal(w) != Vector2.INF and me.salvage > 500:
 		return relay
-	if me.salvage > 900 and _count(barracks) < max_barracks:
+	# Salvage piling up means production is the bottleneck: add capacity.
+	var spare: int = mini(2, me.salvage / 1500)
+	if me.salvage > 900 and _count(barracks) < max_barracks + spare:
 		return barracks
-	if works != "" and me.salvage > 1200 and _count(works) < max_works and has_barracks:
+	if works != "" and me.salvage > 1200 and _count(works) < max_works + spare and has_barracks:
 		return works
 	if builds_turrets and me.salvage > 1500 and turrets < 5:
 		return armor if _can(w, me, armor) and rng.chance(0.5) else (ground if _can(w, me, ground) else "")
@@ -550,7 +564,7 @@ func _run_mobile_factory(w: SimWorld, me: SimPlayer) -> void:
 	if unit_id == "":
 		return
 	var factory_def: EntityDef = w.data.entity(_r("mobile_factory"))
-	var want: int = 2 if (max_works > 1 and me.salvage > 1400) else 1
+	var want: int = mini(3, max_works + me.salvage / 1500)
 	if _count(factory_def.id, false) + _mobile.size() + _queued(unit_id) < want and _can(w, me, unit_id):
 		_train_at_any(w, me, unit_id)
 	var toward_enemy: Vector2 = (_enemy_hq_pos(w) - _hq.pos).normalized()
@@ -620,6 +634,12 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 	var next: String = _next_building(w, me)
 	if next != "" and not _engineers.is_empty():
 		reserve = w.data.entity(next).cost
+	# Never spend the last salvage on soldiers while there is nobody to
+	# collect more or to build anything.
+	if _haulers.size() + _queued(_r("hauler")) < 2 and _best_resource(w) != null:
+		reserve = maxi(reserve, w.data.entity(_r("hauler")).cost)
+	if _engineers.size() + _queued(_r("builder")) == 0:
+		reserve = maxi(reserve, w.data.entity(_r("builder")).cost)
 	var heavy: int = 0
 	var light: int = 0
 	var infantry: int = 0
@@ -638,9 +658,28 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 	for e: SimEntity in _army:
 		if e.def.ai_role == "support":
 			support += 1
+	var depth: int = 3 if me.salvage > 1000 else 2
 	for b: SimEntity in _buildings:
-		if b.def.produces.is_empty() or not b.linked or b.queue.size() >= 2:
+		if b.def.produces.is_empty() or not b.linked or b.queue.size() >= depth:
 			continue
+		# Having decided what to build here, wait until it can be afforded
+		# rather than settling for whatever is cheapest right now.
+		if _wish.has(b.id):
+			var wanted: EntityDef = w.data.entity(_wish[b.id])
+			if not me.meets_requirements(wanted) or not b.def.produces.has(wanted.id):
+				_wish.erase(b.id)
+			elif me.bandwidth_used + _queued_bandwidth(w) + wanted.bandwidth > me.bandwidth_cap:
+				_wish.erase(b.id)
+			elif _can_afford(me, wanted.cost + reserve):
+				w.push_command(SimCommand.train(player_id, b.id, wanted.id))
+				_spent += wanted.cost
+				_bandwidth_committed += wanted.bandwidth
+				_wish.erase(b.id)
+				continue
+			elif w.tick_count - _wish_tick.get(b.id, 0) > 20 * 90:
+				_wish.erase(b.id)  # waited long enough; think again
+			else:
+				continue
 		var options: Array[String] = []
 		var weights: Array[float] = []
 		var total: float = 0.0
@@ -648,7 +687,7 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 			var def: EntityDef = w.data.entity(id)
 			if def.ai_weight <= 0.0:
 				continue  # builders, haulers and factories are handled elsewhere
-			if not me.meets_requirements(def) or not _can_afford(me, def.cost + reserve):
+			if not me.meets_requirements(def):
 				continue
 			if me.bandwidth_used + _queued_bandwidth(w) + def.bandwidth > me.bandwidth_cap:
 				continue
@@ -680,9 +719,13 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 			if roll <= 0.0:
 				pick = options[i]
 				break
-		w.push_command(SimCommand.train(player_id, b.id, pick))
-		_spent += w.data.entity(pick).cost
-		_bandwidth_committed += w.data.entity(pick).bandwidth
+		if _can_afford(me, w.data.entity(pick).cost + reserve):
+			w.push_command(SimCommand.train(player_id, b.id, pick))
+			_spent += w.data.entity(pick).cost
+			_bandwidth_committed += w.data.entity(pick).bandwidth
+		else:
+			_wish[b.id] = pick
+			_wish_tick[b.id] = w.tick_count
 
 
 # ---------------------------------------------------------------- military
@@ -773,7 +816,14 @@ func _run_military(w: SimWorld) -> void:
 
 	match wave_state:
 		Wave.NONE:
-			if threat == null and home.size() >= wave_size and w.tick_count - last_wave_end >= wave_cooldown_ticks:
+			var since: int = w.tick_count - maxi(last_wave_end, 0)
+			var ready: bool = home.size() >= wave_size and since >= wave_cooldown_ticks
+			# A starved economy may never reach the full wave size: after a long
+			# quiet spell go with whatever has gathered, and aim lower next time.
+			if not ready and since >= STALL_TICKS and home.size() >= maxi(4, wave_size / 4):
+				ready = true
+				wave_size = maxi(first_wave, home.size())
+			if threat == null and ready:
 				_launch_wave(w, home)
 		Wave.STAGING:
 			var arrived: int = 0
