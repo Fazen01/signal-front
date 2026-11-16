@@ -37,7 +37,7 @@ func _draw() -> void:
 		var is_selected: bool = ctl.selected.has(e.id)
 		var show_bar: bool = is_selected or e.hp < e.max_hp - 0.5 or not e.constructed
 		var dark: bool = e.owner >= 0 and not e.linked and e.constructed
-		if not show_bar and not dark:
+		if not show_bar and not dark and e.rank == 0:
 			continue
 		var top: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + _bar_height(e), e.pos.y)
 		if cam3d.is_position_behind(top):
@@ -47,6 +47,8 @@ func _draw() -> void:
 			continue
 		if dark:
 			_draw_dark_icon(sp + Vector2(0.0, -14.0))
+		if e.rank > 0:
+			_draw_rank(sp + Vector2(0.0, -9.0 if not dark else -27.0), e.rank)
 		if not show_bar:
 			continue
 		var edge: Vector2 = cam3d.unproject_position(top + right * e.radius)
@@ -78,6 +80,16 @@ func _draw() -> void:
 		draw_arc(m, 14.0, 0.0, TAU, 24, Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(20.0, 0.0), m + Vector2(20.0, 0.0), Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(0.0, 20.0), m + Vector2(0.0, 20.0), Color(1.0, 0.35, 0.3), 2.0)
+
+
+## Veterancy: one gold chevron per rank.
+func _draw_rank(at: Vector2, rank: int) -> void:
+	var gold: Color = Color(1.0, 0.85, 0.3)
+	for i: int in rank:
+		var x: float = at.x + (float(i) - float(rank - 1) * 0.5) * 7.0
+		var pts: PackedVector2Array = PackedVector2Array([Vector2(x - 3.0, at.y + 2.0), Vector2(x, at.y - 2.0), Vector2(x + 3.0, at.y + 2.0)])
+		draw_polyline(pts, Color(0.0, 0.0, 0.0, 0.8), 3.5)
+		draw_polyline(pts, gold, 1.8)
 
 
 ## "No signal": an antenna with a slash through it.

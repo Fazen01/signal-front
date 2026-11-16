@@ -20,6 +20,11 @@ var hud: Hud = null
 var menus: MatchMenus = null
 var ui_layer: CanvasLayer = null
 
+# Directive targeting
+var targeting: DirectiveDef = null
+var target_ring: MeshInstance3D = null
+var _target_ok: int = -1
+
 # Building placement
 var placing: EntityDef = null
 var ghost: Node3D = null
@@ -157,6 +162,34 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	hud.minimap._gui_input(rclick)
 	hud.minimap.ping(hq.pos)
 	cam.center_on(hq.pos)
+	# Directives: unlock through the bar, target, fire, and the Alt hotkey.
+	p.command_points = 20
+	driver.expect(hud.activate_directive(0), "Recon Sweep unlock click accepted")
+	world.tick()
+	world.tick()
+	driver.expect(p.unlocked.has("recon_sweep"), "Recon Sweep unlocked")
+	driver.expect(hud.activate_directive(0), "Recon Sweep enters targeting")
+	driver.expect(targeting != null and target_ring != null, "targeting ring shown")
+	driver.expect(on_left_click(get_viewport().get_visible_rect().size * 0.5, false), "targeting click consumed")
+	driver.expect(targeting == null, "targeting ended after firing")
+	world.tick()
+	world.tick()
+	driver.expect(p.stat_directives_used == 1, "Recon Sweep was used")
+	var akey: InputEventKey = InputEventKey.new()
+	akey.physical_keycode = KEY_4
+	akey.alt_pressed = true
+	akey.pressed = true
+	controller._unhandled_input(akey)
+	world.tick()
+	world.tick()
+	driver.expect(p.unlocked.has("signal_surge"), "Alt+4 unlocked Signal Surge")
+	controller._unhandled_input(akey)
+	hud.activate_directive(1)
+	world.tick()
+	world.tick()
+	hud.activate_directive(1)
+	driver.expect(targeting != null, "Shell Barrage targeting started")
+	driver.expect(on_right_click(Vector2.ZERO) and targeting == null, "right click cancels targeting")
 	# Idle-builder key and camera bookmarks.
 	world.push_command(SimCommand.stop(local_player, PackedInt32Array([eng.id])))
 	controller.clear_selection()
@@ -218,6 +251,7 @@ func _process(delta: float) -> void:
 	world_view.sync(clampf(_accum / SimWorld.DT, 0.0, 1.0))
 	_update_markers(delta)
 	_update_placement()
+	_update_targeting()
 
 
 func _handle_event(ev: SimEvent) -> void:
@@ -234,8 +268,12 @@ func _handle_event(ev: SimEvent) -> void:
 				if done != null:
 					hud.push_alert("%s complete" % done.def.name, Hud.CYAN)
 				hud.rebuild_card()
+		SimEvent.Type.DIRECTIVE:
+			if ev.player == local_player and ev.text == "signal_surge":
+				hud.push_alert("Signal Surge: emitter range +50%", Hud.CYAN)
 		SimEvent.Type.MATCH_OVER:
 			cancel_placement()
+			cancel_directive()
 			menus.show_result(world, local_player)
 
 
@@ -255,7 +293,16 @@ func is_input_blocked() -> bool:
 	return paused or world.game_over
 
 
-func on_left_click(_screen: Vector2, shift: bool) -> bool:
+func on_left_click(screen: Vector2, shift: bool) -> bool:
+	if targeting != null:
+		var at: Vector2 = controller.ground_point(screen)
+		var bad: String = SimDirectives.use_error(world, local_player, targeting, at)
+		if bad != "":
+			hud.push_alert(bad, Hud.RED)
+			return true
+		world.push_command(SimCommand.directive(local_player, targeting.id, at))
+		cancel_directive()
+		return true
 	if placing == null:
 		return false
 	var builders: PackedInt32Array = _selected_builders(placing.id)
@@ -275,6 +322,9 @@ func on_left_click(_screen: Vector2, shift: bool) -> bool:
 
 
 func on_right_click(_screen: Vector2) -> bool:
+	if targeting != null:
+		cancel_directive()
+		return true
 	if placing != null:
 		cancel_placement()
 		return true
@@ -286,6 +336,9 @@ func on_hotkey(key: InputEventKey) -> bool:
 		signal_view.set_overlay_visible(not signal_view.is_overlay_visible())
 		return true
 	if key.physical_keycode == KEY_ESCAPE:
+		if targeting != null:
+			cancel_directive()
+			return true
 		if placing != null:
 			cancel_placement()
 			return true
@@ -327,6 +380,40 @@ func play_again() -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
 		game.start_match(config)
+
+
+# ----------------------------------------------------- directive targeting
+
+## Starts choosing where to use a Directive: a ring follows the mouse, green
+## where the target is allowed. Left click fires, right click or Esc cancels.
+func begin_directive(def: DirectiveDef) -> void:
+	cancel_placement()
+	cancel_directive()
+	targeting = def
+	var r: float = maxf(def.radius, 1.0)
+	target_ring = ModelFactory.ring(self, r - 0.2, r, Vector3.ZERO, ModelFactory.mat(Color(0.4, 1.0, 0.5), 1.0))
+	target_ring.name = "TargetRing"
+	target_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_target_ok = -1
+	_update_targeting()
+
+
+func cancel_directive() -> void:
+	targeting = null
+	if target_ring != null:
+		target_ring.queue_free()
+		target_ring = null
+
+
+func _update_targeting() -> void:
+	if targeting == null or target_ring == null:
+		return
+	var at: Vector2 = controller.ground_point(get_viewport().get_mouse_position())
+	target_ring.position = Vector3(at.x, world.map.height_at(world.map.clamp_to_map(at)) + 0.4, at.y)
+	var ok: int = 1 if SimDirectives.use_error(world, local_player, targeting, at) == "" else 0
+	if ok != _target_ok:
+		_target_ok = ok
+		target_ring.material_override = ModelFactory.mat(Color(0.4, 1.0, 0.5) if ok == 1 else Color(1.0, 0.3, 0.25), 1.0)
 
 
 # ------------------------------------------------------ building placement

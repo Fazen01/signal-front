@@ -38,6 +38,9 @@ var _entries: Array[CardEntry] = []
 var _alerts: VBoxContainer = null
 var _alert_age: Array[float] = []
 var _refresh_in: float = 0.0
+var _points: Label = null
+var _directive_buttons: Array[Button] = []
+var _directive_defs: Array[DirectiveDef] = []
 var _queue_sig: String = ""
 var minimap_slot: Control = null
 var minimap: Minimap = null
@@ -52,6 +55,7 @@ func setup(scene: BattleScene) -> void:
 	_build_top_bar()
 	_build_bottom_bar()
 	_build_alerts()
+	_build_directive_bar()
 	rebuild_card()
 	_refresh()
 
@@ -174,6 +178,93 @@ func _build_alerts() -> void:
 	_alerts.offset_left = 14.0
 	_alerts.offset_top = 52.0
 	add_child(_alerts)
+
+
+func _build_directive_bar() -> void:
+	var bar: PanelContainer = PanelContainer.new()
+	bar.name = "DirectiveBar"
+	bar.add_theme_stylebox_override("panel", panel_style(Color(1.0, 0.82, 0.35, 0.6)))
+	bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bar.offset_bottom = -196.0
+	add_child(bar)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	bar.add_child(row)
+	_points = make_label("CP 0", 18, GOLD)
+	_points.custom_minimum_size = Vector2(64.0, 0.0)
+	_points.tooltip_text = "Command Points: earned by destroying enemy units and buildings. Spend them to unlock Directives."
+	_points.mouse_filter = Control.MOUSE_FILTER_STOP
+	row.add_child(_points)
+	for id: String in world.data.directive_order:
+		var def: DirectiveDef = world.data.directive(id)
+		var b: Button = Button.new()
+		b.custom_minimum_size = Vector2(150.0, 44.0)
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 12)
+		b.pressed.connect(activate_directive.bind(def.slot))
+		b.mouse_entered.connect(_on_directive_hover.bind(def.slot))
+		b.mouse_exited.connect(_on_directive_hover.bind(-1))
+		row.add_child(b)
+		_directive_buttons.append(b)
+		_directive_defs.append(def)
+
+
+func _on_directive_hover(index: int) -> void:
+	if index < 0:
+		_info.text = ""
+		return
+	var def: DirectiveDef = _directive_defs[index]
+	_info.text = "%s  (Alt+%d)
+%s
+Unlock: %d Command Points.   Cooldown: %d s." % [def.name, index + 1, def.desc, def.cost, int(def.cooldown)]
+
+
+## Click or Alt+number on a Directive: unlock it, or use it (starting
+## targeting when it needs a target).
+func activate_directive(index: int) -> bool:
+	if index < 0 or index >= _directive_defs.size():
+		return false
+	var def: DirectiveDef = _directive_defs[index]
+	var p: SimPlayer = world.players[player]
+	if not p.unlocked.has(def.id):
+		var why: String = SimDirectives.unlock_error(world, player, def)
+		if why != "":
+			push_alert(why, RED)
+			return false
+		world.push_command(SimCommand.unlock(player, def.id))
+		return true
+	if SimDirectives.cooldown_left(world, player, def) > 0.0:
+		push_alert("%s is not ready yet" % def.name, RED)
+		return false
+	if def.needs_target():
+		battle.begin_directive(def)
+	else:
+		world.push_command(SimCommand.directive(player, def.id, Vector2.ZERO))
+	return true
+
+
+func _refresh_directives() -> void:
+	var p: SimPlayer = world.players[player]
+	_points.text = "CP %d" % p.command_points
+	for i: int in _directive_defs.size():
+		var def: DirectiveDef = _directive_defs[i]
+		var b: Button = _directive_buttons[i]
+		if not p.unlocked.has(def.id):
+			b.text = "%s
+Unlock: %d CP" % [def.name, def.cost]
+			b.disabled = p.command_points < def.cost
+		else:
+			var left: float = SimDirectives.cooldown_left(world, player, def)
+			if left > 0.0:
+				b.text = "%s
+%d s" % [def.name, int(ceilf(left))]
+				b.disabled = true
+			else:
+				b.text = "%s
+READY  Alt+%d" % [def.name, i + 1]
+				b.disabled = false
 
 
 # ----------------------------------------------------------------- alerts
@@ -395,6 +486,7 @@ func _refresh() -> void:
 	var secs: int = int(world.seconds())
 	_clock.text = "%d:%02d" % [secs / 60, secs % 60]
 	_update_card_state()
+	_refresh_directives()
 	_refresh_selection()
 
 

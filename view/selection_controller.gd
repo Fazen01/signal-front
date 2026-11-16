@@ -261,6 +261,10 @@ func _box_select(rect: Rect2, add: bool) -> void:
 
 func _on_key(key: InputEventKey) -> void:
 	var code: Key = key.physical_keycode
+	if code >= KEY_1 and code <= KEY_6 and key.alt_pressed:
+		battle.hud.activate_directive(int(code) - int(KEY_1))
+		get_viewport().set_input_as_handled()
+		return
 	if code >= KEY_0 and code <= KEY_9:
 		var index: int = int(code) - int(KEY_0)
 		if key.ctrl_pressed:

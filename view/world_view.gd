@@ -138,16 +138,45 @@ func _proj_mat(fx_name: String) -> StandardMaterial3D:
 	return m
 
 
+func _directive_fx(ev: SimEvent) -> void:
+	var at: Vector3 = _ground(ev.pos, 0.35)
+	var duration: float = ev.pos2.x
+	match ev.text:
+		"recon_sweep":
+			fx.ground_ring(at, ev.value, Color(0.45, 0.9, 1.0, 0.9), 1.2, true)
+			fx.ground_ring(at, ev.value, Color(0.45, 0.9, 1.0, 0.35), duration)
+		"shell_barrage":
+			fx.ground_ring(at, ev.value, Color(1.0, 0.3, 0.2, 0.9), duration + 1.5)
+		"field_repair":
+			fx.ground_ring(at, ev.value, Color(0.4, 1.0, 0.5, 0.9), 1.4, true)
+			fx.flash(at + Vector3(0.0, 1.0, 0.0), 2.0, Color(0.4, 1.0, 0.5, 0.5), 0.5)
+		"blackout":
+			fx.ground_disc(at, ev.value, Color(0.12, 0.02, 0.2, 0.5), duration)
+			fx.ground_ring(at, ev.value, Color(0.75, 0.3, 1.0, 0.9), duration)
+		"reinforcement_drop":
+			fx.ground_ring(at, ev.value, Color(0.5, 0.8, 1.0, 0.9), duration)
+		"drop_arrived":
+			fx.flash(at + Vector3(0.0, 0.8, 0.0), 2.5, Color(0.7, 0.9, 1.0, 0.8), 0.4)
+			fx.ground_ring(at, ev.value, Color(0.7, 0.9, 1.0, 0.9), 0.8, true)
+		_:
+			pass
+
+
 func _ground(p: Vector2, lift: float) -> Vector3:
 	return Vector3(p.x, world.map.height_at(p) + lift, p.y)
 
 
 ## Called by the battle scene for every sim event after a tick.
 func handle_event(ev: SimEvent) -> void:
-	if fog_enabled and not SimVision.is_visible(world, local_player, ev.pos):
+	var own_power: bool = ev.type == SimEvent.Type.DIRECTIVE and ev.player == local_player
+	if fog_enabled and not own_power and not SimVision.is_visible(world, local_player, ev.pos):
 		if ev.type != SimEvent.Type.SHOT or not SimVision.is_visible(world, local_player, ev.pos2):
 			return
 	match ev.type:
+		SimEvent.Type.DIRECTIVE:
+			_directive_fx(ev)
+		SimEvent.Type.RANK_UP:
+			fx.ground_ring(_ground(ev.pos, 0.2), 1.6, Color(1.0, 0.85, 0.3, 0.9), 0.8, true)
 		SimEvent.Type.SHOT:
 			fx.tracer(_ground(ev.pos, 1.0), _ground(ev.pos2, 0.8), ev.text == "tracer_heavy")
 		SimEvent.Type.PROJECTILE:

@@ -10,10 +10,15 @@ class Fx:
 	var grow: float = 0.0  ## scale added per second
 	var base_scale: Vector3 = Vector3.ONE
 	var rise: float = 0.0
+	var grow_flat: float = 0.0  ## x/z scale added per second (ground rings)
+	var grow_limit: float = 0.0
+	var late_fade: bool = false  ## stay solid, fade only in the last 20%
 
 var _active: Array[Fx] = []
 var _tracer_mesh: BoxMesh = null
 var _blast_mesh: SphereMesh = null
+var _ring_mesh: TorusMesh = null
+var _disc_mesh: CylinderMesh = null
 var _mats: Dictionary[String, StandardMaterial3D] = {}
 
 
@@ -25,6 +30,17 @@ func _ready() -> void:
 	_blast_mesh.height = 1.0
 	_blast_mesh.radial_segments = 8
 	_blast_mesh.rings = 4
+	_ring_mesh = TorusMesh.new()
+	_ring_mesh.inner_radius = 0.965
+	_ring_mesh.outer_radius = 1.0
+	_ring_mesh.rings = 48
+	_ring_mesh.ring_segments = 4
+	_disc_mesh = CylinderMesh.new()
+	_disc_mesh.top_radius = 1.0
+	_disc_mesh.bottom_radius = 1.0
+	_disc_mesh.height = 0.05
+	_disc_mesh.radial_segments = 40
+	_disc_mesh.rings = 1
 
 
 func _fx_mat(color: Color) -> StandardMaterial3D:
@@ -77,6 +93,30 @@ func flash(at: Vector3, size: float, color: Color, life: float = 0.2) -> void:
 	fx.grow = size * 2.5 / maxf(life, 0.01)
 
 
+## A ring on the ground marking an area for `life` seconds. With `pulse` it
+## starts small and expands to its radius.
+func ground_ring(at: Vector3, radius: float, color: Color, life: float, pulse: bool = false) -> void:
+	var fx: Fx = _spawn(_ring_mesh, color, life)
+	fx.node.position = at
+	if pulse:
+		fx.base_scale = Vector3(radius * 0.15, 1.0, radius * 0.15)
+		fx.grow_flat = radius * 0.85 / maxf(life * 0.5, 0.01)
+		fx.grow_limit = radius
+	else:
+		fx.base_scale = Vector3(radius, 1.0, radius)
+	fx.node.scale = fx.base_scale
+	fx.late_fade = true
+
+
+## A translucent disc on the ground for `life` seconds (Blackout).
+func ground_disc(at: Vector3, radius: float, color: Color, life: float) -> void:
+	var fx: Fx = _spawn(_disc_mesh, color, life)
+	fx.node.position = at
+	fx.base_scale = Vector3(radius, 1.0, radius)
+	fx.node.scale = fx.base_scale
+	fx.late_fade = true
+
+
 func explosion(at: Vector3, size: float) -> void:
 	flash(at, size, Color(1.0, 0.75, 0.3, 0.95), 0.28)
 	flash(at + Vector3(0.0, size * 0.3, 0.0), size * 0.6, Color(1.0, 0.95, 0.8, 0.95), 0.16)
@@ -102,6 +142,12 @@ func _process(delta: float) -> void:
 			fx.node.scale = fx.base_scale + Vector3(s, s, s)
 		if fx.rise != 0.0:
 			fx.node.position.y += fx.rise * delta
-		fx.node.transparency = clampf(fx.age / fx.life, 0.0, 1.0)
+		if fx.grow_flat != 0.0:
+			var r: float = minf(fx.grow_limit, fx.base_scale.x + fx.grow_flat * fx.age)
+			fx.node.scale = Vector3(r, 1.0, r)
+		if fx.late_fade:
+			fx.node.transparency = clampf((fx.age / fx.life - 0.8) * 5.0, 0.0, 1.0)
+		else:
+			fx.node.transparency = clampf(fx.age / fx.life, 0.0, 1.0)
 		kept.append(fx)
 	_active = kept

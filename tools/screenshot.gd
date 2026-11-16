@@ -103,6 +103,22 @@ func _run_script(battle: BattleScene) -> void:
 					w.spawn_unit("trooper", me, hq_pos + dir * 74.0 + side * (float(k) * 2.0 - 3.0))
 				battle.cam.set_distance(80.0)
 				battle.cam.center_on(hq_pos + dir * 36.0)
+		"directives":
+			if _count == 3:
+				var pl: SimPlayer = battle.world.players[battle.local_player]
+				pl.command_points = 6
+				pl.unlocked["recon_sweep"] = true
+				pl.unlocked["shell_barrage"] = true
+				pl.unlocked["blackout"] = true
+				var hq_at: Vector2 = pl.start_pos
+				battle.world.push_command(SimCommand.directive(battle.local_player, "recon_sweep", hq_at + Vector2(44.0, 30.0)))
+				battle.world.push_command(SimCommand.directive(battle.local_player, "shell_barrage", hq_at + Vector2(16.0, 22.0)))
+				battle.begin_directive(battle.world.data.directive("blackout"))
+				battle.cam.set_distance(70.0)
+				battle.cam.center_on(hq_at + Vector2(20.0, 16.0))
+				for e: SimEntity in battle.world.entities:
+					if e.owner == battle.local_player and e.def != null and e.def.is_armed() and e.kind == SimEntity.Kind.UNIT:
+						e.rank = 2
 		"result":
 			if _count == 5:
 				battle.world.push_command(SimCommand.surrender(battle.local_player))

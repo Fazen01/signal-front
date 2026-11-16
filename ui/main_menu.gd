@@ -18,6 +18,9 @@ GETTING STARTED
   3. Build a Vehicle Works for tanks, then destroy the enemy Headquarters.
   4. Right-click an Uplink Site with a Field Engineer to capture it: it pays
      salvage while it is inside your coverage.
+  5. Kills earn Command Points. Spend them on the Directive bar to unlock
+     commander powers (Recon Sweep, Shell Barrage, Field Repair, Signal Surge,
+     Blackout, Reinforcement Drop), then use them when they are ready.
 You only see what your coverage and your units see.
 
 CAMERA
@@ -36,6 +39,7 @@ SELECTION AND ORDERS
   . (period) or F1                   select the next idle Field Engineer
   Ctrl+F5..F8, then F5..F8           save and recall camera bookmarks
   Minimap                            left click moves the camera, right click orders
+  Alt+1..6 or the Directive bar      unlock / use a Directive
   Esc                                cancel, or open the pause menu
 
 The command card at the bottom right shows what the selection can build or

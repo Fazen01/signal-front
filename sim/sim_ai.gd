@@ -26,6 +26,7 @@ var wave_cooldown_ticks: int = 20 * 40
 var max_barracks: int = 1
 var max_works: int = 1
 var builds_turrets: bool = true
+var uses_directives: bool = true
 var hunts_relays: bool = true
 
 # Army state
@@ -66,6 +67,7 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			wave_cooldown_ticks = 20 * 75
 			builds_turrets = false
 			hunts_relays = false
+			uses_directives = false
 		2:
 			think_ticks = 10
 			max_haulers = 8
@@ -97,6 +99,7 @@ func update(w: SimWorld) -> void:
 	_run_construction(w, me)
 	_run_production(w, me)
 	_run_military(w)
+	_run_directives(w, me)
 
 
 # ------------------------------------------------------------------ survey
@@ -691,6 +694,80 @@ func _assault(w: SimWorld, fresh: bool) -> void:
 			who.append(id)
 	if not who.is_empty():
 		w.push_command(SimCommand.attack_move(player_id, who, wave_target_pos))
+
+
+# -------------------------------------------------------------- directives
+
+const UNLOCK_ORDER: Array[String] = [
+	"recon_sweep", "shell_barrage", "field_repair", "reinforcement_drop", "blackout", "signal_surge",
+]
+
+
+func _ready_to_use(w: SimWorld, me: SimPlayer, id: String) -> bool:
+	return me.unlocked.has(id) and SimDirectives.cooldown_left(w, player_id, w.data.directive(id)) <= 0.0
+
+
+func _run_directives(w: SimWorld, me: SimPlayer) -> void:
+	if not uses_directives:
+		return
+	# Unlock in a fixed order, saving points for the next one on the list.
+	for id: String in UNLOCK_ORDER:
+		if not me.unlocked.has(id):
+			if me.command_points >= w.data.directive(id).cost:
+				w.push_command(SimCommand.unlock(player_id, id))
+			break
+
+	if _ready_to_use(w, me, "shell_barrage"):
+		var def: DirectiveDef = w.data.directive("shell_barrage")
+		var best: Vector2 = Vector2.INF
+		var best_n: int = 2
+		var candidates: Array[SimEntity] = []
+		candidates.append_array(_enemies)
+		for b: SimEntity in _enemy_buildings:
+			if SimVision.can_see(w, player_id, b):
+				candidates.append(b)
+		for c: SimEntity in candidates:
+			if SimDirectives.target_error(w, player_id, def, c.pos) != "":
+				continue
+			var n: int = _count_near(candidates, c.pos, def.radius)
+			if n > best_n:
+				best_n = n
+				best = c.pos
+		if best != Vector2.INF:
+			w.push_command(SimCommand.directive(player_id, def.id, best))
+
+	if _ready_to_use(w, me, "field_repair"):
+		var def: DirectiveDef = w.data.directive("field_repair")
+		var hurt: Array[SimEntity] = []
+		for e: SimEntity in _army:
+			if e.hp < e.max_hp * 0.6 and e.linked:
+				hurt.append(e)
+		for b: SimEntity in _buildings:
+			if b.hp < b.max_hp * 0.6 and b.linked:
+				hurt.append(b)
+				hurt.append(b)  # buildings count double
+		for e: SimEntity in hurt:
+			if _count_near(hurt, e.pos, def.radius) >= 3:
+				w.push_command(SimCommand.directive(player_id, def.id, e.pos))
+				break
+
+	if _ready_to_use(w, me, "reinforcement_drop") and me.bandwidth_used + 5 <= me.bandwidth_cap:
+		var toward_enemy: Vector2 = (_enemy_hq_pos(w) - _hq.pos).normalized()
+		var at: Vector2 = w.map.nearest_free_pos(_hq.pos + toward_enemy * (_hq.radius + 10.0))
+		if SimSignal.is_covered(w, player_id, at):
+			w.push_command(SimCommand.directive(player_id, "reinforcement_drop", at))
+
+	if _ready_to_use(w, me, "recon_sweep") and wave_state == Wave.NONE:
+		w.push_command(SimCommand.directive(player_id, "recon_sweep", _enemy_hq_pos(w)))
+
+	if wave_state == Wave.ASSAULT:
+		if _ready_to_use(w, me, "blackout") and SimVision.is_visible(w, player_id, wave_target_pos):
+			for other: SimPlayer in w.players:
+				if w.are_enemies(player_id, other.id) and SimSignal.is_covered(w, other.id, wave_target_pos):
+					w.push_command(SimCommand.directive(player_id, "blackout", wave_target_pos))
+					break
+		if _ready_to_use(w, me, "signal_surge"):
+			w.push_command(SimCommand.directive(player_id, "signal_surge", Vector2.ZERO))
 
 
 ## What to hit next. Normal and Hard AIs go for the relay whose loss would

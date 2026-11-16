@@ -34,6 +34,13 @@ destroying one relay can black out everything chained behind it.
 5. Send a Field Engineer to capture **Uplink Sites** (right-click one). A site
    pays a salvage trickle while it is inside your coverage.
 
+6. Destroying enemy units and buildings earns **Command Points** (CP). Spend
+   them on the bar above the command card to unlock **Directives** — Recon
+   Sweep, Shell Barrage, Field Repair, Signal Surge, Blackout and
+   Reinforcement Drop — then use them whenever their cooldown is ready.
+7. Units that destroy a lot earn up to three veterancy ranks (gold chevrons):
+   more damage, more health, and self-repair at the top rank.
+
 You only see what your network and your units see: everything inside your
 coverage is visible, plus a circle around each unit. A Marksman standing still
 is invisible to the enemy unless they come close.
@@ -55,6 +62,7 @@ is invisible to the enemy unless they come close.
 | . (period) or F1 | Select the next idle Field Engineer |
 | Ctrl+F5..F8, then F5..F8 | Save / recall a camera bookmark |
 | Minimap: left click / right click | Move the camera / order the selection there |
+| Alt+1..6, or click the Directive bar | Unlock or use a Directive (left click to target, right click to cancel) |
 | Letter in [brackets] on the command card | Build or train that item |
 | Esc | Cancel placement or attack-move; otherwise open the pause menu |
 
@@ -71,11 +79,12 @@ match against a scripted AI (Easy / Normal / Hard) on seeded, mirrored
 - Systems: salvage economy with wrecks, construction and production queues,
   Bandwidth cap, the Signal Grid (link chains, coverage, Linked/Dark effects,
   placement rules), fog of war with vision shared through coverage, minimap,
-  Uplink Sites, damage types against armor classes, projectiles, forest
-  cover, win/lose with a stats screen.
+  Uplink Sites, Command Points and six Directives, veterancy, damage types
+  against armor classes, projectiles, forest cover, win/lose with a stats
+  screen.
 
-Not in yet (see the roadmap): Directives, veterancy, air units and tier 3,
-the Foundry Pact and Nomad Circuit factions, sound, save/load.
+Not in yet (see the roadmap): air units and tier 3, the Foundry Pact and
+Nomad Circuit factions, sound, save/load.
 
 ## For developers
 

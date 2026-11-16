@@ -65,9 +65,9 @@ decision in the session log at the bottom.
 
 ## M7 — Directives and veterancy
 
-- [ ] Command Points, Directive bar, all six Directives with targeting UI
-- [ ] Veterancy ranks and indicators
-- [ ] AI uses Directives
+- [x] Command Points, Directive bar, all six Directives with targeting UI
+- [x] Veterancy ranks and indicators
+- [x] AI uses Directives
 
 ## M8 — T3 and air
 
@@ -255,9 +255,12 @@ Notes on this session's pushes:
   alert pings), Uplink Sites captured by Field Engineers, double-click
   select, idle-builder key (period or F1), camera bookmarks (Ctrl+F5..F8).
 
-Half-done / next: M7 — Command Points, all six Directives and veterancy are
-in the simulation and tested (`sim/sim_directives.gd`, `data/directives.json`).
-Still to do: Directive bar and targeting UI, rank indicators, AI use.
+- M7 Directives and veterancy: Command Points from value destroyed, six
+  Directives with unlock costs, cooldowns and targeting rules, a Directive
+  bar (click or Alt+1..6) with a targeting ring, ground effects, veterancy
+  ranks with chevrons; the Normal and Hard AI unlock and use Directives.
+
+Half-done / next: M8 tier 3 and air units.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -286,3 +289,9 @@ Fog decisions:
 - Veterancy: ranks at 2x, 4x and 8x the unit's own cost in value destroyed;
   each rank +15% damage and +10% health; rank 3 repairs 1% health a second
   after 5 s without taking damage.
+- Directive hotkeys are Alt+1..6 (plain digits are control groups).
+- The AI unlocks Directives in a fixed order (Recon, Barrage, Repair, Drop,
+  Blackout, Surge), barrages visible clusters of 3+, repairs clusters of
+  damaged units, blacks out the assault target and surges during assaults.
+  The Easy AI does not use Directives.
+- With Directives in, AI-vs-AI seed 1 runs 15:29 (was about 9-10 minutes).
