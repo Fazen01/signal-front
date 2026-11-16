@@ -201,7 +201,16 @@ over three or four seeds per faction pairing, Normal vs Normal:
   1-4 (Hard in the first seat), Normal beat Easy 18 of 18. Easy matches
   are short (about 9 minutes), which is fine for Easy.
 - Foundry vs Aegis (Foundry 6 of 16) looked at: Foundry's cheap infantry
-  armies lose the first head-on clash; no bug found. Left as is.
+  armies lose the first head-on clash; no bug found. Gathering 36 more
+  games on seeds 9-12 (09:55 UTC) before deciding whether to tune.
+- After the Hard change: Hard beat Easy 18 of 18 again. Every AI level
+  beats a player who does nothing in 5-8 minutes.
+- Mid-war screenshot (spectated Aegis vs Foundry at 7:28) reads clearly.
+  Haulers spend 65% of their time loading and 8% queued at a field, so the
+  slower loading does not cause crowding.
+- New test: AI memory (lost-site spots, blocked build entries, retreat
+  count, wave members) survives a file save in the middle of a war, and the
+  match continues identically.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
