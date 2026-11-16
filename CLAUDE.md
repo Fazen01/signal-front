@@ -17,9 +17,10 @@ last one stopped, using only what is in the repository.
    branch and take the one with the newest commit. If your working branch does
    not already contain it, merge it in before doing anything else. Earlier
    sessions may have pushed to their own branches rather than to `main`.
-3. If the newest commit on any remote branch is under 10 minutes old, another
-   session is probably still running. Wait 10 minutes and look again; if it is
-   still moving, stop without making changes.
+3. If the newest commit on any remote branch is under 25 minutes old, another
+   session is probably still running. Wait 10 minutes and look again; if a new
+   commit has appeared, stop without making changes. Two sessions working the
+   same roadmap item at once only produce conflicts.
 4. Read the session log at the bottom of the roadmap, then start on the first
    unticked roadmap item.
 
@@ -29,11 +30,15 @@ last one stopped, using only what is in the repository.
   session log.
 - Commit small and push after **every** commit. A session can be cut off by a
   usage limit at any moment, and unpushed work is lost.
+- Push something at least every 15 minutes so later sessions can tell you are
+  alive. If the code is not ready, push a session-log update saying what you
+  are working on.
 - Add your session-log entry early and keep it current; do not leave it for
   the end.
-- Push to your session's branch. Keep one pull request to `main` open for the
-  work and update its description as milestones land. Do not merge it; the
-  owner reviews in the morning.
+- Push to your session's branch. If you are able to open pull requests, keep
+  one to `main` open for the work and update its description as milestones
+  land. Do not merge it; the owner reviews in the morning. If you cannot open
+  one, pushing the branch is enough.
 - Run `tools/check.sh` before every push once it exists. Never push a commit
   that breaks it, and never weaken a check to get it to pass.
 - From M5 onward the game must stay playable at every pushed commit:
