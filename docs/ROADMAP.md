@@ -234,8 +234,15 @@ over three or four seeds per faction pairing, Normal vs Normal:
     assault began. They now attack-move to the staging point.
   - The retreat test no longer counts Flak Posts (anti-air only) as a
     threat to a ground wave.
-  The three stalemate seeds now end at 13-26 minutes. In progress (10:50
-  UTC): 72-game batches on seeds 1-4 and 9-12 before committing.
+  The three stalemate seeds now end at 13-26 minutes. Batches: seeds 1-4
+  no draws (18.7 min); seeds 9-12 two draws (19.5 min).
+- Those two draws had the same cause: the map was exhausted. A two-player
+  generated map starts with 92,000 salvage and had 1,800 left at 36
+  minutes; with both economies stopped, turrets and headquarters guns beat
+  the trickle of free Reinforcement Drop squads for ever. Fields 10,000 /
+  16,000 -> 14,000 / 22,000, so the salvage outlasts a normal match. Both
+  seeds then end at 20 and 26 minutes. In progress (11:25 UTC): batches on
+  seeds 1-4 and 9-12 again before committing.
 - Monkey test (`view/monkey_driver.gd`, `-- --monkey=<seed>
   [--faction=foundry]` on the battle scene): about 6,000 random clicks,
   drags, wheel turns and hotkeys per run, pushed into the root viewport so
