@@ -12,6 +12,9 @@ var _refresh_in: float = 0.0
 
 
 func setup(sim_world: SimWorld) -> void:
+	# Set here as well as on the root window: themes do not pass down
+	# through a CanvasLayer.
+	theme = UiTheme.theme()
 	world = sim_world
 	add_theme_stylebox_override("panel", Hud.panel_style(Color(1.0, 0.82, 0.35, 0.8)))
 	set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)

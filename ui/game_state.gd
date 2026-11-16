@@ -14,6 +14,8 @@ var last_config: MatchConfig = null
 func _ready() -> void:
 	# Menus keep working while a match is paused.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# One theme for every menu and HUD element.
+	get_tree().root.theme = UiTheme.theme()
 	GameSettings.ensure_loaded()
 	if OS.get_cmdline_user_args().has("--flow-smoke"):
 		var smoke: FlowSmoke = FlowSmoke.new()

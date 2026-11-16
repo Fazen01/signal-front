@@ -14,6 +14,7 @@ var _accum: float = 0.0
 var _time: float = 0.0
 var _round: int = 0
 var _rest: float = 0.0  ## seconds the finished match stays on screen
+var caption: String = ""  ## "Live match: A vs B", for the menu to show
 
 
 func _ready() -> void:
@@ -37,6 +38,7 @@ func _start() -> void:
 	var config: MatchConfig = MatchConfig.ai_vs_ai(31 + _round * 7)
 	config.factions = [FACTIONS[_round % 3], FACTIONS[(_round + 1) % 3]]
 	world = SimSetup.create_match(config)
+	caption = "Live match:  %s  vs  %s" % [world.data.faction(config.factions[0]).name, world.data.faction(config.factions[1]).name]
 	var terrain: TerrainView = TerrainView.new()
 	terrain.name = "Terrain"
 	_stage.add_child(terrain)

@@ -45,6 +45,8 @@ SELECTION AND ORDERS
 The command card at the bottom right shows what the selection can build or
 train; the letter in brackets is its hotkey."""
 
+const MENU_LEFT: float = 96.0  ## left edge of the main menu column
+
 var _main_box: VBoxContainer = null
 var _setup: PanelContainer = null
 var _help: PanelContainer = null
@@ -64,14 +66,26 @@ var _opponents: OptionButton = null
 var _faction_blurb: Label = null
 var _faction_ids: Array[String] = []
 var _time: float = 0.0
+var _backdrop: MenuBackdrop = null
+var _shade: GradientTexture2D = null  ## dark on the left, clear on the right
+var _live: Label = null  ## says which match is playing in the background
 
 
 func _ready() -> void:
+	theme = UiTheme.theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# A match between two AIs plays out behind the menu.
-	var backdrop: MenuBackdrop = MenuBackdrop.new()
-	backdrop.name = "Backdrop"
-	add_child(backdrop)
+	_backdrop = MenuBackdrop.new()
+	_backdrop.name = "Backdrop"
+	add_child(_backdrop)
+	var fade: Gradient = Gradient.new()
+	fade.set_color(0, Color(0.02, 0.03, 0.045, 0.95))
+	fade.set_color(1, Color(0.02, 0.03, 0.045, 0.0))
+	fade.add_point(0.55, Color(0.02, 0.03, 0.045, 0.78))
+	_shade = GradientTexture2D.new()
+	_shade.gradient = fade
+	_shade.width = 256
+	_shade.height = 4
 	_build_main()
 	_build_setup()
 	_build_help()
@@ -89,57 +103,90 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	if _live != null and _backdrop != null and _live.text != _backdrop.caption:
+		_live.text = _backdrop.caption
 	queue_redraw()
 
 
-## Background: the live backdrop, dimmed, under slow expanding signal rings.
+## Background: the live match, darkened on the left where the menu sits (or
+## all over while a panel is open), with slow signal rings behind the title.
 func _draw() -> void:
 	var rect: Rect2 = get_viewport_rect()
-	draw_rect(rect, Color(0.02, 0.035, 0.05, 0.56))
-	var origin: Vector2 = Vector2(rect.size.x * 0.5, rect.size.y * 0.30)
-	for i: int in 7:
-		var t: float = fposmod(_time * 0.12 + float(i) / 7.0, 1.0)
-		var radius: float = lerpf(40.0, rect.size.x * 0.75, t)
-		var alpha: float = (1.0 - t) * 0.22
-		draw_arc(origin, radius, 0.0, TAU, 96, Color(0.25, 0.62, 1.0, alpha), 2.0)
-	# A faint chain of relay nodes along the bottom.
-	var y: float = rect.size.y * 0.86
-	var prev: Vector2 = Vector2(rect.size.x * 0.08, y)
-	for i: int in 9:
-		var p: Vector2 = Vector2(rect.size.x * (0.08 + 0.105 * float(i)), y + sin(float(i) * 1.7) * 26.0)
-		var lit: bool = fposmod(_time * 0.6 - float(i) * 0.25, 3.0) < 2.0
-		var col: Color = Color(0.25, 0.62, 1.0, 0.55) if lit else Color(0.5, 0.2, 0.15, 0.4)
-		if i > 0:
-			draw_line(prev, p, Color(col.r, col.g, col.b, col.a * 0.6), 2.0)
-		draw_circle(p, 6.0, col)
-		prev = p
+	if _main_box.visible:
+		draw_texture_rect(_shade, Rect2(Vector2.ZERO, Vector2(rect.size.x * 0.66, rect.size.y)), false)
+		draw_rect(Rect2(0.0, rect.size.y - 38.0, rect.size.x, 38.0), Color(0.02, 0.03, 0.045, 0.72))
+		draw_rect(Rect2(0.0, rect.size.y - 38.0, rect.size.x, 1.0), UiTheme.LINE_SOFT)
+		var origin: Vector2 = Vector2(MENU_LEFT + 8.0, 150.0)
+		for i: int in 5:
+			var t: float = fposmod(_time * 0.1 + float(i) / 5.0, 1.0)
+			draw_arc(origin, lerpf(30.0, 560.0, t), -0.9, 0.9, 64, Color(0.3, 0.7, 1.0, (1.0 - t) * 0.16), 2.0, true)
+	else:
+		draw_rect(rect, Color(0.02, 0.03, 0.045, 0.66))
 
 
+## A wide menu entry: left-aligned text behind an accent bar that widens and
+## lights up under the pointer.
 func _menu_button(text: String, action: Callable) -> Button:
 	var b: Button = Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(340.0, 54.0)
-	b.add_theme_font_size_override("font_size", 22)
+	b.custom_minimum_size = Vector2(380.0, 54.0)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.add_theme_font_size_override("font_size", 21)
+	b.add_theme_font_override("font", UiTheme.strong_font())
+	var idle: StyleBoxFlat = UiTheme.box(Color(0.06, 0.09, 0.125, 0.72), UiTheme.LINE_SOFT, 4, 0, 10.0)
+	idle.border_width_left = 3
+	idle.border_color = Color(UiTheme.ACCENT.r, UiTheme.ACCENT.g, UiTheme.ACCENT.b, 0.45)
+	idle.content_margin_left = 24.0
+	var hot: StyleBoxFlat = UiTheme.box(UiTheme.RAISED_HOT, UiTheme.ACCENT, 4, 0, 10.0)
+	hot.border_width_left = 7
+	hot.content_margin_left = 28.0
+	var down: StyleBoxFlat = UiTheme.box(UiTheme.PRESSED, UiTheme.ACCENT, 4, 0, 10.0)
+	down.border_width_left = 7
+	down.content_margin_left = 28.0
+	var off: StyleBoxFlat = UiTheme.box(Color(0.05, 0.065, 0.085, 0.6), UiTheme.FAINT, 4, 0, 10.0)
+	off.border_width_left = 3
+	off.content_margin_left = 24.0
+	b.add_theme_stylebox_override("normal", idle)
+	b.add_theme_stylebox_override("hover", hot)
+	b.add_theme_stylebox_override("pressed", down)
+	b.add_theme_stylebox_override("disabled", off)
+	b.add_theme_stylebox_override("focus", hot)
 	b.pressed.connect(action)
 	return b
 
 
 func _build_main() -> void:
-	var centre: CenterContainer = CenterContainer.new()
-	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(centre)
 	_main_box = VBoxContainer.new()
-	_main_box.add_theme_constant_override("separation", 14)
-	_main_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	centre.add_child(_main_box)
-	var title: Label = Hud.make_label("SIGNAL FRONT", 84, Color(0.55, 0.85, 1.0))
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_main_box.add_child(title)
-	var tag: Label = Hud.make_label("Every army runs on signal. Cut the chain and the front goes dark.", 20, Hud.DIM)
-	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_main_box.name = "Main"
+	_main_box.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	_main_box.offset_left = MENU_LEFT
+	_main_box.offset_right = MENU_LEFT + 560.0
+	_main_box.offset_top = 64.0
+	_main_box.offset_bottom = -9.0
+	_main_box.add_theme_constant_override("separation", 10)
+	add_child(_main_box)
+	_main_box.add_child(UiTheme.caption("REAL-TIME STRATEGY", UiTheme.ACCENT))
+	var logo: VBoxContainer = VBoxContainer.new()
+	logo.add_theme_constant_override("separation", -30)
+	_main_box.add_child(logo)
+	var word_one: Label = UiTheme.title("SIGNAL", 86, UiTheme.TEXT)
+	logo.add_child(word_one)
+	var word_two: Label = UiTheme.title("FRONT", 86, UiTheme.ACCENT)
+	logo.add_child(word_two)
+	for word: Label in [word_one, word_two]:
+		word.add_theme_constant_override("line_spacing", -18)
+		word.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.55))
+		word.add_theme_constant_override("shadow_offset_x", 3)
+		word.add_theme_constant_override("shadow_offset_y", 4)
+	var bar: ColorRect = UiTheme.rule(UiTheme.ACCENT, 3.0)
+	bar.custom_minimum_size = Vector2(150.0, 3.0)
+	bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_main_box.add_child(bar)
+	var tag: Label = UiTheme.label("Every army runs on signal.\nCut the chain and the front goes dark.", 19, UiTheme.DIM)
 	_main_box.add_child(tag)
 	var gap: Control = Control.new()
-	gap.custom_minimum_size = Vector2(0.0, 40.0)
+	gap.custom_minimum_size = Vector2(0.0, 26.0)
 	_main_box.add_child(gap)
 	var buttons: Array[Button] = [
 		_menu_button("Skirmish", open_skirmish),
@@ -150,10 +197,22 @@ func _build_main() -> void:
 		_menu_button("Quit", func() -> void: get_tree().quit()),
 	]
 	for b: Button in buttons:
-		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		_main_box.add_child(b)
 	# Loading is only offered when there is something to load.
 	buttons[1].disabled = not SimSave.has_save()
+	var push: Control = Control.new()
+	push.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_main_box.add_child(push)
+	_main_box.add_child(UiTheme.label("Built with Godot 4.7.2  ·  every model, map, shader and sound is generated in code", 13, UiTheme.FAINT))
+	# What the match in the background is.
+	_live = UiTheme.label("", 14, UiTheme.DIM)
+	_live.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	_live.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_live.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_live.offset_right = -22.0
+	_live.offset_bottom = -9.0
+	_live.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	add_child(_live)
 
 
 func _row(parent: VBoxContainer, caption: String, control: Control) -> void:
@@ -169,7 +228,7 @@ func _row(parent: VBoxContainer, caption: String, control: Control) -> void:
 
 func _build_setup() -> void:
 	_setup = PanelContainer.new()
-	_setup.add_theme_stylebox_override("panel", Hud.panel_style())
+	_setup.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.LINE, 22.0))
 	_setup.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_setup.custom_minimum_size = Vector2(560.0, 0.0)
 	_setup.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -178,7 +237,7 @@ func _build_setup() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
 	_setup.add_child(box)
-	box.add_child(Hud.make_label("SKIRMISH", 32, Color(0.55, 0.85, 1.0)))
+	box.add_child(UiTheme.title("SKIRMISH", 28))
 	box.add_child(Hud.make_label("Destroy every enemy headquarters. Starts are always symmetric.", 15, Hud.DIM))
 
 	_map = OptionButton.new()
@@ -254,6 +313,7 @@ func _build_setup() -> void:
 	buttons.add_child(back)
 	var start: Button = Button.new()
 	start.text = "Start Match"
+	start.theme_type_variation = "PrimaryButton"
 	start.custom_minimum_size = Vector2(180.0, 44.0)
 	start.add_theme_font_size_override("font_size", 20)
 	start.pressed.connect(start_skirmish)
@@ -263,7 +323,7 @@ func _build_setup() -> void:
 
 func _build_tutorials() -> void:
 	_tutorials = PanelContainer.new()
-	_tutorials.add_theme_stylebox_override("panel", Hud.panel_style())
+	_tutorials.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.LINE, 22.0))
 	_tutorials.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_tutorials.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_tutorials.grow_vertical = Control.GROW_DIRECTION_BOTH
@@ -271,12 +331,13 @@ func _build_tutorials() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	_tutorials.add_child(box)
-	box.add_child(Hud.make_label("TUTORIALS", 32, Color(0.55, 0.85, 1.0)))
+	box.add_child(UiTheme.title("TUTORIALS", 28))
 	box.add_child(Hud.make_label("Three short missions with the Aegis Directorate. Nothing can go wrong in them.", 15, Hud.DIM))
 	for id: String in SimTutorial.IDS:
 		var b: Button = Button.new()
 		b.text = "%s\n%s" % [SimTutorial.TITLES[id], SimTutorial.BLURBS[id]]
 		b.custom_minimum_size = Vector2(520.0, 64.0)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.add_theme_font_size_override("font_size", 17)
 		b.pressed.connect(start_tutorial.bind(id))
 		box.add_child(b)
@@ -296,7 +357,7 @@ func start_tutorial(tutorial_id: String) -> void:
 
 func _build_help() -> void:
 	_help = PanelContainer.new()
-	_help.add_theme_stylebox_override("panel", Hud.panel_style())
+	_help.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.LINE, 22.0))
 	_help.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_help.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_help.grow_vertical = Control.GROW_DIRECTION_BOTH

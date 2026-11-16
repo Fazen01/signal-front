@@ -11,6 +11,9 @@ var result_shown: bool = false
 
 
 func setup(scene: BattleScene) -> void:
+	# Set here as well as on the root window: themes do not pass down
+	# through a CanvasLayer.
+	theme = UiTheme.theme()
 	battle = scene
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -48,7 +51,7 @@ func _build_pause() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
 	_pause.add_child(box)
-	var title: Label = Hud.make_label("PAUSED", 30, Color(0.55, 0.85, 1.0))
+	var title: Label = UiTheme.title("PAUSED", 26)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	box.add_child(_button("Resume", func() -> void: battle.toggle_pause_menu()))

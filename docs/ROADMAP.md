@@ -135,6 +135,20 @@ only (`view/`): nothing here changes the simulation or the data.
 - [x] Minimap and coverage overlay colours retuned for the new ground
 - [x] Dust behind ground vehicles on the move
 
+## M16 — Interface (owner request, 16 November)
+
+The owner asked for the UI and main menu to look better. `ui/` only.
+
+- [x] One interface theme built in code (`UiTheme`): glass panels, buttons,
+      dropdowns, sliders, entry fields, tooltips, heading and value fonts
+- [x] Main menu: logo and menu in a column on the left, the live match in
+      full view on the right, a caption saying which factions are fighting
+- [x] HUD: top strip with drawn icons and a bandwidth meter; bottom bar in
+      three framed sections; command card buttons with a hotkey badge and
+      the cost in gold; Directives light up gold when ready
+- [x] Skirmish setup, pause, result, settings and tutorial panels share the
+      theme; the main action of a panel is a highlighted button
+
 ## Session log
 
 Newest first. One entry per session: date, what was finished, decisions made,
@@ -209,6 +223,23 @@ better graphics (units, buildings, map) and to carry on; that is M15 above.
   captures a column on the move.
 
 Status at 10:15 UTC: M15 is complete and pushed; `tools/check.sh` passes.
+
+**10:20 UTC — the owner asked for a better-looking UI and main menu (M16),
+then for more work on the map (M17).**
+
+- **Finding: a theme set on the root window does not reach controls under a
+  `CanvasLayer` or a plain `Node`.** The HUD lives under one, so it kept the
+  engine's default buttons. `UiTheme.theme()` is set on the root window *and*
+  on each top-level control (`Hud`, `MatchMenus`, `TutorialPanel`,
+  `SettingsPanel`, `MainMenu`).
+- **Decision: no font files.** Headings use the engine's built-in font,
+  emboldened and letter-spaced through `FontVariation`. A system font would
+  look different on every machine and could not be checked here.
+- **Decision: the bottom bar has a fixed height.** The selection text sits
+  in a clipped holder, so a long description can no longer stretch the bar
+  over the Directive bar (it did, once the themed buttons got taller).
+- The HUD's public methods and node names are unchanged; the smoke drivers
+  did not need touching. Icons are drawn (`HudIcon`), not images.
 Nothing is half-finished. What nobody has seen yet is all of this on a real
 GPU — the captures here are software-rendered.
 

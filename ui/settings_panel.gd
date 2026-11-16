@@ -6,12 +6,15 @@ signal closed
 
 
 func _ready() -> void:
+	# Set here as well as on the root window: themes do not pass down
+	# through a CanvasLayer.
+	theme = UiTheme.theme()
 	GameSettings.ensure_loaded()
 	add_theme_stylebox_override("panel", Hud.panel_style())
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
 	add_child(box)
-	box.add_child(Hud.make_label("SETTINGS", 28, Color(0.55, 0.85, 1.0)))
+	box.add_child(UiTheme.title("SETTINGS", 24))
 
 	box.add_child(Hud.make_label("Audio", 16, Hud.GOLD))
 	for bus: String in GameSettings.BUSES:
