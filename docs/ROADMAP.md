@@ -109,7 +109,7 @@ decision in the session log at the bottom.
 ## M14 — Finish
 
 - [x] Settings (video, audio, key hints), pause menu, save/load of a skirmish
-- [ ] Three scripted tutorial missions teaching economy, signal and Directives
+- [x] Three scripted tutorial missions teaching economy, signal and Directives
 - [ ] Windows export preset; final README
 
 ## Session log
@@ -307,7 +307,13 @@ Notes on this session's pushes:
   anti-aliasing) and hotkey hints; Save Game in the pause menu and Load
   Saved Game on the main menu (one slot, `user://skirmish.sav`).
 
-Half-done / next: M14 tutorials and the Windows export preset. Two M13
+- M14, second item: three tutorial missions (`sim/sim_tutorial.gd`) for the
+  economy, the Signal Grid and Directives, with an objective panel, a pulsing
+  ground marker, minimap pings and a mission-complete screen that leads to
+  the next mission. Tests complete each mission by issuing the commands its
+  objectives ask for; `check.sh` plays one through the real interface.
+
+Half-done / next: the Windows export preset and final README. Two M13
 items are open and need things this session did not have (a GPU, and a
 better lever on match length than income).
 
@@ -462,3 +468,13 @@ Fog decisions:
 - Godot 4 packed arrays are shared by reference: an early version of the
   snapshot shared the cooldown arrays with the live world and the two
   drifted apart. Everything is deep-copied in and out now.
+- Tutorials are simulation-side: a mission is a prepared world plus ordered
+  objectives, each a check on the simulation, so missions are testable with
+  no interface. The opponent is a non-AI player that only stands there and
+  defeat is switched off. Two flaws the tests caught and fixed: Haulers
+  salvaged the lesson's wreck before the player was asked to (it now appears
+  when that objective begins), and a relay objective sat inside enemy turret
+  range. Tutorials cannot be saved.
+- The test runner now fails any test during which an engine or script error
+  was raised (a `Logger` counts them). Before this a test that crashed
+  half-way was printed as ok and only `check.sh`'s grep caught it.

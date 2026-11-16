@@ -19,6 +19,10 @@ var controller: SelectionController = null
 var overlay: BattleOverlay = null
 var hud: Hud = null
 var menus: MatchMenus = null
+var tutorial_panel: TutorialPanel = null
+var _tutorial_marker: MeshInstance3D = null
+var _tutorial_index: int = -1
+var _tutorial_ping_in: float = 0.0
 var ui_layer: CanvasLayer = null
 
 # Directive targeting
@@ -109,6 +113,11 @@ func _ready() -> void:
 	menus.name = "Menus"
 	ui_layer.add_child(menus)
 	menus.setup(self)
+	if world.tutorial != null:
+		tutorial_panel = TutorialPanel.new()
+		tutorial_panel.name = "TutorialPanel"
+		ui_layer.add_child(tutorial_panel)
+		tutorial_panel.setup(world)
 	if OS.get_cmdline_user_args().has("--smoke"):
 		var smoke: SmokeDriver = SmokeDriver.new()
 		smoke.name = "Smoke"
@@ -293,6 +302,8 @@ func _process(delta: float) -> void:
 	_update_markers(delta)
 	_update_placement()
 	_update_targeting()
+	if world.tutorial != null:
+		_update_tutorial(delta)
 	if perf_enabled:
 		perf["sim"] = perf.get("sim", 0) + t1 - t0 - t_events
 		perf["events"] = perf.get("events", 0) + t_events
@@ -430,8 +441,43 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+# ---------------------------------------------------------------- tutorial
+
+## Points at the current objective (a gold ring on the ground and a ping on
+## the minimap) and shows the completion screen when the mission ends.
+func _update_tutorial(delta: float) -> void:
+	var t: SimTutorial = world.tutorial
+	var index: int = t.steps.size() if t.done else t.index
+	if index != _tutorial_index:
+		_tutorial_index = index
+		_tutorial_ping_in = 0.0
+		if _tutorial_marker != null:
+			_tutorial_marker.queue_free()
+			_tutorial_marker = null
+		var step: SimTutorial.Step = t.current()
+		if step != null and step.marker != Vector2.INF:
+			var at: Vector2 = world.map.clamp_to_map(step.marker)
+			_tutorial_marker = ModelFactory.ring(self, 3.4, 3.8, Vector3(at.x, world.map.height_at(at) + 0.35, at.y), ModelFactory.mat(Color(1.0, 0.82, 0.3), 1.3))
+			_tutorial_marker.name = "ObjectiveMarker"
+			_tutorial_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if index > 0:
+			audio.play_ui("ready")
+		if t.done:
+			menus.show_tutorial_complete(t.id)
+	if _tutorial_marker != null:
+		var pulse: float = 1.0 + 0.12 * sin(float(Time.get_ticks_msec()) * 0.005)
+		_tutorial_marker.scale = Vector3(pulse, 1.0, pulse)
+		_tutorial_ping_in -= delta
+		if _tutorial_ping_in <= 0.0:
+			_tutorial_ping_in = 3.0
+			hud.minimap.ping(world.tutorial.current().marker)
+
+
 ## Writes the match to the save slot (from the pause menu).
 func save_game() -> bool:
+	if world.tutorial != null:
+		hud.push_alert("Tutorial missions cannot be saved", Hud.RED)
+		return false
 	var ok: bool = SimSave.save_to_file(world, config)
 	hud.push_alert("Game saved" if ok else "Could not write the save file", Hud.CYAN if ok else Hud.RED)
 	return ok
@@ -455,6 +501,12 @@ func quit_to_menu() -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
 		game.to_menu()
+
+
+func start_tutorial(tutorial_id: String) -> void:
+	var game: GameState = get_node_or_null("/root/Game") as GameState
+	if game != null:
+		game.start_match(SimTutorial.config_for(tutorial_id))
 
 
 func play_again() -> void:

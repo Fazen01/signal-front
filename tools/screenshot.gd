@@ -30,6 +30,10 @@ func _ready() -> void:
 		print("BOOT FAILED: cannot load %s" % _scene_path)
 		get_tree().quit(1)
 		return
+	if _script_name.begins_with("tutorial_"):
+		var tgame: GameState = get_node_or_null("/root/Game") as GameState
+		if tgame != null:
+			tgame.pending_config = SimTutorial.config_for(_script_name.trim_prefix("tutorial_"))
 	if _script_name == "foundry" or _script_name == "nomad":
 		# Play as another faction for this capture.
 		var config: MatchConfig = MatchConfig.skirmish(1)
@@ -49,6 +53,10 @@ func _process(_delta: float) -> void:
 	var menu: MainMenu = _scene as MainMenu
 	if menu != null and _script_name == "setup" and _count == 3:
 		menu.open_skirmish()
+	if menu != null and _script_name == "tutorials" and _count == 3:
+		menu.call("_show", menu.get("_tutorials"))
+	if menu != null and _script_name == "settings" and _count == 3:
+		menu.open_settings()
 	if menu != null and _script_name == "help" and _count == 3:
 		menu.call("_show", menu.get("_help"))
 	if _count == _frames:

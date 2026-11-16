@@ -99,8 +99,35 @@ func _process(_delta: float) -> void:
 				battle.quit_to_menu()
 				_next(10)
 		9:
+			var menu: MainMenu = scene as MainMenu
+			if menu != null:
+				menu.start_tutorial("directives")
+				_next(10)
+		10:
+			# Play the Directives tutorial through its real objectives.
+			var battle: BattleScene = scene as BattleScene
+			if battle != null and battle.world != null and battle.world.tutorial != null:
+				_expect(battle.tutorial_panel != null, "the objective panel is shown")
+				_expect(not battle.save_game(), "tutorials refuse to save")
+				var w: SimWorld = battle.world
+				var squad_at: Vector2 = w.tutorial.steps[1].marker
+				for id: String in ["recon_sweep", "shell_barrage", "field_repair", "signal_surge"]:
+					w.push_command(SimCommand.unlock(SimTutorial.PLAYER, id))
+				w.push_command(SimCommand.directive(SimTutorial.PLAYER, "recon_sweep", squad_at))
+				w.push_command(SimCommand.directive(SimTutorial.PLAYER, "shell_barrage", squad_at))
+				w.push_command(SimCommand.directive(SimTutorial.PLAYER, "field_repair", w.tutorial.steps[3].marker))
+				w.push_command(SimCommand.directive(SimTutorial.PLAYER, "signal_surge", Vector2.ZERO))
+				_next(120)
+		11:
+			var battle: BattleScene = scene as BattleScene
+			if battle != null:
+				_expect(battle.world.tutorial.done, "the tutorial completes (objective %d)" % battle.world.tutorial.index)
+				_expect(battle.menus.result_shown, "the mission-complete screen is shown")
+				battle.quit_to_menu()
+				_next(10)
+		12:
 			if scene is MainMenu:
-				print("Flow smoke finished: menu -> skirmish -> match -> result -> menu -> load -> menu in %d frames" % _frames)
+				print("Flow smoke finished: menu -> skirmish -> match -> result -> menu -> load -> tutorial -> menu in %d frames" % _frames)
 				get_tree().quit(0)
 	if _frames > 3000:
 		print("BOOT FAILED: flow smoke stuck at stage %d" % _stage)

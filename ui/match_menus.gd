@@ -88,6 +88,37 @@ func set_pause_open(open: bool) -> void:
 		_settings.visible = false
 
 
+## The end of a tutorial mission: on to the next one, or back to the menu.
+func show_tutorial_complete(tutorial_id: String) -> void:
+	if result_shown:
+		return
+	result_shown = true
+	_pause.visible = false
+	_dim.visible = true
+	_result = _centre_panel()
+	_result.visible = true
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	_result.add_child(box)
+	var title: Label = Hud.make_label("MISSION COMPLETE", 44, Color(0.5, 1.0, 0.6))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+	var sub: Label = Hud.make_label(SimTutorial.TITLES.get(tutorial_id, ""), 18, Hud.DIM)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(sub)
+	var buttons: HBoxContainer = HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 12)
+	var next: int = SimTutorial.IDS.find(tutorial_id) + 1
+	if next > 0 and next < SimTutorial.IDS.size():
+		var next_id: String = SimTutorial.IDS[next]
+		buttons.add_child(_button("Next Mission", func() -> void: battle.start_tutorial(next_id)))
+	else:
+		buttons.add_child(_button("Play a Skirmish", func() -> void: battle.quit_to_menu()))
+	buttons.add_child(_button("Main Menu", func() -> void: battle.quit_to_menu()))
+	box.add_child(buttons)
+
+
 ## Shows the end-of-match summary for the local player.
 func show_result(world: SimWorld, local_player: int) -> void:
 	if result_shown:

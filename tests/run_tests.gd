@@ -5,7 +5,19 @@ extends SceneTree
 ## non-zero if anything failed.
 
 
+## Counts engine and script errors so a test that crashes half-way (GDScript
+## abandons the function and carries on) is reported as failed, not as ok.
+class ErrorCounter:
+	extends Logger
+	var count: int = 0
+
+	func _log_error(_function: String, _file: String, _line: int, _code: String, _rationale: String, _editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		count += 1
+
+
 func _init() -> void:
+	var errors: ErrorCounter = ErrorCounter.new()
+	OS.add_logger(errors)
 	var filter: String = ""
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	if args.size() > 0:
@@ -47,8 +59,11 @@ func _init() -> void:
 				break
 			tc.current_test = "%s.%s" % [f.trim_suffix(".gd"), mname]
 			var t0: int = Time.get_ticks_msec()
+			var errors_before: int = errors.count
 			tc.call(mname)
 			var dt: int = Time.get_ticks_msec() - t0
+			if errors.count > errors_before:
+				tc.failures.append("%s: %d error(s) were raised while it ran" % [tc.current_test, errors.count - errors_before])
 			total_tests += 1
 			total_checks += tc.checks
 			var status: String = "ok"

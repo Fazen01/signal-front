@@ -44,6 +44,7 @@ var blackouts: Array[Vector4] = []  ## x, z, radius, player id of the caster
 var blackout_until: PackedInt32Array = PackedInt32Array()
 
 var ais: Array[SimAI] = []
+var tutorial: SimTutorial = null  ## the scripted mission being played, if any
 
 var victory_enabled: bool = true  ## tests without bases switch this off
 var path_budget: int = 0  ## new move orders that may still be pathed this tick
@@ -381,6 +382,8 @@ func tick() -> void:
 		t = _mark(t, "combat")
 		if victory_enabled and tick_count % 10 == 0:
 			_check_victory()
+		if tutorial != null and tick_count % 5 == 0:
+			tutorial.update(self)
 
 	_flush_dead()
 	tick_count += 1

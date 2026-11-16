@@ -49,6 +49,7 @@ var _main_box: VBoxContainer = null
 var _setup: PanelContainer = null
 var _help: PanelContainer = null
 var _settings: SettingsPanel = null
+var _tutorials: PanelContainer = null
 var _seed: SpinBox = null
 var _faction: OptionButton = null
 var _level: OptionButton = null
@@ -68,6 +69,7 @@ func _ready() -> void:
 	_build_main()
 	_build_setup()
 	_build_help()
+	_build_tutorials()
 	GameSettings.ensure_loaded()
 	_settings = SettingsPanel.new()
 	_settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -136,6 +138,7 @@ func _build_main() -> void:
 	var buttons: Array[Button] = [
 		_menu_button("Skirmish", open_skirmish),
 		_menu_button("Load Saved Game", load_saved),
+		_menu_button("Tutorials", func() -> void: _show(_tutorials)),
 		_menu_button("How to Play", func() -> void: _show(_help)),
 		_menu_button("Settings", open_settings),
 		_menu_button("Quit", func() -> void: get_tree().quit()),
@@ -249,6 +252,39 @@ func _build_setup() -> void:
 	box.add_child(buttons)
 
 
+func _build_tutorials() -> void:
+	_tutorials = PanelContainer.new()
+	_tutorials.add_theme_stylebox_override("panel", Hud.panel_style())
+	_tutorials.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_tutorials.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_tutorials.grow_vertical = Control.GROW_DIRECTION_BOTH
+	add_child(_tutorials)
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	_tutorials.add_child(box)
+	box.add_child(Hud.make_label("TUTORIALS", 32, Color(0.55, 0.85, 1.0)))
+	box.add_child(Hud.make_label("Three short missions with the Aegis Directorate. Nothing can go wrong in them.", 15, Hud.DIM))
+	for id: String in SimTutorial.IDS:
+		var b: Button = Button.new()
+		b.text = "%s\n%s" % [SimTutorial.TITLES[id], SimTutorial.BLURBS[id]]
+		b.custom_minimum_size = Vector2(520.0, 64.0)
+		b.add_theme_font_size_override("font_size", 17)
+		b.pressed.connect(start_tutorial.bind(id))
+		box.add_child(b)
+	var back: Button = Button.new()
+	back.text = "Back"
+	back.custom_minimum_size = Vector2(120.0, 44.0)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_END
+	back.pressed.connect(func() -> void: _show(_main_box))
+	box.add_child(back)
+
+
+func start_tutorial(tutorial_id: String) -> void:
+	var game: GameState = get_node_or_null("/root/Game") as GameState
+	if game != null:
+		game.start_match(SimTutorial.config_for(tutorial_id))
+
+
 func _build_help() -> void:
 	_help = PanelContainer.new()
 	_help.add_theme_stylebox_override("panel", Hud.panel_style())
@@ -308,6 +344,7 @@ func _show(which: Control) -> void:
 	_setup.visible = which == _setup
 	_help.visible = which == _help
 	_settings.visible = which == _settings
+	_tutorials.visible = which == _tutorials
 
 
 func load_saved() -> void:
