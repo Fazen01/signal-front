@@ -9,8 +9,11 @@ const BIG_RADIUS: float = 4.5  ## padding so large buildings are found by centre
 
 static func update(w: SimWorld) -> void:
 	var n: int = w.entities.size()
-	for i: int in n:
-		var e: SimEntity = w.entities[i]
+	# Entities fire in creation order one tick and in reverse the next, so
+	# the player whose units were created first does not always shoot first.
+	var reverse: bool = w.tick_count % 2 == 1
+	for k: int in n:
+		var e: SimEntity = w.entities[n - 1 - k] if reverse else w.entities[k]
 		if not e.alive or e.def == null or e.def.weapons.is_empty():
 			continue
 		if e.kind == SimEntity.Kind.BUILDING and not e.constructed:
@@ -53,32 +56,15 @@ static func can_hit(wd: WeaponDef, t: SimEntity) -> bool:
 
 
 ## Best damage multiplier any of e's weapons has against t (0 = cannot hurt it).
-static func best_multiplier(w: SimWorld, e: SimEntity, t: SimEntity) -> float:
-	var best: float = 0.0
+static func best_multiplier(_w: SimWorld, e: SimEntity, t: SimEntity) -> float:
 	if t.def == null:
-		return best
-	for wd: WeaponDef in e.def.weapons:
-		if can_hit(wd, t):
-			best = maxf(best, w.data.damage_multiplier(wd.damage_type, t.def.armor))
-	return best
+		return 0.0
+	return e.def.vs_armor[t.def.armor]
 
 
 ## Longest effective range among e's weapons that can hurt t.
 static func reach_against(w: SimWorld, e: SimEntity, t: SimEntity) -> float:
-	var best: float = 0.0
-	for wd: WeaponDef in e.def.weapons:
-		if can_hit(wd, t) and w.data.damage_multiplier(wd.damage_type, t.def.armor) > 0.0:
-			best = maxf(best, wd.max_range)
-	return best * range_mult(w, e)
-
-
-## Smallest minimum range among e's weapons that can hit t.
-static func _shortest_min_range(e: SimEntity, t: SimEntity) -> float:
-	var best: float = INF
-	for wd: WeaponDef in e.def.weapons:
-		if can_hit(wd, t):
-			best = minf(best, wd.min_range)
-	return 0.0 if best == INF else best
+	return e.def.reach_vs[t.def.armor] * range_mult(w, e)
 
 
 # --------------------------------------------------------------- per unit
@@ -92,11 +78,12 @@ static func _update_combatant(w: SimWorld, e: SimEntity) -> void:
 		e.hp = minf(e.max_hp, e.hp + e.max_hp * w.data.rank_self_repair * SimWorld.DT)
 
 	if w.tick_count >= e.scan_tick:
-		e.scan_tick = w.tick_count + SCAN_INTERVAL
 		var o: SimOrder = e.current_order()
 		var forced: bool = o != null and o.type == SimOrder.Type.ATTACK
 		if not forced:
 			e.target_id = _acquire(w, e)
+		# With a target in hand there is no hurry to look for another.
+		e.scan_tick = w.tick_count + (SCAN_INTERVAL + 3 if e.target_id != 0 else SCAN_INTERVAL)
 
 	var t: SimEntity = w.get_entity(e.target_id)
 	if t == null:
@@ -143,27 +130,58 @@ static func _acquire(w: SimWorld, e: SimEntity) -> int:
 			radius = maxf(reach, sight_range(w, e))
 	var best_id: int = 0
 	var best_score: float = INF
-	for n: SimEntity in w.query_radius(e.pos, radius + BIG_RADIUS):
-		if n.def == null or not w.are_enemies(e.owner, n.owner):
-			continue
-		var d: float = e.pos.distance_to(n.pos) - n.radius
-		if d > radius:
-			continue
-		if not SimVision.can_see(w, e.owner, n):
-			continue
-		var mult: float = best_multiplier(w, e, n)
-		if mult <= 0.01:
-			continue
-		if d < _shortest_min_range(e, n):
-			continue  # too close for anything we carry
-		var score: float = (maxf(d, 0.0) + 2.0) / mult
-		if not n.def.is_armed():
-			score *= 1.6
-		if n.id == e.target_id:
-			score *= 0.75
-		if score < best_score:
-			best_score = score
-			best_id = n.id
+	# This runs for every armed entity several times a second, so it walks the
+	# spatial buckets directly and rejects candidates as cheaply as it can.
+	var my_owner: int = e.owner
+	var my_team: int = w.players[my_owner].team
+	var vs: PackedFloat32Array = e.def.vs_armor
+	var min_vs: PackedFloat32Array = e.def.min_range_vs
+	var seen: PackedByteArray = w.visible[my_owner]
+	var cells_w: int = w.map.w
+	var cells_h: int = w.map.h
+	var px: float = e.pos.x
+	var py: float = e.pos.y
+	var pad: float = radius + BIG_RADIUS
+	var x0: int = clampi(int((px - pad) / SimWorld.BUCKET), 0, w.bucket_w - 1)
+	var x1: int = clampi(int((px + pad) / SimWorld.BUCKET), 0, w.bucket_w - 1)
+	var y0: int = clampi(int((py - pad) / SimWorld.BUCKET), 0, w.bucket_h - 1)
+	var y1: int = clampi(int((py + pad) / SimWorld.BUCKET), 0, w.bucket_h - 1)
+	for by: int in range(y0, y1 + 1):
+		for bx: int in range(x0, x1 + 1):
+			var bucket: Array = w.buckets[by * w.bucket_w + bx]
+			for n: SimEntity in bucket:
+				if n.owner < 0 or n.owner == my_owner or not n.alive or n.def == null:
+					continue
+				if w.players[n.owner].team == my_team:
+					continue
+				var mult: float = vs[n.def.armor]
+				if mult <= 0.01:
+					continue
+				var dx: float = n.pos.x - px
+				var dy: float = n.pos.y - py
+				var limit: float = radius + n.radius
+				var d2: float = dx * dx + dy * dy
+				if d2 > limit * limit:
+					continue
+				var d: float = sqrt(d2) - n.radius
+				if d < min_vs[n.def.armor]:
+					continue  # too close for anything we carry
+				# Fog of war: the cell must be visible, and stealth is checked
+				# only for the few things that can have it.
+				var cx: int = int(n.pos.x / SimMap.CELL)
+				var cy: int = int(n.pos.y / SimMap.CELL)
+				if cx < 0 or cy < 0 or cx >= cells_w or cy >= cells_h or seen[cy * cells_w + cx] == 0:
+					continue
+				if (n.def.stealth or w.players[n.owner].faction.forest_cloak) and not SimVision.can_see(w, my_owner, n):
+					continue
+				var score: float = (maxf(d, 0.0) + 2.0) / mult
+				if n.def.weapons.is_empty():
+					score *= 1.6
+				if n.id == e.target_id:
+					score *= 0.75
+				if score < best_score:
+					best_score = score
+					best_id = n.id
 	return best_id
 
 

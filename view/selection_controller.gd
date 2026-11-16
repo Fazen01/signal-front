@@ -16,6 +16,7 @@ var world: SimWorld = null
 var cam: RtsCamera = null
 var player: int = 0
 var selected: Array[int] = []
+var selected_set: Dictionary[int, bool] = {}  ## the same ids, for fast lookups
 var groups: Array[PackedInt32Array] = []
 var mode: int = Mode.NORMAL
 var dragging: bool = false
@@ -66,6 +67,9 @@ func own_unit_ids() -> PackedInt32Array:
 
 func set_selection(ids: Array[int]) -> void:
 	selected = ids
+	selected_set.clear()
+	for id: int in ids:
+		selected_set[id] = true
 	selection_changed.emit()
 
 

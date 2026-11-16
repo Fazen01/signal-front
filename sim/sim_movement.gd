@@ -37,7 +37,9 @@ static func update(w: SimWorld) -> void:
 	for i: int in n:
 		var e: SimEntity = w.entities[i]
 		if e.alive and e.kind == SimEntity.Kind.UNIT:
-			_separate(w, e)
+			# Units standing still only need pushing apart every other tick.
+			if e.moving or (w.tick_count + e.id) % 2 == 0:
+				_separate(w, e)
 
 
 static func _advance(w: SimWorld, e: SimEntity) -> void:

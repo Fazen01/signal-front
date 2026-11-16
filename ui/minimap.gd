@@ -12,6 +12,8 @@ var _version: int = -1
 var _signal_version: int = -1
 var _pings: Array[Vector3] = []  ## x, z, age
 var _dragging: bool = false
+var _redraw_in: float = 0.0
+var _palette: PackedByteArray = PackedByteArray()  ## rgb per (terrain, covered, visible)
 
 
 func setup(scene: BattleScene) -> void:
@@ -22,7 +24,27 @@ func setup(scene: BattleScene) -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var map: SimMap = world.map
 	_texture = ImageTexture.create_from_image(Image.create(map.w, map.h, false, Image.FORMAT_RGBA8))
+	_build_palette()
 	_refresh_texture()
+
+
+## Every colour the map can show, worked out once: 4 terrains x covered or
+## not x visible or only explored. The per-cell refresh is then byte copies.
+func _build_palette() -> void:
+	var team: Color = world.players[player].color
+	_palette.resize(4 * 2 * 2 * 3)
+	for t: int in 4:
+		for covered: int in 2:
+			for vis: int in 2:
+				var c: Color = _terrain_color(t)
+				if covered == 1:
+					c = c.lerp(team, 0.3)
+				if vis == 0:
+					c = c.darkened(0.5)
+				var o: int = ((t * 2 + covered) * 2 + vis) * 3
+				_palette[o] = int(c.r * 255.0)
+				_palette[o + 1] = int(c.g * 255.0)
+				_palette[o + 2] = int(c.b * 255.0)
 
 
 ## Flash a ring at a world position (alerts, attacks).
@@ -43,7 +65,11 @@ func _process(delta: float) -> void:
 		if p.z + delta < 3.0:
 			kept.append(Vector3(p.x, p.y, p.z + delta))
 	_pings = kept
-	queue_redraw()
+	# Twenty redraws a second is plenty for a map this small.
+	_redraw_in -= delta
+	if _redraw_in <= 0.0:
+		_redraw_in = 0.05
+		queue_redraw()
 
 
 func _terrain_color(t: int) -> Color:
@@ -65,22 +91,21 @@ func _refresh_texture() -> void:
 	var vis: PackedByteArray = world.visible[player]
 	var seen: PackedByteArray = world.explored[player]
 	var cover: PackedByteArray = world.coverage[player]
-	var team: Color = world.players[player].color
 	var bytes: PackedByteArray = PackedByteArray()
 	bytes.resize(map.w * map.h * 4)
 	var n: int = map.w * map.h
+	var terrain: PackedByteArray = map.terrain
 	for i: int in n:
-		var c: Color = Color(0.02, 0.03, 0.04)
-		if seen[i] != 0:
-			c = _terrain_color(map.terrain[i])
-			if cover[i] != 0:
-				c = c.lerp(team, 0.3)
-			if vis[i] == 0:
-				c = c.darkened(0.5)
 		var o: int = i * 4
-		bytes[o] = int(c.r * 255.0)
-		bytes[o + 1] = int(c.g * 255.0)
-		bytes[o + 2] = int(c.b * 255.0)
+		if seen[i] == 0:
+			bytes[o] = 5
+			bytes[o + 1] = 8
+			bytes[o + 2] = 10
+		else:
+			var k: int = ((terrain[i] * 2 + (1 if cover[i] != 0 else 0)) * 2 + (1 if vis[i] != 0 else 0)) * 3
+			bytes[o] = _palette[k]
+			bytes[o + 1] = _palette[k + 1]
+			bytes[o + 2] = _palette[k + 2]
 		bytes[o + 3] = 255
 	_texture.update(Image.create_from_data(map.w, map.h, false, Image.FORMAT_RGBA8, bytes))
 

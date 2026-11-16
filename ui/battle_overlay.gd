@@ -34,7 +34,7 @@ func _draw() -> void:
 				draw_rect(Rect2(c2.x - 30.0, c2.y - 3.0, 60.0 * frac_c, 6.0), Color(0.9, 0.9, 1.0))
 		if not e.alive or e.def == null or not battle.world_view.is_shown(e.id):
 			continue
-		var is_selected: bool = ctl.selected.has(e.id)
+		var is_selected: bool = ctl.selected_set.has(e.id)
 		var show_bar: bool = is_selected or e.hp < e.max_hp - 0.5 or not e.constructed
 		var dark: bool = e.owner >= 0 and not e.linked and e.constructed
 		if not show_bar and not dark and e.rank == 0:

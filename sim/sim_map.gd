@@ -178,7 +178,7 @@ func line_clear(a: Vector2, b: Vector2, avoid_forest: bool = false) -> bool:
 	var dist: float = d.length()
 	if dist < 0.001:
 		return is_passable(a)
-	var steps: int = int(ceilf(dist / 0.5))
+	var steps: int = int(ceilf(dist / 0.9))
 	var dir: Vector2 = d / dist
 	var side: Vector2 = Vector2(-dir.y, dir.x) * 0.55
 	var forest_ok: bool = not avoid_forest
@@ -221,13 +221,16 @@ func find_path(a: Vector2, b: Vector2, vehicle: bool) -> PackedVector2Array:
 		anchor = raw[0]
 	var anchor_start: Vector2 = anchor
 	while i < raw.size():
+		# Look ahead in shrinking strides (8, 4, 2, 1 waypoints) rather than
+		# testing every candidate: a few line checks per kept waypoint.
 		var far: int = i
-		var j: int = mini(raw.size() - 1, i + 12)
-		while j > i:
-			if line_clear(anchor, raw[j], vehicle):
+		var stride: int = 8
+		while stride >= 1:
+			var j: int = mini(raw.size() - 1, i + stride)
+			if j > far and line_clear(anchor, raw[j], vehicle):
 				far = j
 				break
-			j -= 1
+			stride /= 2
 		out.append(raw[far])
 		anchor = raw[far]
 		i = far + 1

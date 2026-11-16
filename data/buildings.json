@@ -95,14 +95,14 @@
 	},
 	"crawler_factory": {
 		"name": "Crawler (deployed)", "desc": "A deployed Crawler. Assembles vehicles; pack it up to move the factory.",
-		"faction": "foundry", "tier": 2, "cost": 420, "build_time": 22.0,
+		"faction": "foundry", "tier": 2, "cost": 380, "build_time": 22.0,
 		"hp": 950, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"produces": ["scow", "ratchet", "tusk", "harrow", "anvil", "mauler"], "packs_to": "crawler",
 		"model": "crawler_factory", "buildable": false
 	},
 	"bastion": {
 		"name": "Bastion", "desc": "Heavy gun emplacement. Shells ground targets.",
-		"faction": "foundry", "tier": 2, "cost": 220, "build_time": 15.0,
+		"faction": "foundry", "tier": 2, "cost": 190, "build_time": 15.0,
 		"hp": 1100, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
 		"weapons": ["bastion_gun"], "turret": true, "model": "bastion",
 		"hotkey": "T", "requires": ["muster_hall"]
@@ -141,7 +141,7 @@
 		"name": "Beacon", "desc": "A deployed Beacon Rig. Projects signal and adds bandwidth; pack it up to move it.",
 		"faction": "nomad", "tier": 1, "cost": 140, "build_time": 10.0,
 		"hp": 450, "armor": "structure", "footprint": [1, 1], "sight": 10.0,
-		"signal_radius": 15.0, "bandwidth_provided": 8, "packs_to": "beacon_rig",
+		"signal_radius": 15.0, "bandwidth_provided": 10, "packs_to": "beacon_rig",
 		"model": "beacon", "buildable": false
 	},
 	"cache": {
@@ -158,7 +158,7 @@
 	},
 	"chop_shop": {
 		"name": "Chop Shop", "desc": "Builds the Circuit's vehicles.",
-		"faction": "nomad", "tier": 2, "cost": 340, "build_time": 22.0,
+		"faction": "nomad", "tier": 2, "cost": 300, "build_time": 22.0,
 		"hp": 1100, "armor": "structure", "footprint": [3, 3], "sight": 8.0,
 		"produces": ["skiff", "dart", "sidewinder", "gnat", "prowler", "jammer_buggy", "beacon_rig"],
 		"model": "chop_shop", "hotkey": "V", "requires": ["camp"]
@@ -166,12 +166,12 @@
 	"snare_turret": {
 		"name": "Snare Turret", "desc": "Light gun that fires at ground and air alike.",
 		"faction": "nomad", "tier": 2, "cost": 140, "build_time": 10.0,
-		"hp": 450, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
+		"hp": 550, "armor": "structure", "footprint": [1, 1], "sight": 12.0,
 		"weapons": ["snare_gun"], "turret": true, "model": "snare_turret",
 		"hotkey": "T", "requires": ["camp"]
 	},
 	"signal_loom": {
-		"name": "Signal Loom", "desc": "Tier 3: unlocks the Prowler. Directives recharge 25% faster.",
+		"name": "Signal Loom", "desc": "Tier 3: Directives recharge 25% faster.",
 		"faction": "nomad", "tier": 3, "cost": 420, "build_time": 26.0,
 		"hp": 1000, "armor": "structure", "footprint": [3, 3], "sight": 9.0,
 		"directive_cooldown_mult": 0.75, "model": "signal_loom",

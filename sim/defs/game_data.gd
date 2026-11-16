@@ -89,6 +89,7 @@ func load_all() -> bool:
 	_load_factions(_read_json("res://data/factions.json"))
 	_load_directives(_read_json("res://data/directives.json"))
 	_validate()
+	_precompute_matchups()
 	for e: String in errors:
 		push_error("GameData: " + e)
 	return errors.is_empty()
@@ -112,6 +113,33 @@ func directive(id: String) -> DirectiveDef:
 
 func damage_multiplier(damage_type: int, armor: int) -> float:
 	return damage_table[damage_type][armor]
+
+
+## For every entity and armor class: the best damage multiplier, longest
+## range and shortest minimum range among the weapons that can hit that class.
+## Aircraft are exactly the entities with the "air" armor class.
+func _precompute_matchups() -> void:
+	var air_class: int = armor_classes.find("air")
+	for e: EntityDef in entities.values():
+		if e.is_air() != (e.armor == air_class):
+			errors.append("entity %s: aircraft must use the air armor class, and only aircraft" % e.id)
+		e.vs_armor.resize(armor_classes.size())
+		e.reach_vs.resize(armor_classes.size())
+		e.min_range_vs.resize(armor_classes.size())
+		for a: int in armor_classes.size():
+			var best: float = 0.0
+			var reach: float = 0.0
+			var closest: float = INF
+			for wd: WeaponDef in e.weapons:
+				if (wd.hits_air if a == air_class else wd.hits_ground):
+					var mult: float = damage_table[wd.damage_type][a] if wd.damage_type < damage_table.size() and a < damage_table[wd.damage_type].size() else 0.0
+					best = maxf(best, mult)
+					closest = minf(closest, wd.min_range)
+					if mult > 0.0:
+						reach = maxf(reach, wd.max_range)
+			e.vs_armor[a] = best
+			e.reach_vs[a] = reach
+			e.min_range_vs[a] = 0.0 if closest == INF else closest
 
 
 func _read_json(path: String) -> Dictionary:

@@ -7,6 +7,7 @@ extends RefCounted
 const TICK_RATE: int = 20
 const DT: float = 1.0 / 20.0
 const BUCKET: float = 4.0
+const PATHS_PER_TICK: int = 24  ## spreads a big group's pathfinding over a few ticks
 
 var data: GameData = null
 var map: SimMap = null
@@ -45,6 +46,9 @@ var blackout_until: PackedInt32Array = PackedInt32Array()
 var ais: Array[SimAI] = []
 
 var victory_enabled: bool = true  ## tests without bases switch this off
+var path_budget: int = 0  ## new move orders that may still be pathed this tick
+var profiling: bool = false  ## collect per-stage tick timings in `profile`
+var profile: Dictionary[String, int] = {}  ## stage -> microseconds
 var game_over: bool = false
 var winner: int = -1  ## player id, -1 = nobody (yet)
 
@@ -344,30 +348,53 @@ func tick() -> void:
 		e.prev_pos = e.pos
 		e.prev_facing = e.facing
 		e.prev_aim = e.aim
+	var t: int = _mark(0, "")
 	_rebuild_buckets()
 	SimSignal.update(self)
+	t = _mark(t, "signal")
 	SimVision.update(self)
+	t = _mark(t, "vision")
 
 	var pending: Array[SimCommand] = commands
 	commands = []
 	for cmd: SimCommand in pending:
 		SimOrders.apply_command(self, cmd)
+	t = _mark(t, "commands")
 
+	path_budget = PATHS_PER_TICK
 	if not game_over:
-		for ai: SimAI in ais:
-			ai.update(self)
+		# The AIs take turns going first, for the same reason.
+		var ai_count: int = ais.size()
+		for k: int in ai_count:
+			ais[(k + tick_count) % ai_count].update(self)
+		t = _mark(t, "ai")
 		for e: SimEntity in entities:
 			if e.alive and e.kind == SimEntity.Kind.UNIT:
 				SimOrders.update_unit(self, e)
+		t = _mark(t, "orders")
 		SimEconomy.update(self)
 		SimDirectives.update(self)
+		t = _mark(t, "economy")
 		SimMovement.update(self)
+		t = _mark(t, "movement")
 		SimCombat.update(self)
+		t = _mark(t, "combat")
 		if victory_enabled and tick_count % 10 == 0:
 			_check_victory()
 
 	_flush_dead()
 	tick_count += 1
+
+
+## Stage timing for tools/perf_bench.gd: adds the microseconds since `since`
+## to profile[stage] when profiling is on. Returns the current time.
+func _mark(since: int, stage: String) -> int:
+	if not profiling:
+		return 0
+	var now: int = Time.get_ticks_usec()
+	if stage != "":
+		profile[stage] = profile.get(stage, 0) + now - since
+	return now
 
 
 # ---------------------------------------------------------------- victory

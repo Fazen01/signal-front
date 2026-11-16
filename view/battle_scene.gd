@@ -35,6 +35,8 @@ var ghost_ok: bool = false
 var _ghost_shown_ok: int = -1
 
 var _accum: float = 0.0
+var perf_enabled: bool = false  ## tools/frame_bench.gd: time the stages of _process
+var perf: Dictionary[String, int] = {}  ## stage -> microseconds, plus "frames"
 var _markers: Array[MeshInstance3D] = []
 var _marker_age: Array[float] = []
 
@@ -264,6 +266,8 @@ func _build_environment() -> void:
 func _process(delta: float) -> void:
 	if world == null:
 		return
+	var t0: int = Time.get_ticks_usec()
+	var t_events: int = 0
 	if not paused:
 		_accum += delta * time_scale
 		var steps: int = 0
@@ -271,18 +275,27 @@ func _process(delta: float) -> void:
 			world.tick()
 			_accum -= SimWorld.DT
 			steps += 1
+			var e0: int = Time.get_ticks_usec()
 			for ev: SimEvent in world.events:
 				_handle_event(ev)
 			world.events.clear()
+			t_events += Time.get_ticks_usec() - e0
 		if steps >= 10:
 			_accum = 0.0  # too far behind: drop the backlog rather than spiral
+	var t1: int = Time.get_ticks_usec()
 	controller.prune()
 	audio.listener = cam.focus
 	cam.wasd_free = controller.own_unit_ids().is_empty()
 	world_view.sync(clampf(_accum / SimWorld.DT, 0.0, 1.0))
+	var t2: int = Time.get_ticks_usec()
 	_update_markers(delta)
 	_update_placement()
 	_update_targeting()
+	if perf_enabled:
+		perf["sim"] = perf.get("sim", 0) + t1 - t0 - t_events
+		perf["events"] = perf.get("events", 0) + t_events
+		perf["sync"] = perf.get("sync", 0) + t2 - t1
+		perf["frames"] = perf.get("frames", 0) + 1
 
 
 func _handle_event(ev: SimEvent) -> void:
@@ -326,7 +339,7 @@ func _handle_event(ev: SimEvent) -> void:
 
 func _on_selection_changed() -> void:
 	for id: int in world_view.views.keys():
-		world_view.views[id].set_selected(controller.selected.has(id))
+		world_view.views[id].set_selected(controller.selected_set.has(id))
 	if placing != null and _selected_builders(placing.id).is_empty():
 		cancel_placement()
 	if hud != null:

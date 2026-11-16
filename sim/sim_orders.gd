@@ -190,6 +190,9 @@ static func update_unit(w: SimWorld, e: SimEntity) -> void:
 	match o.type:
 		SimOrder.Type.MOVE:
 			if not o.started:
+				if w.path_budget <= 0:
+					return  # the pathfinder is busy this tick; go on the next
+				w.path_budget -= 1
 				o.started = true
 				SimMovement.start_move(w, e, o.pos)
 				if not e.moving:
@@ -202,6 +205,9 @@ static func update_unit(w: SimWorld, e: SimEntity) -> void:
 				engage(w, e, seen)
 				o.started = false  # path again once the fight is over
 			elif not o.started:
+				if w.path_budget <= 0:
+					return
+				w.path_budget -= 1
 				o.started = true
 				SimMovement.start_move(w, e, o.pos)
 				if not e.moving:

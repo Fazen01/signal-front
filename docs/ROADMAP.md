@@ -97,9 +97,14 @@ decision in the session log at the bottom.
 
 ## M13 — Balance and performance
 
-- [ ] Batch AI-vs-AI runs across factions; tune costs and stats toward even win rates
-- [ ] AI difficulty levels
-- [ ] Profile and hold 60 fps with 300 units
+- [x] Batch AI-vs-AI runs across factions; tune costs and stats toward even win rates
+- [x] AI difficulty levels
+- [x] Profile the simulation and the view with 300 units and optimise the hot
+      spots (`tools/perf_bench.gd`, `tools/frame_bench.tscn`)
+- [ ] Confirm 60 fps with 300 units on real hardware (this needs a GPU: the
+      sessions only have software rendering, so the draw cost is unmeasured)
+- [ ] Bring 1v1 match length up to the 15–25 minute target (AI-vs-AI matches
+      average about 9 minutes after tuning)
 
 ## M14 — Finish
 
@@ -293,7 +298,14 @@ Notes on this session's pushes:
   saved to `user://settings.cfg`; order acknowledgement and selection blips,
   hit sparks, alert sounds and minimap pings.
 
-Half-done / next: M13 balance and performance.
+- M13 Balance and performance (three of five items; two were split out and
+  are still open, see the roadmap): `tools/balance_batch.gd` plays every
+  ordered faction pairing over a list of seeds; four tuning passes;
+  difficulty levels measured; simulation and view profiled and optimised.
+
+Half-done / next: the two open M13 items need things this session did not
+have (a GPU, and a decision on economy pace). After them comes M14: settings
+beyond volume, save/load, tutorials, Windows export preset.
 
 Fog decisions:
 - "Shared vision through coverage" is implemented as: everything inside your
@@ -394,3 +406,39 @@ Fog decisions:
   ear; every sound is a few lines in `view/sound_bank.gd`.
 - Particle emitters are capped at 56 live bursts; beyond that new bursts are
   skipped rather than queued.
+- Balance, measured with `tools/balance_batch.gd` (Normal vs Normal, six
+  seeds per ordered pairing, 24 games per faction against the other two):
+  - Before tuning: Aegis beat Foundry 11-1 and Nomad 7-4; Foundry beat Nomad
+    10-2; the first seat won the Aegis mirror 5-1.
+  - After four passes, on seeds 7-12 that the tuning had not seen: Aegis
+    58%, Foundry 54%, Nomad 38% (Aegis-Foundry 7-5, Aegis-Nomad 7-5,
+    Foundry-Nomad 8-4); every mirror split 3-3. With 24 games each the noise
+    is roughly +/-10 points, so only the Nomad figure is clearly off.
+  - What changed: units now fire in alternating order each tick and the AIs
+    alternate who thinks first (this removed the first-seat bias); Trooper
+    60 -> 55; Lance Missile 40 -> 44; Crawler 420 -> 380 and 22 s -> 18 s;
+    Tusk hp 620 -> 580; Bastion 220 -> 190; Prowler is tier 2, cheaper (280)
+    and armor-piercing; Sidewinder cheaper, tougher, hits harder; Dart and
+    Drifter tougher; Beacon +10 bandwidth; Snare Turret tougher; Chop Shop
+    340 -> 300.
+  - Not addressed: AI-vs-AI matches average about 9 game minutes against the
+    15-25 minute target. Slowing income is the obvious lever
+    (`harvest_seconds`, field amounts) but it moves every matchup, so it
+    needs its own batch.
+- Difficulty, same tool with `--levels`: Hard beat Easy in 21 of 24 games,
+  Hard beat Normal in 8 of 12, Normal beat Easy in 9 of 12. A unit test that
+  asserted one seeded Hard-vs-Easy result was tried and dropped: single
+  matches flip with any stat change.
+- Performance, on this container's CPU (no GPU): with 313 units in one fight
+  the simulation tick averages 6.7-6.9 ms (was 9.9) with spikes of 17-31 ms
+  (was 54); the whole frame's script and scene processing averages 6.6-8 ms
+  with a 24-25 ms worst frame, against a 16.7 ms budget at 60 fps. Changes:
+  per-armor damage, range and minimum-range tables precomputed per unit
+  type; target scans walk the spatial buckets inline and run less often when
+  a unit already has a target; stationary units are separated every other
+  tick; at most 24 new move orders are pathed per tick; path smoothing uses
+  shrinking strides; the minimap redraws 20 times a second from a
+  precomputed palette; selection lookups use a set.
+- `Performance.TIME_PROCESS` read 36 ms per frame in headless mode while
+  wall-clock frame time was 8 ms. Do not trust that monitor headless; the
+  frame benchmark measures wall-clock time between frames instead.

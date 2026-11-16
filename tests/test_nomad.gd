@@ -40,7 +40,7 @@ func test_beacon_rig_deploys_within_link_range_and_packs() -> void:
 	SimTestUtil.run(w, 8)
 	check(beacons[0].linked, "the beacon links to the hub")
 	check(SimSignal.is_covered(w, 0, beacons[0].pos + Vector2(10, 0).rotated(0.3)), "and projects coverage")
-	check_eq(w.players[0].bandwidth_cap, 28, "a beacon adds 8 bandwidth")
+	check_eq(w.players[0].bandwidth_cap, 20 + beacons[0].def.bandwidth_provided, "a beacon adds its bandwidth")
 	w.push_command(SimCommand.pack(0, beacons[0].id))
 	SimTestUtil.run(w, 8)
 	check_eq(_own(w, 0, "beacon_rig").size(), 1, "it packs back into a rig")

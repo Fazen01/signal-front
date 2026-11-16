@@ -64,6 +64,13 @@ var mine_splash: float = 0.0
 const AIR_ALTITUDE: float = 6.0
 
 
+# Filled in by GameData after loading: the best this entity's weapons can do
+# against each armor class, so targeting never has to loop over weapons.
+var vs_armor: PackedFloat32Array = PackedFloat32Array()  ## best damage multiplier
+var reach_vs: PackedFloat32Array = PackedFloat32Array()  ## longest usable range
+var min_range_vs: PackedFloat32Array = PackedFloat32Array()  ## shortest minimum range
+
+
 func is_infantry() -> bool:
 	return move == MOVE_INFANTRY
 

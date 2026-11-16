@@ -87,7 +87,7 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 		_:
 			pass
 	wave_size = first_wave
-	next_think = 10 + owner_id * 3
+	next_think = 10
 
 
 func update(w: SimWorld) -> void:
