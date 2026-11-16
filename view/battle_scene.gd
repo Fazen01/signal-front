@@ -11,6 +11,7 @@ var time_scale: float = 1.0
 
 var terrain: TerrainView = null
 var world_view: WorldView = null
+var signal_view: SignalView = null
 var cam: RtsCamera = null
 var controller: SelectionController = null
 var overlay: BattleOverlay = null
@@ -49,6 +50,11 @@ func _ready() -> void:
 	world_view.name = "World"
 	add_child(world_view)
 	world_view.setup(world, local_player)
+
+	signal_view = SignalView.new()
+	signal_view.name = "Signal"
+	add_child(signal_view)
+	signal_view.setup(world, local_player)
 
 	cam = RtsCamera.new()
 	cam.name = "CameraRig"
@@ -123,6 +129,11 @@ func smoke_extra(driver: SmokeDriver) -> void:
 	key.pressed = true
 	driver.expect(hud.handle_hotkey(key), "card hotkey F trains an engineer")
 	hud.push_alert("Smoke alert", Hud.GOLD)
+	var gkey: InputEventKey = InputEventKey.new()
+	gkey.physical_keycode = KEY_G
+	gkey.pressed = true
+	driver.expect(on_hotkey(gkey) and not signal_view.is_overlay_visible(), "G hides the coverage overlay")
+	driver.expect(on_hotkey(gkey) and signal_view.is_overlay_visible(), "G shows it again")
 
 
 func _build_environment() -> void:
@@ -225,6 +236,9 @@ func on_right_click(_screen: Vector2) -> bool:
 
 
 func on_hotkey(key: InputEventKey) -> bool:
+	if key.physical_keycode == KEY_G:
+		signal_view.set_overlay_visible(not signal_view.is_overlay_visible())
+		return true
 	if key.physical_keycode == KEY_ESCAPE:
 		if placing != null:
 			cancel_placement()
@@ -258,6 +272,11 @@ func begin_placement(def: EntityDef) -> void:
 	ghost = ModelFactory.build(def.model, world.players[local_player].color)
 	ghost.name = "Ghost"
 	add_child(ghost)
+	if def.signal_radius > 0.0:
+		# Show how far the new emitter will reach.
+		var reach: MeshInstance3D = ModelFactory.ring(ghost, def.signal_radius - 0.15, def.signal_radius + 0.15, Vector3(0.0, 0.3, 0.0), ModelFactory.mat(Color(0.5, 0.9, 1.0), 1.0))
+		reach.name = "ReachRing"
+		reach.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_ghost_shown_ok = -1
 	_update_placement()
 
@@ -297,6 +316,8 @@ func _update_placement() -> void:
 		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		for child: Node in ghost.find_children("*", "MeshInstance3D", true, false):
 			var mi: MeshInstance3D = child as MeshInstance3D
+			if mi.name == "ReachRing":
+				continue
 			mi.material_override = m
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 

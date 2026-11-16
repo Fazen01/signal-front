@@ -29,13 +29,18 @@ func _draw() -> void:
 			continue
 		var is_selected: bool = ctl.selected.has(e.id)
 		var show_bar: bool = is_selected or e.hp < e.max_hp - 0.5 or not e.constructed
-		if not show_bar:
+		var dark: bool = e.owner >= 0 and not e.linked and e.constructed
+		if not show_bar and not dark:
 			continue
 		var top: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + _bar_height(e), e.pos.y)
 		if cam3d.is_position_behind(top):
 			continue
 		var sp: Vector2 = cam3d.unproject_position(top)
 		if not view_rect.has_point(sp):
+			continue
+		if dark:
+			_draw_dark_icon(sp + Vector2(0.0, -14.0))
+		if not show_bar:
 			continue
 		var edge: Vector2 = cam3d.unproject_position(top + right * e.radius)
 		var half: float = clampf(sp.distance_to(edge), 12.0, 70.0)
@@ -66,6 +71,16 @@ func _draw() -> void:
 		draw_arc(m, 14.0, 0.0, TAU, 24, Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(20.0, 0.0), m + Vector2(20.0, 0.0), Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(0.0, 20.0), m + Vector2(0.0, 20.0), Color(1.0, 0.35, 0.3), 2.0)
+
+
+## "No signal": an antenna with a slash through it.
+func _draw_dark_icon(at: Vector2) -> void:
+	draw_circle(at, 8.0, Color(0.0, 0.0, 0.0, 0.7))
+	var col: Color = Color(1.0, 0.45, 0.2)
+	draw_line(at + Vector2(0.0, 5.0), at + Vector2(0.0, -2.0), col, 1.5)
+	draw_arc(at + Vector2(0.0, -2.0), 3.0, PI * 1.15, PI * 1.85, 6, col, 1.5)
+	draw_arc(at + Vector2(0.0, -2.0), 5.5, PI * 1.15, PI * 1.85, 8, col, 1.5)
+	draw_line(at + Vector2(-5.5, -5.5), at + Vector2(5.5, 5.5), Color(1.0, 0.2, 0.15), 2.0)
 
 
 func _bar_height(e: SimEntity) -> float:

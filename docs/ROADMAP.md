@@ -44,7 +44,7 @@ decision in the session log at the bottom.
 - [x] Emitters, link graph back to HQ, coverage grid
 - [x] Linked/Dark effects on units, turrets and production
 - [x] Placement rules (buildings in coverage, relays in link range)
-- [ ] Overlay, link lines, blackout alert, Dark indicator
+- [x] Overlay, link lines, blackout alert, Dark indicator
 - [x] Tests: cutting a mid-chain relay unlinks everything downstream
 
 ## M5 — First playable (tag `v0.1`)
@@ -208,5 +208,18 @@ Economy and HUD decisions:
   headless check passed (`set_anchors_preset` keeps the old zero size; use
   `set_anchors_and_offsets_preset`). Look at screenshots after UI changes.
 
-Half-done / next: M4 — the Signal Grid simulation is done and tested; the
-coverage overlay, link lines and Dark indicator are being written.
+- M4 Signal Grid: emitters link breadth-first from the HQ within range 30;
+  per-player coverage grid rebuilt at most 4x a second; Dark units fire
+  slower, see less and lose the Aegis range bonus; Dark buildings pause
+  production and cannot be repaired; Dark turrets fire at half rate;
+  placement needs coverage (relays need link range); unlinked relays give no
+  bandwidth and raise a blackout alert; coverage overlay (G), animated link
+  lines, Dark icon over affected units, reach ring on a relay ghost.
+
+Signal decisions:
+- Only finished buildings emit. Coverage is "cell centre inside the disc".
+- Units without any HQ (test worlds) are simply Dark.
+- The overlay dims uncovered ground and tints covered ground in the team
+  colour with a brighter rim; it shows only the local player's network.
+
+Half-done / next: M5 first playable (AI, win/lose, menus, headless match).

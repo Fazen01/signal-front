@@ -81,6 +81,25 @@ func _run_script(battle: BattleScene) -> void:
 						battle.world.push_command(SimCommand.train(battle.local_player, e.id, "hauler"))
 						battle.world.push_command(SimCommand.train(battle.local_player, e.id, "field_engineer"))
 				battle.hud.push_alert("Bandwidth limit reached - build Relays", Hud.RED)
+		"signal":
+			if _count == 2:
+				# A relay chain towards the middle, one cut-off relay, and
+				# units both inside and outside coverage.
+				var w: SimWorld = battle.world
+				var me: int = battle.local_player
+				var hq_pos: Vector2 = w.players[me].start_pos
+				var dir: Vector2 = (w.map.world_size() * 0.5 - hq_pos).normalized()
+				var side: Vector2 = Vector2(-dir.y, dir.x)
+				for k: int in 2:
+					var at: Vector2 = hq_pos + dir * (26.0 * float(k + 1))
+					w.map.set_terrain(w.map.cell_of(at), SimMap.Terrain.GROUND)
+					w.spawn_building("relay", me, w.map.cell_of(at), true)
+				for k: int in 4:
+					w.spawn_unit("bulwark", me, hq_pos + dir * 40.0 + side * (float(k) * 3.0 - 4.0))
+					w.spawn_unit("trooper", me, hq_pos + dir * 74.0 + side * (float(k) * 2.0 - 3.0))
+				battle.cam.distance = 80.0
+				battle.cam.set("_target_distance", 80.0)
+				battle.cam.center_on(hq_pos + dir * 36.0)
 		"wide":
 			if _count == 2:
 				battle.cam.distance = 95.0
