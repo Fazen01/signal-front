@@ -127,8 +127,30 @@ session 2's branch merged in (one conflict, both sides kept).
 
 Godot verification: **available** (4.7.2 downloaded).
 
-Working on: checking the merge with `tools/check.sh`, then the open M13
-item on 1v1 match length, building on both sessions' findings.
+The merge broke `tools/check.sh`, although each branch passes it alone: the
+three-way match (seed 5) and the spectated Nomad-vs-Foundry match (seed 7)
+ran an hour with no winner. Timelines (`tools/match_timeline.gd`, which now
+also takes `--map=` and prints haulers, turrets and headquarters health each
+minute) showed why: session 2's home guard and retreat rule meant no wave
+ever got through a base with turrets, while session 3's emergency income kept
+the beaten side alive and the AI spent that trickle rebuilding turrets
+instead of haulers. Fixes in `sim/sim_ai.gd`:
+- After two failed waves in a row (wiped out or pulled back) the AI masses
+  1.4 times the last wave, sends the whole army with no guard, aims it at the
+  headquarters and does not retreat.
+- When the visible enemy army is worth under a third of ours (and we have 8+
+  units), the wave is likewise committed to the headquarters.
+- A wave cut to a third of its launch size retreats only if the defence is
+  worth more than half of what is left, instead of always.
+- Under half its hauler target, the AI keeps a hauler's cost back from
+  construction as well as from unit production.
+- Known enemy turrets raise the weight of anti-armor units and artillery.
+
+Decision: these are AI rules, not data. They only change what the AI does
+when matches stall, so they belong with the wave doctrine in `sim_ai.gd`.
+
+Working on (07:45 UTC): getting `tools/check.sh` green on the merge; then
+the open M13 item on 1v1 match length.
 
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 

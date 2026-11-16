@@ -357,7 +357,12 @@ func _run_construction(w: SimWorld, me: SimPlayer) -> void:
 	if next == "":
 		return
 	var def: EntityDef = w.data.entity(next)
-	if not _can_afford(me, def.cost):
+	# A raided economy replaces its haulers before it builds anything: the
+	# emergency trickle is there to buy a hauler, not to rebuild turrets.
+	var reserve: int = 0
+	if _haulers.size() + _queued(_r("hauler")) < maxi(2, (_want_haulers + 1) / 2) and _best_resource(w) != null:
+		reserve = w.data.entity(_r("hauler")).cost
+	if not _can_afford(me, def.cost + reserve):
 		return
 	var cell: Vector2i = _site_for(w, def)
 	if cell.x < 0 or not _site_is_safe(w, w.map.cell_center(cell)):
@@ -710,6 +715,12 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 		else:
 			light += 1
 	_enemy_air_seen = maxi(_enemy_air_seen, air)
+	# Armed buildings we know of call for units that can crack them: small
+	# arms barely scratch a turret, so a rifle army dies in front of one.
+	var turrets: int = 0
+	for b: SimEntity in _enemy_buildings:
+		if b.def.is_armed() and not b.def.signal_root and _known_buildings.has(b.id):
+			turrets += 1
 	var support: int = 0
 	for e: SimEntity in _army:
 		if e.def.ai_role == "support":
@@ -753,7 +764,9 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 				"anti_infantry":
 					wgt += float(infantry) * 0.25
 				"anti_armor":
-					wgt += float(heavy) * 0.6 + float(light) * 0.3
+					wgt += float(heavy) * 0.6 + float(light) * 0.3 + float(turrets) * 0.5
+				"artillery":
+					wgt += float(turrets) * 0.8
 				"anti_air":
 					wgt += float(_enemy_air_seen) * 1.6
 				"support":
@@ -885,6 +898,9 @@ func _run_military(w: SimWorld) -> void:
 			if commit:
 				guard = 0
 				needed = maxi(wave_size, int(ceil(float(wave_launch_size) * COMMIT_SCALE)))
+			# An enemy with no army left to speak of is there to be finished:
+			# go for the headquarters and stay until it falls.
+			var finish: bool = _enemy_looks_beaten()
 			var free: int = home.size() - guard
 			var ready: bool = free >= needed and since >= wave_cooldown_ticks
 			# A starved economy may never reach the full wave size: after a long
@@ -893,8 +909,8 @@ func _run_military(w: SimWorld) -> void:
 				ready = true
 				wave_size = maxi(first_wave, free)
 			if threat == null and ready and w.tick_count >= first_attack_tick:
+				wave_committed = commit or finish
 				_launch_wave(w, _pick_attackers(home, free, rally))
-				wave_committed = commit
 				if commit:
 					failed_waves = 0
 		Wave.STAGING:
@@ -939,8 +955,7 @@ func _pick_attackers(home: Array[SimEntity], count: int, rally: Vector2) -> Arra
 func _should_retreat(w: SimWorld) -> bool:
 	if retreat_odds <= 0.0 or wave_ids.is_empty() or wave_committed:
 		return false
-	if wave_launch_size >= 5 and wave_ids.size() * 3 <= wave_launch_size:
-		return true
+	var cut_down: bool = wave_launch_size >= 5 and wave_ids.size() * 3 <= wave_launch_size
 	var centre: Vector2 = Vector2.ZERO
 	var mine: float = 0.0
 	for id: int in wave_ids:
@@ -955,7 +970,25 @@ func _should_retreat(w: SimWorld) -> bool:
 	for b: SimEntity in _enemy_buildings:
 		if b.def.is_armed() and not b.def.signal_root and b.constructed and b.pos.distance_to(centre) < 18.0:
 			theirs += float(b.def.cost) * 1.5 * b.hp / b.max_hp
+	# A wave cut to a third still stays to finish off a weaker defence.
+	if cut_down:
+		return theirs > mine * 0.5
 	return theirs > mine * retreat_odds
+
+
+## True when our army is at least eight strong and the armed enemy units we
+## can see are worth less than a third of it.
+func _enemy_looks_beaten() -> bool:
+	if _army.size() < 8:
+		return false
+	var mine: float = 0.0
+	for e: SimEntity in _army:
+		mine += float(e.def.cost)
+	var theirs: float = 0.0
+	for e: SimEntity in _enemies:
+		if e.def.is_armed():
+			theirs += float(e.def.cost)
+	return theirs * 3.0 < mine
 
 
 func _retreat(w: SimWorld, rally: Vector2) -> void:
@@ -1103,7 +1136,7 @@ func _pick_target(w: SimWorld) -> SimEntity:
 			continue
 		var score: float = -from.distance_to(b.pos) * 0.05
 		if b.def.signal_root:
-			score += 1.5
+			score += 50.0 if wave_committed else 1.5
 		elif hunts_relays and b.def.signal_radius > 0.0 and b.constructed:
 			score += 2.0 + 2.5 * float(_downstream_count(w, b))
 		elif b.def.is_armed():

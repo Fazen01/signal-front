@@ -5,6 +5,7 @@ extends SceneTree
 ##
 ## Usage: godot --headless --path . -s res://tools/match_timeline.gd -- \
 ##          [--seed=N] [--factions=aegis,foundry] [--levels=1,1] [--max-minutes=45]
+##          [--map=twin_fords]
 
 
 func _init() -> void:
@@ -12,6 +13,7 @@ func _init() -> void:
 	var max_minutes: float = 45.0
 	var levels: Array[int] = [1, 1]
 	var factions: Array[String] = ["aegis", "aegis"]
+	var map_id: String = ""
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--seed="):
 			seed_value = int(arg.trim_prefix("--seed="))
@@ -23,9 +25,12 @@ func _init() -> void:
 		elif arg.begins_with("--factions="):
 			var names: PackedStringArray = arg.trim_prefix("--factions=").split(",")
 			factions = [names[0], names[1]]
+		elif arg.begins_with("--map="):
+			map_id = arg.trim_prefix("--map=")
 	var config: MatchConfig = MatchConfig.ai_vs_ai(seed_value)
 	config.factions = factions
 	config.ai_levels = levels
+	config.map_id = map_id
 	var w: SimWorld = SimSetup.create_match(config)
 	w.collect_events = false
 	var max_ticks: int = int(max_minutes * 60.0 * float(SimWorld.TICK_RATE))
@@ -64,7 +69,9 @@ func _init() -> void:
 		if w.tick_count % (SimWorld.TICK_RATE * 60) == 0:
 			var line: String = _clock(w)
 			for p: SimPlayer in w.players:
-				line += " | P%d $%d army %d bw %d/%d" % [p.id + 1, p.salvage, _army(w, p.id), p.bandwidth_used, p.bandwidth_cap]
+				line += " | P%d $%d army %d bw %d/%d haulers %d turrets %d hq %d%%" % [
+					p.id + 1, p.salvage, _army(w, p.id), p.bandwidth_used, p.bandwidth_cap,
+					_haulers(w, p.id), _turrets(w, p.id), _hq_percent(w, p.id)]
 			print(line)
 	print("END %s winner %d" % [_clock(w), w.winner + 1 if w.game_over else 0])
 	quit(0)
@@ -81,6 +88,30 @@ func _army(w: SimWorld, owner: int) -> int:
 		if e.alive and e.owner == owner and e.def != null and e.kind == SimEntity.Kind.UNIT and e.def.is_armed():
 			n += 1
 	return n
+
+
+func _haulers(w: SimWorld, owner: int) -> int:
+	var n: int = 0
+	for e: SimEntity in w.entities:
+		if e.alive and e.owner == owner and e.def != null and e.def.harvester:
+			n += 1
+	return n
+
+
+func _turrets(w: SimWorld, owner: int) -> int:
+	var n: int = 0
+	for e: SimEntity in w.entities:
+		if e.alive and e.owner == owner and e.def != null and e.kind == SimEntity.Kind.BUILDING \
+				and e.def.is_armed() and not e.def.signal_root:
+			n += 1
+	return n
+
+
+func _hq_percent(w: SimWorld, owner: int) -> int:
+	for e: SimEntity in w.entities:
+		if e.alive and e.owner == owner and e.def != null and e.def.signal_root:
+			return int(100.0 * e.hp / e.max_hp)
+	return 0
 
 
 func _value(w: SimWorld, ids: Array[int]) -> int:
