@@ -9,7 +9,11 @@ enum Wave { NONE, STAGING, ASSAULT }
 
 const STAGE_DISTANCE: float = 26.0
 const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long without a wave
+const COMMIT_AFTER: int = 2  ## failed waves in a row before the whole army is sent
+const COMMIT_SCALE: float = 1.4  ## a committed wave waits for this many times the last wave's size
 const THREAT_RANGE: float = 22.0
+const BLOCKED_TICKS: int = 20 * 30  ## how long an unplaceable building is skipped in the build order
+const SITE_AVOID_TICKS: int = 20 * 120  ## how long a spot where a site died is left alone
 
 var player_id: int = 0
 var level: int = 1  ## 0 easy, 1 normal, 2 hard
@@ -24,6 +28,9 @@ var first_wave: int = 7
 var wave_growth: int = 3
 var max_wave: int = 26
 var wave_cooldown_ticks: int = 20 * 40
+var first_attack_tick: int = 20 * 240  ## no attack wave before this; the opening is for building
+var guard_fraction: float = 0.3  ## share of the army that stays home when a wave leaves
+var retreat_odds: float = 1.5  ## a wave facing this many times its own value falls back; 0 = never
 var max_barracks: int = 1
 var max_works: int = 1
 var builds_turrets: bool = true
@@ -38,8 +45,12 @@ var wave_target_pos: Vector2 = Vector2.ZERO
 var wave_stage: Vector2 = Vector2.ZERO
 var wave_tick: int = 0
 var wave_size: int = 7
+var wave_launch_size: int = 0
 var waves_sent: int = 0
+var retreats: int = 0
 var last_wave_end: int = -100000
+var failed_waves: int = 0  ## waves wiped out or pulled back since the last committed one
+var wave_committed: bool = false  ## the wave in the field is the whole army and does not retreat
 
 # Per-think scratch lists
 var _f: FactionDef = null  ## this player's faction; roles map jobs to its definitions
@@ -58,6 +69,9 @@ var _enemy_air_seen: int = 0  ## most enemy aircraft seen at once
 var _wish: Dictionary[int, String] = {}  ## building id -> unit it is saving up for
 var _wish_tick: Dictionary[int, int] = {}
 var _want_haulers: int = 3  ## how many haulers the economy is aiming for
+var _blocked_until: Dictionary[String, int] = {}  ## building id -> tick it may be tried again
+var _site_pos: Dictionary[int, Vector2] = {}  ## our unfinished buildings, to notice when one is shot down
+var _lost_spots: Array[Vector3] = []  ## (x, y, tick) of sites lost to the enemy; avoided for a while
 var _spent: int = 0  ## salvage committed by commands issued this think
 var _bandwidth_committed: int = 0  ## bandwidth of units ordered this think
 
@@ -71,6 +85,9 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			think_ticks = 40
 			max_haulers = 4
 			first_wave = 9
+			first_attack_tick = 20 * 360
+			guard_fraction = 0.4
+			retreat_odds = 0.0
 			wave_growth = 4
 			wave_cooldown_ticks = 20 * 75
 			builds_turrets = false
@@ -81,6 +98,8 @@ func _init(owner_id: int, difficulty: int, seed_value: int) -> void:
 			max_haulers = 8
 			max_engineers = 3
 			first_wave = 6
+			first_attack_tick = 20 * 150
+			guard_fraction = 0.25
 			wave_growth = 3
 			wave_cooldown_ticks = 20 * 25
 			max_barracks = 2
@@ -159,6 +178,17 @@ func _survey(w: SimWorld) -> void:
 					_enemy_buildings.append(e)
 			elif seen:
 				_enemies.append(e)
+	# A site that vanished without becoming a building was destroyed: do not
+	# keep feeding new sites into the same guns.
+	var still: Dictionary[int, Vector2] = {}
+	for b: SimEntity in _sites:
+		still[b.id] = b.pos
+	for id: int in _site_pos:
+		if not still.has(id) and w.get_entity(id) == null:
+			_lost_spots.append(Vector3(_site_pos[id].x, _site_pos[id].y, float(w.tick_count)))
+	_site_pos = still
+	while not _lost_spots.is_empty() and w.tick_count - int(_lost_spots[0].z) > SITE_AVOID_TICKS:
+		_lost_spots.remove_at(0)
 
 
 ## The definition id this faction uses for a job ("" if it has none).
@@ -330,14 +360,37 @@ func _run_construction(w: SimWorld, me: SimPlayer) -> void:
 	if not _can_afford(me, def.cost):
 		return
 	var cell: Vector2i = _site_for(w, def)
-	if cell.x < 0:
+	if cell.x < 0 or not _site_is_safe(w, w.map.cell_center(cell)):
+		# Nowhere to put it for now: let the rest of the build order proceed.
+		_blocked_until[next] = w.tick_count + BLOCKED_TICKS
 		return
 	w.push_command(SimCommand.build(player_id, _ids(free), def.id, cell))
 	_spent += def.cost
 
 
 ## The next building in the build order, or "" when nothing is needed.
+## Not under enemy guns right now, and not where a site was just destroyed.
+func _site_is_safe(w: SimWorld, at: Vector2) -> bool:
+	if _threat_near(at, 16.0) != null:
+		return false
+	for spot: Vector3 in _lost_spots:
+		if at.distance_to(Vector2(spot.x, spot.y)) < 14.0 and w.tick_count - int(spot.z) <= SITE_AVOID_TICKS:
+			return false
+	return true
+
+
+## The first thing on the build order that is not blocked right now.
 func _next_building(w: SimWorld, me: SimPlayer) -> String:
+	for id: String in _build_order(w, me):
+		if id != "" and w.tick_count >= _blocked_until.get(id, 0):
+			return id
+	return ""
+
+
+## Everything the base wants next, most urgent first. A building that cannot
+## be placed for the moment must not hold up the ones after it.
+func _build_order(w: SimWorld, me: SimPlayer) -> Array[String]:
+	var out: Array[String] = []
 	var relay: String = _r("relay")
 	var barracks: String = _r("barracks")
 	var works: String = _r("works")
@@ -355,38 +408,38 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 	# Factions whose relays are deployed units expand in _run_mobile_relays.
 	var build_relays: bool = w.data.entity(relay).buildable
 	if _count(barracks) == 0:
-		return barracks
+		out.append(barracks)
 	if build_relays and relays == 0:
-		return relay
+		out.append(relay)
 	if build_relays and headroom < 6 and me.bandwidth_cap < w.data.bandwidth_max:
-		return relay
+		out.append(relay)
 	if works != "" and _count(works) == 0 and has_barracks:
-		return works
+		out.append(works)
 	if _wants_depot(w):
-		return _r("depot")
+		out.append(_r("depot"))
 	if build_relays and relays < early_relays and _relay_goal(w) != Vector2.INF:
-		return relay
+		out.append(relay)
 	if builds_turrets and _can(w, me, ground) and _count(ground) < 1:
-		return ground
+		out.append(ground)
 	if builds_turrets and armor != ground and _can(w, me, armor) and _count(armor) < 1:
-		return armor
+		out.append(armor)
 	if builds_turrets and _can(w, me, flak) and _enemy_air_seen > 0 and _count(flak) < 2:
-		return flak
+		out.append(flak)
 	if level > 0 and _can(w, me, tier3) and _count(tier3) == 0 and me.salvage > 650 and w.tick_count > 20 * 240:
-		return tier3
+		out.append(tier3)
 	if level > 0 and _can(w, me, airpad) and _count(airpad) == 0 and me.salvage > 550:
-		return airpad
+		out.append(airpad)
 	if build_relays and relays < early_relays * 2 and _relay_goal(w) != Vector2.INF and me.salvage > 500:
-		return relay
+		out.append(relay)
 	# Salvage piling up means production is the bottleneck: add capacity.
 	var spare: int = mini(2, me.salvage / 1500)
 	if me.salvage > 900 and _count(barracks) < max_barracks + spare:
-		return barracks
+		out.append(barracks)
 	if works != "" and me.salvage > 1200 and _count(works) < max_works + spare and has_barracks:
-		return works
+		out.append(works)
 	if builds_turrets and me.salvage > 1500 and turrets < 5:
-		return armor if _can(w, me, armor) and rng.chance(0.5) else (ground if _can(w, me, ground) else "")
-	return ""
+		out.append(armor if _can(w, me, armor) and rng.chance(0.5) else (ground if _can(w, me, ground) else ""))
+	return out
 
 
 ## Salvage fields, in order of distance, that our signal does not reach yet.
@@ -787,6 +840,7 @@ func _run_military(w: SimWorld) -> void:
 			alive_wave.append(id)
 	wave_ids = alive_wave
 	if wave_state != Wave.NONE and wave_ids.is_empty():
+		failed_waves += 1
 		_end_wave(w)
 
 	var home: Array[SimEntity] = []
@@ -820,26 +874,46 @@ func _run_military(w: SimWorld) -> void:
 	match wave_state:
 		Wave.NONE:
 			var since: int = w.tick_count - maxi(last_wave_end, 0)
-			var ready: bool = home.size() >= wave_size and since >= wave_cooldown_ticks
+			# Part of the army always stays home, so a lost wave is a setback
+			# and not the end of the match.
+			var guard: int = maxi(2, int(ceil(float(home.size()) * guard_fraction)))
+			var needed: int = wave_size
+			# Two waves lost in a row means partial attacks are not working and
+			# the match is heading for a stalemate: mass a larger force, send
+			# all of it and do not turn back.
+			var commit: bool = failed_waves >= COMMIT_AFTER
+			if commit:
+				guard = 0
+				needed = maxi(wave_size, int(ceil(float(wave_launch_size) * COMMIT_SCALE)))
+			var free: int = home.size() - guard
+			var ready: bool = free >= needed and since >= wave_cooldown_ticks
 			# A starved economy may never reach the full wave size: after a long
 			# quiet spell go with whatever has gathered, and aim lower next time.
-			if not ready and since >= STALL_TICKS and home.size() >= maxi(4, wave_size / 4):
+			if not ready and since >= STALL_TICKS and free >= maxi(3, wave_size / 4):
 				ready = true
-				wave_size = maxi(first_wave, home.size())
-			if threat == null and ready:
-				_launch_wave(w, home)
+				wave_size = maxi(first_wave, free)
+			if threat == null and ready and w.tick_count >= first_attack_tick:
+				_launch_wave(w, _pick_attackers(home, free, rally))
+				wave_committed = commit
+				if commit:
+					failed_waves = 0
 		Wave.STAGING:
 			var arrived: int = 0
 			for id: int in wave_ids:
 				if w.get_entity(id).pos.distance_to(wave_stage) < 11.0:
 					arrived += 1
 			var waited: int = w.tick_count - wave_tick
-			if arrived * 10 >= wave_ids.size() * 7 or waited > 20 * 45:
+			if _should_retreat(w):
+				_retreat(w, rally)
+			elif arrived * 10 >= wave_ids.size() * 7 or waited > 20 * 45:
 				wave_state = Wave.ASSAULT
 				wave_tick = w.tick_count
 				_assault(w, true)
 		Wave.ASSAULT:
-			_assault(w, false)
+			if _should_retreat(w):
+				_retreat(w, rally)
+			else:
+				_assault(w, false)
 
 
 func _count_near(list: Array[SimEntity], pos: Vector2, radius: float) -> int:
@@ -848,6 +922,47 @@ func _count_near(list: Array[SimEntity], pos: Vector2, radius: float) -> int:
 		if e.pos.distance_to(pos) <= radius:
 			n += 1
 	return n
+
+
+## The `count` units furthest from the rally point go; the rest are the guard.
+func _pick_attackers(home: Array[SimEntity], count: int, rally: Vector2) -> Array[SimEntity]:
+	var sorted: Array[SimEntity] = home.duplicate()
+	sorted.sort_custom(func(a: SimEntity, b: SimEntity) -> bool:
+		var da: float = a.pos.distance_squared_to(rally)
+		var db: float = b.pos.distance_squared_to(rally)
+		return da > db if da != db else a.id < b.id)
+	return sorted.slice(0, count)
+
+
+## True when the wave has been cut down or is facing far more than it can
+## beat: the survivors are worth more at home than dying where they stand.
+func _should_retreat(w: SimWorld) -> bool:
+	if retreat_odds <= 0.0 or wave_ids.is_empty() or wave_committed:
+		return false
+	if wave_launch_size >= 5 and wave_ids.size() * 3 <= wave_launch_size:
+		return true
+	var centre: Vector2 = Vector2.ZERO
+	var mine: float = 0.0
+	for id: int in wave_ids:
+		var e: SimEntity = w.get_entity(id)
+		centre += e.pos
+		mine += float(e.def.cost) * e.hp / e.max_hp
+	centre /= float(wave_ids.size())
+	var theirs: float = 0.0
+	for e: SimEntity in _enemies:
+		if e.def.is_armed() and e.pos.distance_to(centre) < 22.0:
+			theirs += float(e.def.cost) * e.hp / e.max_hp
+	for b: SimEntity in _enemy_buildings:
+		if b.def.is_armed() and not b.def.signal_root and b.constructed and b.pos.distance_to(centre) < 18.0:
+			theirs += float(b.def.cost) * 1.5 * b.hp / b.max_hp
+	return theirs > mine * retreat_odds
+
+
+func _retreat(w: SimWorld, rally: Vector2) -> void:
+	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), rally))
+	retreats += 1
+	failed_waves += 1
+	_end_wave(w)
 
 
 func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
@@ -861,6 +976,7 @@ func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 	wave_state = Wave.STAGING
 	wave_tick = w.tick_count
 	waves_sent += 1
+	wave_launch_size = wave_ids.size()
 	var back: Vector2 = (_hq.pos - wave_target_pos).normalized()
 	wave_stage = w.map.nearest_free_pos(w.map.clamp_to_map(wave_target_pos + back * STAGE_DISTANCE))
 	w.push_command(SimCommand.move(player_id, PackedInt32Array(wave_ids), wave_stage))
@@ -868,6 +984,7 @@ func _launch_wave(w: SimWorld, units: Array[SimEntity]) -> void:
 
 func _end_wave(w: SimWorld) -> void:
 	wave_state = Wave.NONE
+	wave_committed = false
 	wave_ids.clear()
 	wave_target = 0
 	last_wave_end = w.tick_count

@@ -117,6 +117,19 @@ decision in the session log at the bottom.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 4 (branch `claude/relay-session-1116-0654`)
+
+Status: **in progress**, started 06:55 UTC. The newest commit then was
+session 3's `b14d2d1` (5 minutes old); waited 10 minutes, nothing new was
+pushed, so carried on as CLAUDE.md says. Sessions 2 and 3 had diverged
+(both edited `sim/sim_ai.gd`); this branch starts from session 3's tip with
+session 2's branch merged in (one conflict, both sides kept).
+
+Godot verification: **available** (4.7.2 downloaded).
+
+Working on: checking the merge with `tools/check.sh`, then the open M13
+item on 1v1 match length, building on both sessions' findings.
+
 ### 2026-11-16 — session 3 (branch `claude/relay-session-1116-0550`)
 
 Status: **in progress**, started 05:50 UTC from `f728680` (session 2's last
@@ -151,14 +164,46 @@ shorter (8.4), because the survivors die running and the enemy follows.
 
 ### 2026-11-16 — session 2 (branch `claude/relay-session-1116-0451`)
 
-Status: **cut off** after one HUD commit (`f728680`, 05:07 UTC); nothing
-else was pushed. Started 04:51 UTC from `3a43a9e` (session 1's last
-commit; `tools/check.sh` passes on it here, Godot and software GL available).
+Status: **stopped pushing** at 06:24 UTC (`f959f9e`). Started 04:51 UTC from
+`3a43a9e` (session 1's last commit). It ran in parallel with session 3
+without either seeing the other's later commits; session 4 merged the two.
+The "In progress" paragraph below describes work that was never pushed.
 
-Working on, in order:
-1. Looking at screenshots of every screen for layout and visibility faults.
-2. The open M13 item: 1v1 match length (defender-side levers, as session 1's
-   notes suggest).
+Done so far:
+- Looked at screenshots of the menu, skirmish setup, HUD states, signal
+  overlay, Directives, combat and result screens. Three faults fixed: the
+  minimap's camera box was drawn outside the minimap over the selection
+  text; "[C] Command Lab" was cut off on the command card; the bottom panel
+  was see-through enough to make its text hard to read.
+- `tools/match_timeline.gd`: plays one AI match and prints every wave
+  (size, survivors), every building lost and both treasuries each minute.
+- Two AI faults the timeline showed, both fixed:
+  - It re-placed a building site on the same spot each time the enemy shot
+    one down (13 Depots, 3,200 salvage, lost in 80 seconds in one match). It
+    now avoids a spot for two minutes after losing a site there and does not
+    place sites within 16 units of a visible armed enemy.
+  - One unplaceable building (usually that Depot) blocked the whole build
+    order, so the AI sat on 3,000-4,000 salvage with one Barracks and one
+    Vehicle Works. Blocked entries are now skipped for 30 seconds.
+- AI wave doctrine: no attack before 6:00 / 4:00 / 2:30 (Easy / Normal /
+  Hard); a guard of 40% / 30% / 25% of the army stays home; Normal and Hard
+  pull a wave back when it is down to a third or facing 1.5 times its value.
+
+In progress (07:35 UTC): match length (the open M13 item). Averages over
+three seeds per faction pairing, 27 games each:
+- baseline 10.0 minutes; first attack delayed to 4:00 alone 10.1; harvesting
+  2.5 times slower on top 11.0; guard + retreat + the two fixes above 9.4.
+  The first large clash decided the match whenever it happened.
+- What moved it: a much slower economy (loading 100 salvage takes 12 s, was
+  4 s) 12.7; retreating units defend their base instead of walking through
+  the fight 12.9; loading time in proportion to the load 13.1; headquarters
+  health +50% and a longer-ranged headquarters gun 17.3 but with two
+  60-minute stalemates; anti-stalemate rules (third wave in a row commits,
+  siege units when the enemy army is gone) and richer fields 20.6 with one
+  stalemate left.
+- Still to do before this lands: remove the remaining stalemate, rebalance
+  the factions (Aegis is winning too much under the slower economy), run
+  the full check. None of this is committed yet; the working tree holds it.
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
