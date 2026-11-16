@@ -122,10 +122,32 @@ anything left half-done, whether Godot verification was available.
 Status: **in progress**, started 04:51 UTC from `3a43a9e` (session 1's last
 commit; `tools/check.sh` passes on it here, Godot and software GL available).
 
-Working on, in order:
-1. Looking at screenshots of every screen for layout and visibility faults.
-2. The open M13 item: 1v1 match length (defender-side levers, as session 1's
-   notes suggest).
+Done so far:
+- Looked at screenshots of the menu, skirmish setup, HUD states, signal
+  overlay, Directives, combat and result screens. Three faults fixed: the
+  minimap's camera box was drawn outside the minimap over the selection
+  text; "[C] Command Lab" was cut off on the command card; the bottom panel
+  was see-through enough to make its text hard to read.
+- `tools/match_timeline.gd`: plays one AI match and prints every wave
+  (size, survivors), every building lost and both treasuries each minute.
+- Two AI faults the timeline showed, both fixed:
+  - It re-placed a building site on the same spot each time the enemy shot
+    one down (13 Depots, 3,200 salvage, lost in 80 seconds in one match). It
+    now avoids a spot for two minutes after losing a site there and does not
+    place sites within 16 units of a visible armed enemy.
+  - One unplaceable building (usually that Depot) blocked the whole build
+    order, so the AI sat on 3,000-4,000 salvage with one Barracks and one
+    Vehicle Works. Blocked entries are now skipped for 30 seconds.
+- AI wave doctrine: no attack before 6:00 / 4:00 / 2:30 (Easy / Normal /
+  Hard); a guard of 40% / 30% / 25% of the army stays home; Normal and Hard
+  pull a wave back when it is down to a third or facing 1.5 times its value.
+
+In progress: match length (the open M13 item). Findings so far, three seeds
+per pairing: baseline 10.0 minutes; delaying the first attack to 4:00 alone
+10.1; harvesting 2.5 times slower on top 11.0; guard + retreat + the two
+fixes above 9.4. The first large clash decides the match whenever it
+happens, so the next thing to try is a slower economy overall together with
+a stronger defender (headquarters gun and health, more turrets).
 
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
