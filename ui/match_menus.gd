@@ -155,6 +155,17 @@ func show_result(world: SimWorld, local_player: int, watching: bool = false) -> 
 	var subtitle: Label = Hud.make_label(sub, 16, Hud.DIM)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(subtitle)
+	# Now that it is over, say how each AI had been playing.
+	var styles: Array[String] = []
+	for ai: SimAI in world.ais:
+		if ai.level > 0:
+			styles.append("%s played as %s" % [world.players[ai.player_id].name, "an aggressor" if ai.doctrine == "aggressor" else "a " + ai.doctrine if ai.doctrine != "balanced" else "an all-rounder"])
+	if not styles.is_empty():
+		var manner: Label = Hud.make_label(".   ".join(styles) + ".", 14, Hud.DIM)
+		manner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		manner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		manner.custom_minimum_size = Vector2(560.0, 0.0)
+		box.add_child(manner)
 
 	var grid: GridContainer = GridContainer.new()
 	grid.columns = world.players.size() + 1
