@@ -170,7 +170,7 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-Status: **M15 done**; carrying on with polish. The owner wrote in at about 09:05 UTC asking for
+Status: **finished** (M15, M16, M17). The owner wrote in at about 09:05 UTC asking for
 better graphics (units, buildings, map) and to carry on; that is M15 above.
 
 - This branch was fast-forwarded to `claude/relay-session-1116-0550` (the
@@ -268,7 +268,15 @@ then for more work on the map (M17).**
   darkening. It samples the fog-of-war texture at the nearest map edge, so
   it is never brighter than unexplored ground beside it. Nothing can enter
   it: the simulation does not know it exists.
-- `tools/screenshot.sh scenery_edge 40 scenery_edge` looks at a map corner.
+- `tools/screenshot.sh scenery_edge 40 scenery_edge` looks at a map corner;
+  `layout_twin_fords`, `layout_crater_ring` and `layout_crossroads` show a
+  hand-made map whole with fog off. All three were looked at: the tracks
+  cross Twin Fords at a ford and enter Crater Ring through its gaps.
+
+Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
+`tools/check.sh` passes on the last commit. Nothing is half-finished. Open
+for whoever is next: the real-GPU frame rate, and the two session branches
+that do not merge (see above).
 Nothing is half-finished. What nobody has seen yet is all of this on a real
 GPU — the captures here are software-rendered.
 

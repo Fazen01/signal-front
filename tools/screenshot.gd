@@ -48,6 +48,16 @@ func _ready() -> void:
 		var game: GameState = get_node_or_null("/root/Game") as GameState
 		if game != null:
 			game.pending_config = config
+	if _script_name.begins_with("layout_"):
+		# "layout_<map id>": a hand-made map seen whole, with fog off.
+		var lconfig: MatchConfig = MatchConfig.skirmish(1)
+		lconfig.map_id = _script_name.trim_prefix("layout_")
+		var players: int = int(SimMapGen.layout_info(lconfig.map_id)["players"])
+		for extra: int in players - 2:
+			lconfig.add_ai("aegis", 1, "AI %d" % (extra + 2))
+		var lgame: GameState = get_node_or_null("/root/Game") as GameState
+		if lgame != null:
+			lgame.pending_config = lconfig
 	_scene = packed.instantiate()
 	add_child(_scene)
 
@@ -240,6 +250,13 @@ func _run_script(battle: BattleScene) -> void:
 			if _count == 2:
 				battle.cam.set_distance(95.0)
 				battle.cam.center_on(battle.world.map.world_size() * 0.5)
+		"layout_twin_fords", "layout_crater_ring", "layout_crossroads":
+			if _count == 2:
+				battle.fog_view.visible = false
+				battle.terrain.set_fog_texture(null)
+				battle.signal_view.set_overlay_visible(false)
+				battle.cam.center_on(battle.world.map.world_size() * 0.5)
+				battle.cam.set_distance(150.0)
 		"scenery_water", "scenery_forest", "scenery_rock", "scenery_wide", "scenery_edge":
 			# The bare landscape with fog and coverage switched off, looking at
 			# the nearest patch of one kind of terrain to the map centre.

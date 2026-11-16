@@ -181,8 +181,9 @@ tools/screenshot.sh battle 120
 Captures `screenshots/battle.png` with software rendering (needs `xvfb-run`).
 `tools/gallery.tscn` puts every model on one sheet, or eight at a time close
 up with `page0`..`page7` as the capture script; `scenery_wide`,
-`scenery_water`, `scenery_forest` and `scenery_rock` show the bare landscape
-with fog off.
+`scenery_water`, `scenery_forest`, `scenery_rock` and `scenery_edge` show the
+bare landscape with fog off, and `layout_twin_fords`, `layout_crater_ring`
+and `layout_crossroads` show a hand-made map whole.
 
 ```bash
 .godot-bin/godot --headless --path . -s res://tools/headless_match.gd -- --seed=7 --factions=aegis,nomad
