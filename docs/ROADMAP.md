@@ -7,13 +7,13 @@ decision in the session log at the bottom.
 
 ## M0 — Bootstrap
 
-- [ ] `project.godot` for Godot 4.7.2 (Compatibility renderer), folder layout
+- [x] `project.godot` for Godot 4.7.2 (Compatibility renderer), folder layout
       `sim/ view/ ui/ data/ scenes/ tests/ tools/`, input map
-- [ ] `tools/install_godot.sh` — fetches the Godot 4.7.2 Linux headless build
+- [x] `tools/install_godot.sh` — fetches the Godot 4.7.2 Linux headless build
       into `.godot-bin/` (git-ignored) if it is not already there
-- [ ] `tests/run_tests.gd` — minimal headless test runner, non-zero exit on failure
-- [ ] `tools/check.sh` — import, run tests, fail on any script error
-- [ ] An empty main scene boots headless with zero errors
+- [x] `tests/run_tests.gd` — minimal headless test runner, non-zero exit on failure
+- [x] `tools/check.sh` — import, run tests, fail on any script error
+- [x] An empty main scene boots headless with zero errors
 
 ## M1 — Simulation core
 
@@ -112,3 +112,32 @@ decision in the session log at the bottom.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
+
+Status: **in progress** — this entry is updated as work lands.
+
+Godot verification: **available**. `tools/install_godot.sh` downloads the
+official 4.7.2 Linux build and `tools/check.sh` runs it headless. A
+software-GL display (`xvfb-run` + `--rendering-driver opengl3`, Mesa llvmpipe)
+also works here, so screenshots can be captured and looked at.
+
+Finished:
+- M0 Bootstrap: project file, folder layout, input map, Godot installer, test
+  runner, `tools/check.sh` (import → unit tests → headless boot of the main
+  scene; fails on any `SCRIPT ERROR`, engine `ERROR:` or warning-as-error).
+
+Decisions:
+- GDScript warnings `untyped_declaration`, `unused_variable`,
+  `shadowed_variable`, `unreachable_code` and `standalone_expression` are
+  errors in `project.godot`, so untyped code does not load at all.
+- Godot exits 0 even when a script fails to parse, so `check.sh` greps the
+  output of every step instead of trusting exit codes alone.
+- Scenes are tiny hand-written `.tscn` files (root node + script); everything
+  else is built in code, because nobody can open the editor.
+- Camera keys: the design gives WASD to the camera and A/S to attack-move and
+  stop. Arrow keys, W and D always pan; A and S pan only while no units are
+  selected, otherwise they are the unit orders.
+- `.uid` files that Godot generates next to scripts are committed (standard
+  for Godot 4.4+); `.godot/` is not.
+
+Half-done / next: M1 simulation core is being written.
