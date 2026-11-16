@@ -117,6 +117,16 @@ decision in the session log at the bottom.
 Newest first. One entry per session: date, what was finished, decisions made,
 anything left half-done, whether Godot verification was available.
 
+### 2026-11-16 — session 2 (branch `claude/relay-session-1116-0451`)
+
+Status: **in progress**, started 04:51 UTC from `3a43a9e` (session 1's last
+commit; `tools/check.sh` passes on it here, Godot and software GL available).
+
+Working on, in order:
+1. Looking at screenshots of every screen for layout and visibility faults.
+2. The open M13 item: 1v1 match length (defender-side levers, as session 1's
+   notes suggest).
+
 ### 2026-11-16 — session 1 (branch `claude/gracious-lovelace-fxl9n2`)
 
 Status: **finished** at about 04:00 UTC, M0 through M14 (two split-out M13
