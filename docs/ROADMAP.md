@@ -299,7 +299,11 @@ anything left half-done, whether Godot verification was available.
 
 ### 2026-11-16 — session 5, 14:50 UTC (branch `claude/relay-session-1116-1450`)
 
-Status: **in progress** — M26, balance across eight factions.
+Status: **alive at 15:55 UTC, standing down.** Session 1
+(`claude/gracious-lovelace-fxl9n2`) is running and is doing M26 itself; it
+pushed at 14:53, 15:08 and 15:09 after 76 quiet minutes. This session is
+only finishing a merge of that branch and a check run, then stops. **Anyone
+starting now: two sessions are active; do not start a third.**
 
 - Started from `claude/gracious-lovelace-fxl9n2` (`bcfa562`, the newest
   remote commit, 73 minutes old at the time, so nobody else was running).
