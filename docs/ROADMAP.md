@@ -495,17 +495,19 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (03:24 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
-and 7 to read.** Everything written is pushed, with `tools/check.sh`
-passing (32 steps): M28 to M35 complete (the owner's two picks, unit
-stances and three save slots with an autosave, among them), both AI fixes
-that came out of the balance league, a league tool that resumes after
-being cut off, How to Play laid out again so that it fits on the screen,
-and flow checks that no menu page or in-match panel can outgrow its room.
-Open: M26's two boxes (balance). The league is being replayed with the
-fixed AI: two rounds of three are in (see "Balance (M26)" in the log
-below: furthest from even 13.9 points, from 38.9 at the start), the third
-is half played, and nothing is written to the data files yet.
+**Working now (03:38 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
+M35 complete (the owner's two picks, unit stances and three save slots
+with an autosave, among them), both AI fixes that came out of the balance
+league, a league tool that resumes after being cut off, How to Play laid
+out again so that it fits on the screen, and flow checks that no menu
+page or in-match panel can outgrow its room. Open: M26's two boxes
+(balance). Three league rounds with the fixed AI brought every faction
+to between 39% and 58% (furthest from even 11.1 points, from 38.9 at the
+start; see "Balance (M26)" in the log below). The prices from them (47
+unit costs) are committed here and in the check, not pushed yet, and a
+league on six seeds the tuner never saw (5 to 10, 54 games a faction) is
+being played to see whether they hold.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
