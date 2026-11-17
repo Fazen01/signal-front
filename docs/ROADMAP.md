@@ -497,20 +497,17 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (07:48 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
-and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
-M35 complete, both AI fixes that came out of the balance league, and the
-unit prices the leagues arrived at with the fixed AI. Over sixteen seeds
-and 720 games those prices put nine factions within 7.6 points of even
-and the Veil 11.8 below, with the average match between 15 and 25 minutes
-in 44 of 45 pairings (see "Balance (M26)" in the log below). **Not pushed:
-one more price step failed the check**: the three-way match ran ninety
-minutes without a winner. The cause was a third flaw in the AI (the Nomad
-AI trained Splicers without limit, thirty and more, and had no army
-left), fixed here and in the check now together with that price step.
-Since it makes the Nomad AI stronger, the sixteen-seed league is being
-played again (about ninety minutes) before M26's first box is judged; its
-second box (match length) is ticked here.
+**Working now (07:53 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Everything written is pushed, with `tools/check.sh`
+passing (32 steps): M28 to M35 complete, three AI fixes that came out of
+the balance leagues (factories before relays when rich, relays kept at
+home under fire, at most three hijackers), and the unit prices the
+leagues arrived at. M26's second box (match length) is ticked. Its first
+is open: before the third AI fix, 720 games over sixteen seeds put nine
+factions within 7.6 points of even and the Veil 11.8 below (see "Balance
+(M26)" in the log below); that fix makes the Nomad AI stronger, so the
+same league is being played again with it and one more price step.
+At 07:53 it had played 10 of its 90 jobs; it resumes if it is cut off.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
