@@ -12,6 +12,7 @@ const STALL_TICKS: int = 20 * 150  ## attack with what we have after this long w
 const THREAT_RANGE: float = 22.0
 const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
 const REINFORCE_TICKS: int = 20 * 240  ## a wave out this long no longer holds back the next one
+const RELAY_DANGER_RADIUS: float = 16.0  ## enemies this close to a relay site send the relay home
 const FLANK_MIN_WAVE: int = 10  ## smaller waves take the straight road
 const FLANK_ANGLE: float = 0.95  ## how far round the target a flanking wave gathers (radians)
 const STRIKE_MIN_CRAFT: int = 3  ## aircraft needed for a strike between waves
@@ -45,6 +46,7 @@ var wave_growth: int = 3
 var max_wave: int = 26
 var wave_cooldown_ticks: int = 20 * 60
 var max_barracks: int = 1
+var relays_kept_home: int = 0  ## relays raised behind the base because the forward spot was under fire
 var max_works: int = 1
 var builds_turrets: bool = true
 var uses_directives: bool = true
@@ -664,7 +666,15 @@ func _relay_spot(w: SimWorld, relay_def: EntityDef) -> Vector2:
 		return Vector2.INF
 	var gap: float = from.pos.distance_to(goal)
 	var step: float = clampf(gap - relay_def.signal_radius * 0.4, 6.0, w.data.link_range - 4.0)
-	return from.pos + (goal - from.pos).normalized() * step
+	var spot: Vector2 = from.pos + (goal - from.pos).normalized() * step
+	# A relay raised under the enemy's guns is a relay lost, and with it
+	# the bandwidth the army is waiting for. While they stand there, raise
+	# it behind the base instead: it reaches nothing new, but it carries
+	# bandwidth, and that comes before ground.
+	if _threat_near(spot, RELAY_DANGER_RADIUS) != null:
+		relays_kept_home += 1
+		return _base_ring_spot((_enemy_hq_pos(w) - _hq.pos).normalized())
+	return spot
 
 
 ## A spot in the ring around the HQ, biased away from the enemy.

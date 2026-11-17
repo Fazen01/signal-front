@@ -355,3 +355,28 @@ func test_a_rich_ai_adds_production_before_it_goes_back_to_relays() -> void:
 	ai._survey(w)
 	me.salvage = 100000
 	check(not (ai._next_building(w, me) in ["flight_deck", "roost"]), "there is an end to it")
+
+
+func test_a_relay_goes_behind_the_base_while_the_forward_spot_is_under_fire() -> void:
+	var w: SimWorld = _match(["aegis", "aegis"], [], [true, false], 5)
+	w.victory_enabled = false
+	var ai: SimAI = w.ais[0]
+	var me: SimPlayer = w.players[0]
+	SimTestUtil.run(w, 30)
+	ai._f = me.faction
+	ai._survey(w)
+	var relay: EntityDef = w.data.entity("relay")
+	var forward: Vector2 = ai._relay_spot(w, relay)
+	check(forward != Vector2.INF, "there is somewhere worth reaching")
+	check_eq(ai.relays_kept_home, 0, "left alone, the next relay goes out towards it")
+	# An enemy tank parks on that spot, in plain view.
+	w.spawn_unit("bulwark", 1, w.map.nearest_free_pos(forward))
+	SimTestUtil.reveal_all(w)
+	SimTestUtil.run(w, 2)
+	ai._survey(w)
+	check(ai._threat_near(forward, SimAI.RELAY_DANGER_RADIUS) != null, "the AI sees the tank there")
+	var home: Vector2 = ai._relay_spot(w, relay)
+	check_eq(ai.relays_kept_home, 1, "so the relay is kept at home")
+	check(home.distance_to(ai._hq.pos) <= 17.5, "in the ring round the headquarters (%.1f from it)" % home.distance_to(ai._hq.pos))
+	var toward_enemy: Vector2 = (ai._enemy_hq_pos(w) - ai._hq.pos).normalized()
+	check((home - ai._hq.pos).dot(toward_enemy) < (forward - ai._hq.pos).dot(toward_enemy), "further from the enemy than the spot it gave up")

@@ -1192,6 +1192,13 @@ restarted three times; the background tuner died with it).**
     Every faction's AI has this, so the two leagues above describe an AI
     that no longer exists, and nothing from them was written to the data
     files. The tuner is playing again from its present prices.
+  - The same trace showed the other half of it: with its Masts gone the
+    AI's bandwidth fell to 20 and it could field nothing, with 5,000
+    salvage in hand, while it went on raising each new Mast at the same
+    forward spot, under the guns that had killed the last one. Now a relay
+    whose spot has armed enemies within 16 units is raised in the ring
+    behind the base instead: it reaches nothing new, but it carries
+    bandwidth (`relays_kept_home` counts them).
   - A test had to change with it: "a starved AI concedes" starved its AI
     by killing its units and emptying its bank, but the AI now has an
     uplink by minute eighteen, which pays 180 a minute, so it was (rightly)
