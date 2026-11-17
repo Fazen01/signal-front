@@ -21,7 +21,8 @@ GETTING STARTED
   5. Kills earn Command Points. Spend them in the Directives panel to unlock
      commander powers (Recon Sweep, Shell Barrage, Field Repair, Signal Surge,
      Blackout, Reinforcement Drop), then use them when they are ready.
-You only see what your coverage and your units see.
+You only see what your coverage and your units see. Ground units and buildings
+on a hill shoot 15% further and see 25% further.
 
 CAMERA
   W / D / arrow keys / screen edge   pan  (A and S also pan with nothing selected)
@@ -45,7 +46,8 @@ SELECTION AND ORDERS
   Shift + train                      queue five of a unit
   Space                              look at the latest warning
   + / -                              game speed (x0.5 to x3)
-  Esc                                cancel, or open the pause menu
+  Esc                                cancel, or open the pause menu (three save
+                                     slots there; the game also saves itself)
 
 The command card at the bottom right shows what the selection can build or
 train, with its hotkey in the corner. Lines show where selected units are
@@ -101,7 +103,7 @@ var _shade: GradientTexture2D = null  ## dark on the left, clear on the right
 var _live: Label = null  ## says which match is playing in the background
 var _preview: MapPreview = null  ## a picture of the battlefield the setup gives
 var _preview_caption: Label = null
-var _help_text: Label = null
+var _help_text: HBoxContainer = null  ## the first page of How to Play: the game on the left, the controls on the right
 var _help_page: Button = null
 var _help_roster: VBoxContainer = null
 var _help_factions: bool = false
@@ -521,9 +523,51 @@ func _build_help() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	_help.add_child(box)
-	_help_text = Hud.make_label(HELP_TEXT, 15, Hud.TEXT)
-	_help_text.custom_minimum_size = Vector2(760.0, 0.0)
+	# The first page is two columns, or it would be taller than the screen:
+	# what the game is on the left, the controls as a table on the right.
+	_help_text = HBoxContainer.new()
+	_help_text.add_theme_constant_override("separation", 36)
 	box.add_child(_help_text)
+	var halves: PackedStringArray = HELP_TEXT.split("\nCAMERA\n")
+	var controls: String = "CAMERA\n" + (halves[1] if halves.size() > 1 else "")
+	var note: String = ""
+	var note_at: int = controls.find("\n\nThe command card")
+	if note_at >= 0:
+		note = controls.substr(note_at + 2)
+		controls = controls.substr(0, note_at)
+	var story: Label = Hud.make_label(halves[0].strip_edges() + "\n\n" + note, 15, Hud.TEXT)
+	story.custom_minimum_size = Vector2(620.0, 0.0)
+	story.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_help_text.add_child(story)
+	var keys: GridContainer = GridContainer.new()
+	keys.columns = 2
+	keys.add_theme_constant_override("h_separation", 18)
+	keys.add_theme_constant_override("v_separation", 3)
+	keys.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_help_text.add_child(keys)
+	for line: String in controls.split("\n"):
+		if line.strip_edges() == "":
+			continue
+		if not line.begins_with(" "):
+			# A heading, across both columns, with a little air above it.
+			if keys.get_child_count() > 0:
+				for k: int in 2:
+					var air: Control = Control.new()
+					air.custom_minimum_size = Vector2(0.0, 8.0)
+					keys.add_child(air)
+			keys.add_child(UiTheme.label(line, 14, UiTheme.ACCENT))
+			keys.add_child(Control.new())
+			continue
+		# "  key      what it does": split at the first run of spaces. A line
+		# with nothing in the key column carries on the line above.
+		var body: String = line.strip_edges(false, true)
+		var gap: int = body.find("  ", 2)
+		var key: String = body.substr(0, gap).strip_edges() if gap >= 0 else ""
+		var what: String = body.substr(gap).strip_edges() if gap >= 0 else body.strip_edges()
+		var key_label: Label = Hud.make_label(key, 15, Hud.GOLD)
+		key_label.custom_minimum_size = Vector2(250.0, 0.0)
+		keys.add_child(key_label)
+		keys.add_child(Hud.make_label(what, 15, Hud.TEXT))
 	# The second page: every faction with its emblem, in its own colour.
 	_help_roster = VBoxContainer.new()
 	_help_roster.add_theme_constant_override("separation", 12)
@@ -570,6 +614,33 @@ func _build_help() -> void:
 	back.custom_minimum_size = Vector2(120.0, 44.0)
 	back.pressed.connect(func() -> void: _show(_main_box))
 	buttons.add_child(back)
+
+
+## The menu pages that would not fit on the screen, each with the size it
+## needs (for the checks: a page that outgrows the screen loses its buttons
+## off the bottom, as How to Play once did).
+func pages_too_big() -> Array[String]:
+	# Measured against the size the interface is laid out for, which is the
+	# least any window gives it (the project stretches to fit, and expands).
+	var room: Vector2 = Vector2(
+		float(ProjectSettings.get_setting("display/window/size/viewport_width", 1600)),
+		float(ProjectSettings.get_setting("display/window/size/viewport_height", 900))
+	)
+	var out: Array[String] = []
+	var pages: Dictionary[String, Control] = {
+		"skirmish setup": _setup, "how to play": _help, "settings": _settings, "tutorials": _tutorials, "load game": _loads,
+	}
+	for id: String in pages:
+		var need: Vector2 = pages[id].get_combined_minimum_size()
+		if need.x > room.x or need.y > room.y:
+			out.append("%s needs %d x %d" % [id, int(need.x), int(need.y)])
+	var was: bool = _help_factions
+	show_help_page(not was)
+	var other: Vector2 = _help.get_combined_minimum_size()
+	if other.x > room.x or other.y > room.y:
+		out.append("how to play, second page, needs %d x %d" % [int(other.x), int(other.y)])
+	show_help_page(was)
+	return out
 
 
 ## The How to Play panel has two pages: the game, and the factions.

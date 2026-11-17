@@ -1168,6 +1168,18 @@ restarted three times; the background tuner died with it).**
   (`test_slot`, `smoke_slot`), so running them never touches a player's
   saves. One autosave, not a rolling set: a second would only matter if
   the first were written at a bad moment, and the three slots cover that.
+- **Found while adding a line about hills to How to Play: the page did
+  not fit on the screen.** It was one column of forty-odd lines, taller
+  than the window, centred, so its heading was cut off at the top and its
+  two buttons (The Factions, Back) were off the bottom. It had been so
+  since the controls list grew, some sessions ago; nobody had looked at
+  that page whole since. It is now two columns: what the game is on the
+  left, the controls as a table of keys on the right, and it needs 1325 by
+  697 of the 1600 by 900 the interface is laid out for. The flow check
+  now asks the menu for any page that needs more room than that
+  (`MainMenu.pages_too_big`), so a page cannot outgrow the screen again
+  without failing the check. The page also says that hills give range
+  and sight, and where the save slots are.
 - **Balance (M26): two leagues over all ten factions, and what they
   showed.** 180 games a round, seeds 1-4, the AI of 23:40 UTC, maps
   without hills.

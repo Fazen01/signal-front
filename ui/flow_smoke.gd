@@ -27,6 +27,8 @@ func _process(_delta: float) -> void:
 		0:
 			var menu: MainMenu = scene as MainMenu
 			if menu != null:
+				var too_big: Array[String] = menu.pages_too_big()
+				_expect(too_big.is_empty(), "every menu page fits on the screen (%s)" % ", ".join(PackedStringArray(too_big)))
 				menu.open_skirmish()
 				_expect(menu.is_setup_open(), "skirmish setup opens")
 				_next(5)

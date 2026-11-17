@@ -162,6 +162,9 @@ func _process(_delta: float) -> void:
 		menu.open_loads()
 	if menu != null and _script_name == "menusettings" and _count == 3:
 		menu.open_settings()
+	if menu != null and _script_name == "help" and _count == 3:
+		menu.show_help_page(false)
+		menu.call("_show", menu.get("_help"))
 	if menu != null and _script_name == "helpfactions" and _count == 3:
 		menu.show_help_page(true)
 		menu.call("_show", menu.get("_help"))
