@@ -497,7 +497,7 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (08:59 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (09:12 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Everything written is pushed, with `tools/check.sh`
 passing (32 steps): M28 to M35 complete, three AI fixes that came out of
 the balance leagues (factories before relays when rich, relays kept at
@@ -507,7 +507,7 @@ is open: before the third AI fix, 720 games over sixteen seeds put nine
 factions within 7.6 points of even and the Veil 11.8 below (see "Balance
 (M26)" in the log below); that fix makes the Nomad AI stronger, so the
 same league is being played again with it and one more price step.
-At 08:59 it had played 69 of its 90 jobs; it resumes if it is cut off.
+At 09:12 it had played 81 of its 90 jobs; it resumes if it is cut off.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
