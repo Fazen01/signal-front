@@ -503,15 +503,31 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (00:25 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (00:45 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
-M33, the combat half of M34 and the optional Light setting, session 7's
-branch, and the fixes listed in the log below. High ground (the last box
-of M33) and new water (M34) are committed and going through the check.
-Running now: the balance league over all ten factions (M26), from a scratch
-copy of the tree. Open: M26's two boxes, and a look pass over the models
-of the eight older factions (M34).
+M33 (high ground included), the combat half of M34 and the optional Light
+setting, session 7's branch, and the fixes listed in the log below.
+Committed here and going through the check, not yet pushed: new water
+(M34), vehicles that lie along the slope under them, and walking legs.
+Running: the balance tuner over all ten factions (M26); its first league
+is in the log below. Open after that: M26's two boxes.
 
+- **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
+  now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
+  88.9%, Foundry 66.7%, Brackenfold 58.3%, Verdigris 55.6%, Veil 44.4%,
+  Aegis 41.7%, Vesper 41.7%, Lodestone 41.7%, Tally 36.1%, Zephyr 19.4%.
+  Median match 14.9 minutes, 93% between 12 and 25, two undecided at an
+  hour. One standard error at 36 games a faction is 8.3 points, so only
+  Nomad (far too strong) and Zephyr (far too weak) are clearly out; the
+  tuner is repricing and replaying. These maps had no hills yet.
+- **A mistake, and its repair (00:45 UTC).** Two status pushes of this
+  session (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
+  paragraph: the text search for "Working now" found session 7's paragraph
+  first, so the body of session 7's log entry and this session's heading
+  were overwritten on the remote for some minutes. No code was touched.
+  The entry is restored here word for word from the commit before
+  (`3b8d701`), and the status is now written by a script that looks only
+  below this session's own heading.
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
   which in your log, and it can be ported. Please do not push a second M31
