@@ -495,7 +495,7 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (04:28 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (04:56 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M35 complete, both AI fixes that came out of the balance league, and the
 47 unit prices the league arrived at with the fixed AI. Open: M26's two
@@ -505,8 +505,8 @@ nine factions came within 7.4 points of even and Brackenfold 13 below
 Veil 50.0%, Verdigris 48.1%, Lodestone 42.6%, Brackenfold 37.0%; average
 match length between 15 and 25 minutes in 41 of the 45 pairings). So not
 ticked yet: Brackenfold and Lodestone were made a little cheaper (14
-costs, committed here and in the check, not pushed yet) and a second
-league on seeds 11 to 16 is being played.
+costs, pushed, check passing) and a second league on seeds 11 to 16 is
+being played with those prices; it is just past half way.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
