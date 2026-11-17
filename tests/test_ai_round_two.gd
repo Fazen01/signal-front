@@ -316,3 +316,42 @@ func _artillery_picked(turrets: bool) -> int:
 				picked += 1
 	w.commands.clear()
 	return picked
+
+
+func test_a_rich_ai_adds_production_before_it_goes_back_to_relays() -> void:
+	# An AI with one barracks, one works and one relay left standing (the
+	# others shot down), asked what it wants to build next.
+	var w: SimWorld = _match(["zephyr", "aegis"], [], [true, false], 5)
+	w.victory_enabled = false
+	var ai: SimAI = w.ais[0]
+	var me: SimPlayer = w.players[0]
+	var home: Vector2i = w.map.cell_of(me.start_pos)
+	w.spawn_building("roost", 0, home + Vector2i(6, -2), true)
+	w.spawn_building("flight_deck", 0, home + Vector2i(-3, 6), true)
+	w.spawn_building("hangar", 0, home + Vector2i(6, 5), true)
+	w.spawn_building("mast", 0, home + Vector2i(-6, -3), true)
+	SimTestUtil.run(w, 30)
+	ai._f = me.faction
+	ai._survey(w)
+	me.bandwidth_cap = 200
+	me.salvage = 400
+	var poor: String = ai._next_building(w, me)
+	check_eq(poor, "mast", "with little in the bank it raises the relays it is short of")
+	me.salvage = 1600
+	var rich: String = ai._next_building(w, me)
+	check_eq(rich, "flight_deck", "with salvage piling up it adds a works first")
+	w.spawn_building("flight_deck", 0, home + Vector2i(-9, 6), true)
+	ai._survey(w)
+	check_eq(ai._next_building(w, me), "roost", "then a barracks")
+	w.spawn_building("roost", 0, home + Vector2i(10, -2), true)
+	ai._survey(w)
+	check_eq(ai._next_building(w, me), "mast", "and with one more of each it is back to relays")
+	me.salvage = 4600
+	check(ai._next_building(w, me) in ["flight_deck", "roost"], "unless still more has piled up")
+	# The most it adds this way is three of each over its usual number.
+	for k: int in 6:
+		w.spawn_building("flight_deck", 0, home + Vector2i(-12 - k * 4, 12), true)
+		w.spawn_building("roost", 0, home + Vector2i(12 + k * 3, 10), true)
+	ai._survey(w)
+	me.salvage = 100000
+	check(not (ai._next_building(w, me) in ["flight_deck", "roost"]), "there is an end to it")
