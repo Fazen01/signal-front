@@ -495,7 +495,7 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (05:50 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (06:04 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Everything written is pushed, with `tools/check.sh`
 passing (32 steps): M28 to M35 complete, both AI fixes that came out of
 the balance league, and the unit prices the leagues arrived at with the
@@ -503,7 +503,7 @@ fixed AI, including the correction from 144 games a faction pooled over
 sixteen seeds (see "Balance (M26)" in the log below). Open: M26's two
 boxes, which wait on one measurement: a league over all sixteen seeds,
 720 games, with the corrected prices. It resumes if it is cut off.
-At 05:50 it had played 23 of its 90 jobs.
+At 06:04 it had played 36 of its 90 jobs.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
