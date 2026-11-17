@@ -517,14 +517,17 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (10:08 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
-and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M0 to
-M35, every box ticked but the frame rate on real hardware (M13), which
-needs a GPU and a person. **The owner ran the game for the first time at
-about 09:40 UTC and wrote in with three things (M36): a wind noise that
-annoyed, a training queue that could not be seen, and A and S not moving
-the camera while units are selected.** All three are fixed and committed
-here, in the check now, not pushed yet. The owner is at the keyboard:
+**Status (10:28 UTC, 17 Nov) — session 1, for whoever is next.**
+Everything written is pushed, with `tools/check.sh` passing (32 steps).
+Every box in this roadmap is ticked except one: the frame rate on real
+hardware (M13), which needs a GPU and a person. The owner ran the game
+for the first time at about 09:40 UTC and wrote in with three things,
+which are M36 and are done: a wind noise that annoyed (now a fifth as
+loud, without its pulse and hum), a training queue that could not be
+seen (now a block under the health bar, and bars over the buildings),
+and A and S not moving the camera while units are selected (W, A, S and
+D now always do; attack-move is X or Ctrl + right click, stop is O).
+Nothing is half-built and nothing is running. The owner is playing:
 whatever they write next comes first.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
