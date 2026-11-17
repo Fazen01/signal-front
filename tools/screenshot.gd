@@ -275,10 +275,16 @@ func _run_script(battle: BattleScene) -> void:
 				if at.distance_to(hmid) < hbest_d:
 					hbest_d = at.distance_to(hmid)
 					hbest = at
-		for k: int in 3:
-			battle.world.spawn_unit("bulwark", battle.local_player, hmap.nearest_free_pos(hbest + Vector2(float(k) * 4.0, 2.0)))
-		battle.cam.center_on(hbest)
-		battle.cam.set_distance(46.0)
+		# Walk outwards from the hilltop to the bank, and put tanks on and across it.
+		var hedge: Vector2 = hbest
+		for step: int in 40:
+			if not hmap.is_high(hedge + Vector2(1.0, 0.0)):
+				break
+			hedge += Vector2(1.0, 0.0)
+		for k: int in 4:
+			battle.world.spawn_unit("bulwark", battle.local_player, hedge + Vector2(float(k) * 2.2 - 4.0, float(k) * 4.0 - 6.0))
+		battle.cam.center_on(hedge)
+		battle.cam.set_distance(30.0 if _script_name.ends_with("_near_hill") else 46.0)
 	if _script_name.begins_with("region_") and _script_name.ends_with("_water") and _count == 3:
 		# "region_<id>_<seed>_water": look at the water nearest the middle of the map.
 		var wmap: SimMap = battle.world.map

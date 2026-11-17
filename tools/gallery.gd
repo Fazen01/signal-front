@@ -25,6 +25,10 @@ func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		# "upage<N>": the same, counting units only (so that the last units
 		# do not share a page with the first buildings).
+		# "faction_<id>": everything one faction has, units in front.
+		if arg.begins_with("--script=faction_"):
+			_show_faction(units, buildings, arg.trim_prefix("--script=faction_"))
+			return
 		if arg.begins_with("--script=upage"):
 			_show_page(units, int(arg.trim_prefix("--script=upage")))
 			return
@@ -69,6 +73,27 @@ func _show_page(defs: Array[EntityDef], page: int) -> void:
 		cam.look_at_from_position(Vector3(0.0, 13.0, 15.0), Vector3(0.0, 0.0, 0.6), Vector3.UP)
 	else:
 		cam.look_at_from_position(Vector3(0.0, 24.0, 27.0), Vector3(0.0, 0.0, 1.5), Vector3.UP)
+	cam.current = true
+
+
+func _show_faction(units: Array[EntityDef], buildings: Array[EntityDef], faction_id: String) -> void:
+	var i: int = 0
+	for def: EntityDef in units:
+		if def.faction != faction_id:
+			continue
+		var model: Node3D = ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[0])
+		_put(model, Vector3((float(i % 6) - 2.5) * 5.6, def.altitude() * 0.35, 7.0 + float(i / 6) * 6.0), def.name)
+		i += 1
+	i = 0
+	for def: EntityDef in buildings:
+		if def.faction != faction_id:
+			continue
+		_put(ModelFactory.build(def.model, MatchConfig.TEAM_COLORS[0]), Vector3((float(i % 4) - 1.5) * 9.0, 0.0, -12.0 + float(i / 4) * 8.5), def.name)
+		i += 1
+	var cam: Camera3D = Camera3D.new()
+	cam.fov = 40.0
+	add_child(cam)
+	cam.look_at_from_position(Vector3(0.0, 27.0, 36.0), Vector3(0.0, 0.0, 2.5), Vector3.UP)
 	cam.current = true
 
 

@@ -23,6 +23,8 @@ var _turret_home: Vector3 = Vector3.ZERO
 var _kick: float = 0.0  ## turret recoil, 1 just after firing, decaying to 0
 var _view_scale: float = 1.0
 var _walks: bool = false  ## infantry bob as they move
+var _tilts: bool = false  ## ground vehicles lie along the slope under them
+var _ground_up: Vector3 = Vector3.UP  ## the slope a vehicle is lying on, smoothed
 var _stride: float = 0.0
 var _scaffold: Node3D = null  ## stands around a building until it is finished
 var _range_ring: MeshInstance3D = null  ## how far its weapons reach, while it is selected
@@ -47,7 +49,7 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 			model = ModelFactory.build(e.def.model, team)
 		SimEntity.Kind.WRECK:
 			model = ModelFactory.build_wreck(e.wreck_model, e.id)
-			model.rotation.y = -e.facing
+			model.basis = Basis(Quaternion(Vector3.UP, _slope(world.map, e.pos, maxf(0.8, e.radius)))) * Basis(Vector3.UP, -e.facing)
 			# A wreck made just now is on fire; one that was already lying
 			# there when it came into view (or when a save was loaded) is not.
 			var made: int = e.decay_tick - int(world.data.wreck_decay_seconds * float(SimWorld.TICK_RATE))
@@ -68,6 +70,7 @@ func setup(e: SimEntity, world: SimWorld, local_player: int) -> void:
 		_walks = e.def.is_infantry()
 		_view_scale = 1.25 if _walks else 1.1
 		model.scale = Vector3.ONE * _view_scale
+		_tilts = not _walks and altitude <= 0.0
 	_find_parts()
 	var ring_color: Color = RING_NEUTRAL
 	if e.owner >= 0:
@@ -284,6 +287,13 @@ func _make_fire(radius: float) -> CPUParticles3D:
 	return fire
 
 
+## Which way is up on the ground at a spot, measured across `reach` either side.
+static func _slope(map: SimMap, p: Vector2, reach: float) -> Vector3:
+	var dx: float = map.height_at(p + Vector2(reach, 0.0)) - map.height_at(p - Vector2(reach, 0.0))
+	var dz: float = map.height_at(p + Vector2(0.0, reach)) - map.height_at(p - Vector2(0.0, reach))
+	return Vector3(-dx, 2.0 * reach, -dz).normalized()
+
+
 func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 	if e.def != null:
 		_update_damage_smoke(e)
@@ -295,7 +305,13 @@ func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 	match kind:
 		SimEntity.Kind.UNIT:
 			var f: float = lerp_angle(e.prev_facing, e.facing, alpha)
-			model.rotation.y = -f
+			if _tilts:
+				# A vehicle lies along the ground under it: crossing a bank
+				# its nose comes up, and along one it leans.
+				_ground_up = _ground_up.lerp(_slope(map, p, maxf(0.8, e.radius)), 0.18).normalized()
+				model.basis = (Basis(Quaternion(Vector3.UP, _ground_up)) * Basis(Vector3.UP, -f)).scaled(Vector3.ONE * _view_scale)
+			else:
+				model.rotation.y = -f
 			if turret != null:
 				turret.rotation.y = -(lerp_angle(e.prev_aim, e.aim, alpha) - f)
 			var t: float = float(Time.get_ticks_msec()) * 0.001
