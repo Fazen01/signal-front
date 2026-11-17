@@ -13,6 +13,7 @@ const THREAT_RANGE: float = 22.0
 const LATE_GAME_TICKS: int = 20 * 60 * 22  ## after this, waves head for the enemy HQ
 const REINFORCE_TICKS: int = 20 * 240  ## a wave out this long no longer holds back the next one
 const RELAY_DANGER_RADIUS: float = 16.0  ## enemies this close to a relay site send the relay home
+const MAX_HIJACKERS: int = 3  ## Splicers and the like an AI keeps at once
 const FLANK_MIN_WAVE: int = 10  ## smaller waves take the straight road
 const FLANK_ANGLE: float = 0.95  ## how far round the target a flanking wave gathers (radians)
 const STRIKE_MIN_CRAFT: int = 3  ## aircraft needed for a strike between waves
@@ -902,6 +903,11 @@ func _run_production(w: SimWorld, me: SimPlayer) -> void:
 					wgt += minf(float(turrets_known) * 0.45, 3.0)
 				"support":
 					if support + _queued(id) >= 2:
+						wgt = 0.0
+				"hijacker":
+					# They do not fight and so do not die: without a limit an
+					# AI ends a long match with thirty of them and no army.
+					if _hijackers.size() + _queued(id) >= MAX_HIJACKERS:
 						wgt = 0.0
 				_:
 					pass

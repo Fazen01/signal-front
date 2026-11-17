@@ -1282,6 +1282,18 @@ restarted three times; the background tuner died with it).**
     Nomad x1.024, Tally x1.017, Lodestone x0.976, Brackenfold x0.973, Veil
     x0.959 (29 costs: a Stalker 355 to 340, a Mauler 535 to 550). Being
     measured over the same sixteen seeds again.
+  - **That step failed the check (07:25 UTC) and was not pushed:** the
+    three-way match (Foundry, Nomad, Aegis, seed 5) had no winner after
+    ninety minutes; with the prices before it had ended at 35. Traced:
+    by minute 50 the map's salvage was gone and both survivors lived on
+    their uplinks, and the Nomad AI had 20 to 37 Splicers at any time (its
+    vehicle thief, which does not fight and so does not die) and a dozen
+    Drifters. Nothing limited how many it trained: one infantry order in
+    seven for the whole match, 140 salvage and a point of bandwidth each.
+    It had been doing this in every long match. Fix: an AI keeps at most
+    three hijackers (`MAX_HIJACKERS`); the same match then ends at 31
+    minutes. This makes the Nomad AI stronger, so the league is being
+    played again before the box is judged.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty

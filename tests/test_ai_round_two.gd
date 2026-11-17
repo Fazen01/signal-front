@@ -380,3 +380,39 @@ func test_a_relay_goes_behind_the_base_while_the_forward_spot_is_under_fire() ->
 	check(home.distance_to(ai._hq.pos) <= 17.5, "in the ring round the headquarters (%.1f from it)" % home.distance_to(ai._hq.pos))
 	var toward_enemy: Vector2 = (ai._enemy_hq_pos(w) - ai._hq.pos).normalized()
 	check((home - ai._hq.pos).dot(toward_enemy) < (forward - ai._hq.pos).dot(toward_enemy), "further from the enemy than the spot it gave up")
+
+
+func test_the_ai_keeps_only_a_few_hijackers() -> void:
+	# A Nomad AI with a Camp and money to burn, asked what to train many
+	# times over, with none, some and its fill of Splicers already about.
+	var w: SimWorld = _match(["nomad", "aegis"], [], [true, false], 5)
+	w.victory_enabled = false
+	var ai: SimAI = w.ais[0]
+	var me: SimPlayer = w.players[0]
+	var home: Vector2i = w.map.cell_of(me.start_pos)
+	var camp: SimEntity = w.spawn_building("camp", 0, home + Vector2i(6, -2), true)
+	SimTestUtil.run(w, 30)
+	me.salvage = 1000000
+	me.bandwidth_cap = 100000
+	ai._f = me.faction
+	var picked: Array[int] = []
+	for have: int in [0, SimAI.MAX_HIJACKERS]:
+		for k: int in have:
+			w.spawn_unit("splicer", 0, w.map.nearest_free_pos(me.start_pos + Vector2(8.0 + float(k), 6.0)))
+		ai._survey(w)
+		check_eq(ai._hijackers.size(), have, "the AI counts its Splicers (%d)" % have)
+		var splicers: int = 0
+		for i: int in 300:
+			ai._spent = 0
+			ai._bandwidth_committed = 0
+			ai._wish.clear()
+			w.commands.clear()
+			camp.queue.clear()
+			ai._run_production(w, me)
+			for cmd: SimCommand in w.commands:
+				if cmd.type == SimCommand.Type.TRAIN and cmd.def_id == "splicer":
+					splicers += 1
+		w.commands.clear()
+		picked.append(splicers)
+	check(picked[0] > 0, "with none it trains some (%d in 300 choices)" % picked[0])
+	check_eq(picked[1], 0, "with %d it trains no more" % SimAI.MAX_HIJACKERS)
