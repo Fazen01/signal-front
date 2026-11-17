@@ -81,6 +81,10 @@ func _process(_delta: float) -> void:
 				_expect(battle.world.tick_count == int(battle.get_meta("paused_at")), "simulation holds while paused")
 				battle.menus.open_saves(false)
 				_expect(battle.menus.is_pause_open(), "the save slots open from the pause menu")
+				battle.menus.open_settings()
+				var cramped: Array[String] = battle.menus.panels_too_big()
+				_expect(cramped.is_empty(), "the pause menu, its settings and the save slots fit between the bars (%s)" % ", ".join(PackedStringArray(cramped)))
+				battle.menus.close_settings()
 				battle.menus.close_saves()
 				# A slot of the test's own, so that nobody's saves are touched.
 				_expect(battle.save_game(SMOKE_SLOT), "the match saves to a slot")
@@ -113,6 +117,8 @@ func _process(_delta: float) -> void:
 			if battle != null:
 				_expect(battle.world.game_over, "surrender ends the match")
 				_expect(battle.menus.result_shown, "result screen is shown")
+				var tall: Array[String] = battle.menus.panels_too_big()
+				_expect(tall.is_empty(), "and fits between the bars (%s)" % ", ".join(PackedStringArray(tall)))
 				_expect(battle.world.winner != battle.local_player, "the surrendering player lost")
 				battle.play_again()
 				_next(20)

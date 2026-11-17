@@ -3,6 +3,7 @@ extends Control
 ## The pause menu and the victory / defeat summary shown over a match.
 
 const FIELD_CENTRE: float = 0.415  ## the middle of the view between the HUD's bars, as a share of the screen height
+const FIELD_TOP: float = 56.0  ## where the battlefield begins under the top bar, in the layout's own height
 
 var battle: BattleScene = null
 var skin: UiSkin = null
@@ -78,6 +79,26 @@ func _build_pause() -> void:
 	box.add_child(_button("Quit to Main Menu", func() -> void: battle.quit_to_menu()))
 
 
+## The panels built so far that are too big to sit between the HUD's bars,
+## each with the size it needs (for the checks).
+func panels_too_big() -> Array[String]:
+	var width: float = float(ProjectSettings.get_setting("display/window/size/viewport_width", 1600))
+	var height: float = float(ProjectSettings.get_setting("display/window/size/viewport_height", 900))
+	# A panel is centred on the middle of the battlefield, so it may be as
+	# tall as twice the distance from there up to the top bar.
+	var room: float = 2.0 * (FIELD_CENTRE * height - FIELD_TOP)
+	var out: Array[String] = []
+	var panels: Dictionary[String, Control] = {"pause menu": _pause, "settings": _settings, "save slots": _saves, "result": _result}
+	for id: String in panels:
+		var panel: Control = panels[id]
+		if panel == null:
+			continue
+		var need: Vector2 = panel.get_combined_minimum_size()
+		if need.x > width or need.y > room:
+			out.append("%s needs %d x %d of %d x %d" % [id, int(need.x), int(need.y), int(width), int(room)])
+	return out
+
+
 func is_pause_open() -> bool:
 	return _pause.visible or (_settings != null and _settings.visible) or (_saves != null and _saves.visible)
 
@@ -147,13 +168,17 @@ func open_settings() -> void:
 		_settings.grow_horizontal = Control.GROW_DIRECTION_BOTH
 		_settings.grow_vertical = Control.GROW_DIRECTION_BOTH
 		add_child(_settings)
-		_settings.closed.connect(func() -> void:
-			_settings.visible = false
-			_pause.visible = true
-			battle.apply_settings()
-		)
+		_settings.closed.connect(close_settings)
 	_pause.visible = false
 	_settings.visible = true
+
+
+## Back from the settings to the pause menu, with the settings applied.
+func close_settings() -> void:
+	if _settings != null:
+		_settings.visible = false
+	_pause.visible = true
+	battle.apply_settings()
 
 
 func set_pause_open(open: bool) -> void:
