@@ -495,67 +495,18 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (03:05 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (03:24 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Everything written is pushed, with `tools/check.sh`
 passing (32 steps): M28 to M35 complete (the owner's two picks, unit
 stances and three save slots with an autosave, among them), both AI fixes
 that came out of the balance league, a league tool that resumes after
 being cut off, How to Play laid out again so that it fits on the screen,
 and flow checks that no menu page or in-match panel can outgrow its room.
-Script-side frame cost with 300 units is unchanged (7.3 ms). Open: M26's
-two boxes (balance). The league is being replayed with the fixed AI: two
-rounds of three are in (the two bullets before the last below), nothing
-is written to the data files yet.
+Open: M26's two boxes (balance). The league is being replayed with the
+fixed AI: two rounds of three are in (see "Balance (M26)" in the log
+below: furthest from even 13.9 points, from 38.9 at the start), the third
+is half played, and nothing is written to the data files yet.
 
-- **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
-  now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
-  88.9%, Foundry 66.7%, Brackenfold 58.3%, Verdigris 55.6%, Veil 44.4%,
-  Aegis 41.7%, Vesper 41.7%, Lodestone 41.7%, Tally 36.1%, Zephyr 19.4%.
-  Median match 14.9 minutes, 93% between 12 and 25, two undecided at an
-  hour. One standard error at 36 games a faction is 8.3 points, so only
-  Nomad (far too strong) and Zephyr (far too weak) are clearly out. These
-  maps had no hills yet.
-- **Round 2 (01:12 UTC), prices Nomad x1.136, Foundry x1.058, Brackenfold
-  x1.029, Tally x0.951, Zephyr x0.893:** Nomad 63.9%, Brackenfold 63.9%,
-  Verdigris 61.1%, Vesper 58.3%, Foundry 55.6%, Tally 44.4%, Lodestone
-  44.4%, Aegis 41.7%, Veil 30.6%, Zephyr 25.0%. Median 15.3 minutes, 88%
-  between 12 and 25, four undecided. Furthest from even 25 points, down
-  from 39. Not written to the data files.
-- **Why Zephyr does not answer to price (01:20 UTC).** Traced one of its
-  matches minute by minute: it sat on 2,000 to 5,000 salvage with one
-  Roost and one Flight Deck for the whole match. The build order returns
-  the first need that is not met, and "relays below the early count" came
-  before "salvage is piling up, add production"; an enemy that kept
-  shooting its forward Masts down kept it at the relay step for ever. A
-  faction that cannot spend its salvage is not helped by cheaper units.
-  Fix (in the check next): with 1,500 or more in the bank the AI adds a
-  works and a barracks (up to three over its usual number) before it goes
-  back to relays. This is in every faction's AI, so the league is being
-  played again from the tuner's present prices before anything is written.
-- **With the fixed AI, round 1 of 3 (02:30 UTC), prices as the tuner
-  left them (Nomad x1.191, Brackenfold x1.079, Foundry x1.058, Verdigris
-  x1.039, Vesper x1.029, Tally x0.951, Veil x0.932, Zephyr x0.815), hills
-  on the maps:** Brackenfold 72.2%, Tally 58.3%, Veil 58.3%, Lodestone
-  52.8%, Vesper 50.0%, Verdigris 50.0%, Zephyr 44.4%, Foundry 36.1%,
-  Nomad 36.1%, Aegis 30.6%. Median match 16.3 minutes, 87% between 12 and
-  25, four undecided at an hour. Furthest from even 22.2 points. Zephyr
-  went from 25% to 44%: most of its trouble was the AI, as traced. The
-  prices that were right for the old AI now overcharge Nomad and Foundry.
-- **With the fixed AI, round 2 of 3 (03:03 UTC), prices Brackenfold
-  x1.163, Nomad x1.133, Verdigris x1.039, Vesper x1.029, Foundry x1.007,
-  Tally x0.979, Veil x0.959, Aegis x0.932, Zephyr x0.815:** Veil 61.1%,
-  Tally 55.6%, Foundry 52.8%, Nomad 52.8%, Brackenfold 52.8%, Lodestone
-  50.0%, Vesper 47.2%, Verdigris 47.2%, Aegis 36.1%, Zephyr 36.1%. Median
-  match 16.0 minutes, 92% between 12 and 25, three undecided. Furthest
-  from even 13.9 points (22.2 a round earlier, 38.9 at the start).
-- **A mistake, and its repair (00:45 UTC).** Two status pushes of this
-  session (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
-  paragraph: the text search for "Working now" found session 7's paragraph
-  first, so the body of session 7's log entry and this session's heading
-  were overwritten on the remote for some minutes. No code was touched.
-  The entry is restored here word for word from the commit before
-  (`3b8d701`), and the status is now written by a script that looks only
-  below this session's own heading.
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
   which in your log, and it can be ported. Please do not push a second M31
@@ -1183,6 +1134,18 @@ restarted three times; the background tuner died with it).**
   (`test_slot`, `smoke_slot`), so running them never touches a player's
   saves. One autosave, not a rolling set: a second would only matter if
   the first were written at a bad moment, and the three slots cover that.
+- **A mistake of this session, and its repair (00:45 UTC).** Two status
+  pushes (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
+  paragraph of this log: the text search for "Working now" found session
+  7's paragraph first, so the body of session 7's entry and this
+  session's heading were overwritten on the remote for some minutes each.
+  No code was touched. The entry was restored word for word from the
+  commit before (`3b8d701`), and the status is now written by a script
+  that looks only below this session's own heading and refuses to
+  replace more than a paragraph's worth.
+- The frame benchmark after tonight's view changes (vehicles tilting,
+  legs, the new water and ground shaders are not in it: no GPU): 7.31 ms
+  a frame with 300 units, as before.
 - **Found while adding a line about hills to How to Play: the page did
   not fit on the screen.** It was one column of forty-odd lines, taller
   than the window, centred, so its heading was cut off at the top and its
@@ -1228,6 +1191,24 @@ restarted three times; the background tuner died with it).**
     whose spot has armed enemies within 16 units is raised in the ring
     behind the base instead: it reaches nothing new, but it carries
     bandwidth (`relays_kept_home` counts them).
+  - **With the fixed AI** (both changes above), hills on the maps, 180
+    games a round, seeds 1-4:
+    - Round 1 (02:30 UTC), prices as the tuner had left them for the old
+      AI (Nomad x1.191, Brackenfold x1.079, Foundry x1.058, Verdigris
+      x1.039, Vesper x1.029, Tally x0.951, Veil x0.932, Zephyr x0.815):
+      Brackenfold 72.2%, Tally 58.3%, Veil 58.3%, Lodestone 52.8%, Vesper
+      50.0%, Verdigris 50.0%, Zephyr 44.4%, Foundry 36.1%, Nomad 36.1%,
+      Aegis 30.6%. Median match 16.3 minutes, 87% between 12 and 25, four
+      undecided. Furthest from even 22.2 points. Zephyr went from 25% to
+      44%: most of its trouble was the AI, as traced. The prices that
+      were right for the old AI overcharged Nomad and Foundry.
+    - Round 2 (03:03 UTC), prices Brackenfold x1.163, Nomad x1.133,
+      Verdigris x1.039, Vesper x1.029, Foundry x1.007, Tally x0.979, Veil
+      x0.959, Aegis x0.932, Zephyr x0.815: Veil 61.1%, Tally 55.6%,
+      Foundry 52.8%, Nomad 52.8%, Brackenfold 52.8%, Lodestone 50.0%,
+      Vesper 47.2%, Verdigris 47.2%, Aegis 36.1%, Zephyr 36.1%. Median
+      16.0 minutes, 92% between 12 and 25, three undecided. Furthest from
+      even 13.9 points.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty
