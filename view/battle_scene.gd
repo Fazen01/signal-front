@@ -73,6 +73,7 @@ func _ready() -> void:
 	terrain.name = "Terrain"
 	add_child(terrain)
 	terrain.build(world.map, config.seed_value)
+	terrain.set_sky_color(SceneLight.sky_over(time_of_day))
 
 	world_view = WorldView.new()
 	world_view.name = "World"

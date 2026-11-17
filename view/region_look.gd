@@ -20,6 +20,7 @@ var water_shallow: Color = Color(0.25, 0.55, 0.58)
 var water_deep: Color = Color(0.06, 0.22, 0.38)
 var water_foam: Color = Color(0.86, 0.93, 0.92)
 var water_glow: float = 0.0  ## above 0 the "water" gives off light: lava
+var water_ice: float = 0.0  ## above 0 the water is frozen over
 # Plants and rock.
 var trees: String = "wood"  ## "wood", "snow" (capped conifers), "dry" (cactus and thorn) or "dead"
 var conifer_low: Color = Color(0.07, 0.20, 0.11)
@@ -111,6 +112,7 @@ static func of(region: String) -> RegionLook:
 			k.water_shallow = Color(0.62, 0.80, 0.88)
 			k.water_deep = Color(0.24, 0.44, 0.60)
 			k.water_foam = Color(0.97, 0.99, 1.0)
+			k.water_ice = 1.0
 			k.trees = "snow"
 			k.conifer_low = Color(0.07, 0.18, 0.14)
 			k.conifer_high = Color(0.16, 0.32, 0.24)

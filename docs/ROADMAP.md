@@ -324,7 +324,11 @@ map generation itself to be improved.
       "I don't want that", then that it need not be removed if it was
       already built, which it was. So it is kept, but a match is lit for
       midday, as before, unless another hour is picked
-- [ ] The game as a whole: water and sky
+- [x] The game as a whole: water and sky. Water has a soft, wandering
+      shore, clear shallows, ripples and the sky's colour in its deeps;
+      Frostline water is frozen over. The sky itself is never on screen
+      (the camera looks down), so its part is what it does to the water and
+      the cloud shadows that cross land and water alike
 
 ## Ideas for later (proposed by session 1, not yet asked for)
 
@@ -499,14 +503,14 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (00:10 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (00:25 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M33, the combat half of M34 and the optional Light setting, session 7's
 branch, and the fixes listed in the log below. High ground (the last box
-of M33) is committed and going through the check. Running now: the balance
-league over all ten factions (M26), from a scratch copy of the tree. Open:
-M26's two boxes, a look pass over every faction's models and water and sky
-(M34).
+of M33) and new water (M34) are committed and going through the check.
+Running now: the balance league over all ten factions (M26), from a scratch
+copy of the tree. Open: M26's two boxes, and a look pass over the models
+of the eight older factions (M34).
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
@@ -1059,6 +1063,20 @@ restarted three times; the background tuner died with it).**
   - Not done: the AI does not know about hills (it neither seeks them for
     its guns nor avoids attacking up one); the three-way and team matches
     in the check are unchanged by that.
+- **Water and sky (M34).** The old water was one flat blue with a hard
+  white line round it, and the line ran straight from mesh corner to mesh
+  corner, so every lake was a polygon. Now the sheet is pulled back from
+  its true edge by an uneven amount (noise, in the shader), so the shore
+  wanders and sand shows under clear shallows; foam is a thin line that
+  comes and goes instead of an outline; thin ripples drift over it; the
+  deeps take a little of the sky's colour for the hour (`SceneLight.
+  sky_over`), and the cloud shadows that cross the land cross the water
+  too. Frostline water is frozen (`RegionLook.water_ice`): a matte sheet,
+  clouded in patches, cracked, with snow drifted over it from the shore.
+  Lava keeps its look and gains the ragged edge. The sky is never in the
+  picture, so nothing was built for it beyond that; the box is ticked on
+  that understanding. `tools/screenshot.sh x 140 region_<id>_<seed>_water`
+  looks at the water nearest the middle of a map.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

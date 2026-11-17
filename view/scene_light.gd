@@ -13,6 +13,19 @@ const TIME_NAMES: Dictionary[String, String] = {
 }
 
 
+## The colour the sky gives to open water at an hour.
+static func sky_over(time: String) -> Color:
+	match time:
+		"morning":
+			return Color(0.80, 0.76, 0.74)
+		"evening":
+			return Color(0.90, 0.60, 0.46)
+		"overcast":
+			return Color(0.66, 0.68, 0.71)
+		_:
+			return Color(0.58, 0.70, 0.86)
+
+
 ## Adds a "Sun" and an "Environment" node to `parent`.
 static func add_to(parent: Node, shadows: bool, region: String = "temperate", time: String = "noon") -> void:
 	var look: RegionLook = RegionLook.of(region)

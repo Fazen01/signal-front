@@ -279,6 +279,21 @@ func _run_script(battle: BattleScene) -> void:
 			battle.world.spawn_unit("bulwark", battle.local_player, hmap.nearest_free_pos(hbest + Vector2(float(k) * 4.0, 2.0)))
 		battle.cam.center_on(hbest)
 		battle.cam.set_distance(46.0)
+	if _script_name.begins_with("region_") and _script_name.ends_with("_water") and _count == 3:
+		# "region_<id>_<seed>_water": look at the water nearest the middle of the map.
+		var wmap: SimMap = battle.world.map
+		var wmid: Vector2 = wmap.world_size() * 0.5
+		var wbest: Vector2 = wmid
+		var wbest_d: float = INF
+		for wy: int in wmap.h:
+			for wx: int in wmap.w:
+				if wmap.terrain_cell(Vector2i(wx, wy)) == SimMap.Terrain.WATER:
+					var wat: Vector2 = wmap.cell_center(Vector2i(wx, wy))
+					if wat.distance_to(wmid) < wbest_d:
+						wbest_d = wat.distance_to(wmid)
+						wbest = wat
+		battle.cam.center_on(wbest)
+		battle.cam.set_distance(40.0)
 	match _script_name:
 		"closeup":
 			if _count == 2:

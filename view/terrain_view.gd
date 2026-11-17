@@ -117,7 +117,9 @@ uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform vec3 shallow : source_color = vec3(0.25, 0.55, 0.58);
 uniform vec3 deep : source_color = vec3(0.06, 0.22, 0.38);
 uniform vec3 foam_color : source_color = vec3(0.86, 0.93, 0.92);
+uniform vec3 sky : source_color = vec3(0.58, 0.70, 0.86);
 uniform float glow = 0.0;
+uniform float ice = 0.0;
 varying vec3 wpos;
 
 void vertex() {
@@ -125,23 +127,42 @@ void vertex() {
 }
 
 void fragment() {
-	// UV.x carries the water depth at this point; negative is dry land.
-	float depth = UV.x;
+	vec2 p = wpos.xz;
+	// UV.x carries the water depth at this point; negative is dry land. The
+	// surface is a flat sheet over a coarse mesh, so its true edge runs in
+	// straight lines from corner to corner: pull the edge back by an uneven
+	// amount, so that the shoreline wanders, and let it breathe a little.
+	vec3 still = texture(noise_tex, p * 0.085 + vec2(0.21, 0.63)).rgb;
+	float near_shore = 1.0 - smoothstep(0.25, 0.85, UV.x);
+	float lap = (glow > 0.0 || ice > 0.0) ? 0.0 : sin(TIME * 0.8 + still.g * 12.0) * 0.025;
+	float depth = UV.x - (0.05 + still.r * 0.36 - lap) * near_shore;
 	if (depth < 0.0) {
 		discard;
 	}
-	vec2 p = wpos.xz;
 	vec3 n1 = texture(noise_tex, p * 0.045 + TIME * vec2(0.011, 0.006)).rgb;
 	vec3 n2 = texture(noise_tex, p * 0.083 - TIME * vec2(0.008, 0.012)).rgb;
-	float d = clamp(depth / 0.8, 0.0, 1.0);
+	vec3 n3 = texture(noise_tex, p * 0.19 + TIME * vec2(-0.017, 0.013)).rgb;
+	float d = smoothstep(0.0, 0.9, depth);
 	vec3 col = mix(shallow, deep, d);
-	float glint = smoothstep(0.56, 0.70, n1.r * 0.5 + n2.g * 0.5);
-	col += glint * 0.09;
-	float edge = 1.0 - smoothstep(0.0, 0.06 + 0.06 * n2.b, depth);
-	float band = smoothstep(0.72, 1.0, sin(depth * 24.0 - TIME * 1.2 + n1.g * 5.0)) * (1.0 - smoothstep(0.10, 0.42, depth));
-	float foam = clamp(edge + band * 0.4, 0.0, 1.0);
+	// The sky lies in the deep water, and the clouds whose shadows cross
+	// the land darken it as they pass.
+	col = mix(col, sky, 0.14 * d);
+	float cloud = texture(noise_tex, p * 0.0032 + TIME * vec2(0.0042, 0.0023)).g;
+	col *= mix(0.84, 1.04, smoothstep(0.38, 0.62, cloud));
+	// Ripples: thin bright lines where two drifting fields cross, in patches.
+	float ripple = 1.0 - smoothstep(0.0, 0.020, abs(n2.r - n3.g));
+	ripple *= smoothstep(0.40, 0.62, n1.b);
+	col += foam_color * ripple * 0.15;
+	// The shore: a thin line of foam that comes and goes along it, and a
+	// faint band or two lapping in behind.
+	float edge = (1.0 - smoothstep(0.0, 0.07, depth)) * smoothstep(0.34, 0.62, n2.b + 0.22 * sin(TIME * 0.7 + still.b * 9.0));
+	float band = smoothstep(0.80, 1.0, sin(depth * 22.0 - TIME * 1.1 + n1.g * 5.0)) * (1.0 - smoothstep(0.08, 0.36, depth));
+	float foam = clamp(edge * 0.7 + band * 0.26, 0.0, 1.0);
 	ALBEDO = mix(col, foam_color, foam);
-	ALPHA = mix(mix(0.55, 0.92, d), 0.95, foam);
+	// Shallows are clear, and the bed shows through them.
+	ALPHA = max(smoothstep(0.0, 0.11, depth) * mix(0.46, 0.93, d), foam * 0.9);
+	ROUGHNESS = 0.12;
+	SPECULAR = 0.7;
 	if (glow > 0.0) {
 		// Lava: a dark crust broken into slowly drifting plates, glowing in
 		// the cracks between them and cooling to black at the shore.
@@ -156,11 +177,28 @@ void fragment() {
 		ALBEDO = mix(crust, molten, heat);
 		EMISSION = molten * heat * glow;
 		ALPHA = 1.0;
-	}
-	ROUGHNESS = glow > 0.0 ? 0.9 : 0.12;
-	SPECULAR = glow > 0.0 ? 0.1 : 0.7;
-	if (glow <= 0.0) {
-		vec3 nw = normalize(vec3((n1.r + n2.g - 1.0) * 0.45, 1.0, (n1.b + n2.r - 1.0) * 0.45));
+		ROUGHNESS = 0.9;
+		SPECULAR = 0.1;
+	} else if (ice > 0.0) {
+		// Frozen over: a hard sheet, clear and dark where the ice is thick,
+		// clouded white in patches, cracked across, with snow drifted over
+		// it from the shore.
+		vec3 f1 = texture(noise_tex, p * 0.052 + vec2(0.4, 0.9)).rgb;
+		vec3 f2 = texture(noise_tex, p * 0.118 + vec2(0.7, 0.2)).rgb;
+		float grain = texture(noise_tex, p * 0.7).g;
+		float clouded = smoothstep(0.38, 0.66, f1.r * 0.6 + f2.g * 0.4);
+		vec3 sheet = mix(deep, shallow, 0.25 + 0.6 * clouded) * (0.94 + 0.12 * grain);
+		float crack = 1.0 - smoothstep(0.0, 0.011, abs(f1.g - f2.b));
+		crack = max(crack, (1.0 - smoothstep(0.0, 0.007, abs(f2.r - 0.5))) * 0.6);
+		sheet = mix(sheet, foam_color, crack * 0.75);
+		float drift = (1.0 - smoothstep(0.05, 0.50, depth + (f2.g - 0.5) * 0.5)) + smoothstep(0.62, 0.80, f1.b) * 0.8;
+		sheet = mix(sheet, foam_color * (0.93 + 0.07 * grain), clamp(drift, 0.0, 1.0));
+		ALBEDO = sheet;
+		ALPHA = 1.0;
+		ROUGHNESS = mix(0.22, 0.9, clamp(drift, 0.0, 1.0));
+		SPECULAR = 0.5;
+	} else {
+		vec3 nw = normalize(vec3((n1.r + n2.g - 1.0) * 0.40 + (n3.r - 0.5) * 0.30, 1.0, (n1.b + n2.r - 1.0) * 0.40 + (n3.b - 0.5) * 0.30));
 		NORMAL = normalize((VIEW_MATRIX * vec4(nw, 0.0)).xyz);
 	}
 }
@@ -215,6 +253,7 @@ var _mark_w: int = 0
 var _mark_h: int = 0
 var _mark_tex: ImageTexture = null
 var _ground_mat: ShaderMaterial = null
+var _water_mat: ShaderMaterial = null
 
 
 func build(sim_map: SimMap, seed_value: int) -> void:
@@ -230,6 +269,12 @@ func build(sim_map: SimMap, seed_value: int) -> void:
 	_build_grass()
 	_build_litter()
 	_build_apron()
+
+
+## The colour of the sky overhead, which lies in the deep water.
+func set_sky_color(c: Color) -> void:
+	if _water_mat != null:
+		_water_mat.set_shader_parameter("sky", c)
 
 
 ## The fog-of-war texture (one texel per cell); scatter standing in fog is
@@ -585,6 +630,8 @@ func _build_water() -> void:
 	mat.set_shader_parameter("deep", look.water_deep)
 	mat.set_shader_parameter("foam_color", look.water_foam)
 	mat.set_shader_parameter("glow", look.water_glow)
+	mat.set_shader_parameter("ice", look.water_ice)
+	_water_mat = mat
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "Water"
 	mi.mesh = st.commit()
