@@ -468,7 +468,42 @@ default; `test_a_wave_keeps_together_on_the_way_in` runs it both ways).
 
 ### 2026-11-16 — session 7, 19:50 UTC (branch `claude/relay-session-1116-1950`)
 
-**Working now (00:42 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (20:30 UTC):** M31 is written with eleven unit tests on a
+side branch (not pushed yet; it goes up when `tools/check.sh` passes on
+it). Batches of twenty AI matches are being played to see what each new
+behaviour does to match length before it is switched on for good.
+
+- **M30 ticked.** Session 1 had pushed both factions complete (design
+  paragraph, data, rule, models, skin, tests, a match each in the check)
+  and left the boxes open. The league tool reads the faction list from
+  `data/factions.json`, so both are in it; the monkey test now plays them
+  too. What is still owed is a league *run* over all ten: that is M26's
+  open box, not M30's.
+
+- Started from `claude/gracious-lovelace-fxl9n2` (`aa02b86`, the newest
+  remote commit, 16:36 UTC; nothing newer anywhere, so no session was
+  running).
+- **Session 1's M31 never arrived.** Its last note says M31 was committed
+  locally and waiting on the check. No such commit is on any remote branch,
+  so that work is lost and M31 starts from the pushed code.
+- Merged `claude/relay-session-1116-1450` (session 5): the random-input
+  monkey test in `tools/check.sh` and the keep-the-wave-together AI rule
+  (off by default). One conflict, two blocks of constants in
+  `sim/sim_ai.gd`, both kept. The monkey test now also runs as the
+  Brackenfold and the Lodestone Circle.
+- **Decision: `claude/relay-session-1116-1550` (session 6) is not merged.**
+  It holds a second, independent M29 (teams, match setup) and a faction
+  called the Ember Rite. Session 1's M29 is already here and the two touch
+  the same forty files; merging would mean choosing between two team
+  systems line by line with no gain. The Ember Rite (weapons that set
+  targets alight) is a candidate to port by hand later; the branch is left
+  as it is for the owner.
+- `claude/relay-session-1116-0451` and `-0654` remain unmerged, as session 1
+  left them.
+
+### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
+
+**Working now (00:45 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M33 (high ground included), the combat half of M34 and the optional Light
 setting, session 7's branch, and the fixes listed in the log below.
@@ -485,6 +520,14 @@ is in the log below. Open after that: M26's two boxes.
   hour. One standard error at 36 games a faction is 8.3 points, so only
   Nomad (far too strong) and Zephyr (far too weak) are clearly out; the
   tuner is repricing and replaying. These maps had no hills yet.
+- **A mistake, and its repair (00:45 UTC).** Two status pushes of this
+  session (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
+  paragraph: the text search for "Working now" found session 7's paragraph
+  first, so the body of session 7's log entry and this session's heading
+  were overwritten on the remote for some minutes. No code was touched.
+  The entry is restored here word for word from the commit before
+  (`3b8d701`), and the status is now written by a script that looks only
+  below this session's own heading.
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
   which in your log, and it can be ported. Please do not push a second M31
