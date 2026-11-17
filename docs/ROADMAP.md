@@ -1242,6 +1242,31 @@ restarted three times; the background tuner died with it).**
     from even, nothing inside one standard error) gives Brackenfold x0.955
     and Lodestone x0.974 on top: 14 more costs (a Barkhide 430 to 410, an
     Armature 380 to 370). Being tested again on seeds 11 to 16.
+  - **The second league on unseen seeds (05:15 UTC), seeds 11 to 16, 270
+    games, with Brackenfold and Lodestone made cheaper:** Aegis 72.2%,
+    Foundry 64.8%, Tally 55.6%, Vesper 51.9%, Verdigris 51.9%, Nomad
+    48.1%, Zephyr 44.4%, Brackenfold 44.4%, Veil 35.2%, Lodestone 27.8%.
+    Median 16.5 minutes, 89% between 12 and 25, two undecided. Furthest
+    from even 22.2 points.
+  - **Finding: which maps are drawn moves a faction by fifteen points and
+    more.** Aegis took 58%, 52% and 72% of its games on seeds 1 to 4, 5 to
+    10 and 11 to 16 at almost the same prices; Lodestone 42%, 43% and
+    28%; Brackenfold 58%, 37% and 44%. Games on one seed share a map, so
+    they are not independent, and the "standard error" the tools print
+    (6.8 points at 54 games) understates the spread between leagues by
+    about half. A league of 54 games a faction on six maps is not enough
+    to judge "within ten points"; nor was tuning on four maps.
+  - **All three leagues at near-final prices pooled (16 seeds, 144 games a
+    faction):** Aegis 61.1%, Foundry 56.2%, Vesper 53.5%, Tally 52.8%,
+    Nomad 51.4%, Verdigris 47.9%, Zephyr 46.5%, Brackenfold 45.1%, Veil
+    44.4%, Lodestone 36.8%. Eight within 6.2 points of even; Aegis 11.1
+    above, Lodestone 13.2 below. Box not ticked.
+  - The tuner's rule applied to the pooled result (nothing inside one
+    standard error of 4.2 points): Aegis x1.039, Foundry x1.022,
+    Brackenfold x0.983, Veil x0.981, Lodestone x0.954. Written (28
+    costs: a Bulwark 345 to 360, an Armature 370 to 355), and being
+    measured over all sixteen seeds at once: 720 games, 144 a faction,
+    about two hours.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty
