@@ -30,6 +30,8 @@ func show_config(config: MatchConfig) -> void:
 	bytes.resize(_map.w * _map.h * 3)
 	for i: int in _map.w * _map.h:
 		var c: Color = palette[_map.terrain[i]]
+		if _map.high[i] != 0:
+			c = c.lightened(0.22)
 		bytes[i * 3] = int(c.r * 255.0)
 		bytes[i * 3 + 1] = int(c.g * 255.0)
 		bytes[i * 3 + 2] = int(c.b * 255.0)

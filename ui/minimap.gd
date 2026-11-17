@@ -28,15 +28,18 @@ func setup(scene: BattleScene) -> void:
 	_refresh_texture()
 
 
-## Every colour the map can show, worked out once: 4 terrains x covered or
-## not x visible or only explored. The per-cell refresh is then byte copies.
+## Every colour the map can show, worked out once: 4 terrains, each low or
+## high (kinds 4 to 7 are the hilltops, a shade lighter), x covered or not
+## x visible or only explored. The per-cell refresh is then byte copies.
 func _build_palette() -> void:
 	var team: Color = world.players[player].color
-	_palette.resize(4 * 2 * 2 * 3)
-	for t: int in 4:
+	_palette.resize(8 * 2 * 2 * 3)
+	for t: int in 8:
 		for covered: int in 2:
 			for vis: int in 2:
-				var c: Color = _terrain_color(t)
+				var c: Color = _terrain_color(t % 4)
+				if t >= 4:
+					c = c.lightened(0.22)
 				if covered == 1:
 					c = c.lerp(team, 0.3)
 				if vis == 0:
@@ -102,6 +105,7 @@ func _refresh_texture() -> void:
 	bytes.resize(map.w * map.h * 4)
 	var n: int = map.w * map.h
 	var terrain: PackedByteArray = map.terrain
+	var high: PackedByteArray = map.high
 	for i: int in n:
 		var o: int = i * 4
 		if seen[i] == 0:
@@ -109,7 +113,7 @@ func _refresh_texture() -> void:
 			bytes[o + 1] = 8
 			bytes[o + 2] = 10
 		else:
-			var k: int = ((terrain[i] * 2 + (1 if cover[i] != 0 else 0)) * 2 + (1 if vis[i] != 0 else 0)) * 3
+			var k: int = (((terrain[i] + (4 if high[i] != 0 else 0)) * 2 + (1 if cover[i] != 0 else 0)) * 2 + (1 if vis[i] != 0 else 0)) * 3
 			bytes[o] = _palette[k]
 			bytes[o + 1] = _palette[k + 1]
 			bytes[o + 2] = _palette[k + 2]

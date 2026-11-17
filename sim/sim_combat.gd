@@ -28,9 +28,17 @@ static func update(w: SimWorld) -> void:
 
 ## Weapon range multiplier for this entity right now.
 static func range_mult(w: SimWorld, e: SimEntity) -> float:
+	var mult: float = 1.0
 	if e.owner >= 0 and e.linked:
-		return 1.0 + w.players[e.owner].faction.linked_range_bonus
-	return 1.0
+		mult += w.players[e.owner].faction.linked_range_bonus
+	if on_high_ground(w, e):
+		mult *= 1.0 + w.data.high_ground_range_bonus
+	return mult
+
+
+## True for a ground unit or a building standing on a hilltop.
+static func on_high_ground(w: SimWorld, e: SimEntity) -> bool:
+	return e.def != null and not e.def.is_air() and w.map.is_high(e.pos)
 
 
 ## Rate-of-fire multiplier for this entity right now (1 = normal).
@@ -45,11 +53,12 @@ static func rof_mult(w: SimWorld, e: SimEntity) -> float:
 
 
 static func sight_range(w: SimWorld, e: SimEntity) -> float:
+	var up: float = 1.0 + w.data.high_ground_sight_bonus if on_high_ground(w, e) else 1.0
 	if e.linked:
 		if e.owner >= 0:
-			return e.def.sight * (1.0 + w.players[e.owner].faction.linked_sight_bonus)
-		return e.def.sight
-	return e.def.sight * w.data.dark_sight_mult
+			return e.def.sight * (1.0 + w.players[e.owner].faction.linked_sight_bonus) * up
+		return e.def.sight * up
+	return e.def.sight * w.data.dark_sight_mult * up
 
 
 static func can_hit(wd: WeaponDef, t: SimEntity) -> bool:

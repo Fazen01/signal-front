@@ -819,6 +819,8 @@ func _entity_detail(e: SimEntity) -> String:
 		lines.append("Under construction: %d%%" % int(e.build_progress * 100.0))
 	elif e.owner >= 0 and not e.linked:
 		lines.append("DARK - outside the signal grid")
+	if SimCombat.on_high_ground(world, e):
+		lines.append("On high ground: +%d%% range, +%d%% sight" % [int(world.data.high_ground_range_bonus * 100.0), int(world.data.high_ground_sight_bonus * 100.0)])
 	if e.def.harvester:
 		lines.append("Cargo %d / %d" % [e.cargo, e.def.capacity])
 	if e.def.is_armed():

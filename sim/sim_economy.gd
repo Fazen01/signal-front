@@ -95,6 +95,8 @@ static func placement_error(w: SimWorld, player_id: int, def: EntityDef, cell: V
 			# Things that do not block (mines) only need walkable ground.
 			if not (w.map.is_cell_buildable(c) if def.blocks else w.map.is_cell_passable(c)):
 				return "Ground is blocked"
+			if def.blocks and w.map.is_bank(c):
+				return "Too steep to build on"
 	var centre: Vector2 = Vector2(
 		(float(cell.x) + float(def.footprint.x) * 0.5) * SimMap.CELL,
 		(float(cell.y) + float(def.footprint.y) * 0.5) * SimMap.CELL

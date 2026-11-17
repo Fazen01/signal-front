@@ -15,6 +15,7 @@ var h: int = 0  ## height in cells
 var terrain: PackedByteArray = PackedByteArray()
 var occupant: PackedInt32Array = PackedInt32Array()  ## building id per cell, 0 = free
 var heights: PackedFloat32Array = PackedFloat32Array()  ## (w+1)*(h+1) corner heights, cosmetic
+var high: PackedByteArray = PackedByteArray()  ## 1 where a cell is high ground: what stands there sees and shoots further
 
 var starts: Array[Vector2] = []  ## player start positions
 var field_spots: Array[Vector3] = []  ## salvage fields: x, z, amount
@@ -33,6 +34,8 @@ func setup(width: int, height: int) -> void:
 	occupant.resize(w * h)
 	heights = PackedFloat32Array()
 	heights.resize((w + 1) * (h + 1))
+	high = PackedByteArray()
+	high.resize(w * h)
 
 
 ## Call after the terrain has been filled in. Builds the pathfinding grids.
@@ -243,6 +246,32 @@ func find_path(a: Vector2, b: Vector2, vehicle: bool) -> PackedVector2Array:
 		else:
 			out.append(goal)
 	return out
+
+
+## True where the ground is high: a hilltop. Anything on the ground there
+## (unit or building) sees and shoots further; aircraft gain nothing.
+func is_high(p: Vector2) -> bool:
+	var cx: int = int(p.x / CELL)
+	var cy: int = int(p.y / CELL)
+	if cx < 0 or cy < 0 or cx >= w or cy >= h:
+		return false
+	return high[cy * w + cx] != 0
+
+
+## True for a cell on the bank of a hill: one whose neighbours are not all
+## on the same level as it. Units cross a bank freely; buildings need level
+## ground.
+func is_bank(c: Vector2i) -> bool:
+	if c.x < 0 or c.y < 0 or c.x >= w or c.y >= h:
+		return false
+	var level: int = high[c.y * w + c.x]
+	for dy: int in range(-1, 2):
+		for dx: int in range(-1, 2):
+			var x: int = c.x + dx
+			var y: int = c.y + dy
+			if x >= 0 and y >= 0 and x < w and y < h and high[y * w + x] != level:
+				return true
+	return false
 
 
 ## Cosmetic ground height at a world position (bilinear over corner heights).

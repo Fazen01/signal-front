@@ -265,6 +265,13 @@ the land, the salvage, the uplink sites and where each seat starts. Its
 choose Morning, Evening or Overcast); like the region, it changes the look
 and nothing else.
 
+Generated maps have **high ground**: flat-topped hills with a bank round
+them. A ground unit or a building on a hill shoots 15% further and sees 25%
+further (aircraft get nothing), so a hill over a road or a salvage field is
+worth holding. Units climb a bank anywhere; buildings need level ground.
+The minimap and the setup preview draw high ground lighter, and the
+selection panel says when what you have selected stands on it.
+
 A battlefield also lies in one of four **regions**, picked by the seed or in
 the skirmish setup: the **Greenwood** (grass and woods), the **Dustlands**
 (sand, red mesas, cactus and oases), the **Frostline** (snow, capped pines,

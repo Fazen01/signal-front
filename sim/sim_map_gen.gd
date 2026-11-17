@@ -23,6 +23,14 @@ const NEAR_FIELD_AMOUNT: int = 7500
 const MID_FIELD_AMOUNT: int = 13500
 const PRIZE_FIELD_AMOUNT: int = 20000  ## what lies inside the wall of a prize map, in all
 const PRIZE_GATE_CELLS: float = 5.0  ## width of each of the four ways in
+const HIGH_MARK: int = 100  ## painted like a terrain, but marks cells as high ground instead
+const HILL_HEIGHT: float = 2.8  ## how far a hilltop stands above the land round it
+## How many hills a kind of country gets for each start (per 128 x 128 of
+## map). Hill country has many; a kind missing here has one or two.
+const HILLS: Dictionary[String, float] = {
+	"highlands": 3.2, "plains": 2.0, "mesas": 2.4, "dunes": 3.4, "crags": 3.0, "pinewood": 1.8,
+	"fissures": 2.0, "burntplain": 2.8, "lakes": 1.6, "oasis": 2.0, "frozenlakes": 1.6, "calderas": 2.0,
+}
 const SMALL_CELLS: int = 64  ## 128 x 128 world units: the compact two-player map and the layouts
 const STANDARD_CELLS: int = 88  ## 176 x 176 world units: the default two-player map
 const LARGE_CELLS: int = 96  ## 192 x 192 world units, up to four players
@@ -268,6 +276,11 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool, re
 			_scatter(m, rng, order, 2.0 * scale, rock, 1.6, 3.0)
 			_scatter(m, rng, order, 7.0 * scale, wood, 2.4, 5.0)
 
+	# Hills: high ground gives range and sight to whoever holds it. Painted
+	# over whatever is there; the tops of rock and the beds of water do not
+	# count, and nor does the ground round a start.
+	_scatter(m, rng, order, float(HILLS.get(theme, 1.4)) * scale, HIGH_MARK, 2.6, 4.6)
+
 	# Salvage near each start, on the side facing the map centre.
 	var centre: Vector2 = size * 0.5
 	var to_centre: float = (centre - start_a).angle()
@@ -306,6 +319,7 @@ static func _generate_once(seed_value: int, n: int, order: int, sparse: bool, re
 		_clear_disc(m, u, 3)
 	for s: Vector2 in m.starts:
 		_clear_disc(m, s, START_CLEAR_CELLS)
+	_trim_high_ground(m)
 
 	build_heights(m, rng)
 	m.finalize()
@@ -412,6 +426,9 @@ static func _paint(m: SimMap, order: int, c: Vector2i, terrain: int) -> void:
 	for image: Vector2i in cell_images(m, c, order):
 		if not m.in_bounds(image):
 			continue
+		if terrain == HIGH_MARK:
+			m.high[image.y * m.w + image.x] = 1
+			continue
 		if terrain == SimMap.Terrain.FOREST and m.terrain_cell(image) != SimMap.Terrain.GROUND:
 			continue
 		m.set_terrain(image, terrain)
@@ -515,8 +532,29 @@ static func _add_field(m: SimMap, order: int, p: Vector2, amount: int) -> void:
 			_clear_disc(m, image, 3)
 
 
+## High ground only counts where something can stand on it and where it is
+## fair: not on rock or water, and not within reach of a start (every base
+## sits on level ground).
+static func _trim_high_ground(m: SimMap) -> void:
+	var keep_clear: float = float(START_CLEAR_CELLS + 5) * SimMap.CELL
+	for y: int in m.h:
+		for x: int in m.w:
+			var i: int = y * m.w + x
+			if m.high[i] == 0:
+				continue
+			var t: int = m.terrain[i]
+			if t == SimMap.Terrain.ROCK or t == SimMap.Terrain.WATER:
+				m.high[i] = 0
+				continue
+			var at: Vector2 = m.cell_center(Vector2i(x, y))
+			for s: Vector2 in m.starts:
+				if at.distance_to(s) < keep_clear:
+					m.high[i] = 0
+					break
+
+
 ## Fills in the cosmetic height field: gentle rolls, flat bases, raised rock
-## and sunken water.
+## and sunken water, and the hills.
 static func build_heights(m: SimMap, rng: SimRng) -> void:
 	var p1: float = rng.range_f(0.0, TAU)
 	var p2: float = rng.range_f(0.0, TAU)
@@ -539,6 +577,17 @@ static func build_heights(m: SimMap, rng: SimRng) -> void:
 				var d: float = sqrt(float(dx * dx + dy * dy))
 				var keep: float = clampf((d - 5.0) / 4.0, 0.0, 1.0)
 				m.heights[y * row + x] *= keep
+	# Hills: each corner rises with the share of high cells among the sixteen
+	# round it, sharpened so that a hill is a flat-topped terrace with a
+	# bank about two cells wide rather than a swell too gentle to see.
+	for y: int in range(0, m.h + 1):
+		for x: int in range(0, m.w + 1):
+			var up: int = 0
+			for cy: int in range(y - 2, y + 2):
+				for cx: int in range(x - 2, x + 2):
+					if cx >= 0 and cy >= 0 and cx < m.w and cy < m.h and m.high[cy * m.w + cx] != 0:
+						up += 1
+			m.heights[y * row + x] += HILL_HEIGHT * smoothstep(0.22, 0.78, float(up) / 16.0)
 	# Rock rises and water sinks: each corner takes the average of the four
 	# cells around it, so cliffs and shores slope instead of stepping.
 	for y: int in range(0, m.h + 1):

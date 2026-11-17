@@ -303,8 +303,9 @@ map generation itself to be improved.
 - [x] More shapes within each region, and features that matter in play:
       chokepoints and islands of salvage worth fighting for (a fifth kind
       of country in every region: a prize behind a wall or a moat)
-- [ ] High ground that matters in play (not done: heights are still only
-      for looks; it needs a rule in the sim and a terrain of its own)
+- [x] High ground that matters in play: hills on every generated map;
+      ground units and buildings on one shoot 15% further and see 25%
+      further (aircraft do not), and buildings need level ground
 - [x] Three more hand-made layouts, one for each new region
 - [x] A preview of the map in the match setup
 
@@ -498,13 +499,14 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (23:45 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
-read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to M33,
-the combat half of M34, session 7's branch, and the fixes listed in the
-log below (vehicle spacing, repairs under fire, conceding only when no
-person plays). Running now: the balance league over all ten factions
-(M26), from a scratch copy of the tree. Open: M26's two boxes, high ground
-(M33), a look pass over every faction's models and water and sky (M34).
+**Working now (00:10 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
+M33, the combat half of M34 and the optional Light setting, session 7's
+branch, and the fixes listed in the log below. High ground (the last box
+of M33) is committed and going through the check. Running now: the balance
+league over all ten factions (M26), from a scratch copy of the tree. Open:
+M26's two boxes, a look pass over every faction's models and water and sky
+(M34).
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
@@ -990,11 +992,8 @@ restarted three times; the background tuner died with it).**
     `tools/make_layouts.py` now writes all six and their regions (the
     regions of the first three had been added to the JSON by hand; running
     the tool would have dropped them).
-  - **Not done: high ground.** Heights are cosmetic. Making them matter
-    needs a terrain of its own (plateau: passable, more range and sight
-    for what stands on it), which touches the map, the generator, the
-    path finder's inputs, the terrain view, the minimap and the layouts'
-    legend. Left as an open box rather than half-built.
+  - High ground was left out of this commit and done afterwards (see
+    "High ground" further down).
 
 - **`tools/check.sh` failed on the M32 commit** (not pushed alone): the
   Lodestone against Verdigris match was undecided at 45 minutes. Both ran
@@ -1036,6 +1035,30 @@ restarted three times; the background tuner died with it).**
   disc of embers under big explosions, which drew as a flat orange circle.
   Still open in M34: a better look for every faction's models, and
   lighting, water and sky.
+- **High ground (M33's last box).** Not a terrain of its own after all: a
+  second layer on the map (`SimMap.high`, one byte a cell), so a hill can
+  be grass, forest or sand and nothing in the path finder changes. Rules,
+  in `data/rules.json`: a ground unit or a building standing on a high
+  cell shoots 15% further and sees 25% further; aircraft get nothing. The
+  generator scatters hills on every map with the same mirroring as the
+  rest, never on rock or water and never within a base's reach of a start;
+  the hand-made layouts have none yet. Units cross a bank anywhere.
+  Buildings cannot stand on one ("Too steep to build on":
+  `SimMap.is_bank`), because a hall half on a slope hangs in the air. The
+  selection panel says when what is selected stands on high ground, and
+  the minimap and the setup preview draw high ground lighter.
+  - *How it looks.* The first version marked each hilltop with a paler top
+    and a dark line round it, on ground that rose too gently to see. **The
+    owner, on a capture of it: "looks weird"** — it looked drawn on with a
+    marker. Replaced: a hill is now a real terrace 2.8 high with a bank
+    about two cells wide, which the sun lights on one side and shades on
+    the other; steep ground shows earth (stone only beside rock), and the
+    top is a little drier. No outline.
+  - Adding hills moves the random stream, so every seed is once more a
+    different map from before.
+  - Not done: the AI does not know about hills (it neither seeks them for
+    its guns nor avoids attacking up one); the three-way and team matches
+    in the check are unchanged by that.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

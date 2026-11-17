@@ -19,6 +19,7 @@ render_mode cull_disabled;
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform sampler2D mark_tex : filter_linear, repeat_disable, hint_default_black;
 uniform sampler2D fog_tex : filter_linear, repeat_disable, hint_default_transparent;
+uniform sampler2D high_tex : filter_linear, repeat_disable, hint_default_black;
 uniform vec2 map_size = vec2(1.0, 1.0);
 uniform vec3 lush : source_color = vec3(0.26, 0.39, 0.19);
 uniform vec3 dry : source_color = vec3(0.40, 0.44, 0.24);
@@ -70,8 +71,18 @@ void fragment() {
 	col = mix(col, sand, shore);
 	col = mix(col, bed, under);
 	col = mix(col, stone, rock);
-	float steep = smoothstep(0.90, 0.72, up) * (1.0 - under);
-	col = mix(col, stone * 0.8, steep);
+	// Steep ground shows what is under the turf: bare stone on the flanks of
+	// rock, packed earth on the bank of a hill.
+	float steep = smoothstep(0.93, 0.74, up) * (1.0 - under);
+	float stony = smoothstep(0.04, 0.30, UV.y);
+	vec3 earth = mix(soil * 0.78, soil * 1.08, fine.g) * (0.92 + 0.16 * mid.b);
+	col = mix(col, mix(earth, stone * 0.8, stony), steep);
+	// High ground: the top of a hill is a little paler and drier than the
+	// land below it. The bank itself, lit on one side and shaded on the
+	// other, is what shows where the hill is.
+	float hi = texture(high_tex, p / map_size).r;
+	float top = smoothstep(0.55, 0.9, hi) * (1.0 - under) * (1.0 - rock) * (1.0 - steep);
+	col = mix(col, mix(col, dry, 0.35) * 1.12, top);
 	float worn = max(smoothstep(0.16, 0.58, mark.r + wob * 0.12), smoothstep(0.25, 0.75, mark.b + wob * 0.35) * 0.8);
 	worn *= (1.0 - under) * (1.0 - rock * 0.8);
 	vec3 track = soil * mix(0.82, 1.12, fine.b);
@@ -325,6 +336,16 @@ func _in_map(x: int, y: int) -> bool:
 ## Paints the texture of worn ground: tracks along the routes vehicles would
 ## take between the bases, the middle of the map and the uplink sites,
 ## packed earth where the bases stand, and stains under the salvage fields.
+## One byte a cell: 255 where the ground is high. The ground shader reads
+## it smoothed, to paint the tops of hills a little drier.
+func _high_texture() -> ImageTexture:
+	var bytes: PackedByteArray = PackedByteArray()
+	bytes.resize(map.w * map.h)
+	for i: int in map.w * map.h:
+		bytes[i] = 255 if map.high[i] != 0 else 0
+	return ImageTexture.create_from_image(Image.create_from_data(map.w, map.h, false, Image.FORMAT_R8, bytes))
+
+
 func _build_marks() -> void:
 	_mark_w = map.w * MARK_SCALE
 	_mark_h = map.h * MARK_SCALE
@@ -436,6 +457,7 @@ func _build_ground() -> void:
 	mat.shader = shader
 	mat.set_shader_parameter("noise_tex", noise_texture())
 	mat.set_shader_parameter("mark_tex", _mark_tex)
+	mat.set_shader_parameter("high_tex", _high_texture())
 	mat.set_shader_parameter("map_size", map.world_size())
 	for key: String in ["lush", "dry", "soil", "litter_dark", "litter_light", "stone_dark", "stone_light", "sand_dark", "sand_light", "bed"]:
 		mat.set_shader_parameter(key, look.get(key))

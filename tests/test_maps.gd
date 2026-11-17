@@ -348,3 +348,72 @@ func test_the_setup_preview_shows_the_map_the_match_gets() -> void:
 	preview.show_config(config)
 	check_eq(preview.seats_shown(), 4, "four seats, four starts drawn")
 	preview.free()
+
+
+func test_generated_maps_have_fair_high_ground() -> void:
+	for region: String in SimMapGen.REGIONS:
+		var with_hills: int = 0
+		for players: int in [2, 4]:
+			var cells: int = SimMapGen.STANDARD_CELLS if players == 2 else SimMapGen.LARGE_CELLS
+			for seed_value: int in range(1, 9):
+				var m: SimMap = SimMapGen.generate(seed_value, cells, players, region)
+				var count: int = 0
+				var wrong_ground: int = 0
+				var lopsided: int = 0
+				var near_start: int = 0
+				for y: int in m.h:
+					for x: int in m.w:
+						if m.high[y * m.w + x] == 0:
+							continue
+						count += 1
+						var t: int = m.terrain[y * m.w + x]
+						if t == SimMap.Terrain.ROCK or t == SimMap.Terrain.WATER:
+							wrong_ground += 1
+						for image: Vector2i in SimMapGen.cell_images(m, Vector2i(x, y), 4 if players == 4 else 2):
+							if m.high[image.y * m.w + image.x] == 0:
+								lopsided += 1
+						for s: Vector2 in m.starts:
+							if m.cell_center(Vector2i(x, y)).distance_to(s) < float(SimMapGen.START_CLEAR_CELLS) * SimMap.CELL:
+								near_start += 1
+				if count > 0:
+					with_hills += 1
+				check_eq(wrong_ground, 0, "%s seed %d: no high ground on rock or water" % [region, seed_value])
+				check_eq(lopsided, 0, "%s seed %d (%d starts): every side has the same hills" % [region, seed_value, players])
+				check_eq(near_start, 0, "%s seed %d: every base stands on level ground" % [region, seed_value])
+				check(count < m.w * m.h / 8, "%s seed %d: hills are the exception (%d cells)" % [region, seed_value, count])
+				check(m.is_high(m.starts[0]) == false, "%s seed %d: a start is not high" % [region, seed_value])
+		check(with_hills >= 12, "%s: nearly every map has some high ground (%d of 16)" % [region, with_hills])
+	var a: SimMap = SimMapGen.generate(5, SimMapGen.STANDARD_CELLS, 2, "desert")
+	var b: SimMap = SimMapGen.generate(5, SimMapGen.STANDARD_CELLS, 2, "desert")
+	check(a.high == b.high, "the same seed gives the same hills")
+
+
+func test_buildings_need_level_ground() -> void:
+	var w: SimWorld = SimTestUtil.make_world()
+	var hill: Vector2i = Vector2i(20, 20)
+	for dy: int in 8:
+		for dx: int in 8:
+			w.map.high[(hill.y + dy) * w.map.w + hill.x + dx] = 1
+	check(w.map.is_bank(hill), "the edge of a hilltop is bank")
+	check(w.map.is_bank(hill + Vector2i(-1, 3)), "so is the ground at its foot")
+	check(not w.map.is_bank(hill + Vector2i(3, 3)), "the middle of the top is level")
+	check(not w.map.is_bank(hill + Vector2i(-4, 3)), "and so is the ground well clear of it")
+	check(not w.map.is_bank(Vector2i(-1, 0)), "off the map nothing is bank")
+	# Any building of theirs that needs nothing else built first.
+	var def: EntityDef = null
+	for candidate: EntityDef in w.data.entities.values():
+		if candidate.is_building and candidate.buildable and candidate.blocks and candidate.faction == "aegis" and candidate.requires.is_empty():
+			def = candidate
+			break
+	check(def != null, "there is a building to try")
+	if def == null:
+		return
+	var on_top: String = SimEconomy.placement_error(w, 0, def, hill + Vector2i(3, 3))
+	var across: String = SimEconomy.placement_error(w, 0, def, hill + Vector2i(-1, 3))
+	check(across == "Too steep to build on", "a turret cannot be built across the bank (%s)" % across)
+	check(on_top != "Too steep to build on", "but it can on the level top (%s)" % on_top)
+	# Units cross the bank like any other ground.
+	var tank: SimEntity = w.spawn_unit("bulwark", 0, w.map.cell_center(hill + Vector2i(-5, 3)))
+	w.push_command(SimCommand.move(0, PackedInt32Array([tank.id]), w.map.cell_center(hill + Vector2i(3, 3))))
+	SimTestUtil.run(w, 20 * 20)
+	check(w.map.is_high(tank.pos), "a tank drives up onto the hill")

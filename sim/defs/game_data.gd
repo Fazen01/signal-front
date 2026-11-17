@@ -63,6 +63,8 @@ var forest_vehicle_speed_mult: float = 0.5
 var harvest_seconds: float = 4.0
 var unload_seconds: float = 1.0
 var repair_rate: float = 0.04
+var high_ground_range_bonus: float = 0.15  ## extra weapon range for ground units and buildings on high ground
+var high_ground_sight_bonus: float = 0.25  ## and extra sight
 var repair_under_fire_mult: float = 0.2  ## builders mend a building that is being shot at this much slower
 var uplink_income_per_second: int = 3
 var emergency_income_per_second: int = 4  ## trickle while a player has no hauler and cannot buy one
@@ -199,6 +201,8 @@ func _load_rules(d: Dictionary) -> void:
 	unload_seconds = float(d.get("unload_seconds", unload_seconds))
 	repair_rate = float(d.get("repair_rate", repair_rate))
 	repair_under_fire_mult = float(d.get("repair_under_fire_mult", repair_under_fire_mult))
+	high_ground_range_bonus = float(d.get("high_ground_range_bonus", high_ground_range_bonus))
+	high_ground_sight_bonus = float(d.get("high_ground_sight_bonus", high_ground_sight_bonus))
 	uplink_income_per_second = int(d.get("uplink_income_per_second", uplink_income_per_second))
 	emergency_income_per_second = int(d.get("emergency_income_per_second", emergency_income_per_second))
 	uplink_capture_seconds = float(d.get("uplink_capture_seconds", uplink_capture_seconds))

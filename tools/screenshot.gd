@@ -262,6 +262,23 @@ func _run_script(battle: BattleScene) -> void:
 		battle.cam.center_on(battle.world.map.world_size() * 0.5)
 		battle.cam.set_distance(150.0)
 		print("Map: ", battle.world.map.name)
+	if _script_name.begins_with("region_") and _script_name.ends_with("_hill") and _count == 3:
+		# "region_<id>_<seed>_hill": look at the hill nearest the middle of the map,
+		# with a few tanks on it and a few below.
+		var hmap: SimMap = battle.world.map
+		var hmid: Vector2 = hmap.world_size() * 0.5
+		var hbest: Vector2 = hmid
+		var hbest_d: float = INF
+		for i: int in hmap.w * hmap.h:
+			if hmap.high[i] != 0:
+				var at: Vector2 = hmap.cell_center(Vector2i(i % hmap.w, i / hmap.w))
+				if at.distance_to(hmid) < hbest_d:
+					hbest_d = at.distance_to(hmid)
+					hbest = at
+		for k: int in 3:
+			battle.world.spawn_unit("bulwark", battle.local_player, hmap.nearest_free_pos(hbest + Vector2(float(k) * 4.0, 2.0)))
+		battle.cam.center_on(hbest)
+		battle.cam.set_distance(46.0)
 	match _script_name:
 		"closeup":
 			if _count == 2:

@@ -146,3 +146,53 @@ func _run_battle(seed_value: int) -> Array[int]:
 		if e.kind == SimEntity.Kind.WRECK:
 			wrecks += 1
 	return [w.state_hash(), SimTestUtil.alive_units(w, 0), SimTestUtil.alive_units(w, 1), wrecks]
+
+
+func test_high_ground_gives_range_and_sight() -> void:
+	var w: SimWorld = SimTestUtil.make_world()
+	var hill: Vector2i = Vector2i(10, 10)
+	for dy: int in 3:
+		for dx: int in 3:
+			w.map.high[(hill.y + dy) * w.map.w + hill.x + dx] = 1
+	var top: Vector2 = w.map.cell_center(hill + Vector2i(1, 1))
+	var below: Vector2 = w.map.cell_center(hill + Vector2i(8, 1))
+	check(w.map.is_high(top) and not w.map.is_high(below), "a hilltop and the ground below it")
+	check(not w.map.is_high(Vector2(-5.0, -5.0)), "nothing is high off the map")
+	var up: SimEntity = w.spawn_unit("bulwark", 0, top)
+	var down: SimEntity = w.spawn_unit("bulwark", 0, below)
+	var over: SimEntity = w.spawn_unit("kestrel", 0, top)
+	up.linked = false
+	down.linked = false
+	over.linked = false
+	check_near(SimCombat.range_mult(w, up), 1.0 + w.data.high_ground_range_bonus, 0.001, "a tank on the hill shoots further")
+	check_near(SimCombat.range_mult(w, down), 1.0, 0.001, "a tank below does not")
+	check_near(SimCombat.range_mult(w, over), 1.0, 0.001, "nor does a gunship flying over the hill")
+	check_near(SimCombat.sight_range(w, up) / SimCombat.sight_range(w, down), 1.0 + w.data.high_ground_sight_bonus, 0.001, "and it sees further")
+	# A turret built on the hill gets the same.
+	var turret: SimEntity = w.spawn_building("sentry_turret", 0, hill, true)
+	turret.linked = false
+	check(SimCombat.on_high_ground(w, turret), "a building can stand on high ground")
+	check_near(SimCombat.range_mult(w, turret), 1.0 + w.data.high_ground_range_bonus, 0.001, "and its guns reach further from there")
+	# In a fight at the edge of range, the one on the hill hits first.
+	var w2: SimWorld = SimTestUtil.make_world()
+	for dy: int in 3:
+		for dx: int in 3:
+			w2.map.high[(hill.y + dy) * w2.map.w + hill.x + dx] = 1
+	var reach: float = w2.data.entity("bulwark").weapons[0].max_range
+	var high_tank: SimEntity = w2.spawn_unit("bulwark", 0, top)
+	var low_tank: SimEntity = w2.spawn_unit("bulwark", 1, top + Vector2(reach * 3.0, 0.0))
+	high_tank.hold = true
+	low_tank.hold = true
+	SimTestUtil.run(w2, 2)
+	# Halfway between how far each of them can shoot (links can add to both).
+	var far: float = reach * SimCombat.range_mult(w2, high_tank)
+	var near: float = reach * SimCombat.range_mult(w2, low_tank)
+	check(far > near * 1.1, "the tank on the hill outranges the same tank below (%.1f against %.1f)" % [far, near])
+	# Ranges are measured to the edge of the target, not its middle.
+	low_tank.pos = top + Vector2((far + near) * 0.5 + low_tank.radius, 0.0)
+	low_tank.prev_pos = low_tank.pos
+	check(not w2.map.is_high(low_tank.pos), "the second tank stands below the hill")
+	SimTestUtil.reveal_all(w2)
+	SimTestUtil.run(w2, 20 * 6)
+	check(low_tank.hp < low_tank.max_hp, "at just over normal range, the tank on the hill hits")
+	check(is_equal_approx(high_tank.hp, high_tank.max_hp), "and the one below cannot answer")
