@@ -29,6 +29,7 @@ var _tutorial_ping_in: float = 0.0
 var ui_layer: CanvasLayer = null
 var time_of_day: String = "noon"  ## the hour the scene is lit for
 var save_slot: String = SimSave.MANUAL_SLOTS[0]  ## where "Save Game" writes unless told otherwise
+var autosave_slot: String = SimSave.AUTO  ## where the game saves itself (the flow check names a slot of its own)
 var _autosave_wait: float = 0.0  ## seconds of play since the last autosave
 var skin: UiSkin = null  ## the interface look: the local player's faction, or neutral when watching
 
@@ -648,10 +649,10 @@ func save_game(slot: String = "") -> bool:
 ## The game saving itself, every few minutes of play (Settings, Autosave).
 ## Nothing is saved from a tutorial, from a match nobody is playing, or
 ## once the match is over.
-func autosave(slot: String = SimSave.AUTO) -> bool:
+func autosave() -> bool:
 	if world.tutorial != null or watching or world.game_over:
 		return false
-	var ok: bool = SimSave.save_to_slot(world, config, slot)
+	var ok: bool = SimSave.save_to_slot(world, config, autosave_slot)
 	hud.push_alert("Autosaved" if ok else "Autosave failed: could not write the file", Hud.TEXT if ok else Hud.RED)
 	return ok
 

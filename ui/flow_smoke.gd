@@ -82,9 +82,26 @@ func _process(_delta: float) -> void:
 				battle.menus.close_saves()
 				# A slot of the test's own, so that nobody's saves are touched.
 				_expect(battle.save_game(SMOKE_SLOT), "the match saves to a slot")
-				_expect(battle.autosave(SMOKE_AUTO), "and the autosave writes its own")
-				_expect(not SimSave.slot_info(SMOKE_AUTO).is_empty(), "which a load screen can describe")
+				# The autosave, also into a slot of the test's own: nothing while
+				# the match is paused, nothing before its time, then one save.
+				battle.autosave_slot = SMOKE_AUTO
 				SimSave.delete_slot(SMOKE_AUTO)
+				var minutes: int = GameSettings.autosave_minutes
+				GameSettings.autosave_minutes = 2
+				battle.tick_autosave(500.0)
+				_expect(not SimSave.has_slot(SMOKE_AUTO), "no autosave while the match is paused")
+				battle.paused = false
+				battle.tick_autosave(60.0)
+				_expect(not SimSave.has_slot(SMOKE_AUTO), "none before its time")
+				battle.tick_autosave(61.0)
+				_expect(SimSave.has_slot(SMOKE_AUTO), "after two minutes of play the game saves itself")
+				_expect(int(SimSave.slot_info(SMOKE_AUTO).get("tick", -1)) == battle.world.tick_count, "which a load screen can describe")
+				SimSave.delete_slot(SMOKE_AUTO)
+				GameSettings.autosave_minutes = 0
+				battle.tick_autosave(5000.0)
+				_expect(not SimSave.has_slot(SMOKE_AUTO), "and never, with autosave switched off")
+				GameSettings.autosave_minutes = minutes
+				battle.paused = true
 				_saved_tick = battle.world.tick_count
 				_saved_entities = battle.world.entities.size()
 				battle.surrender()
