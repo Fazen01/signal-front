@@ -20,9 +20,11 @@ import concurrent.futures
 import json
 import math
 import os
+import hashlib
 import re
 import subprocess
 import sys
+import threading
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,10 +42,62 @@ def parse_seeds(text):
     return seeds
 
 
+CACHE = os.path.join(ROOT, ".godot-bin", "league_cache.json")
+_cache = None
+_cache_lock = threading.Lock()
+_fingerprint = None
+
+
+def fingerprint():
+    """A hash of everything a match depends on: the simulation, the data
+    and the batch script. Results are remembered under it, so a league that
+    is cut off picks up where it stopped, and one played on a changed game
+    starts again."""
+    global _fingerprint
+    if _fingerprint is None:
+        h = hashlib.sha1()
+        for part in ("sim", "data", os.path.join("tools", "pace_batch.gd")):
+            path = os.path.join(ROOT, part)
+            if os.path.isfile(path):
+                files = [path]
+            else:
+                files = sorted(os.path.join(d, f) for d, _, fs in os.walk(path) for f in fs if not f.endswith(".uid"))
+            for f in files:
+                h.update(os.path.relpath(f, ROOT).encode())
+                h.update(open(f, "rb").read())
+        _fingerprint = h.hexdigest()
+    return _fingerprint
+
+
+def _remembered(key):
+    global _cache
+    with _cache_lock:
+        if _cache is None:
+            try:
+                _cache = json.load(open(CACHE))
+            except (OSError, ValueError):
+                _cache = {}
+            # Results of any other version of the game are of no use now.
+            _cache = {k: v for k, v in _cache.items() if k.startswith(fingerprint())}
+        return _cache.get(key)
+
+
+def _remember(key, result):
+    with _cache_lock:
+        _cache[key] = result
+        tmp = CACHE + ".part"
+        json.dump(_cache, open(tmp, "w"))
+        os.replace(tmp, CACHE)
+
+
 def play(first, second, seeds, scale, max_minutes):
     """One process: `first` in seat one against `second` over the seeds."""
     if not seeds:
         return first, second, 0, 0, 0, []
+    key = "|".join([fingerprint(), first, second, ",".join(str(s) for s in seeds), scale, str(max_minutes)])
+    held = _remembered(key)
+    if held is not None:
+        return first, second, held[0], held[1], held[2], held[3]
     args = [
         GODOT, "--headless", "--path", ROOT, "-s", "res://tools/pace_batch.gd", "--",
         "--seeds=" + ",".join(str(s) for s in seeds), "--pairs=%s:%s" % (first, second),
@@ -57,6 +111,7 @@ def play(first, second, seeds, scale, max_minutes):
         sys.stderr.write("no result for %s against %s:\n%s\n" % (first, second, out[-2000:]))
         return first, second, 0, 0, len(seeds), []
     lengths = [float(x) for x in match.group(4).split()]
+    _remember(key, [int(match.group(1)), int(match.group(2)), int(match.group(3)), lengths])
     return first, second, int(match.group(1)), int(match.group(2)), int(match.group(3)), lengths
 
 
