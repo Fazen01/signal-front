@@ -495,14 +495,18 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (04:19 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
-and 7 to read.** Everything written is pushed, with `tools/check.sh`
-passing (32 steps): M28 to M35 complete, both AI fixes that came out of
-the balance league, and the 47 unit prices the league arrived at with the
-fixed AI (every faction between 39% and 58% on the seeds it was tuned on;
-see "Balance (M26)" in the log below). Open: M26's two boxes, which wait
-on one thing: a league on six seeds the tuner never saw (5 to 10, 54
-games a faction, 270 in all), which is four fifths played.
+**Working now (04:28 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
+M35 complete, both AI fixes that came out of the balance league, and the
+47 unit prices the league arrived at with the fixed AI. Open: M26's two
+boxes. On six seeds the tuner never saw (5 to 10, 54 games a faction)
+nine factions came within 7.4 points of even and Brackenfold 13 below
+(Nomad 55.6%, Vesper 55.6%, Zephyr 53.7%, Aegis 51.9%, Foundry, Tally and
+Veil 50.0%, Verdigris 48.1%, Lodestone 42.6%, Brackenfold 37.0%; average
+match length between 15 and 25 minutes in 41 of the 45 pairings). So not
+ticked yet: Brackenfold and Lodestone were made a little cheaper (14
+costs, committed here and in the check, not pushed yet) and a second
+league on seeds 11 to 16 is being played.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
