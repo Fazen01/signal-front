@@ -505,7 +505,7 @@ behaviour does to match length before it is switched on for good.
 **Status (09:30 UTC, 17 Nov) — session 1, for whoever is next.**
 Everything written is pushed, with `tools/check.sh` passing (32 steps).
 **Every box in this roadmap is ticked except one**: the frame rate on
-real hardware (M5), which needs a GPU and a person. Done since 15:00 UTC
+real hardware (M13), which needs a GPU and a person. Done since 15:00 UTC
 on the 16th, all asked for by the owner: M28 to M35 (an interface per
 faction, teams with AI allies, two more factions, a better AI, a unit of
 its own for six factions, prize maps, a map preview, high ground, new
