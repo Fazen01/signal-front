@@ -495,7 +495,7 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (07:36 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (07:48 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M35 complete, both AI fixes that came out of the balance league, and the
 unit prices the leagues arrived at with the fixed AI. Over sixteen seeds
