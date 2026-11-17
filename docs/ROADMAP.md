@@ -1149,6 +1149,36 @@ restarted three times; the background tuner died with it).**
   (`test_slot`, `smoke_slot`), so running them never touches a player's
   saves. One autosave, not a rolling set: a second would only matter if
   the first were written at a bad moment, and the three slots cover that.
+- **Balance (M26): two leagues over all ten factions, and what they
+  showed.** 180 games a round, seeds 1-4, the AI of 23:40 UTC, maps
+  without hills.
+  - Round 1, prices as in the data files: Nomad 88.9%, Foundry 66.7%,
+    Brackenfold 58.3%, Verdigris 55.6%, Veil 44.4%, Aegis 41.7%, Vesper
+    41.7%, Lodestone 41.7%, Tally 36.1%, Zephyr 19.4%. Median match 14.9
+    minutes, 93% between 12 and 25, two undecided at an hour.
+  - Round 2, prices Nomad x1.136, Foundry x1.058, Brackenfold x1.029,
+    Tally x0.951, Zephyr x0.893: Nomad 63.9%, Brackenfold 63.9%,
+    Verdigris 61.1%, Vesper 58.3%, Foundry 55.6%, Tally 44.4%, Lodestone
+    44.4%, Aegis 41.7%, Veil 30.6%, Zephyr 25.0%. Median 15.3 minutes,
+    88% between 12 and 25, four undecided. Furthest from even 25 points
+    (39 in round 1); one standard error at 36 games is 8.3 points.
+  - **Zephyr did not answer to price, and the reason was the AI.** One of
+    its matches, traced minute by minute, showed it sitting on 2,000 to
+    5,000 salvage with one Roost and one Flight Deck from start to finish.
+    `_next_building` returns the first need that is not met, and "fewer
+    relays than the early count" stood before "salvage is piling up: add
+    production". An enemy that shot its forward Masts down as fast as it
+    raised them kept it at the relay step for the whole match. Cheaper
+    units do nothing for a faction that cannot spend what it has. Fix:
+    with 1,500 or more in the bank the AI builds a works and a barracks
+    (up to three over its usual number) before it goes back to relays.
+    Every faction's AI has this, so the two leagues above describe an AI
+    that no longer exists, and nothing from them was written to the data
+    files. The tuner is playing again from its present prices.
+  - A test had to change with it: "a starved AI concedes" starved its AI
+    by killing its units and emptying its bank, but the AI now has an
+    uplink by minute eighteen, which pays 180 a minute, so it was (rightly)
+    not starving. The test takes the uplinks away as well.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

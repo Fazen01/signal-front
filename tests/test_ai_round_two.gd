@@ -254,14 +254,17 @@ func test_a_starved_ai_concedes_to_a_stronger_one() -> void:
 	var loser: SimAI = w.ais[1]
 	check(w.players[1].stat_salvage_collected > 3000, "it had an income until now")
 	check(loser._buildings.size() > SimAI.CONCEDE_MAX_BUILDINGS, "and has a whole base (%d buildings)" % loser._buildings.size())
-	# From here on seat two has its base but no haulers, no army and no money:
-	# more than eight buildings, so the first rule does not apply.
+	# From here on seat two has its base but no haulers, no army, no money
+	# and no uplink paying it anything: more than eight buildings, so the
+	# first rule does not apply.
 	var before: int = w.tick_count
-	var limit: int = SimAI.STARVED_WINDOW_TICKS * 2 + SimAI.CONCEDE_HOLD_TICKS + 20 * 60
+	var limit: int = SimAI.STARVED_WINDOW_TICKS * 2 + SimAI.CONCEDE_HOLD_TICKS + 20 * 180
 	while not w.game_over and w.tick_count - before < limit:
 		for e: SimEntity in w.entities.duplicate():
 			if e.alive and e.owner == 1 and e.kind == SimEntity.Kind.UNIT:
 				SimCombat.kill(w, e, null, -1)
+			elif e.alive and e.owner == 1 and e.kind == SimEntity.Kind.UPLINK:
+				e.owner = -1
 		w.players[1].salvage = 0
 		for e: SimEntity in w.entities:
 			if e.alive and e.owner == 1 and e.kind == SimEntity.Kind.BUILDING:

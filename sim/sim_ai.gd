@@ -542,6 +542,17 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 		return works
 	if _wants_depot(w):
 		return _r("depot")
+	# Salvage piling up means production is the bottleneck: add capacity,
+	# and do it before the steps below that an enemy can keep undoing. (An
+	# AI whose forward relays were shot down as fast as it raised them used
+	# to stand at the relay step for the whole match, with one barracks, one
+	# works and thousands of salvage in the bank.)
+	var spare: int = mini(3, me.salvage / 1500)
+	if spare > 0 and has_barracks:
+		if works != "" and _count(works) < max_works + spare:
+			return works
+		if _count(barracks) < max_barracks + spare:
+			return barracks
 	if build_relays and relays < early_relays and _relay_goal(w) != Vector2.INF:
 		return relay
 	if builds_turrets and _can(w, me, ground) and _count(ground) < 1:
@@ -556,8 +567,6 @@ func _next_building(w: SimWorld, me: SimPlayer) -> String:
 		return airpad
 	if build_relays and relays < early_relays * 2 and _relay_goal(w) != Vector2.INF and me.salvage > 500:
 		return relay
-	# Salvage piling up means production is the bottleneck: add capacity.
-	var spare: int = mini(2, me.salvage / 1500)
 	if me.salvage > 900 and _count(barracks) < max_barracks + spare:
 		return barracks
 	if works != "" and me.salvage > 1200 and _count(works) < max_works + spare and has_barracks:
