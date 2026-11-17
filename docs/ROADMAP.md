@@ -1332,6 +1332,12 @@ restarted three times; the background tuner died with it).**
     26% cheaper, Lodestone 9%, Aegis 6%, Veil 6%, Tally 1%; Nomad 15%
     dearer, Brackenfold 10%, Foundry 5%, Verdigris 4%, Vesper 3%. Before
     it, Nomad won 89% and Zephyr 19%.
+  - **The owner asked whether the win percentages are saved.** The
+    summaries were (this log, the README, the pull request); the full
+    tables, pairing by pairing, were only in this session's scratch
+    files. All of them are now in `docs/balance_leagues_2026-11-17.txt`:
+    the final league first, then every league before it back to the
+    game as it was on 16 November.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty

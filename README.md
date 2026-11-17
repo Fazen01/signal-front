@@ -307,7 +307,8 @@ game except through software-rendered screenshots, so:
   one fight is about 7–8 ms a frame.
 - Balance and pacing are measured with AI-vs-AI leagues
   (`tools/balance_league.py`), which says how the AI fares with each
-  faction, not how a person will. The last one (17 November, 720 games,
+  faction, not how a person will (every table, pairing by pairing, is in
+  `docs/balance_leagues_2026-11-17.txt`). The last one (17 November, 720 games,
   every faction against every other on sixteen maps) put all ten factions
   within 8.3 points of even: Nomad 57%, Vesper 56%, Tally 55%, Foundry
   54%, Brackenfold 52%, Aegis, Verdigris and Veil 44%, Lodestone 42%,

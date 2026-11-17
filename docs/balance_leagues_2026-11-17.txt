@@ -1,0 +1,580 @@
+Balance leagues of 16 and 17 November 2026: the full tables
+=============================================================
+
+AI against AI at Normal, one faction in each seat, on generated two-player
+maps. Played with tools/balance_league.py and tools/balance_tune.py; the
+session log in docs/ROADMAP.md ("Balance (M26)") says what was done between
+them and what the numbers can and cannot be trusted for. Newest first.
+
+To play the first one again (about ninety minutes on four cores):
+    python3 tools/balance_league.py --seeds 1-16 --jobs 4
+
+1. The final league: the data and AI now in the game (17 Nov, 09:22 UTC)
+------------------------------------------------------------------------
+Every faction against every other on seeds 1 to 16, both seats, 720 games,
+144 a faction. This is the table in the README. Each row is one pairing:
+games won by the faction on the left, then by the one on the right.
+
+LEAGUE seeds 1-16  (720 games, 6545 s)
+  aegis       5 - 11 bracken
+  aegis       7 - 9  foundry
+  aegis       7 - 8  lodestone   (1 drawn)
+  aegis       7 - 9  nomad
+  aegis       4 - 12 tally
+  aegis       9 - 7  veil
+  aegis       8 - 7  verdigris   (1 drawn)
+  aegis       7 - 8  vesper      (1 drawn)
+  aegis      10 - 6  zephyr
+  bracken     8 - 8  foundry
+  bracken    10 - 5  lodestone   (1 drawn)
+  bracken     6 - 9  nomad       (1 drawn)
+  bracken     8 - 7  tally       (1 drawn)
+  bracken     9 - 7  veil
+  bracken     6 - 8  verdigris   (2 drawn)
+  bracken     5 - 11 vesper
+  bracken    12 - 4  zephyr
+  foundry    11 - 5  lodestone
+  foundry     8 - 7  nomad       (1 drawn)
+  foundry     9 - 7  tally
+  foundry     7 - 9  veil
+  foundry     9 - 6  verdigris   (1 drawn)
+  foundry     5 - 11 vesper
+  foundry    12 - 4  zephyr
+  lodestone   5 - 11 nomad
+  lodestone   7 - 8  tally       (1 drawn)
+  lodestone   9 - 7  veil
+  lodestone   7 - 9  verdigris
+  lodestone   7 - 9  vesper
+  lodestone   8 - 8  zephyr
+  nomad       9 - 7  tally
+  nomad      12 - 4  veil
+  nomad      10 - 6  verdigris
+  nomad       9 - 7  vesper
+  nomad       6 - 10 zephyr
+  tally       9 - 7  veil
+  tally      10 - 5  verdigris   (1 drawn)
+  tally       7 - 9  vesper
+  tally      12 - 3  zephyr      (1 drawn)
+  veil        9 - 7  verdigris
+  veil        6 - 10 vesper
+  veil        8 - 8  zephyr
+  verdigris  11 - 5  vesper
+  verdigris   5 - 11 zephyr
+  vesper     10 - 6  zephyr
+  ----
+  nomad       56.9%  (82 of 144)
+  vesper      55.6%  (80 of 144)
+  tally       54.9%  (79 of 144)
+  foundry     54.2%  (78 of 144)
+  bracken     52.1%  (75 of 144)
+  aegis       44.4%  (64 of 144)
+  verdigris   44.4%  (64 of 144)
+  veil        44.4%  (64 of 144)
+  lodestone   42.4%  (61 of 144)
+  zephyr      41.7%  (60 of 144)
+  match length: median 16.5 min, 90% between 12 and 25, 13 not decided in 60 min
+  furthest from even: 8.3 points; one standard error at 144 games a faction is 4.2 points
+
+
+2. The same league one step earlier (07:04 UTC)
+-----------------------------------------------
+Before the last price step and before the AI was limited to three hijackers.
+
+LEAGUE seeds 1-16  (720 games, 5282 s)
+  aegis       9 - 7  bracken
+  aegis       5 - 11 foundry
+  aegis       9 - 7  lodestone
+  aegis       4 - 12 nomad
+  aegis       6 - 9  tally       (1 drawn)
+  aegis      11 - 4  veil        (1 drawn)
+  aegis       8 - 7  verdigris   (1 drawn)
+  aegis       7 - 8  vesper      (1 drawn)
+  aegis      10 - 6  zephyr
+  bracken     4 - 12 foundry
+  bracken     9 - 7  lodestone
+  bracken     7 - 9  nomad
+  bracken     4 - 11 tally       (1 drawn)
+  bracken     8 - 8  veil
+  bracken     8 - 7  verdigris   (1 drawn)
+  bracken     6 - 9  vesper      (1 drawn)
+  bracken     8 - 8  zephyr
+  foundry     8 - 8  lodestone
+  foundry     7 - 9  nomad
+  foundry     8 - 8  tally
+  foundry     6 - 10 veil
+  foundry    10 - 6  verdigris
+  foundry     9 - 7  vesper
+  foundry    11 - 5  zephyr
+  lodestone   7 - 9  nomad
+  lodestone   7 - 9  tally
+  lodestone  10 - 6  veil
+  lodestone   4 - 12 verdigris
+  lodestone   6 - 10 vesper
+  lodestone   6 - 10 zephyr
+  nomad      11 - 4  tally       (1 drawn)
+  nomad      10 - 4  veil        (2 drawn)
+  nomad       8 - 8  verdigris
+  nomad       7 - 9  vesper
+  nomad       7 - 9  zephyr
+  tally      11 - 5  veil
+  tally       9 - 7  verdigris
+  tally       8 - 8  vesper
+  tally      10 - 6  zephyr
+  veil        6 - 10 verdigris
+  veil        5 - 11 vesper
+  veil        7 - 9  zephyr
+  verdigris  11 - 5  vesper
+  verdigris   5 - 11 zephyr
+  vesper     10 - 6  zephyr
+  ----
+  foundry     56.9%  (82 of 144)
+  nomad       56.9%  (82 of 144)
+  tally       54.9%  (79 of 144)
+  vesper      53.5%  (77 of 144)
+  verdigris   50.7%  (73 of 144)
+  zephyr      48.6%  (70 of 144)
+  aegis       47.9%  (69 of 144)
+  lodestone   43.1%  (62 of 144)
+  bracken     42.4%  (61 of 144)
+  veil        38.2%  (55 of 144)
+  match length: median 16.2 min, 88% between 12 and 25, 10 not decided in 60 min
+  furthest from even: 11.8 points; one standard error at 144 games a faction is 4.2 points
+
+
+3. A league on seeds the tuner had not seen: 11 to 16 (05:15 UTC)
+-----------------------------------------------------------------
+270 games, 54 a faction. Prices of the moment; see the session log.
+
+LEAGUE seeds 11-16  (270 games, 2914 s)
+  aegis       4 - 2  bracken
+  aegis       3 - 3  foundry
+  aegis       6 - 0  lodestone
+  aegis       3 - 3  nomad
+  aegis       3 - 3  tally
+  aegis       6 - 0  veil
+  aegis       3 - 2  verdigris   (1 drawn)
+  aegis       5 - 1  vesper
+  aegis       6 - 0  zephyr
+  bracken     2 - 4  foundry
+  bracken     3 - 3  lodestone
+  bracken     2 - 4  nomad
+  bracken     1 - 5  tally
+  bracken     5 - 1  veil
+  bracken     4 - 2  verdigris
+  bracken     3 - 3  vesper
+  bracken     2 - 4  zephyr
+  foundry     6 - 0  lodestone
+  foundry     6 - 0  nomad
+  foundry     2 - 4  tally
+  foundry     4 - 2  veil
+  foundry     4 - 2  verdigris
+  foundry     2 - 4  vesper
+  foundry     4 - 2  zephyr
+  lodestone   1 - 5  nomad
+  lodestone   1 - 5  tally
+  lodestone   3 - 3  veil
+  lodestone   1 - 5  verdigris
+  lodestone   2 - 4  vesper
+  lodestone   4 - 2  zephyr
+  nomad       4 - 2  tally
+  nomad       3 - 3  veil
+  nomad       2 - 4  verdigris
+  nomad       4 - 2  vesper
+  nomad       1 - 5  zephyr
+  tally       2 - 4  veil
+  tally       2 - 4  verdigris
+  tally       3 - 3  vesper
+  tally       4 - 2  zephyr
+  veil        2 - 3  verdigris   (1 drawn)
+  veil        4 - 2  vesper
+  veil        0 - 6  zephyr
+  verdigris   2 - 4  vesper
+  verdigris   4 - 2  zephyr
+  vesper      5 - 1  zephyr
+  ----
+  aegis       72.2%  (39 of 54)
+  foundry     64.8%  (35 of 54)
+  tally       55.6%  (30 of 54)
+  vesper      51.9%  (28 of 54)
+  verdigris   51.9%  (28 of 54)
+  nomad       48.1%  (26 of 54)
+  zephyr      44.4%  (24 of 54)
+  bracken     44.4%  (24 of 54)
+  veil        35.2%  (19 of 54)
+  lodestone   27.8%  (15 of 54)
+  match length: median 16.5 min, 89% between 12 and 25, 2 not decided in 60 min
+  furthest from even: 22.2 points; one standard error at 54 games a faction is 6.8 points
+
+
+4. A league on seeds the tuner had not seen: 5 to 10 (04:26 UTC)
+----------------------------------------------------------------
+270 games, 54 a faction. Prices of the moment; see the session log.
+
+LEAGUE seeds 5-10  (270 games, 3037 s)
+  aegis       6 - 0  bracken
+  aegis       3 - 2  foundry     (1 drawn)
+  aegis       4 - 2  lodestone
+  aegis       1 - 5  nomad
+  aegis       1 - 5  tally
+  aegis       3 - 3  veil
+  aegis       3 - 3  verdigris
+  aegis       4 - 2  vesper
+  aegis       3 - 3  zephyr
+  bracken     2 - 4  foundry
+  bracken     2 - 4  lodestone
+  bracken     2 - 4  nomad
+  bracken     3 - 3  tally
+  bracken     3 - 3  veil
+  bracken     4 - 1  verdigris   (1 drawn)
+  bracken     1 - 5  vesper
+  bracken     3 - 3  zephyr
+  foundry     3 - 3  lodestone
+  foundry     4 - 2  nomad
+  foundry     4 - 2  tally
+  foundry     1 - 5  veil
+  foundry     4 - 2  verdigris
+  foundry     2 - 4  vesper
+  foundry     3 - 3  zephyr
+  lodestone   2 - 4  nomad
+  lodestone   3 - 3  tally
+  lodestone   3 - 3  veil
+  lodestone   1 - 5  verdigris
+  lodestone   2 - 4  vesper
+  lodestone   3 - 3  zephyr
+  nomad       4 - 1  tally       (1 drawn)
+  nomad       3 - 3  veil
+  nomad       3 - 3  verdigris
+  nomad       1 - 5  vesper
+  nomad       4 - 2  zephyr
+  tally       3 - 3  veil
+  tally       4 - 2  verdigris
+  tally       3 - 3  vesper
+  tally       3 - 3  zephyr
+  veil        1 - 5  verdigris
+  veil        3 - 3  vesper
+  veil        3 - 3  zephyr
+  verdigris   5 - 1  vesper
+  verdigris   0 - 6  zephyr
+  vesper      3 - 3  zephyr
+  ----
+  nomad       55.6%  (30 of 54)
+  vesper      55.6%  (30 of 54)
+  zephyr      53.7%  (29 of 54)
+  aegis       51.9%  (28 of 54)
+  foundry     50.0%  (27 of 54)
+  tally       50.0%  (27 of 54)
+  veil        50.0%  (27 of 54)
+  verdigris   48.1%  (26 of 54)
+  lodestone   42.6%  (23 of 54)
+  bracken     37.0%  (20 of 54)
+  match length: median 16.3 min, 85% between 12 and 25, 3 not decided in 60 min
+  furthest from even: 13.0 points; one standard error at 54 games a faction is 6.8 points
+
+
+5. The tuner's three rounds with the first two AI fixes, seeds 1 to 4 (02:30 to 03:34 UTC)
+------------------------------------------------------------------------------------------
+180 games a round. Each round's heading gives the price multipliers it was played with.
+
+TUNE round 1, seeds 1-4, prices bracken x1.079, foundry x1.058, nomad x1.191, tally x0.951, veil x0.932, verdigris x1.039, vesper x1.029, zephyr x0.815  (180 games, 2004 s)
+  aegis       1 - 3  bracken
+  aegis       1 - 3  foundry
+  aegis       0 - 4  lodestone
+  aegis       1 - 3  nomad
+  aegis       2 - 2  tally
+  aegis       2 - 2  veil
+  aegis       0 - 3  verdigris   (1 drawn)
+  aegis       2 - 2  vesper
+  aegis       2 - 2  zephyr
+  bracken     3 - 1  foundry
+  bracken     1 - 3  lodestone
+  bracken     4 - 0  nomad
+  bracken     3 - 0  tally       (1 drawn)
+  bracken     3 - 1  veil
+  bracken     2 - 2  verdigris
+  bracken     3 - 1  vesper
+  bracken     4 - 0  zephyr
+  foundry     2 - 2  lodestone
+  foundry     2 - 2  nomad
+  foundry     1 - 3  tally
+  foundry     0 - 4  veil
+  foundry     1 - 3  verdigris
+  foundry     2 - 2  vesper
+  foundry     1 - 3  zephyr
+  lodestone   1 - 3  nomad
+  lodestone   1 - 3  tally
+  lodestone   2 - 2  veil
+  lodestone   2 - 2  verdigris
+  lodestone   1 - 3  vesper
+  lodestone   3 - 1  zephyr
+  nomad       2 - 1  tally       (1 drawn)
+  nomad       1 - 3  veil
+  nomad       0 - 4  verdigris
+  nomad       2 - 2  vesper
+  nomad       0 - 4  zephyr
+  tally       2 - 2  veil
+  tally       4 - 0  verdigris
+  tally       3 - 1  vesper
+  tally       3 - 1  zephyr
+  veil        4 - 0  verdigris
+  veil        0 - 4  vesper
+  veil        3 - 1  zephyr
+  verdigris   3 - 1  vesper
+  verdigris   1 - 3  zephyr
+  vesper      2 - 1  zephyr      (1 drawn)
+  ----
+  bracken     72.2%  (26 of 36)
+  tally       58.3%  (21 of 36)
+  veil        58.3%  (21 of 36)
+  lodestone   52.8%  (19 of 36)
+  vesper      50.0%  (18 of 36)
+  verdigris   50.0%  (18 of 36)
+  zephyr      44.4%  (16 of 36)
+  foundry     36.1%  (13 of 36)
+  nomad       36.1%  (13 of 36)
+  aegis       30.6%  (11 of 36)
+  match length: median 16.3 min, 87% between 12 and 25, 4 not decided in 60 min
+  furthest from even: 22.2 points; one standard error at 36 games a faction is 8.3 points
+TUNE round 2, seeds 1-4, prices aegis x0.932, bracken x1.163, foundry x1.007, nomad x1.133, tally x0.979, veil x0.959, verdigris x1.039, vesper x1.029, zephyr x0.815  (180 games, 1930 s)
+  aegis       3 - 1  bracken
+  aegis       1 - 3  foundry
+  aegis       2 - 2  lodestone
+  aegis       2 - 2  nomad
+  aegis       0 - 3  tally       (1 drawn)
+  aegis       2 - 2  veil
+  aegis       0 - 4  verdigris
+  aegis       1 - 3  vesper
+  aegis       2 - 2  zephyr
+  bracken     1 - 3  foundry
+  bracken     1 - 3  lodestone
+  bracken     2 - 2  nomad
+  bracken     4 - 0  tally
+  bracken     2 - 2  veil
+  bracken     3 - 1  verdigris
+  bracken     2 - 2  vesper
+  bracken     3 - 1  zephyr
+  foundry     2 - 2  lodestone
+  foundry     2 - 2  nomad
+  foundry     3 - 1  tally
+  foundry     1 - 3  veil
+  foundry     2 - 2  verdigris
+  foundry     2 - 2  vesper
+  foundry     1 - 3  zephyr
+  lodestone   1 - 3  nomad
+  lodestone   2 - 2  tally
+  lodestone   2 - 2  veil
+  lodestone   2 - 2  verdigris
+  lodestone   1 - 3  vesper
+  lodestone   3 - 1  zephyr
+  nomad       2 - 2  tally
+  nomad       2 - 2  veil
+  nomad       1 - 3  verdigris
+  nomad       2 - 2  vesper
+  nomad       3 - 1  zephyr
+  tally       1 - 2  veil        (1 drawn)
+  tally       4 - 0  verdigris
+  tally       3 - 1  vesper
+  tally       4 - 0  zephyr
+  veil        3 - 1  verdigris
+  veil        3 - 1  vesper
+  veil        3 - 1  zephyr
+  verdigris   3 - 1  vesper
+  verdigris   1 - 3  zephyr
+  vesper      2 - 1  zephyr      (1 drawn)
+  ----
+  veil        61.1%  (22 of 36)
+  tally       55.6%  (20 of 36)
+  foundry     52.8%  (19 of 36)
+  nomad       52.8%  (19 of 36)
+  bracken     52.8%  (19 of 36)
+  lodestone   50.0%  (18 of 36)
+  vesper      47.2%  (17 of 36)
+  verdigris   47.2%  (17 of 36)
+  aegis       36.1%  (13 of 36)
+  zephyr      36.1%  (13 of 36)
+  match length: median 16.0 min, 92% between 12 and 25, 3 not decided in 60 min
+  furthest from even: 13.9 points; one standard error at 36 games a faction is 8.3 points
+TUNE round 3, seeds 1-4, prices aegis x0.887, bracken x1.163, foundry x1.007, nomad x1.133, tally x0.979, veil x0.996, verdigris x1.039, vesper x1.029, zephyr x0.775  (180 games, 1899 s)
+  aegis       2 - 2  bracken
+  aegis       2 - 2  foundry
+  aegis       3 - 1  lodestone
+  aegis       1 - 3  nomad
+  aegis       2 - 2  tally
+  aegis       3 - 1  veil
+  aegis       2 - 2  verdigris
+  aegis       2 - 2  vesper
+  aegis       4 - 0  zephyr
+  bracken     1 - 3  foundry
+  bracken     1 - 3  lodestone
+  bracken     2 - 2  nomad
+  bracken     4 - 0  tally
+  bracken     4 - 0  veil
+  bracken     3 - 1  verdigris
+  bracken     2 - 2  vesper
+  bracken     2 - 2  zephyr
+  foundry     2 - 2  lodestone
+  foundry     2 - 2  nomad
+  foundry     3 - 1  tally
+  foundry     0 - 4  veil
+  foundry     2 - 2  verdigris
+  foundry     2 - 2  vesper
+  foundry     3 - 1  zephyr
+  lodestone   1 - 3  nomad
+  lodestone   2 - 2  tally
+  lodestone   2 - 2  veil
+  lodestone   2 - 2  verdigris
+  lodestone   1 - 3  vesper
+  lodestone   1 - 3  zephyr
+  nomad       2 - 2  tally
+  nomad       1 - 3  veil
+  nomad       1 - 3  verdigris
+  nomad       2 - 2  vesper
+  nomad       2 - 2  zephyr
+  tally       3 - 1  veil
+  tally       4 - 0  verdigris
+  tally       3 - 1  vesper
+  tally       2 - 2  zephyr
+  veil        3 - 1  verdigris
+  veil        1 - 2  vesper      (1 drawn)
+  veil        3 - 1  zephyr
+  verdigris   3 - 1  vesper
+  verdigris   1 - 3  zephyr
+  vesper      4 - 0  zephyr
+  ----
+  aegis       58.3%  (21 of 36)
+  bracken     58.3%  (21 of 36)
+  foundry     52.8%  (19 of 36)
+  vesper      52.8%  (19 of 36)
+  tally       52.8%  (19 of 36)
+  nomad       50.0%  (18 of 36)
+  veil        50.0%  (18 of 36)
+  verdigris   41.7%  (15 of 36)
+  lodestone   41.7%  (15 of 36)
+  zephyr      38.9%  (14 of 36)
+  match length: median 16.1 min, 95% between 12 and 25, 1 not decided in 60 min
+  furthest from even: 11.1 points; one standard error at 36 games a faction is 8.3 points
+TUNE prices: aegis x0.913, bracken x1.197, foundry x1.007, lodestone x1.000, nomad x1.133, tally x0.979, veil x0.996, verdigris x1.039, vesper x1.029, zephyr x0.745
+
+
+6. Where it started: two rounds with the AI and prices of 16 November, seeds 1 to 4 (00:30 and 01:12 UTC)
+---------------------------------------------------------------------------------------------------------
+180 games a round, maps without hills. Round 1 is the game as it was before any of this.
+
+TUNE round 1, seeds 1-4, prices as in the data files  (180 games, 2829 s)
+  aegis       1 - 3  bracken
+  aegis       0 - 4  foundry
+  aegis       2 - 1  lodestone   (1 drawn)
+  aegis       0 - 4  nomad
+  aegis       2 - 2  tally
+  aegis       3 - 1  veil
+  aegis       1 - 2  verdigris   (1 drawn)
+  aegis       2 - 2  vesper
+  aegis       4 - 0  zephyr
+  bracken     2 - 2  foundry
+  bracken     1 - 3  lodestone
+  bracken     0 - 4  nomad
+  bracken     3 - 1  tally
+  bracken     3 - 1  veil
+  bracken     3 - 1  verdigris
+  bracken     3 - 1  vesper
+  bracken     3 - 1  zephyr
+  foundry     4 - 0  lodestone
+  foundry     1 - 3  nomad
+  foundry     3 - 1  tally
+  foundry     1 - 3  veil
+  foundry     1 - 3  verdigris
+  foundry     4 - 0  vesper
+  foundry     4 - 0  zephyr
+  lodestone   0 - 4  nomad
+  lodestone   3 - 1  tally
+  lodestone   2 - 2  veil
+  lodestone   1 - 3  verdigris
+  lodestone   2 - 2  vesper
+  lodestone   3 - 1  zephyr
+  nomad       4 - 0  tally
+  nomad       2 - 2  veil
+  nomad       3 - 1  verdigris
+  nomad       4 - 0  vesper
+  nomad       4 - 0  zephyr
+  tally       1 - 3  veil
+  tally       2 - 2  verdigris
+  tally       2 - 2  vesper
+  tally       3 - 1  zephyr
+  veil        2 - 2  verdigris
+  veil        0 - 4  vesper
+  veil        2 - 2  zephyr
+  verdigris   4 - 0  vesper
+  verdigris   2 - 2  zephyr
+  vesper      4 - 0  zephyr
+  ----
+  nomad       88.9%  (32 of 36)
+  foundry     66.7%  (24 of 36)
+  bracken     58.3%  (21 of 36)
+  verdigris   55.6%  (20 of 36)
+  veil        44.4%  (16 of 36)
+  aegis       41.7%  (15 of 36)
+  vesper      41.7%  (15 of 36)
+  lodestone   41.7%  (15 of 36)
+  tally       36.1%  (13 of 36)
+  zephyr      19.4%  (7 of 36)
+  match length: median 14.9 min, 93% between 12 and 25, 2 not decided in 60 min
+  furthest from even: 38.9 points; one standard error at 36 games a faction is 8.3 points
+TUNE round 2, seeds 1-4, prices bracken x1.029, foundry x1.058, nomad x1.136, tally x0.951, zephyr x0.893  (180 games, 2667 s)
+  aegis       2 - 2  bracken
+  aegis       0 - 4  foundry
+  aegis       2 - 1  lodestone   (1 drawn)
+  aegis       1 - 3  nomad
+  aegis       2 - 2  tally
+  aegis       3 - 1  veil
+  aegis       1 - 2  verdigris   (1 drawn)
+  aegis       2 - 2  vesper
+  aegis       2 - 2  zephyr
+  bracken     1 - 3  foundry
+  bracken     3 - 1  lodestone
+  bracken     1 - 3  nomad
+  bracken     4 - 0  tally
+  bracken     4 - 0  veil
+  bracken     3 - 1  verdigris
+  bracken     2 - 2  vesper
+  bracken     3 - 1  zephyr
+  foundry     1 - 3  lodestone
+  foundry     2 - 2  nomad
+  foundry     2 - 2  tally
+  foundry     1 - 3  veil
+  foundry     1 - 2  verdigris   (1 drawn)
+  foundry     2 - 2  vesper
+  foundry     4 - 0  zephyr
+  lodestone   2 - 2  nomad
+  lodestone   1 - 3  tally
+  lodestone   2 - 2  veil
+  lodestone   1 - 3  verdigris
+  lodestone   2 - 2  vesper
+  lodestone   3 - 1  zephyr
+  nomad       2 - 2  tally
+  nomad       3 - 1  veil
+  nomad       3 - 1  verdigris
+  nomad       1 - 2  vesper      (1 drawn)
+  nomad       4 - 0  zephyr
+  tally       3 - 1  veil
+  tally       0 - 4  verdigris
+  tally       1 - 3  vesper
+  tally       3 - 1  zephyr
+  veil        2 - 2  verdigris
+  veil        0 - 4  vesper
+  veil        1 - 3  zephyr
+  verdigris   4 - 0  vesper
+  verdigris   3 - 1  zephyr
+  vesper      4 - 0  zephyr
+  ----
+  nomad       63.9%  (23 of 36)
+  bracken     63.9%  (23 of 36)
+  verdigris   61.1%  (22 of 36)
+  vesper      58.3%  (21 of 36)
+  foundry     55.6%  (20 of 36)
+  tally       44.4%  (16 of 36)
+  lodestone   44.4%  (16 of 36)
+  aegis       41.7%  (15 of 36)
+  veil        30.6%  (11 of 36)
+  zephyr      25.0%  (9 of 36)
+  match length: median 15.3 min, 88% between 12 and 25, 4 not decided in 60 min
+  furthest from even: 25.0 points; one standard error at 36 games a faction is 8.3 points
+TUNE prices: aegis x1.000, bracken x1.079, foundry x1.058, lodestone x1.000, nomad x1.191, tally x0.951, veil x0.932, verdigris x1.039, vesper x1.029, zephyr x0.815
