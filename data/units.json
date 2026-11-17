@@ -1,13 +1,13 @@
 {
 	"trooper": {
 		"name": "Trooper", "desc": "Rifle infantry. Cheap, good against other infantry.",
-		"faction": "aegis", "tier": 1, "cost": 55, "build_time": 8.0, "bandwidth": 1,
+		"faction": "aegis", "tier": 1, "cost": 50, "build_time": 8.0, "bandwidth": 1,
 		"hp": 90, "armor": "infantry", "move": "infantry", "speed": 2.6, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["rifle"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "trooper", "hotkey": "T"
 	},
 	"lancer": {
 		"name": "Lancer", "desc": "Anti-armor missile team. Slow to fire, deadly to vehicles.",
-		"faction": "aegis", "tier": 1, "cost": 110, "build_time": 11.5, "bandwidth": 1,
+		"faction": "aegis", "tier": 1, "cost": 100, "build_time": 11.5, "bandwidth": 1,
 		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["lance_missile"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "lancer", "hotkey": "L"
 	},
@@ -20,7 +20,7 @@
 	},
 	"marksman": {
 		"name": "Marksman", "desc": "Long-sighted sharpshooter. Hidden while standing still unless an enemy is close.",
-		"faction": "aegis", "tier": 2, "cost": 150, "build_time": 15.5, "bandwidth": 1,
+		"faction": "aegis", "tier": 2, "cost": 135, "build_time": 15.5, "bandwidth": 1,
 		"hp": 60, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 16.0, "weapons": ["marksman_rifle"], "stealth": true, "ai_role": "anti_infantry", "ai_weight": 0.8, "model": "marksman",
 		"hotkey": "M", "requires": ["vehicle_works"]
@@ -33,38 +33,38 @@
 	},
 	"courser": {
 		"name": "Courser", "desc": "Fast scout car with a light machine gun.",
-		"faction": "aegis", "tier": 2, "cost": 100, "build_time": 10.5, "bandwidth": 1,
+		"faction": "aegis", "tier": 2, "cost": 90, "build_time": 10.5, "bandwidth": 1,
 		"hp": 180, "armor": "light", "move": "vehicle", "speed": 6.2, "turn_rate": 4.0,
 		"radius": 0.8, "sight": 15.0, "weapons": ["light_mg"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "courser", "hotkey": "C"
 	},
 	"warden": {
 		"name": "Warden", "desc": "Autocannon fighting vehicle. Shreds infantry and light vehicles.",
-		"faction": "aegis", "tier": 2, "cost": 220, "build_time": 18.0, "bandwidth": 3,
+		"faction": "aegis", "tier": 2, "cost": 200, "build_time": 18.0, "bandwidth": 3,
 		"hp": 400, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 11.0, "weapons": ["autocannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "warden", "hotkey": "R"
 	},
 	"bulwark": {
 		"name": "Bulwark", "desc": "Main battle tank. Heavy armor and a hard-hitting cannon.",
-		"faction": "aegis", "tier": 2, "cost": 380, "build_time": 26.0, "bandwidth": 4,
+		"faction": "aegis", "tier": 2, "cost": 345, "build_time": 26.0, "bandwidth": 4,
 		"hp": 720, "armor": "heavy", "move": "vehicle", "speed": 3.3, "turn_rate": 2.2,
 		"radius": 1.15, "sight": 11.0, "weapons": ["tank_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.5, "model": "bulwark", "hotkey": "B"
 	},
 	"tempest": {
 		"name": "Tempest", "desc": "Anti-air track. Shreds aircraft; its flak is weak against armor.",
-		"faction": "aegis", "tier": 2, "cost": 240, "build_time": 18.0, "bandwidth": 3,
+		"faction": "aegis", "tier": 2, "cost": 220, "build_time": 18.0, "bandwidth": 3,
 		"hp": 380, "armor": "light", "move": "vehicle", "speed": 4.0, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 12.0, "weapons": ["tempest_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "tempest", "hotkey": "T"
 	},
 	"longbow": {
 		"name": "Longbow", "desc": "Artillery. Huge range and splash, but it cannot hit close targets and needs spotters.",
-		"faction": "aegis", "tier": 3, "cost": 420, "build_time": 28.5, "bandwidth": 4,
+		"faction": "aegis", "tier": 3, "cost": 385, "build_time": 28.5, "bandwidth": 4,
 		"hp": 300, "armor": "light", "move": "vehicle", "speed": 2.8, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["longbow_shell"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "longbow",
 		"hotkey": "L", "requires": ["command_lab"]
 	},
 	"kestrel": {
 		"name": "Kestrel", "desc": "Gunship. Flies over any terrain and rockets ground targets; helpless against flak.",
-		"faction": "aegis", "tier": 3, "cost": 450, "build_time": 28.5, "bandwidth": 4,
+		"faction": "aegis", "tier": 3, "cost": 410, "build_time": 28.5, "bandwidth": 4,
 		"hp": 320, "armor": "air", "move": "air", "speed": 6.5, "turn_rate": 4.0,
 		"radius": 1.1, "sight": 12.0, "weapons": ["kestrel_rockets"], "turret": true, "ai_role": "air", "ai_weight": 2.5, "model": "kestrel", "hotkey": "K"
 	},
@@ -131,7 +131,7 @@
 	},
 	"mauler": {
 		"name": "Mauler", "desc": "Heavy tank. Slow, enormously tough, hits like a wrecking ball.",
-		"faction": "foundry", "tier": 3, "cost": 520, "build_time": 34.0, "bandwidth": 5,
+		"faction": "foundry", "tier": 3, "cost": 525, "build_time": 34.0, "bandwidth": 5,
 		"hp": 1100, "armor": "heavy", "move": "vehicle", "speed": 2.5, "turn_rate": 1.8,
 		"radius": 1.3, "sight": 11.0, "weapons": ["mauler_cannon"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 3.0, "model": "mauler", "hotkey": "M", "requires": ["arsenal"]
@@ -145,7 +145,7 @@
 	},
 	"drifter": {
 		"name": "Drifter", "desc": "Fast light infantry. Vanishes when it stands still in forest.",
-		"faction": "nomad", "tier": 1, "cost": 52, "build_time": 6.5, "bandwidth": 1,
+		"faction": "nomad", "tier": 1, "cost": 60, "build_time": 6.5, "bandwidth": 1,
 		"hp": 88, "armor": "infantry", "move": "infantry", "speed": 3.0, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["drifter_smg"], "ai_role": "anti_infantry", "ai_weight": 3.0,
 		"model": "drifter", "hotkey": "T"
@@ -172,28 +172,28 @@
 	},
 	"dart": {
 		"name": "Dart", "desc": "Raider bike. Very fast, very cheap, shoots on the move.",
-		"faction": "nomad", "tier": 2, "cost": 86, "build_time": 8.0, "bandwidth": 1,
+		"faction": "nomad", "tier": 2, "cost": 95, "build_time": 8.0, "bandwidth": 1,
 		"hp": 160, "armor": "light", "move": "vehicle", "speed": 7.5, "turn_rate": 5.0,
 		"radius": 0.6, "sight": 12.0, "weapons": ["dart_gun"], "turret": true,
 		"ai_role": "anti_infantry", "ai_weight": 2.6, "model": "dart", "hotkey": "R"
 	},
 	"sidewinder": {
 		"name": "Sidewinder", "desc": "Missile truck. Out-ranges tanks and cannot take a hit.",
-		"faction": "nomad", "tier": 2, "cost": 181, "build_time": 15.5, "bandwidth": 2,
+		"faction": "nomad", "tier": 2, "cost": 205, "build_time": 15.5, "bandwidth": 2,
 		"hp": 290, "armor": "light", "move": "vehicle", "speed": 5.0, "turn_rate": 3.4,
 		"radius": 0.95, "sight": 12.0, "weapons": ["sidewinder_missile"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 2.8, "model": "sidewinder", "hotkey": "B"
 	},
 	"gnat": {
 		"name": "Gnat", "desc": "Flak buggy. Keeps aircraft off the raiders.",
-		"faction": "nomad", "tier": 2, "cost": 170, "build_time": 13.0, "bandwidth": 2,
+		"faction": "nomad", "tier": 2, "cost": 195, "build_time": 13.0, "bandwidth": 2,
 		"hp": 220, "armor": "light", "move": "vehicle", "speed": 5.5, "turn_rate": 4.0,
 		"radius": 0.85, "sight": 12.0, "weapons": ["gnat_flak"], "turret": true,
 		"ai_role": "anti_air", "ai_weight": 0.2, "model": "gnat", "hotkey": "K"
 	},
 	"prowler": {
 		"name": "Prowler", "desc": "Light tank with an armor-piercing gun. The heaviest thing the Circuit builds, and still quick.",
-		"faction": "nomad", "tier": 2, "cost": 266, "build_time": 21.0, "bandwidth": 3,
+		"faction": "nomad", "tier": 2, "cost": 300, "build_time": 21.0, "bandwidth": 3,
 		"hp": 480, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.0,
 		"radius": 1.05, "sight": 11.0, "weapons": ["prowler_cannon"], "turret": true,
 		"ai_role": "anti_armor", "ai_weight": 3.0, "model": "prowler", "hotkey": "P"
@@ -225,7 +225,7 @@
 	},
 	"shard": {
 		"name": "Shard", "desc": "Anti-armor frame. Its homing lance is slow to fire and deadly to vehicles.",
-		"faction": "vesper", "tier": 1, "cost": 100, "build_time": 10.5, "bandwidth": 1,
+		"faction": "vesper", "tier": 1, "cost": 105, "build_time": 10.5, "bandwidth": 1,
 		"hp": 68, "armor": "infantry", "move": "infantry", "speed": 2.8, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["shard_lance"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "shard", "hotkey": "L"
 	},
@@ -244,44 +244,44 @@
 	},
 	"glint": {
 		"name": "Glint", "desc": "Fast scout skimmer with a light repeater.",
-		"faction": "vesper", "tier": 2, "cost": 95, "build_time": 10.0, "bandwidth": 1,
+		"faction": "vesper", "tier": 2, "cost": 100, "build_time": 10.0, "bandwidth": 1,
 		"hp": 150, "armor": "light", "move": "vehicle", "speed": 6.6, "turn_rate": 4.2,
 		"radius": 0.8, "sight": 15.0, "weapons": ["glint_pulse"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "glint", "hotkey": "C"
 	},
 	"lash": {
 		"name": "Lash", "desc": "Skimmer with twin repeaters. Shreds infantry and light vehicles.",
-		"faction": "vesper", "tier": 2, "cost": 205, "build_time": 16.5, "bandwidth": 3,
+		"faction": "vesper", "tier": 2, "cost": 210, "build_time": 16.5, "bandwidth": 3,
 		"hp": 330, "armor": "light", "move": "vehicle", "speed": 4.6, "turn_rate": 3.2,
 		"radius": 1.0, "sight": 11.0, "weapons": ["lash_repeater"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "lash", "hotkey": "R"
 	},
 	"halberd": {
 		"name": "Halberd", "desc": "The Array's battle skimmer: armored, with a long armor-piercing lance. Lighter than other tanks and quicker.",
-		"faction": "vesper", "tier": 2, "cost": 350, "build_time": 24.5, "bandwidth": 4,
+		"faction": "vesper", "tier": 2, "cost": 360, "build_time": 24.5, "bandwidth": 4,
 		"hp": 590, "armor": "heavy", "move": "vehicle", "speed": 3.7, "turn_rate": 2.4,
 		"radius": 1.1, "sight": 11.0, "weapons": ["halberd_beam"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "halberd", "hotkey": "B"
 	},
 	"aureole": {
 		"name": "Aureole", "desc": "Anti-air skimmer. Its bursts tear up aircraft and do little to armor.",
-		"faction": "vesper", "tier": 2, "cost": 220, "build_time": 17.0, "bandwidth": 3,
+		"faction": "vesper", "tier": 2, "cost": 225, "build_time": 17.0, "bandwidth": 3,
 		"hp": 330, "armor": "light", "move": "vehicle", "speed": 4.4, "turn_rate": 3.2,
 		"radius": 1.0, "sight": 12.0, "weapons": ["aureole_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "aureole", "hotkey": "K"
 	},
 	"prism": {
 		"name": "Prism", "desc": "Siege skimmer. Lobs heavy bolts a long way; it cannot hit close targets and needs spotters.",
-		"faction": "vesper", "tier": 3, "cost": 400, "build_time": 27.0, "bandwidth": 4,
+		"faction": "vesper", "tier": 3, "cost": 410, "build_time": 27.0, "bandwidth": 4,
 		"hp": 270, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.2,
 		"radius": 1.1, "sight": 10.0, "weapons": ["prism_ray"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "prism", "hotkey": "L",
 		"requires": ["oracle"]
 	},
 	"vigil": {
 		"name": "Vigil", "desc": "Armored foot knight with a carbine and a shield. Slow, costly, and tougher than any other infantry.",
-		"faction": "verdigris", "tier": 1, "cost": 75, "build_time": 9.5, "bandwidth": 1,
+		"faction": "verdigris", "tier": 1, "cost": 80, "build_time": 9.5, "bandwidth": 1,
 		"hp": 135, "armor": "infantry", "move": "infantry", "speed": 2.3, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["vigil_carbine"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "vigil", "hotkey": "T"
 	},
 	"pike": {
 		"name": "Pike", "desc": "Knight with a homing lance. Slow to fire, deadly to vehicles.",
-		"faction": "verdigris", "tier": 1, "cost": 130, "build_time": 12.5, "bandwidth": 1,
+		"faction": "verdigris", "tier": 1, "cost": 135, "build_time": 12.5, "bandwidth": 1,
 		"hp": 115, "armor": "infantry", "move": "infantry", "speed": 2.2, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["pike_lance"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "pike", "hotkey": "L"
 	},
@@ -300,44 +300,44 @@
 	},
 	"outrider": {
 		"name": "Outrider", "desc": "Two-legged scout walker with a light gun.",
-		"faction": "verdigris", "tier": 2, "cost": 125, "build_time": 12.0, "bandwidth": 1,
+		"faction": "verdigris", "tier": 2, "cost": 130, "build_time": 12.0, "bandwidth": 1,
 		"hp": 250, "armor": "light", "move": "vehicle", "speed": 5.4, "turn_rate": 3.6,
 		"radius": 0.85, "sight": 15.0, "weapons": ["outrider_gun"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "outrider", "hotkey": "C"
 	},
 	"thresher": {
 		"name": "Thresher", "desc": "Two-legged walker with twin cannons. Cuts down infantry and light vehicles.",
-		"faction": "verdigris", "tier": 2, "cost": 260, "build_time": 20.0, "bandwidth": 3,
+		"faction": "verdigris", "tier": 2, "cost": 270, "build_time": 20.0, "bandwidth": 3,
 		"hp": 500, "armor": "light", "move": "vehicle", "speed": 3.7, "turn_rate": 2.8,
 		"radius": 1.05, "sight": 11.0, "weapons": ["thresher_cannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "thresher", "hotkey": "R"
 	},
 	"castellan": {
 		"name": "Castellan", "desc": "The Order's great walker: the thickest armor and the heaviest gun on the field, at a price and a pace to match.",
-		"faction": "verdigris", "tier": 2, "cost": 450, "build_time": 30.0, "bandwidth": 5,
+		"faction": "verdigris", "tier": 2, "cost": 470, "build_time": 30.0, "bandwidth": 5,
 		"hp": 880, "armor": "heavy", "move": "vehicle", "speed": 2.9, "turn_rate": 2.0,
 		"radius": 1.25, "sight": 11.0, "weapons": ["castellan_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.5, "model": "castellan", "hotkey": "B"
 	},
 	"canopy": {
 		"name": "Canopy", "desc": "Anti-air walker. Its flak tears up aircraft and does little to armor.",
-		"faction": "verdigris", "tier": 2, "cost": 270, "build_time": 20.0, "bandwidth": 3,
+		"faction": "verdigris", "tier": 2, "cost": 280, "build_time": 20.0, "bandwidth": 3,
 		"hp": 440, "armor": "light", "move": "vehicle", "speed": 3.5, "turn_rate": 2.8,
 		"radius": 1.05, "sight": 12.0, "weapons": ["canopy_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "canopy", "hotkey": "K"
 	},
 	"mangonel": {
 		"name": "Mangonel", "desc": "Siege walker. Hurls heavy shot a long way; it cannot hit close targets and needs spotters.",
-		"faction": "verdigris", "tier": 3, "cost": 470, "build_time": 31.0, "bandwidth": 4,
+		"faction": "verdigris", "tier": 3, "cost": 490, "build_time": 31.0, "bandwidth": 4,
 		"hp": 340, "armor": "light", "move": "vehicle", "speed": 2.5, "turn_rate": 2.0,
 		"radius": 1.15, "sight": 10.0, "weapons": ["mangonel_shot"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "mangonel", "hotkey": "L",
 		"requires": ["reliquary"]
 	},
 	"ranger": {
 		"name": "Ranger", "desc": "Light rifle infantry that screens the airfields.",
-		"faction": "zephyr", "tier": 1, "cost": 55, "build_time": 8.0, "bandwidth": 1,
+		"faction": "zephyr", "tier": 1, "cost": 40, "build_time": 8.0, "bandwidth": 1,
 		"hp": 90, "armor": "infantry", "move": "infantry", "speed": 2.7, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["ranger_rifle"], "ai_role": "anti_infantry", "ai_weight": 2.6, "model": "ranger", "hotkey": "T"
 	},
 	"flare": {
 		"name": "Flare", "desc": "Missile trooper. Its homing missiles hit vehicles and aircraft alike.",
-		"faction": "zephyr", "tier": 1, "cost": 105, "build_time": 11.5, "bandwidth": 1,
+		"faction": "zephyr", "tier": 1, "cost": 80, "build_time": 11.5, "bandwidth": 1,
 		"hp": 75, "armor": "infantry", "move": "infantry", "speed": 2.5, "turn_rate": 12.0,
 		"radius": 0.4, "sight": 11.0, "weapons": ["flare_missile"], "ai_role": "anti_armor", "ai_weight": 1.8, "model": "flare", "hotkey": "L"
 	},
@@ -356,31 +356,31 @@
 	},
 	"lookout": {
 		"name": "Lookout", "desc": "Fast spotter car with a light gun and very long sight.",
-		"faction": "zephyr", "tier": 2, "cost": 100, "build_time": 10.5, "bandwidth": 1,
+		"faction": "zephyr", "tier": 2, "cost": 75, "build_time": 10.5, "bandwidth": 1,
 		"hp": 170, "armor": "light", "move": "vehicle", "speed": 6.4, "turn_rate": 4.0,
 		"radius": 0.8, "sight": 17.0, "weapons": ["lookout_mg"], "turret": true, "ai_role": "scout", "ai_weight": 0.5, "model": "lookout", "hotkey": "C"
 	},
 	"squall": {
 		"name": "Squall", "desc": "Flak truck. Keeps enemy aircraft off the airfields; weak against armor.",
-		"faction": "zephyr", "tier": 2, "cost": 230, "build_time": 17.5, "bandwidth": 3,
+		"faction": "zephyr", "tier": 2, "cost": 170, "build_time": 17.5, "bandwidth": 3,
 		"hp": 340, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 12.0, "weapons": ["squall_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "squall", "hotkey": "K"
 	},
 	"swift": {
 		"name": "Swift", "desc": "Light gunship. Flies over any terrain and rakes infantry and light vehicles; helpless against flak.",
-		"faction": "zephyr", "tier": 2, "cost": 210, "build_time": 18.0, "bandwidth": 3,
+		"faction": "zephyr", "tier": 2, "cost": 155, "build_time": 18.0, "bandwidth": 3,
 		"hp": 310, "armor": "air", "move": "air", "speed": 7.0, "turn_rate": 4.5,
 		"radius": 1.0, "sight": 12.0, "weapons": ["swift_guns"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.2, "model": "swift", "hotkey": "R"
 	},
 	"lanner": {
 		"name": "Lanner", "desc": "Strike craft. Its missiles break tanks and turrets; it cannot fire at other aircraft.",
-		"faction": "zephyr", "tier": 2, "cost": 320, "build_time": 25.0, "bandwidth": 4,
+		"faction": "zephyr", "tier": 2, "cost": 240, "build_time": 25.0, "bandwidth": 4,
 		"hp": 380, "armor": "air", "move": "air", "speed": 6.6, "turn_rate": 4.0,
 		"radius": 1.1, "sight": 12.0, "weapons": ["lanner_missile"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "lanner", "hotkey": "B"
 	},
 	"condor": {
 		"name": "Condor", "desc": "Heavy bomber. Slow, and it must fly right over its target, but its bombs flatten whatever is beneath.",
-		"faction": "zephyr", "tier": 3, "cost": 430, "build_time": 30.0, "bandwidth": 4,
+		"faction": "zephyr", "tier": 3, "cost": 320, "build_time": 30.0, "bandwidth": 4,
 		"hp": 500, "armor": "air", "move": "air", "speed": 5.2, "turn_rate": 3.0,
 		"radius": 1.3, "sight": 11.0, "weapons": ["condor_bombs"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "condor", "hotkey": "L",
 		"requires": ["control_tower"]
@@ -418,25 +418,25 @@
 	},
 	"brigand": {
 		"name": "Brigand", "desc": "Gun truck with an autocannon. Shreds infantry and light vehicles.",
-		"faction": "tally", "tier": 2, "cost": 225, "build_time": 18.0, "bandwidth": 3,
+		"faction": "tally", "tier": 2, "cost": 220, "build_time": 18.0, "bandwidth": 3,
 		"hp": 420, "armor": "light", "move": "vehicle", "speed": 4.4, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 11.0, "weapons": ["brigand_cannon"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "brigand", "hotkey": "R"
 	},
 	"ravager": {
 		"name": "Ravager", "desc": "Battle tank with a quick-firing cannon. Hits less hard than other tanks and far more often.",
-		"faction": "tally", "tier": 2, "cost": 370, "build_time": 25.5, "bandwidth": 4,
+		"faction": "tally", "tier": 2, "cost": 360, "build_time": 25.5, "bandwidth": 4,
 		"hp": 700, "armor": "heavy", "move": "vehicle", "speed": 3.6, "turn_rate": 2.4,
 		"radius": 1.15, "sight": 11.0, "weapons": ["ravager_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "ravager", "hotkey": "B"
 	},
 	"flakjack": {
 		"name": "Flakjack", "desc": "Anti-air gun truck. Its flak is weak against armor.",
-		"faction": "tally", "tier": 2, "cost": 235, "build_time": 18.0, "bandwidth": 3,
+		"faction": "tally", "tier": 2, "cost": 230, "build_time": 18.0, "bandwidth": 3,
 		"hp": 370, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0,
 		"radius": 1.0, "sight": 12.0, "weapons": ["flakjack_flak"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "flakjack", "hotkey": "K"
 	},
 	"ransom": {
 		"name": "Ransom", "desc": "Rocket artillery. Rains rockets over a wide area from far away; it cannot hit close targets and needs spotters.",
-		"faction": "tally", "tier": 3, "cost": 430, "build_time": 28.5, "bandwidth": 4,
+		"faction": "tally", "tier": 3, "cost": 420, "build_time": 28.5, "bandwidth": 4,
 		"hp": 310, "armor": "light", "move": "vehicle", "speed": 3.0, "turn_rate": 2.4,
 		"radius": 1.1, "sight": 10.0, "weapons": ["ransom_rockets"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "ransom", "hotkey": "L",
 		"requires": ["exchange"]
@@ -499,13 +499,13 @@
 	},
 	"thornling": {
 		"name": "Thornling", "desc": "Cheap spitter of thorns. Weak alone; mends itself between fights.",
-		"faction": "bracken", "tier": 1, "cost": 50, "build_time": 7.0, "bandwidth": 1,
+		"faction": "bracken", "tier": 1, "cost": 60, "build_time": 7.0, "bandwidth": 1,
 		"hp": 78, "armor": "infantry", "move": "infantry", "speed": 2.7, "turn_rate": 12.0, "radius": 0.4, "sight": 11.0,
 		"weapons": ["thorn_spit"], "ai_role": "anti_infantry", "ai_weight": 3.0, "model": "thornling", "hotkey": "T"
 	},
 	"lasher": {
 		"name": "Lasher", "desc": "Hurls a barbed spine that homes on vehicles. Slow to fire.",
-		"faction": "bracken", "tier": 1, "cost": 105, "build_time": 11.0, "bandwidth": 1,
+		"faction": "bracken", "tier": 1, "cost": 125, "build_time": 11.0, "bandwidth": 1,
 		"hp": 80, "armor": "infantry", "move": "infantry", "speed": 2.4, "turn_rate": 12.0, "radius": 0.4, "sight": 11.0,
 		"weapons": ["lasher_spine"], "ai_role": "anti_armor", "ai_weight": 2.0, "model": "lasher", "hotkey": "L"
 	},
@@ -524,31 +524,31 @@
 	},
 	"quillhound": {
 		"name": "Quillhound", "desc": "Fast runner that sprays quills. Made for chasing haulers and finding the enemy.",
-		"faction": "bracken", "tier": 2, "cost": 105, "build_time": 11.0, "bandwidth": 1,
+		"faction": "bracken", "tier": 2, "cost": 125, "build_time": 11.0, "bandwidth": 1,
 		"hp": 210, "armor": "light", "move": "vehicle", "speed": 6.4, "turn_rate": 4.2, "radius": 0.8, "sight": 14.0,
 		"weapons": ["quill_burst"], "turret": true, "ai_role": "scout", "ai_weight": 0.6, "model": "quillhound", "hotkey": "C"
 	},
 	"quillback": {
 		"name": "Quillback", "desc": "Walking quill battery. Shreds infantry and light vehicles.",
-		"faction": "bracken", "tier": 2, "cost": 215, "build_time": 17.5, "bandwidth": 3,
+		"faction": "bracken", "tier": 2, "cost": 255, "build_time": 17.5, "bandwidth": 3,
 		"hp": 450, "armor": "light", "move": "vehicle", "speed": 4.2, "turn_rate": 3.0, "radius": 1.0, "sight": 11.0,
 		"weapons": ["quill_volley"], "turret": true, "ai_role": "anti_infantry", "ai_weight": 2.0, "model": "quillback", "hotkey": "R"
 	},
 	"barkhide": {
 		"name": "Barkhide", "desc": "Thick-skinned battle beast with a gall cannon. Slow, tough, and whole again after every fight it survives.",
-		"faction": "bracken", "tier": 2, "cost": 360, "build_time": 25.0, "bandwidth": 4,
+		"faction": "bracken", "tier": 2, "cost": 430, "build_time": 25.0, "bandwidth": 4,
 		"hp": 760, "armor": "heavy", "move": "vehicle", "speed": 3.3, "turn_rate": 2.3, "radius": 1.15, "sight": 11.0,
 		"weapons": ["gall_cannon"], "turret": true, "ai_role": "anti_armor", "ai_weight": 2.6, "model": "barkhide", "hotkey": "B"
 	},
 	"whipvine": {
 		"name": "Whipvine", "desc": "Anti-air creeper. Its darts are weak against armor.",
-		"faction": "bracken", "tier": 2, "cost": 230, "build_time": 18.0, "bandwidth": 3,
+		"faction": "bracken", "tier": 2, "cost": 275, "build_time": 18.0, "bandwidth": 3,
 		"hp": 380, "armor": "light", "move": "vehicle", "speed": 4.1, "turn_rate": 3.0, "radius": 1.0, "sight": 12.0,
 		"weapons": ["whip_darts"], "turret": true, "ai_role": "anti_air", "ai_weight": 0.2, "model": "whipvine", "hotkey": "K"
 	},
 	"sporemortar": {
 		"name": "Sporemortar", "desc": "Lobs bursting spore pods a long way. It cannot hit close targets and needs spotters.",
-		"faction": "bracken", "tier": 3, "cost": 420, "build_time": 28.0, "bandwidth": 4,
+		"faction": "bracken", "tier": 3, "cost": 505, "build_time": 28.0, "bandwidth": 4,
 		"hp": 330, "armor": "light", "move": "vehicle", "speed": 2.9, "turn_rate": 2.4, "radius": 1.1, "sight": 10.0,
 		"weapons": ["spore_pods"], "turret": true, "ai_role": "artillery", "ai_weight": 1.4, "model": "sporemortar",
 		"hotkey": "L", "requires": ["elder_bough"]
@@ -635,7 +635,7 @@
 	},
 	"burster": {
 		"name": "Burster", "desc": "Runs at the enemy and bursts, wrecking everything around it. It does this once.",
-		"faction": "bracken", "tier": 1, "cost": 70, "build_time": 8.0, "bandwidth": 1,
+		"faction": "bracken", "tier": 1, "cost": 85, "build_time": 8.0, "bandwidth": 1,
 		"hp": 60, "armor": "infantry", "move": "infantry", "speed": 4.2, "turn_rate": 12.0, "radius": 0.4, "sight": 9.0,
 		"weapons": ["burster_burst"], "ai_role": "anti_infantry", "ai_weight": 1.0, "model": "burster", "hotkey": "R"
 	},
