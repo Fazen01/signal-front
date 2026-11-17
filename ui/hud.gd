@@ -831,6 +831,12 @@ func _refresh_selection() -> void:
 			parts.append("%d %s" % [counts[n], n])
 		_sel_title.text = "%d selected" % sel.size()
 		_sel_detail.text = ", ".join(parts)
+		# A group that is not on the default stance says so.
+		var stance: int = selected_stance()
+		if stance == SimEntity.Stance.RETURN_FIRE:
+			_sel_detail.text += "\nReturning fire only"
+		elif stance == SimEntity.Stance.HOLD_FIRE:
+			_sel_detail.text += "\nHolding fire"
 	_refresh_queue(queue_owner)
 
 
