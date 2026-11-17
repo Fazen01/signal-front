@@ -236,7 +236,9 @@ map generation itself to be improved.
 - [x] `tools/balance_league.py`: every pairing, both seats, in parallel
 - [ ] Every faction within about ten points of even over a league of at
       least 48 games a faction
-- [ ] Match length still 15-25 minutes for most pairings
+- [x] Match length still 15-25 minutes for most pairings (17 November,
+      720 games over sixteen seeds: the average is between 15 and 25
+      minutes in 44 of the 45 pairings; the median game is 16.2 minutes)
 
 ## M27 — Bug hunt (owner request)
 
@@ -1264,6 +1266,22 @@ restarted three times; the background tuner died with it).**
     costs: a Bulwark 345 to 360, an Armature 370 to 355), and being
     measured over all sixteen seeds at once: 720 games, 144 a faction,
     about two hours.
+  - **The league over all sixteen seeds (07:04 UTC), 720 games, 144 a
+    faction, with the pooled correction:** Foundry 56.9%, Nomad 56.9%,
+    Tally 54.9%, Vesper 53.5%, Verdigris 50.7%, Zephyr 48.6%, Aegis
+    47.9%, Lodestone 43.1%, Brackenfold 42.4%, Veil 38.2%. Nine within 7.6
+    points of even; the Veil 11.8 below. One standard error at 144 games
+    is 4.2 points (and see the finding above: the real spread is wider).
+    Median game 16.2 minutes; 60% of games between 15 and 25 minutes, 31%
+    shorter, 9% longer; ten of 720 undecided at an hour. **By pairing the
+    average length is between 15 and 25 minutes in 44 of the 45** (the
+    one outside is Brackenfold against Veil at 14.5; the longest is
+    Brackenfold against Tally at 24.0), so M26's second box is ticked.
+    The first is not: the Veil is not within "about ten".
+  - One more step of the tuner's rule from that league: Foundry x1.024,
+    Nomad x1.024, Tally x1.017, Lodestone x0.976, Brackenfold x0.973, Veil
+    x0.959 (29 costs: a Stalker 355 to 340, a Mauler 535 to 550). Being
+    measured over the same sixteen seeds again.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty
