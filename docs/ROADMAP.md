@@ -503,14 +503,16 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (00:45 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (01:02 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
-M33 (high ground included), the combat half of M34 and the optional Light
-setting, session 7's branch, and the fixes listed in the log below.
-Committed here and going through the check, not yet pushed: new water
-(M34), vehicles that lie along the slope under them, and walking legs.
-Running: the balance tuner over all ten factions (M26); its first league
-is in the log below. Open after that: M26's two boxes.
+M33 (high ground included), the combat half of M34, new water, vehicles
+that lie along the slope, the optional Light setting, session 7's branch,
+and the fixes listed in the log below. Going through the check, not yet
+pushed: walking legs, hills on the hand-made maps. **The owner asked at
+00:50 UTC for two more things, which are M35: unit stances (written,
+tested, committed here) and autosave with several save slots (being
+written now).** Running: the balance tuner over all ten factions (M26);
+its first league is in the log below. Open after that: M26's two boxes.
 
 - **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
   now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
