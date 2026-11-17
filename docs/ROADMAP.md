@@ -495,18 +495,19 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (05:10 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (05:18 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M35 complete, both AI fixes that came out of the balance league, and the
-47 unit prices the league arrived at with the fixed AI. Open: M26's two
-boxes. On six seeds the tuner never saw (5 to 10, 54 games a faction)
-nine factions came within 7.4 points of even and Brackenfold 13 below
-(Nomad 55.6%, Vesper 55.6%, Zephyr 53.7%, Aegis 51.9%, Foundry, Tally and
-Veil 50.0%, Verdigris 48.1%, Lodestone 42.6%, Brackenfold 37.0%; average
-match length between 15 and 25 minutes in 41 of the 45 pairings). So not
-ticked yet: Brackenfold and Lodestone were made a little cheaper (14
-costs, pushed, check passing) and a second league on seeds 11 to 16 is
-being played with those prices; it is six sevenths played.
+unit prices the league arrived at with the fixed AI. Open: M26's two
+boxes. Two leagues on seeds the tuner never saw disagreed (Aegis 52% on
+seeds 5 to 10 and 72% on 11 to 16; Lodestone 43% and 28%): which maps are
+drawn moves a faction by fifteen points, so 54 games on six maps is not
+enough to judge. Pooled over 16 seeds and 144 games a faction, eight are
+within 6.2 points of even, Aegis 11.1 above and Lodestone 13.2 below (see
+"Balance (M26)" in the log below). So not ticked: a correction from the
+pooled figures is committed here and in the check (28 costs, not pushed
+yet), and one league over all sixteen seeds, 720 games, is being played
+with it (about two hours; it resumes if it is cut off).
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
