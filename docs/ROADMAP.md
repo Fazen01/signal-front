@@ -495,19 +495,20 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (07:08 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (07:36 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M35 complete, both AI fixes that came out of the balance league, and the
-unit prices the leagues arrived at with the fixed AI. The league over all
-sixteen seeds is played (720 games, 144 a faction): Foundry 56.9%, Nomad
-56.9%, Tally 54.9%, Vesper 53.5%, Verdigris 50.7%, Zephyr 48.6%, Aegis
-47.9%, Lodestone 43.1%, Brackenfold 42.4%, Veil 38.2%; the average match
-is between 15 and 25 minutes in 44 of the 45 pairings. Nine factions are
-within 7.6 points of even and the Veil 11.8 below, so M26's first box is
-still open and its second is ticked (committed here, not pushed yet).
-One more step of the tuner's rule (29 costs) is in the check, and the
-same league is being played again with it (about ninety minutes; it
-resumes if it is cut off).
+unit prices the leagues arrived at with the fixed AI. Over sixteen seeds
+and 720 games those prices put nine factions within 7.6 points of even
+and the Veil 11.8 below, with the average match between 15 and 25 minutes
+in 44 of 45 pairings (see "Balance (M26)" in the log below). **Not pushed:
+one more price step failed the check**: the three-way match ran ninety
+minutes without a winner. The cause was a third flaw in the AI (the Nomad
+AI trained Splicers without limit, thirty and more, and had no army
+left), fixed here and in the check now together with that price step.
+Since it makes the Nomad AI stronger, the sixteen-seed league is being
+played again (about ninety minutes) before M26's first box is judged; its
+second box (match length) is ticked here.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
