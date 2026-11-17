@@ -11,6 +11,9 @@ Legend (one character per 2x2-unit cell):
   . ground   f forest   r rock   w water
   1-4 player starts (the cell whose top-left corner is the HQ centre)
   s salvage field   S rich salvage field   u uplink site
+A second grid, "high", marks hills: h where the ground is high. A hill may
+be ground or forest; the game drops any part of one on rock or water or
+close to a start.
 """
 import json
 import math
@@ -25,6 +28,7 @@ class Grid:
         self.n = n
         self.order = order  # 2 = half-turn symmetry, 4 = quarter turns
         self.cells = [["." for _ in range(n)] for _ in range(n)]
+        self.high = [["." for _ in range(n)] for _ in range(n)]
 
     def images(self, x, y):
         n = self.n
@@ -78,8 +82,20 @@ class Grid:
         for num, x, y in marks:
             self.cells[y][x] = str(num)
 
+    def hill(self, cx, cy, r):
+        """A round hill (and its images): high ground on whatever is there."""
+        for y in range(self.n):
+            for x in range(self.n):
+                if (x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r * r:
+                    for ix, iy in self.images(x, y):
+                        if 0 <= ix < self.n and 0 <= iy < self.n:
+                            self.high[iy][ix] = "h"
+
     def rows(self):
         return ["".join(r) for r in self.cells]
+
+    def high_rows(self):
+        return ["".join(r) for r in self.high]
 
 
 def speckle(x, y, keep, mod=7):
@@ -108,11 +124,15 @@ def twin_fords():
     g.feature(36, 6, "s")
     g.feature(26, 33, "S")
     g.feature(46, 12, "u")
+    # A hill on each bank over the middle ford, and one covering each outer ford.
+    g.hill(30, 23, 3.2)
+    g.hill(44, 24, 3.0)
     return {
         "name": "Twin Fords",
         "players": 2,
         "desc": "A river splits the map. Three fords are the only ways across.",
         "rows": g.rows(),
+        "high": g.high_rows(),
     }
 
 
@@ -139,12 +159,16 @@ def crater_ring():
     g.feature(38, 14, "s")
     g.feature(29, 29, "S")
     g.feature(48, 20, "u")
+    # Two rises inside the crater beside the rich salvage, and a hill outside each far gate.
+    g.hill(35, 29, 2.6)
+    g.hill(17, 38, 3.0)
     return {
         "name": "Crater Ring",
         "region": "ashland",
         "players": 2,
         "desc": "Rich salvage sits inside a rock ring with four narrow gates.",
         "rows": g.rows(),
+        "high": g.high_rows(),
     }
 
 
@@ -168,12 +192,16 @@ def crossroads():
     g.feature(36, 22, "s")
     g.feature(44, 43, "S")
     g.feature(43, 30, "u")
+    # A hill beside every pass, and a rise at each corner of the plaza.
+    g.hill(42, 21, 3.0)
+    g.hill(41, 37, 2.4)
     return {
         "name": "Crossroads",
         "region": "tundra",
         "players": 4,
         "desc": "Four quarters divided by ridges. The plaza in the middle holds the richest salvage.",
         "rows": g.rows(),
+        "high": g.high_rows(),
     }
 
 
@@ -203,12 +231,16 @@ def dry_gulch():
     g.feature(36, 20, "s")
     g.feature(28, 28, "S")
     g.feature(47, 13, "u")
+    # A hill outside each pass through the mesas, and one out on each flank.
+    g.hill(43, 29, 2.8)
+    g.hill(50, 20, 2.6)
     return {
         "name": "Dry Gulch",
         "region": "desert",
         "players": 2,
         "desc": "Two mesas wall a gulch between the bases. The rich salvage lies in it; the desert outside is the long way round.",
         "rows": g.rows(),
+        "high": g.high_rows(),
     }
 
 
@@ -236,12 +268,16 @@ def frozen_strait():
     g.feature(34, 7, "s")
     g.feature(31, 29, "S", clear=2)
     g.feature(50, 9, "u")
+    # A hill on each shore over the causeway, and one covering each land bridge.
+    g.hill(24, 26, 2.8)
+    g.hill(42, 13, 2.6)
     return {
         "name": "Frozen Strait",
         "region": "tundra",
         "players": 2,
         "desc": "A strait of ice with a land bridge at each end. The richest salvage is on an island in the middle, reached by two causeways.",
         "rows": g.rows(),
+        "high": g.high_rows(),
     }
 
 
@@ -266,12 +302,15 @@ def ember_lake():
     g.feature(34, 34, "s")
     g.feature(47, 32, "S", clear=2)
     g.feature(47, 4, "u")
+    # A hill on the shore road in every quarter.
+    g.hill(40, 34, 2.6)
     return {
         "name": "Ember Lake",
         "region": "ashland",
         "players": 4,
         "desc": "A lake of lava in the middle and a spur of rock between each pair of neighbours. They meet on the shore road, where the rich salvage is, or along the map's edge.",
         "rows": g.rows(),
+        "high": g.high_rows(),
     }
 
 

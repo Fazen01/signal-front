@@ -1064,7 +1064,9 @@ restarted three times; the background tuner died with it).**
   cell shoots 15% further and sees 25% further; aircraft get nothing. The
   generator scatters hills on every map with the same mirroring as the
   rest, never on rock or water and never within a base's reach of a start;
-  the hand-made layouts have none yet. Units cross a bank anywhere.
+  the six hand-made layouts have hills too (a second grid, "high", in
+  their JSON, written by `tools/make_layouts.py`: over the fords, beside
+  the passes, on the shore roads). Units cross a bank anywhere.
   Buildings cannot stand on one ("Too steep to build on":
   `SimMap.is_bank`), because a hall half on a slope hangs in the air. The
   selection panel says when what is selected stands on high ground, and

@@ -156,8 +156,8 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Flat-to-rolling terrain with impassable rock and water, forest patches,
   Salvage Fields near each start and richer contested fields mid-map, Uplink
   Sites on the flanks.
-- High ground: generated maps have hills, flat-topped with a bank round
-  them. Ground units and buildings on a hill shoot 15% further and see 25%
+- High ground: every map has hills, flat-topped with a bank round them
+  (scattered by the generator, placed by hand in the layouts). Ground units and buildings on a hill shoot 15% further and see 25%
   further; aircraft do not. Units climb a bank anywhere; buildings need
   level ground. Hills are mirrored like everything else and never stand
   next to a start.

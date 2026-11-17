@@ -417,3 +417,34 @@ func test_buildings_need_level_ground() -> void:
 	w.push_command(SimCommand.move(0, PackedInt32Array([tank.id]), w.map.cell_center(hill + Vector2i(3, 3))))
 	SimTestUtil.run(w, 20 * 20)
 	check(w.map.is_high(tank.pos), "a tank drives up onto the hill")
+
+
+func test_hand_made_layouts_have_fair_high_ground() -> void:
+	for id: String in SimMapGen.layout_ids():
+		var m: SimMap = SimMapGen.load_layout(id)
+		check(m != null, "%s loads" % id)
+		if m == null:
+			continue
+		var order: int = 4 if m.starts.size() == 4 else 2
+		var count: int = 0
+		var wrong: int = 0
+		var lopsided: int = 0
+		for y: int in m.h:
+			for x: int in m.w:
+				if m.high[y * m.w + x] == 0:
+					continue
+				count += 1
+				var t: int = m.terrain[y * m.w + x]
+				if t == SimMap.Terrain.ROCK or t == SimMap.Terrain.WATER:
+					wrong += 1
+				for image: Vector2i in SimMapGen.cell_images(m, Vector2i(x, y), order):
+					if m.high[image.y * m.w + image.x] == 0:
+						lopsided += 1
+		check(count >= 30, "%s has hills (%d cells of high ground)" % [id, count])
+		check(count < m.w * m.h / 8, "%s: hills are the exception" % id)
+		check_eq(wrong, 0, "%s: no high ground on rock or water" % id)
+		check_eq(lopsided, 0, "%s: every side has the same hills" % id)
+		for s: Vector2 in m.starts:
+			check(not m.is_high(s), "%s: a start is on level ground" % id)
+			check(not m.is_bank(m.cell_of(s)), "%s: and not on a bank" % id)
+		check(SimMapGen._starts_connected(m), "%s: still connected" % id)

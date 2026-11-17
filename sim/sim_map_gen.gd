@@ -664,6 +664,7 @@ static func _read_layout(id: String) -> Dictionary:
 ## Builds a hand-made layout. Rows are strings, one character per cell:
 ##   . ground   f forest   r rock   w water
 ##   1-4 player starts   s salvage field   S rich salvage field   u uplink site
+## An optional second grid, "high", has an h on every cell of high ground.
 ## Returns null if the layout is missing or malformed.
 static func load_layout(id: String) -> SimMap:
 	var d: Dictionary = _read_layout(id)
@@ -713,6 +714,14 @@ static func load_layout(id: String) -> SimMap:
 	if m.starts.size() < 2:
 		push_error("SimMapGen: layout %s needs at least two starts" % id)
 		return null
+	var high_rows: Array = d.get("high", [])
+	if high_rows.size() == h:
+		for y: int in h:
+			var line: String = str(high_rows[y])
+			for x: int in mini(w, line.length()):
+				if line[x] == "h":
+					m.high[y * w + x] = 1
+		_trim_high_ground(m)
 	build_heights(m, SimRng.new(id.hash()))
 	m.finalize()
 	return m
