@@ -311,6 +311,20 @@ func _run_script(battle: BattleScene) -> void:
 					if e.owner == battle.local_player:
 						ids.append(e.id)
 				battle.controller.set_selection(ids)
+		"stance":
+			# Three tanks selected and told to return fire only: the stance
+			# button on the card and the line in the selection panel.
+			if _count == 3:
+				var tw: SimWorld = battle.world
+				var tme: int = battle.local_player
+				var tat: Vector2 = tw.map.nearest_free_pos(tw.players[tme].start_pos + Vector2(10.0, 8.0))
+				var tids: Array[int] = []
+				for k: int in 3:
+					tids.append(tw.spawn_unit("bulwark", tme, tat + Vector2(float(k) * 3.4, 0.0)).id)
+				battle.controller.set_selection(tids)
+				battle.cam.center_on(tat)
+			if _count == 20:
+				battle.hud.cycle_stance()
 		"hud_builder":
 			if _count == 5:
 				for e: SimEntity in battle.world.entities:

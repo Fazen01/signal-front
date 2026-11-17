@@ -75,6 +75,9 @@ layouts from an existing game.
 - Veterancy: three ranks earned by value destroyed (+damage, +health, slow
   self-repair at top rank).
 - Forest gives infantry −40% damage taken and slows vehicles by half.
+- Stances, per unit: aggressive (the default: shoot any enemy in sight),
+  return fire (only whoever has just hit it or a unit beside it), hold fire
+  (never). An attack order is obeyed in every stance.
 
 ### Directives (commander powers)
 

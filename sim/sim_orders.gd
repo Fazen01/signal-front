@@ -25,6 +25,17 @@ static func apply_command(w: SimWorld, cmd: SimCommand) -> void:
 			for e: SimEntity in own_units(w, cmd):
 				clear_orders(e)
 				e.hold = true
+		SimCommand.Type.STANCE:
+			if cmd.index < 0 or cmd.index > SimEntity.Stance.HOLD_FIRE:
+				return
+			for e: SimEntity in own_units(w, cmd):
+				e.stance = cmd.index
+				# Whatever it was shooting at of its own accord is dropped at
+				# once; a target it was ordered to attack is kept.
+				var o: SimOrder = e.current_order()
+				if cmd.index != SimEntity.Stance.AGGRESSIVE and (o == null or o.type != SimOrder.Type.ATTACK):
+					e.target_id = 0
+					e.scan_tick = w.tick_count
 		SimCommand.Type.SURRENDER:
 			w.defeat_player(cmd.player)
 		SimCommand.Type.DIRECTIVE, SimCommand.Type.UNLOCK:

@@ -6,6 +6,8 @@ const SLOW_TICKS: int = 50  ## how long a Lodestone hit drags its target (2.5 s)
 const REGROW_DELAY: int = 120  ## ticks without damage before the Brackenfold starts to mend (6 s)
 const TURRET_RATE: float = 4.5  ## radians per second
 const SCAN_INTERVAL: int = 5  ## ticks between target scans
+const RETURN_FIRE_TICKS: int = 100  ## how long after a hit a unit on return fire still answers it
+const RETURN_FIRE_RADIUS: float = 9.0  ## it also answers for its own side standing this close
 const BIG_RADIUS: float = 4.5  ## padding so large buildings are found by centre queries
 
 
@@ -95,7 +97,12 @@ static func _update_combatant(w: SimWorld, e: SimEntity) -> void:
 		var o: SimOrder = e.current_order()
 		var forced: bool = o != null and o.type == SimOrder.Type.ATTACK
 		if not forced:
-			e.target_id = _acquire(w, e)
+			if e.kind != SimEntity.Kind.UNIT or e.stance == SimEntity.Stance.AGGRESSIVE:
+				e.target_id = _acquire(w, e)
+			elif e.stance == SimEntity.Stance.RETURN_FIRE:
+				e.target_id = _answer(w, e)
+			else:
+				e.target_id = 0
 		# With a target in hand there is no hurry to look for another.
 		e.scan_tick = w.tick_count + (SCAN_INTERVAL + 3 if e.target_id != 0 else SCAN_INTERVAL)
 
@@ -132,6 +139,30 @@ static func _update_combatant(w: SimWorld, e: SimEntity) -> void:
 		_fire(w, e, t, wd, i)
 		if not t.alive:
 			break
+
+
+## The target of a unit on return fire: whoever has hit it in the last few
+## seconds, or failing that whoever has hit one of its own side standing
+## close by. Nothing, if nobody has, or if it cannot see or hurt them.
+static func _answer(w: SimWorld, e: SimEntity) -> int:
+	var best_id: int = 0
+	var best_d: float = INF
+	for near: SimEntity in w.query_radius(e.pos, RETURN_FIRE_RADIUS):
+		if not near.alive or near.owner < 0 or w.are_enemies(e.owner, near.owner):
+			continue
+		if w.tick_count - near.last_hit_tick > RETURN_FIRE_TICKS:
+			continue
+		var foe: SimEntity = w.get_entity(near.last_attacker)
+		if foe == null or not foe.alive or foe.def == null or foe.owner < 0 or not w.are_enemies(e.owner, foe.owner):
+			continue
+		if e.def.vs_armor[foe.def.armor] <= 0.01 or not SimVision.can_see(w, e.owner, foe):
+			continue
+		# Its own attacker comes before a neighbour's.
+		var d: float = e.pos.distance_to(foe.pos) + (0.0 if near == e else 1000.0)
+		if d < best_d:
+			best_d = d
+			best_id = foe.id
+	return best_id
 
 
 static func _acquire(w: SimWorld, e: SimEntity) -> int:

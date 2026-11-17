@@ -332,33 +332,22 @@ map generation itself to be improved.
       (the camera looks down), so its part is what it does to the water and
       the cloud shadows that cross land and water alike
 
-## Ideas for later (proposed by session 1, not yet asked for)
+## M35 — The owner's picks from the ideas list (owner request, 17 Nov)
 
-These are suggestions; nothing here has been started. The owner struck a
-campaign, play against other people and a map editor from this list. They
-are not to be built.
-
-### Depth in a fight
-
-- [ ] One active ability per signature unit (a Bulwark's smoke, a Splicer's
-      jam burst, a Castellan's brace), on a cooldown, used by the AI too
-- [ ] Unit stances: aggressive, hold fire, return fire
-- [ ] A patrol order, and formations that put tanks in front of artillery
-- [ ] Garrisons: infantry inside a building fire from cover
-
-### More to fight over
-
-- [ ] Neutral structures to capture besides uplinks: a repair yard, an
-      observation post, a salvage rig that pays out slowly
-- [ ] Destructible bridges on river maps; fords that flood on a timer
-- [ ] Weather per region that touches the Signal Grid: dust storms shorten
-      relay reach in the Dustlands, blizzards slow vehicles on the Frostline
-
-### Comfort
-
-- [ ] Rebindable keys; a colour-blind palette for team colours
 - [ ] Autosave every few minutes, and more than one save slot
-- [ ] An in-game encyclopedia of every unit with its counters
+- [x] Unit stances: aggressive, hold fire, return fire (Z, or the stance
+      button on the command card)
+
+## Ideas not taken up
+
+Session 1 proposed a list of further ideas. The owner picked the two in M35
+and said of the rest "I don't care". They are not to be built unless the
+owner asks: an active ability per signature unit; a patrol order and
+formations with tanks in front; garrisons; neutral structures besides
+uplinks; destructible bridges and flooding fords; weather that touches the
+Signal Grid; rebindable keys and a colour-blind palette; an in-game
+encyclopedia. Earlier the owner also struck a campaign, play against other
+people and a map editor.
 
 ## Session log
 
@@ -1122,6 +1111,23 @@ restarted three times; the background tuner died with it).**
     So nothing was added for that. For the record: the first Brackenfold
     (bark and moss) was never pushed on its own and exists only in this
     container's reflog; the Wardrum is in history at `5c20c17`.
+- **M35, asked for by the owner at 00:50 UTC: "Autosave every few minutes,
+  and more than one save slot" and "Unit stances: aggressive, hold fire,
+  return fire"; of the rest of the ideas list, "I don't care".** The list
+  is now "Ideas not taken up" above.
+- **Stances.** `SimEntity.stance` (aggressive by default), set with a new
+  command (`SimCommand.stance`), for units only: buildings always shoot.
+  Hold fire: the unit never picks a target itself. Return fire: its target
+  is whoever hit it in the last five seconds, or failing that whoever hit
+  one of its own side within 9 units of it, so a squad on return fire
+  defends itself as a squad. An attack order is obeyed in every stance,
+  and changing stance drops a target the unit had picked for itself at
+  once. Attack-move in a stance other than aggressive is a move that
+  answers (or ignores) fire: that follows from the rule and is left so.
+  The AI never changes stance. In the interface: Z cycles the selection's
+  stance, the command card has a button that names the current one, and a
+  unit that is not aggressive says so in the selection panel. Stance is
+  in the save (a plain field; old saves load as aggressive).
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

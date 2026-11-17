@@ -4,6 +4,10 @@ extends RefCounted
 ## or an uplink site. Plain data; SimWorld and its systems do the work.
 
 enum Kind { UNIT, BUILDING, WRECK, FIELD, UPLINK }
+## When a unit shoots without being told to. Aggressive: at any enemy it
+## sees. Return fire: only at whoever has just hit it or a unit beside it.
+## Hold fire: never. An attack order is obeyed in every stance.
+enum Stance { AGGRESSIVE, RETURN_FIRE, HOLD_FIRE }
 
 var id: int = 0
 var kind: int = Kind.UNIT
@@ -26,6 +30,7 @@ var max_hp: float = 1.0
 # Orders and movement
 var orders: Array[SimOrder] = []
 var hold: bool = false
+var stance: int = Stance.AGGRESSIVE  ## when a unit opens fire of its own accord
 var moving: bool = false
 var path: PackedVector2Array = PackedVector2Array()
 var path_index: int = 0

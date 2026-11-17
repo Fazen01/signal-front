@@ -14,6 +14,8 @@ class CardEntry:
 
 const CARD_COLUMNS: int = 4
 const CARD_SLOTS: int = 12
+const STANCE_NAMES: Array[String] = ["Aggressive", "Return fire", "Hold fire"]
+const STANCE_TIP: String = "Stance: when these units open fire by themselves. Aggressive: at any enemy they see. Return fire: only at whoever shoots at them or the unit beside them. Hold fire: never. An attack order is always obeyed."
 const GOLD: Color = Color(1.0, 0.82, 0.35)
 const CYAN: Color = Color(0.45, 0.85, 1.0)
 const RED: Color = Color(1.0, 0.4, 0.35)
@@ -543,6 +545,10 @@ func rebuild_card() -> void:
 		_add_entry("order", null, "attack_move", "A", "Attack-move", "Attack-move: advance and engage anything on the way.")
 		_add_entry("order", null, "stop", "S", "Stop", "Stop: drop all orders.")
 		_add_entry("order", null, "hold", "H", "Hold", "Hold position: fire only at what comes into range.")
+		for e: SimEntity in units:
+			if e.def.is_armed():
+				_add_entry("order", null, "stance", "Z", _stance_title(), STANCE_TIP)
+				break
 	elif not buildings.is_empty():
 		var produces: Array[String] = []
 		var any_unfinished: bool = false
@@ -604,6 +610,11 @@ func _entry_blocked(entry: CardEntry) -> String:
 
 func _update_card_state() -> void:
 	for i: int in _entries.size():
+		if _entries[i].order == "stance":
+			# The stance button names the stance the selection is in now.
+			var title: String = _stance_title()
+			if _buttons[i].text != title:
+				_buttons[i].text = title
 		var blocked: bool = _entry_blocked(_entries[i]) != ""
 		_buttons[i].disabled = blocked
 		_key_labels[i].modulate.a = 0.4 if blocked else 1.0
@@ -673,7 +684,44 @@ func activate(entry: CardEntry, times: int = 1) -> bool:
 					world.push_command(SimCommand.stop(player, ids))
 				"hold":
 					world.push_command(SimCommand.hold(player, ids))
+				"stance":
+					cycle_stance()
 	return true
+
+
+## The stance the selected armed units share, or -1 if they differ (or
+## there are none).
+func selected_stance() -> int:
+	var shared: int = -1
+	for e: SimEntity in _selected_own():
+		if e.kind != SimEntity.Kind.UNIT or not e.def.is_armed():
+			continue
+		if shared == -1:
+			shared = e.stance
+		elif shared != e.stance:
+			return -1
+	return shared
+
+
+func _stance_title() -> String:
+	var shared: int = selected_stance()
+	return STANCE_NAMES[shared] if shared >= 0 else "Mixed stance"
+
+
+## Moves the selected units on to the next stance: aggressive, return fire,
+## hold fire, and round again. A selection of mixed stances goes to
+## aggressive first.
+func cycle_stance() -> void:
+	var ids: PackedInt32Array = PackedInt32Array()
+	for e: SimEntity in _selected_own():
+		if e.kind == SimEntity.Kind.UNIT and e.def.is_armed():
+			ids.append(e.id)
+	if ids.is_empty():
+		return
+	var shared: int = selected_stance()
+	var next: int = (shared + 1) % STANCE_NAMES.size() if shared >= 0 else SimEntity.Stance.AGGRESSIVE
+	world.push_command(SimCommand.stance(player, ids, next))
+	push_alert("Stance: %s" % STANCE_NAMES[next], CYAN)
 
 
 ## Card hotkeys. Order keys (A, S, H) are handled by the controller itself.
@@ -821,6 +869,8 @@ func _entity_detail(e: SimEntity) -> String:
 		lines.append("DARK - outside the signal grid")
 	if SimCombat.on_high_ground(world, e):
 		lines.append("On high ground: +%d%% range, +%d%% sight" % [int(world.data.high_ground_range_bonus * 100.0), int(world.data.high_ground_sight_bonus * 100.0)])
+	if e.kind == SimEntity.Kind.UNIT and e.def.is_armed() and e.stance != SimEntity.Stance.AGGRESSIVE:
+		lines.append("Returning fire only" if e.stance == SimEntity.Stance.RETURN_FIRE else "Holding fire")
 	if e.def.harvester:
 		lines.append("Cargo %d / %d" % [e.cargo, e.def.capacity])
 	if e.def.is_armed():

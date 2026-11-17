@@ -8,6 +8,7 @@ extends RefCounted
 enum Type {
 	MOVE, ATTACK, ATTACK_MOVE, STOP, HOLD, HARVEST, BUILD, REPAIR, TRAIN, CANCEL_TRAIN,
 	CANCEL_BUILDING, RALLY, CAPTURE, DIRECTIVE, SURRENDER, UNLOCK, DEPLOY, PACK,
+	STANCE,
 }
 
 var type: int = Type.MOVE
@@ -64,6 +65,16 @@ static func hold(p: int, unit_ids: PackedInt32Array) -> SimCommand:
 	c.type = Type.HOLD
 	c.player = p
 	c.ids = unit_ids
+	return c
+
+
+## Sets when the units open fire of their own accord (SimEntity.Stance).
+static func stance(p: int, unit_ids: PackedInt32Array, to: int) -> SimCommand:
+	var c: SimCommand = SimCommand.new()
+	c.type = Type.STANCE
+	c.player = p
+	c.ids = unit_ids
+	c.index = to
 	return c
 
 

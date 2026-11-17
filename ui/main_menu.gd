@@ -33,6 +33,7 @@ SELECTION AND ORDERS
   Right click                        move, attack, harvest, repair or set a rally point
   A then left click                  attack-move
   S / H                              stop / hold position
+  Z                                  stance: aggressive, return fire, hold fire
   Ctrl+A or F2                       select the whole army
   Ctrl+1..9, then 1..9               set and recall control groups (double-tap centres)
   Shift + order                      queue the order

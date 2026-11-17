@@ -80,6 +80,7 @@ coverage is visible, plus a circle around each unit.
 | Right click | Context order: move, attack, harvest, repair/assist, capture, hijack, set rally point |
 | A, then left click | Attack-move |
 | S / H | Stop / hold position |
+| Z | Change the selected units' stance: aggressive (shoot any enemy in sight), return fire (only whoever shoots at them or the unit beside them), hold fire (never, unless ordered to attack) |
 | Ctrl+A or F2 | Select the whole army (every armed unit) |
 | Shift + order | Queue the order |
 | Ctrl+1..9, then 1..9 | Set / recall a control group (double-tap centres the camera) |

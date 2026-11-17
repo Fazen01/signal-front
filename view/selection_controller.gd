@@ -324,6 +324,9 @@ func _on_key(key: InputEventKey) -> void:
 		KEY_H:
 			world.push_command(SimCommand.hold(player, ids))
 			get_viewport().set_input_as_handled()
+		KEY_Z:
+			battle.hud.cycle_stance()
+			get_viewport().set_input_as_handled()
 		KEY_ESCAPE:
 			if mode != Mode.NORMAL:
 				mode = Mode.NORMAL
