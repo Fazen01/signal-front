@@ -495,16 +495,17 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (01:30 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (01:46 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M34 complete (high ground, new water, vehicles that lie along the slope,
 walking legs, hills on the hand-made maps), the optional Light setting,
 session 7's branch, and the fixes listed in the log below. **The owner
 asked at 00:50 UTC for two more things, M35: unit stances, and autosave
 with three save slots. Both are written, tested and committed here, and
-are in the check now.** Open: M26's two boxes (balance). The league below
-found that the AI itself held some factions back (see the last bullet),
-which is being fixed before any prices are written.
+are pushed.** Open: M26's two boxes (balance). The league below found
+that the AI itself held some factions back (see the bullets), which is
+fixed here (two changes to the AI, in the check, not pushed yet) before
+any prices are written; the league will be played again with them.
 
 - **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
   now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
