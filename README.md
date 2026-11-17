@@ -276,7 +276,10 @@ A battlefield also lies in one of four **regions**, picked by the seed or in
 the skirmish setup: the **Greenwood** (grass and woods), the **Dustlands**
 (sand, red mesas, cactus and oases), the **Frostline** (snow, capped pines,
 ice) and the **Cinder Wastes** (ash, burnt trees and lava). A region changes
-how the land looks and nothing about how it plays.
+how the land looks and nothing about how it plays. Water has a shore that
+wanders, clear shallows and ripples; in the Frostline it is frozen over,
+and in the Cinder Wastes it is lava. Vehicles lie along whatever slope they
+are on, and walking machines and beasts step as they go.
 
 There are also six hand-made layouts: **Twin Fords** (a river with three
 crossings), **Crater Ring** (rich salvage inside a rock ring),
@@ -339,7 +342,8 @@ tools/screenshot.sh battle 120
 
 Captures `screenshots/battle.png` with software rendering (needs `xvfb-run`).
 `tools/gallery.tscn` puts every model on one sheet, or eight at a time close
-up with `page0`..`page7` as the capture script; `scenery_wide`,
+up with `page0`..`page7` as the capture script, one faction's whole line-up
+with `faction_<id>`, or one model with `model_<id>`; `scenery_wide`,
 `scenery_water`, `scenery_forest`, `scenery_rock` and `scenery_edge` show the
 bare landscape with fog off, and `layout_twin_fords`, `layout_crater_ring`
 and `layout_crossroads` show a hand-made map whole.

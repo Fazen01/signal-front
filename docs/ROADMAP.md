@@ -311,12 +311,14 @@ map generation itself to be improved.
 
 ## M34 — Look, round two (owner request)
 
-- [ ] Units and buildings: a better look for every faction's models. The
-      owner does not want to be shown each change first: do the pass, keep
-      the silhouettes and team colours readable, and send pictures when it
-      is done. (The first attempt, a camouflage and weathering shader with
-      extra kit on every model, was withdrawn because the owner disliked
-      it: do not bring that back.)
+- [x] Units and buildings: a better look for every faction's models. The
+      Brackenfold was redrawn (the owner called it the worst looking), the
+      Wardrum became the Paymaster, vehicles lie along the slope under
+      them and walking machines and beasts step. The other eight factions
+      were looked at whole, side by side, and kept as they are; the owner
+      has the sheet and can name any to redo. (The first attempt, a
+      camouflage and weathering shader with extra kit on every model, was
+      withdrawn because the owner disliked it: do not bring that back.)
 - [x] Combat: bigger and more varied explosions, smoke that lingers,
       wrecks that burn, weapon effects per faction
 - [x] Lighting by hour, as an option only: the skirmish setup has a Light
@@ -1093,6 +1095,31 @@ restarted three times; the background tuner died with it).**
   picture, so nothing was built for it beyond that; the box is ticked on
   that understanding. `tools/screenshot.sh x 140 region_<id>_<seed>_water`
   looks at the water nearest the middle of a map.
+- **Units and buildings (M34's last box).** `tools/gallery.tscn` has two
+  new pages: `faction_<id>` (everything one faction has) and `model_<id>`
+  (one model close up). All ten factions were captured this way and looked
+  at. Decision: the eight older factions each have a look of their own
+  that holds together (Aegis a modern base in grey and blue, the Foundry
+  black works with stacks, the Nomads tents and buggies, Vesper pale
+  hexagons, Verdigris a castle order on legs, Zephyr a white airfield, the
+  Tally black and gilt, the Veil dusk-blue spires), so they are not
+  redrawn; redrawing what already works is how the first attempt went
+  wrong. What was added is motion, which no still picture shows:
+  - Ground vehicles and wrecks lie along the slope under them (measured
+    across their own length, smoothed), so a tank climbing a bank noses up
+    instead of hanging level in the air. Needed anyway now that hills have
+    real banks.
+  - Walking machines (Verdigris) and beasts (Brackenfold) step: every leg
+    is its own group hinged at the hip (`_leg_group`, "Leg0", "Leg1"...),
+    swung while the unit moves, diagonal legs together, the body riding up
+    a little at each step. Wrecks keep their legs where they stood.
+  - Not done: wheels do not turn (they are plain cylinders, so it would
+    not show) and tracks do not run.
+  - **The owner asked whether the old designs were saved, to compare, and
+    then withdrew it ("never mind, don't save old Brackenfold design").**
+    So nothing was added for that. For the record: the first Brackenfold
+    (bark and moss) was never pushed on its own and exists only in this
+    container's reflog; the Wardrum is in history at `5c20c17`.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open
