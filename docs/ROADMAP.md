@@ -495,16 +495,16 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (02:22 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (02:32 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M35 complete (the owner's two picks, unit stances and three save slots
 with an autosave, among them), both AI fixes that came out of the balance
 league, and a league tool that resumes after being cut off. In the check,
 not pushed yet: How to Play laid out again so that it fits on the screen
-(it had grown taller than the window), and a flow check that no menu page
-can outgrow it. Open: M26's two boxes (balance): the league is being
-replayed with the fixed AI (round 1 of 3 is about two thirds played)
-before any prices are written.
+(it had grown taller than the window), and flow checks that no menu page
+or in-match panel can outgrow its room. Open: M26's two boxes (balance).
+The league is being replayed with the fixed AI: the first round of three
+is in (last bullet below), nothing is written to the data files yet.
 
 - **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
   now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
@@ -531,6 +531,15 @@ before any prices are written.
   works and a barracks (up to three over its usual number) before it goes
   back to relays. This is in every faction's AI, so the league is being
   played again from the tuner's present prices before anything is written.
+- **With the fixed AI, round 1 of 3 (02:30 UTC), prices as the tuner
+  left them (Nomad x1.191, Brackenfold x1.079, Foundry x1.058, Verdigris
+  x1.039, Vesper x1.029, Tally x0.951, Veil x0.932, Zephyr x0.815), hills
+  on the maps:** Brackenfold 72.2%, Tally 58.3%, Veil 58.3%, Lodestone
+  52.8%, Vesper 50.0%, Verdigris 50.0%, Zephyr 44.4%, Foundry 36.1%,
+  Nomad 36.1%, Aegis 30.6%. Median match 16.3 minutes, 87% between 12 and
+  25, four undecided at an hour. Furthest from even 22.2 points. Zephyr
+  went from 25% to 44%: most of its trouble was the AI, as traced. The
+  prices that were right for the old AI now overcharge Nomad and Foundry.
 - **A mistake, and its repair (00:45 UTC).** Two status pushes of this
   session (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
   paragraph: the text search for "Working now" found session 7's paragraph
