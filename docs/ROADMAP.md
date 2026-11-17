@@ -1200,6 +1200,13 @@ restarted three times; the background tuner died with it).**
     whose spot has armed enemies within 16 units is raised in the ring
     behind the base instead: it reaches nothing new, but it carries
     bandwidth (`relays_kept_home` counts them).
+  - The session's worker was restarted at about 01:55 UTC and this time
+    took the running check and the league with it (both had been started
+    with `setsid`, which had been enough before). A league round is fifty
+    minutes of matches, so `tools/balance_league.py` now remembers every
+    finished job in `.godot-bin/league_cache.json`, under a hash of `sim/`,
+    `data/` and the batch script: a league that is cut off picks up where
+    it stopped, and one played on a changed game starts again.
   - A test had to change with it: "a starved AI concedes" starved its AI
     by killing its units and emptying its bank, but the AI now has an
     uplink by minute eighteen, which pays 180 a minute, so it was (rightly)
