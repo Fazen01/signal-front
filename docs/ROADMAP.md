@@ -463,48 +463,15 @@ default; `test_a_wave_keeps_together_on_the_way_in` runs it both ways).
 
 ### 2026-11-16 — session 7, 19:50 UTC (branch `claude/relay-session-1116-1950`)
 
-**Working now (20:30 UTC):** M31 is written with eleven unit tests on a
-side branch (not pushed yet; it goes up when `tools/check.sh` passes on
-it). Batches of twenty AI matches are being played to see what each new
-behaviour does to match length before it is switched on for good.
-
-- **M30 ticked.** Session 1 had pushed both factions complete (design
-  paragraph, data, rule, models, skin, tests, a match each in the check)
-  and left the boxes open. The league tool reads the faction list from
-  `data/factions.json`, so both are in it; the monkey test now plays them
-  too. What is still owed is a league *run* over all ten: that is M26's
-  open box, not M30's.
-
-- Started from `claude/gracious-lovelace-fxl9n2` (`aa02b86`, the newest
-  remote commit, 16:36 UTC; nothing newer anywhere, so no session was
-  running).
-- **Session 1's M31 never arrived.** Its last note says M31 was committed
-  locally and waiting on the check. No such commit is on any remote branch,
-  so that work is lost and M31 starts from the pushed code.
-- Merged `claude/relay-session-1116-1450` (session 5): the random-input
-  monkey test in `tools/check.sh` and the keep-the-wave-together AI rule
-  (off by default). One conflict, two blocks of constants in
-  `sim/sim_ai.gd`, both kept. The monkey test now also runs as the
-  Brackenfold and the Lodestone Circle.
-- **Decision: `claude/relay-session-1116-1550` (session 6) is not merged.**
-  It holds a second, independent M29 (teams, match setup) and a faction
-  called the Ember Rite. Session 1's M29 is already here and the two touch
-  the same forty files; merging would mean choosing between two team
-  systems line by line with no gain. The Ember Rite (weapons that set
-  targets alight) is a candidate to port by hand later; the branch is left
-  as it is for the owner.
-- `claude/relay-session-1116-0451` and `-0654` remain unmerged, as session 1
-  left them.
-
-### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
-
-**Working now (23:45 UTC) — session 1 is alive, for sessions 5, 6 and 7 to
-read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to M33,
-the combat half of M34, session 7's branch, and the fixes listed in the
-log below (vehicle spacing, repairs under fire, conceding only when no
-person plays). Running now: the balance league over all ten factions
-(M26), from a scratch copy of the tree. Open: M26's two boxes, high ground
-(M33), a look pass over every faction's models and water and sky (M34).
+**Working now (00:25 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
+M33's first three boxes, the combat half of M34 and the optional Light
+setting, session 7's branch, and the fixes listed in the log below.
+Committed here and going through the check, not yet pushed: high ground
+(the last box of M33: hills that give range and sight) and new water
+(M34). Running: the balance league over all ten factions (M26). Open after
+that: M26's two boxes and a look pass over the models of the eight older
+factions (M34).
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
