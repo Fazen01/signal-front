@@ -5,6 +5,9 @@ extends Node
 ## Game autoload when the user argument --flow-smoke is present; check.sh
 ## treats any "BOOT FAILED" line or script error as a failure.
 
+const SMOKE_SLOT: String = "smoke_slot"
+const SMOKE_AUTO: String = "smoke_auto"
+
 var _stage: int = 0
 var _wait: int = 0
 var _frames: int = 0
@@ -74,7 +77,14 @@ func _process(_delta: float) -> void:
 			var battle: BattleScene = scene as BattleScene
 			if battle != null:
 				_expect(battle.world.tick_count == int(battle.get_meta("paused_at")), "simulation holds while paused")
-				_expect(battle.save_game(), "the match saves from the pause menu")
+				battle.menus.open_saves(false)
+				_expect(battle.menus.is_pause_open(), "the save slots open from the pause menu")
+				battle.menus.close_saves()
+				# A slot of the test's own, so that nobody's saves are touched.
+				_expect(battle.save_game(SMOKE_SLOT), "the match saves to a slot")
+				_expect(battle.autosave(SMOKE_AUTO), "and the autosave writes its own")
+				_expect(not SimSave.slot_info(SMOKE_AUTO).is_empty(), "which a load screen can describe")
+				SimSave.delete_slot(SMOKE_AUTO)
 				_saved_tick = battle.world.tick_count
 				_saved_entities = battle.world.entities.size()
 				battle.surrender()
@@ -96,8 +106,9 @@ func _process(_delta: float) -> void:
 		7:
 			var menu: MainMenu = scene as MainMenu
 			if menu != null:
-				_expect(SimSave.has_save(), "a save exists for the menu to load")
-				menu.load_saved()
+				_expect(SimSave.has_slot(SMOKE_SLOT), "a save exists for the menu to load")
+				menu.open_loads()
+				menu.load_saved(SMOKE_SLOT)
 				_next(10)
 		8:
 			var battle: BattleScene = scene as BattleScene
@@ -105,7 +116,7 @@ func _process(_delta: float) -> void:
 				_expect(battle.world.tick_count >= _saved_tick and battle.world.tick_count < _saved_tick + 40, "the loaded match resumes where it was saved (tick %d)" % battle.world.tick_count)
 				_expect(absi(battle.world.entities.size() - _saved_entities) <= 3, "with the same forces on the field")
 				_expect(battle.world.players[0].faction.id == "foundry", "and the same factions")
-				DirAccess.remove_absolute(ProjectSettings.globalize_path(SimSave.PATH))
+				SimSave.delete_slot(SMOKE_SLOT)
 				battle.quit_to_menu()
 				_next(10)
 		9:

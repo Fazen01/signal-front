@@ -158,6 +158,10 @@ func _process(_delta: float) -> void:
 		menu.open_settings()
 	if menu != null and _script_name == "help" and _count == 3:
 		menu.call("_show", menu.get("_help"))
+	if menu != null and _script_name == "loads" and _count == 3:
+		menu.open_loads()
+	if menu != null and _script_name == "menusettings" and _count == 3:
+		menu.open_settings()
 	if menu != null and _script_name == "helpfactions" and _count == 3:
 		menu.show_help_page(true)
 		menu.call("_show", menu.get("_help"))
@@ -506,6 +510,14 @@ func _run_script(battle: BattleScene) -> void:
 		"pause":
 			if _count == 5:
 				battle.toggle_pause_menu()
+		"saves":
+			# The save slots from the pause menu, with two of them filled
+			# (in slots of the capture's own) and the autosave written.
+			if _count == 5:
+				battle.save_game("slot2")
+				battle.autosave()
+				battle.toggle_pause_menu()
+				battle.menus.open_saves(false)
 		"wide":
 			if _count == 2:
 				battle.cam.set_distance(95.0)

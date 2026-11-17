@@ -59,6 +59,15 @@ func _ready() -> void:
 	box.add_child(Hud.make_label("Interface", 16, skin.second))
 	_toggle(box, "Show hotkey hints", GameSettings.key_hints, func(on: bool) -> void: GameSettings.key_hints = on)
 
+	box.add_child(Hud.make_label("Game", 16, skin.second))
+	var auto: OptionButton = OptionButton.new()
+	for n: String in GameSettings.AUTOSAVE_NAMES:
+		auto.add_item(n)
+	auto.select(maxi(0, GameSettings.AUTOSAVE_MINUTES.find(GameSettings.autosave_minutes)))
+	auto.focus_mode = Control.FOCUS_NONE
+	auto.item_selected.connect(func(index: int) -> void: GameSettings.autosave_minutes = GameSettings.AUTOSAVE_MINUTES[index])
+	_row(box, "Autosave", auto)
+
 	var done: Button = Button.new()
 	done.text = "Done"
 	done.custom_minimum_size = Vector2(120.0, 42.0)

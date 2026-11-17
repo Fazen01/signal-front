@@ -334,7 +334,8 @@ map generation itself to be improved.
 
 ## M35 — The owner's picks from the ideas list (owner request, 17 Nov)
 
-- [ ] Autosave every few minutes, and more than one save slot
+- [x] Autosave every few minutes, and more than one save slot (three
+      slots and an autosave; "Load Game" on the main menu lists them)
 - [x] Unit stances: aggressive, hold fire, return fire (Z, or the stance
       button on the command card)
 
@@ -1128,6 +1129,24 @@ restarted three times; the background tuner died with it).**
   stance, the command card has a button that names the current one, and a
   unit that is not aggressive says so in the selection panel. Stance is
   in the save (a plain field; old saves load as aggressive).
+- **Save slots and autosave.** Saves live in `user://saves/`: `slot1` to
+  `slot3`, written from the pause menu, and `auto`, written by the game.
+  A slot file is two values: a short header (when, how far in, which map,
+  who is playing) and then the match as before, so a load screen can
+  describe a save without rebuilding it. A save is written beside its slot
+  and moved over it, so being cut off half-way cannot spoil a good one.
+  The single save file of earlier builds (`user://skirmish.sav`) is still
+  read, as Slot 1, until Slot 1 is saved to. "Save Game" and "Save and
+  Quit" in the pause menu now open the slots (the one this match last
+  used is picked out); "Continue Saved Game" on the main menu became
+  "Load Game", a page of every save, newest first. A match loaded from a
+  slot saves back to that slot. Autosave counts minutes of play, not of
+  pause, and does nothing in a tutorial, in a match nobody is playing or
+  after the match is over; Settings has Off, 2, 5 (the default) and 10
+  minutes. The tests and the flow check use slots of their own names
+  (`test_slot`, `smoke_slot`), so running them never touches a player's
+  saves. One autosave, not a rolling set: a second would only matter if
+  the first were written at a bad moment, and the three slots cover that.
 
 Status at 10:50 UTC: M15, M16 and M17 are complete and pushed;
 `tools/check.sh` passes on the last commit. Nothing is half-finished. Open

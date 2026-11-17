@@ -6,6 +6,8 @@ extends RefCounted
 const PATH: String = "user://settings.cfg"
 const BUSES: Array[String] = ["Master", "SFX", "Ambient"]
 const MSAA_NAMES: Array[String] = ["Off", "2x", "4x"]
+const AUTOSAVE_MINUTES: Array[int] = [0, 2, 5, 10]
+const AUTOSAVE_NAMES: Array[String] = ["Off", "Every 2 minutes", "Every 5 minutes", "Every 10 minutes"]
 
 static var volumes: Dictionary[String, float] = {"Master": 0.8, "SFX": 0.8, "Ambient": 0.5}
 static var fullscreen: bool = false
@@ -13,6 +15,7 @@ static var vsync: bool = true
 static var msaa: int = 1  ## index into MSAA_NAMES
 static var shadows: bool = true
 static var key_hints: bool = true
+static var autosave_minutes: int = 5  ## 0 switches autosave off
 static var _loaded: bool = false
 
 
@@ -29,6 +32,8 @@ static func ensure_loaded() -> void:
 		msaa = clampi(int(cfg.get_value("video", "msaa", msaa)), 0, MSAA_NAMES.size() - 1)
 		shadows = bool(cfg.get_value("video", "shadows", shadows))
 		key_hints = bool(cfg.get_value("interface", "key_hints", key_hints))
+		var minutes: int = int(cfg.get_value("game", "autosave_minutes", autosave_minutes))
+		autosave_minutes = minutes if AUTOSAVE_MINUTES.has(minutes) else 5
 	apply()
 	apply_video()
 
@@ -47,6 +52,7 @@ static func save() -> void:
 	cfg.set_value("video", "msaa", msaa)
 	cfg.set_value("video", "shadows", shadows)
 	cfg.set_value("interface", "key_hints", key_hints)
+	cfg.set_value("game", "autosave_minutes", autosave_minutes)
 	cfg.save(PATH)
 
 

@@ -10,6 +10,8 @@ var _pause: PanelContainer = null
 var _result: PanelContainer = null
 var _dim: ColorRect = null
 var _settings: SettingsPanel = null
+var _saves: PanelContainer = null  ## the save-slot chooser, while it is open
+var _save_buttons: Array[Button] = []
 var result_shown: bool = false
 
 
@@ -68,8 +70,8 @@ func _build_pause() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	box.add_child(_button("Resume", func() -> void: battle.toggle_pause_menu()))
-	box.add_child(_button("Save Game", func() -> void: battle.save_game()))
-	box.add_child(_button("Save and Quit to Menu", func() -> void: battle.save_and_quit()))
+	box.add_child(_button("Save Game", func() -> void: open_saves(false)))
+	box.add_child(_button("Save and Quit to Menu", func() -> void: open_saves(true)))
 	box.add_child(_button("Settings", open_settings))
 	if not battle.watching:
 		box.add_child(_button("Surrender", func() -> void: battle.surrender()))
@@ -77,7 +79,62 @@ func _build_pause() -> void:
 
 
 func is_pause_open() -> bool:
-	return _pause.visible or (_settings != null and _settings.visible)
+	return _pause.visible or (_settings != null and _settings.visible) or (_saves != null and _saves.visible)
+
+
+## The save slots, reached from the pause menu: pick one to write the match
+## to. With `then_quit` the match is left for the main menu afterwards.
+func open_saves(then_quit: bool) -> void:
+	if _saves != null:
+		_saves.queue_free()
+	_saves = _centre_panel()
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	_saves.add_child(box)
+	var title: Label = skin.title("SAVE AND QUIT" if then_quit else "SAVE GAME", 24)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+	box.add_child(Hud.make_label("Pick a slot. Saving over a slot replaces what is in it.", 15, skin.dim))
+	_save_buttons.clear()
+	for slot: String in SimSave.MANUAL_SLOTS:
+		var b: Button = _button(slot_caption(slot), save_to.bind(slot, then_quit))
+		b.custom_minimum_size = Vector2(560.0, 46.0)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.clip_text = true
+		if slot == battle.save_slot:
+			b.add_theme_color_override("font_color", skin.accent)
+		box.add_child(b)
+		_save_buttons.append(b)
+	var auto: Dictionary = SimSave.slot_info(SimSave.AUTO)
+	var note: String = "Autosave is off (Settings)."
+	if GameSettings.autosave_minutes > 0:
+		note = "The game also saves itself every %d minutes." % GameSettings.autosave_minutes
+		if not auto.is_empty():
+			note += " Latest: %s." % SimSave.describe(auto)
+	box.add_child(Hud.make_label(note, 14, skin.dim))
+	box.add_child(_button("Back", close_saves))
+	_pause.visible = false
+	_saves.visible = true
+
+
+## "Slot 2: Twin Fords, 12:34 in, saved 17 Nov 00:58", or "Slot 2: empty".
+static func slot_caption(slot: String) -> String:
+	return "%s:  %s" % [str(SimSave.SLOT_NAMES.get(slot, slot)), SimSave.describe(SimSave.slot_info(slot))]
+
+
+func save_to(slot: String, then_quit: bool) -> void:
+	if then_quit:
+		battle.save_and_quit(slot)
+		return
+	battle.save_game(slot)
+	close_saves()
+
+
+func close_saves() -> void:
+	if _saves != null:
+		_saves.queue_free()
+		_saves = null
+	_pause.visible = battle.paused
 
 
 ## Volume sliders, reached from the pause menu.
@@ -106,6 +163,9 @@ func set_pause_open(open: bool) -> void:
 	_dim.visible = open
 	if _settings != null and not open:
 		_settings.visible = false
+	if _saves != null and not open:
+		_saves.queue_free()
+		_saves = null
 
 
 ## The end of a tutorial mission: on to the next one, or back to the menu.

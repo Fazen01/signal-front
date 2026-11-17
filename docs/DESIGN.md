@@ -186,6 +186,9 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Screens: main menu, skirmish setup (map, region, seed, and one row per
   seat: played by, faction, team, AI skill), pause menu, settings,
   victory/defeat summary with stats.
+- Saves: three slots written from the pause menu and an autosave written
+  by the game every few minutes of play (off, 2, 5 or 10). The main menu's
+  Load Game page lists them, newest first, with what each holds.
 - Teams: seats with the same team number are allies. Allies never target
   each other, see everything the other sees (and what the other's
   detectors reveal), start side by side, and win or lose together: the

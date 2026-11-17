@@ -30,8 +30,12 @@ From the main menu:
   The setup panel dresses itself in the interface of the faction you pick:
   each of the ten has its own colours, shapes, lettering and emblem, and
   the match's HUD wears the same.
-- **Continue Saved Game** — pick up the match you saved from the pause menu
-  ("Save Game", or "Save and Quit to Menu"), exactly where it stopped.
+- **Load Game** — pick up a saved match exactly where it stopped. There are
+  three slots you save to from the pause menu ("Save Game", or "Save and
+  Quit to Menu") and one **autosave** the game writes itself every five
+  minutes of play (every two or ten, or never: Settings, Autosave). Each
+  save says which map it is, how far in, who is playing and when it was
+  written; the newest is at the top.
 - **Settings** — volumes, fullscreen, vsync, shadows, anti-aliasing, hotkey
   hints.
 

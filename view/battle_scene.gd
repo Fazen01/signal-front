@@ -28,6 +28,8 @@ var _tutorial_index: int = -1
 var _tutorial_ping_in: float = 0.0
 var ui_layer: CanvasLayer = null
 var time_of_day: String = "noon"  ## the hour the scene is lit for
+var save_slot: String = SimSave.MANUAL_SLOTS[0]  ## where "Save Game" writes unless told otherwise
+var _autosave_wait: float = 0.0  ## seconds of play since the last autosave
 var skin: UiSkin = null  ## the interface look: the local player's faction, or neutral when watching
 
 # Directive targeting
@@ -58,6 +60,11 @@ func _ready() -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	config = game.take_config() if game != null else MatchConfig.skirmish(1)
 	world = game.take_world() if game != null else null
+	if game != null:
+		# A match loaded from a slot saves back to it.
+		if world != null and game.loaded_slot != "":
+			save_slot = game.loaded_slot
+		game.loaded_slot = ""
 	_read_spectate_args()
 	if world == null:
 		world = SimSetup.create_match(config)
@@ -379,6 +386,7 @@ func _process(delta: float) -> void:
 			t_events += Time.get_ticks_usec() - e0
 		if steps >= 10:
 			_accum = 0.0  # too far behind: drop the backlog rather than spiral
+		tick_autosave(delta)
 	var t1: int = Time.get_ticks_usec()
 	controller.prune()
 	audio.listener = cam.focus
@@ -616,21 +624,47 @@ func _update_tutorial(delta: float) -> void:
 			hud.minimap.ping(world.tutorial.current().marker)
 
 
-## Writes the match to the save slot (from the pause menu).
-## Saves, then leaves for the main menu; "Continue Saved Game" there picks
+## Saves to a slot, then leaves for the main menu; "Load Game" there picks
 ## the match up where it stopped.
-func save_and_quit() -> void:
-	if save_game():
+func save_and_quit(slot: String = "") -> void:
+	if save_game(slot):
 		quit_to_menu()
 
 
-func save_game() -> bool:
+## Writes the match to a save slot: the one named, or the one this match
+## was last saved to or loaded from.
+func save_game(slot: String = "") -> bool:
 	if world.tutorial != null:
 		hud.push_alert("Tutorial missions cannot be saved", Hud.RED)
 		return false
-	var ok: bool = SimSave.save_to_file(world, config)
-	hud.push_alert("Game saved" if ok else "Could not write the save file", Hud.CYAN if ok else Hud.RED)
+	if slot != "":
+		save_slot = slot
+	var ok: bool = SimSave.save_to_slot(world, config, save_slot)
+	var where: String = str(SimSave.SLOT_NAMES.get(save_slot, "the save file"))
+	hud.push_alert("Saved to %s" % where if ok else "Could not write the save file", Hud.CYAN if ok else Hud.RED)
 	return ok
+
+
+## The game saving itself, every few minutes of play (Settings, Autosave).
+## Nothing is saved from a tutorial, from a match nobody is playing, or
+## once the match is over.
+func autosave(slot: String = SimSave.AUTO) -> bool:
+	if world.tutorial != null or watching or world.game_over:
+		return false
+	var ok: bool = SimSave.save_to_slot(world, config, slot)
+	hud.push_alert("Autosaved" if ok else "Autosave failed: could not write the file", Hud.TEXT if ok else Hud.RED)
+	return ok
+
+
+## Counts play time towards the next autosave. Time spent paused does not
+## count.
+func tick_autosave(delta: float) -> void:
+	if GameSettings.autosave_minutes <= 0 or paused or world.tutorial != null or watching or world.game_over:
+		return
+	_autosave_wait += delta
+	if _autosave_wait >= float(GameSettings.autosave_minutes) * 60.0:
+		_autosave_wait = 0.0
+		autosave()
 
 
 ## Picks up settings changed in the pause menu.

@@ -73,6 +73,8 @@ var _setup: PanelContainer = null
 var _help: PanelContainer = null
 var _settings: SettingsPanel = null
 var _tutorials: PanelContainer = null
+var _loads: PanelContainer = null  ## the Load Game page
+var _load_list: VBoxContainer = null  ## one button a save, filled when the page opens
 var _seed: SpinBox = null
 # One row for each seat of the match: who plays it, as which faction, on
 # which team and (for an AI) how well.
@@ -128,6 +130,7 @@ func _ready() -> void:
 	_build_setup()
 	_build_help()
 	_build_tutorials()
+	_build_loads()
 	GameSettings.ensure_loaded()
 	_settings = SettingsPanel.new()
 	_settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -228,7 +231,7 @@ func _build_main() -> void:
 	_main_box.add_child(gap)
 	var buttons: Array[Button] = [
 		_menu_button("Skirmish", open_skirmish),
-		_menu_button("Continue Saved Game", load_saved),
+		_menu_button("Load Game", open_loads),
 		_menu_button("Tutorials", func() -> void: _show(_tutorials)),
 		_menu_button("How to Play", func() -> void: _show(_help)),
 		_menu_button("Settings", open_settings),
@@ -479,6 +482,29 @@ func _build_tutorials() -> void:
 	box.add_child(back)
 
 
+func _build_loads() -> void:
+	_loads = PanelContainer.new()
+	_loads.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.LINE, 22.0))
+	_loads.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_loads.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_loads.grow_vertical = Control.GROW_DIRECTION_BOTH
+	add_child(_loads)
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	_loads.add_child(box)
+	box.add_child(UiTheme.title("LOAD GAME", 28))
+	box.add_child(Hud.make_label("Three slots you save to from the pause menu, and the autosave the game writes itself.\nThe newest is at the top.", 15, Hud.DIM))
+	_load_list = VBoxContainer.new()
+	_load_list.add_theme_constant_override("separation", 10)
+	box.add_child(_load_list)
+	var back: Button = Button.new()
+	back.text = "Back"
+	back.custom_minimum_size = Vector2(120.0, 44.0)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_END
+	back.pressed.connect(func() -> void: _show(_main_box))
+	box.add_child(back)
+
+
 func start_tutorial(tutorial_id: String) -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
@@ -700,12 +726,49 @@ func _show(which: Control) -> void:
 	_help.visible = which == _help
 	_settings.visible = which == _settings
 	_tutorials.visible = which == _tutorials
+	_loads.visible = which == _loads
 
 
-func load_saved() -> void:
+## Continues a saved match: the slot named, or the one saved last.
+func load_saved(slot: String = "") -> void:
 	var game: GameState = get_node_or_null("/root/Game") as GameState
 	if game != null:
-		game.load_saved_match()
+		game.load_saved_match(slot)
+
+
+## The save slots, newest first, each with what it holds.
+func open_loads() -> void:
+	for child: Node in _load_list.get_children():
+		child.queue_free()
+	var infos: Array[Dictionary] = []
+	for slot: String in SimSave.SLOTS:
+		var info: Dictionary = SimSave.slot_info(slot)
+		if not info.is_empty():
+			infos.append(info)
+	infos.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["saved_at"]) > int(b["saved_at"]))
+	for info: Dictionary in infos:
+		var sides: Array = info.get("sides", [])
+		var who: String = "" if sides.is_empty() else "   ·   " + " v ".join(PackedStringArray(sides))
+		var b: Button = Button.new()
+		b.text = "%s%s\n%s" % [str(info["name"]), who, SimSave.describe(info)]
+		b.custom_minimum_size = Vector2(640.0, 64.0)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.add_theme_font_size_override("font_size", 17)
+		b.clip_text = true
+		b.pressed.connect(load_saved.bind(str(info["slot"])))
+		_load_list.add_child(b)
+	if infos.is_empty():
+		_load_list.add_child(UiTheme.label("Nothing has been saved yet.", 17, UiTheme.DIM))
+	_show(_loads)
+
+
+## How many saves the load page is offering (for tests).
+func loads_offered() -> int:
+	var n: int = 0
+	for child: Node in _load_list.get_children():
+		if child is Button and not child.is_queued_for_deletion():
+			n += 1
+	return n
 
 
 func open_settings() -> void:

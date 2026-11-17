@@ -6,7 +6,16 @@ extends RefCounted
 ## would have.
 
 const VERSION: int = 1
+const DIR: String = "user://saves"
+## The single save file of earlier builds. It is still read, as slot 1,
+## for as long as slot 1 itself is empty.
 const PATH: String = "user://skirmish.sav"
+const AUTO: String = "auto"  ## the slot the game writes by itself
+const MANUAL_SLOTS: Array[String] = ["slot1", "slot2", "slot3"]
+const SLOTS: Array[String] = ["auto", "slot1", "slot2", "slot3"]
+const SLOT_NAMES: Dictionary[String, String] = {
+	"auto": "Autosave", "slot1": "Slot 1", "slot2": "Slot 2", "slot3": "Slot 3",
+}
 
 # Fields that are references or per-tick scratch and are rebuilt on load.
 const ENTITY_SKIP: Array[String] = ["def", "orders"]
@@ -15,25 +24,102 @@ const PLAYER_SKIP: Array[String] = ["faction"]
 
 # ----------------------------------------------------------------- files
 
+static func path_of(slot: String) -> String:
+	return "%s/%s.sav" % [DIR, slot]
+
+
+## The file a slot is held in at the moment, or "" if the slot is empty.
+static func _file_of(slot: String) -> String:
+	if FileAccess.file_exists(path_of(slot)):
+		return path_of(slot)
+	if slot == MANUAL_SLOTS[0] and FileAccess.file_exists(PATH):
+		return PATH
+	return ""
+
+
+static func has_slot(slot: String) -> bool:
+	return _file_of(slot) != ""
+
+
+## True if there is anything at all to load.
 static func has_save() -> bool:
-	return FileAccess.file_exists(PATH)
+	for slot: String in SLOTS:
+		if has_slot(slot):
+			return true
+	return false
 
 
-## Writes the match to the single save slot. Returns false on failure.
-static func save_to_file(w: SimWorld, config: MatchConfig) -> bool:
-	var f: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+## Writes the match to a slot. Returns false on failure. The file is
+## written beside the slot and then moved over it, so that being cut off
+## half-way cannot leave a broken save where a good one was.
+static func save_to_slot(w: SimWorld, config: MatchConfig, slot: String) -> bool:
+	if not slot.is_valid_identifier():
+		return false
+	DirAccess.make_dir_recursive_absolute(DIR)
+	var tmp: String = path_of(slot) + ".part"
+	var f: FileAccess = FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:
 		return false
+	f.store_var(header_of(w, config))
 	f.store_var(to_dict(w, config))
 	f.close()
+	if FileAccess.file_exists(path_of(slot)):
+		DirAccess.remove_absolute(path_of(slot))
+	if DirAccess.rename_absolute(tmp, path_of(slot)) != OK:
+		return false
+	if slot == MANUAL_SLOTS[0] and FileAccess.file_exists(PATH):
+		DirAccess.remove_absolute(PATH)
 	return true
 
 
-## Reads the save slot. Returns {} if there is none or it cannot be used.
-static func read_file() -> Dictionary:
-	if not has_save():
+static func delete_slot(slot: String) -> void:
+	var held: String = _file_of(slot)
+	if held != "":
+		DirAccess.remove_absolute(held)
+
+
+## What a load screen says about a save without rebuilding it: when it was
+## written, how far into the match, on which map, and who is playing.
+static func header_of(w: SimWorld, config: MatchConfig) -> Dictionary:
+	var sides: Array[String] = []
+	for p: SimPlayer in w.players:
+		sides.append(p.faction.name)
+	return {
+		"header": true, "version": VERSION,
+		"saved_at": int(Time.get_unix_time_from_system()),
+		"tick": w.tick_count, "map": w.map.name, "sides": sides,
+		"watch": config.watch,
+	}
+
+
+## Reads a slot. Returns {} if it is empty or cannot be used.
+static func read_slot(slot: String) -> Dictionary:
+	var held: String = _file_of(slot)
+	if held == "":
 		return {}
-	var f: FileAccess = FileAccess.open(PATH, FileAccess.READ)
+	var f: FileAccess = FileAccess.open(held, FileAccess.READ)
+	if f == null:
+		return {}
+	var v: Variant = f.get_var()
+	# A slot file opens with its header; the old single file is the match itself.
+	if typeof(v) == TYPE_DICTIONARY and (v as Dictionary).has("header"):
+		v = f.get_var() if f.get_position() < f.get_length() else null
+	f.close()
+	if typeof(v) != TYPE_DICTIONARY:
+		return {}
+	var d: Dictionary = v
+	if int(d.get("version", 0)) != VERSION or not d.has("config"):
+		return {}
+	return d
+
+
+## The header of a slot, with "slot" and "name" added, or {} if the slot is
+## empty or unreadable.
+static func slot_info(slot: String) -> Dictionary:
+	var held: String = _file_of(slot)
+	if held == "":
+		return {}
+	var f: FileAccess = FileAccess.open(held, FileAccess.READ)
 	if f == null:
 		return {}
 	var v: Variant = f.get_var()
@@ -43,7 +129,43 @@ static func read_file() -> Dictionary:
 	var d: Dictionary = v
 	if int(d.get("version", 0)) != VERSION:
 		return {}
-	return d
+	var info: Dictionary = {}
+	if d.has("header"):
+		info = d.duplicate()
+	else:
+		# The old single file has no header: say what can be told from outside.
+		info = {"saved_at": int(FileAccess.get_modified_time(held)), "tick": int(d.get("tick_count", 0)), "map": "", "sides": []}
+	info["slot"] = slot
+	info["name"] = str(SLOT_NAMES.get(slot, slot))
+	return info
+
+
+## One line for a load or save screen: "Twin Fords, 12:34 in, saved 17 Nov 00:58".
+static func describe(info: Dictionary) -> String:
+	if info.is_empty():
+		return "empty"
+	var parts: Array[String] = []
+	if str(info.get("map", "")) != "":
+		parts.append(str(info["map"]))
+	var seconds: int = floori(float(int(info.get("tick", 0))) / float(SimWorld.TICK_RATE))
+	parts.append("%d:%02d in" % [floori(float(seconds) / 60.0), seconds % 60])
+	var zone: Dictionary = Time.get_time_zone_from_system()
+	var local: Dictionary = Time.get_datetime_dict_from_unix_time(int(info.get("saved_at", 0)) + int(zone.get("bias", 0)) * 60)
+	var months: Array[String] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+	parts.append("saved %d %s %02d:%02d" % [int(local["day"]), months[clampi(int(local["month"]) - 1, 0, 11)], int(local["hour"]), int(local["minute"])])
+	return ", ".join(parts)
+
+
+## The slot written last, or "" if every slot is empty.
+static func newest_slot() -> String:
+	var best: String = ""
+	var best_at: int = -1
+	for slot: String in SLOTS:
+		var info: Dictionary = slot_info(slot)
+		if not info.is_empty() and int(info.get("saved_at", 0)) > best_at:
+			best_at = int(info.get("saved_at", 0))
+			best = slot
+	return best
 
 
 # -------------------------------------------------------------- snapshot
