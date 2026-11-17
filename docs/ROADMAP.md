@@ -495,16 +495,17 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (02:52 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
-and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
-M35 complete (the owner's two picks, unit stances and three save slots
-with an autosave, among them), both AI fixes that came out of the balance
-league, a league tool that resumes after being cut off, and How to Play
-laid out again so that it fits on the screen. In the check, not pushed
-yet: flow checks that no in-match panel can outgrow its room. Open: M26's
-two boxes (balance). The league is being replayed with the fixed AI: the
-first round of three is in (last bullet but one below), the second is
-60% played, nothing is written to the data files yet.
+**Working now (03:05 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Everything written is pushed, with `tools/check.sh`
+passing (32 steps): M28 to M35 complete (the owner's two picks, unit
+stances and three save slots with an autosave, among them), both AI fixes
+that came out of the balance league, a league tool that resumes after
+being cut off, How to Play laid out again so that it fits on the screen,
+and flow checks that no menu page or in-match panel can outgrow its room.
+Script-side frame cost with 300 units is unchanged (7.3 ms). Open: M26's
+two boxes (balance). The league is being replayed with the fixed AI: two
+rounds of three are in (the two bullets before the last below), nothing
+is written to the data files yet.
 
 - **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
   now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
@@ -540,6 +541,13 @@ first round of three is in (last bullet but one below), the second is
   25, four undecided at an hour. Furthest from even 22.2 points. Zephyr
   went from 25% to 44%: most of its trouble was the AI, as traced. The
   prices that were right for the old AI now overcharge Nomad and Foundry.
+- **With the fixed AI, round 2 of 3 (03:03 UTC), prices Brackenfold
+  x1.163, Nomad x1.133, Verdigris x1.039, Vesper x1.029, Foundry x1.007,
+  Tally x0.979, Veil x0.959, Aegis x0.932, Zephyr x0.815:** Veil 61.1%,
+  Tally 55.6%, Foundry 52.8%, Nomad 52.8%, Brackenfold 52.8%, Lodestone
+  50.0%, Vesper 47.2%, Verdigris 47.2%, Aegis 36.1%, Zephyr 36.1%. Median
+  match 16.0 minutes, 92% between 12 and 25, three undecided. Furthest
+  from even 13.9 points (22.2 a round earlier, 38.9 at the start).
 - **A mistake, and its repair (00:45 UTC).** Two status pushes of this
   session (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
   paragraph: the text search for "Working now" found session 7's paragraph
