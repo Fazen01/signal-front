@@ -25,6 +25,17 @@ func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		# "upage<N>": the same, counting units only (so that the last units
 		# do not share a page with the first buildings).
+		# "model_<id>": one model, close up.
+		if arg.begins_with("--script=model_"):
+			var only: EntityDef = data.entity(arg.trim_prefix("--script=model_"))
+			if only != null:
+				_put(ModelFactory.build(only.model, MatchConfig.TEAM_COLORS[0]), Vector3(0.0, only.altitude() * 0.35, 0.0), only.name)
+			var near: Camera3D = Camera3D.new()
+			near.fov = 40.0
+			add_child(near)
+			near.look_at_from_position(Vector3(0.0, 6.5, 8.0), Vector3(0.0, 0.8, 0.4), Vector3.UP)
+			near.current = true
+			return
 		# "faction_<id>": everything one faction has, units in front.
 		if arg.begins_with("--script=faction_"):
 			_show_faction(units, buildings, arg.trim_prefix("--script=faction_"))

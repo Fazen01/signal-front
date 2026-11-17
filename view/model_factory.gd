@@ -1887,13 +1887,25 @@ static func _knight(root: Node3D, team: Color, shield: bool) -> void:
 ## a shin raked forward, a knee plate and a broad foot, either side.
 static func _legs(root: Node3D, x: float, half_width: float, hip: float) -> void:
 	for side: float in [-1.0, 1.0]:
-		var z: float = side * half_width
-		box(root, Vector3(0.34, 0.3, 0.28), Vector3(x, hip, z), mat(BRONZE_DARK))
-		box(root, Vector3(0.24, hip * 0.62, 0.22), Vector3(x - 0.13, hip * 0.72, z), mat(COPPER), Vector3(0.0, 0.0, -0.45))
-		box(root, Vector3(0.19, hip * 0.66, 0.19), Vector3(x - 0.04, hip * 0.31, z), mat(BRONZE), Vector3(0.0, 0.0, 0.36))
-		box(root, Vector3(0.2, 0.2, 0.26), Vector3(x - 0.24, hip * 0.52, z), mat(COPPER_DARK))
-		box(root, Vector3(0.52, 0.1, 0.36), Vector3(x + 0.1, 0.05, z), mat(BRONZE_DARK))
-		box(root, Vector3(0.16, 0.08, 0.38), Vector3(x + 0.3, 0.1, z), mat(BRONZE))
+		# Each leg is a group hinged at the hip, so that it can swing in step.
+		var leg: Node3D = _leg_group(root, Vector3(x, hip, side * half_width))
+		box(leg, Vector3(0.34, 0.3, 0.28), Vector3.ZERO, mat(BRONZE_DARK))
+		box(leg, Vector3(0.24, hip * 0.62, 0.22), Vector3(-0.13, -hip * 0.28, 0.0), mat(COPPER), Vector3(0.0, 0.0, -0.45))
+		box(leg, Vector3(0.19, hip * 0.66, 0.19), Vector3(-0.04, -hip * 0.69, 0.0), mat(BRONZE), Vector3(0.0, 0.0, 0.36))
+		box(leg, Vector3(0.2, 0.2, 0.26), Vector3(-0.24, -hip * 0.48, 0.0), mat(COPPER_DARK))
+		box(leg, Vector3(0.52, 0.1, 0.36), Vector3(0.1, 0.05 - hip, 0.0), mat(BRONZE_DARK))
+		box(leg, Vector3(0.16, 0.08, 0.38), Vector3(0.3, 0.1 - hip, 0.0), mat(BRONZE))
+
+
+## A moving group for one leg, hinged at `hip`: "Leg0", "Leg1" and so on in
+## the order they are made (left then right, front pair first), which is
+## what the view goes by to make diagonal legs step together.
+static func _leg_group(root: Node3D, hip: Vector3) -> Node3D:
+	var made: int = 0
+	for child: Node in root.get_children():
+		if str(child.name).begins_with("Leg"):
+			made += 1
+	return group(root, "Leg%d" % made, hip)
 
 
 ## The body of a walker on `pairs` pairs of legs: a bronze keel, a copper
@@ -3041,10 +3053,12 @@ static func _sprout(root: Node3D, team: Color) -> void:
 ## One jointed leg: a thick thigh that rises away from the body to a knob
 ## of a knee, and a shin that comes down to a clawed foot.
 static func _beast_leg(root: Node3D, x: float, z: float, side: float, hip: float) -> void:
-	box(root, Vector3(0.2, 0.2, 0.62), Vector3(x, hip + 0.16, z + side * 0.24), mat(BARK), Vector3(-side * 0.55, 0.0, 0.0))
-	box(root, Vector3(0.2, 0.2, 0.2), Vector3(x, hip + 0.33, z + side * 0.5), mat(BONE_DARK))
-	box(root, Vector3(0.15, hip + 0.3, 0.15), Vector3(x, (hip + 0.3) * 0.5, z + side * 0.58), mat(BARK), Vector3(-side * 0.2, 0.0, 0.0))
-	box(root, Vector3(0.3, 0.08, 0.24), Vector3(x + 0.05, 0.04, z + side * 0.66), mat(BONE_DARK))
+	var top: float = hip + 0.16
+	var leg: Node3D = _leg_group(root, Vector3(x, top, z))
+	box(leg, Vector3(0.2, 0.2, 0.62), Vector3(0.0, 0.0, side * 0.24), mat(BARK), Vector3(-side * 0.55, 0.0, 0.0))
+	box(leg, Vector3(0.2, 0.2, 0.2), Vector3(0.0, 0.17, side * 0.5), mat(BONE_DARK))
+	box(leg, Vector3(0.15, hip + 0.3, 0.15), Vector3(0.0, (hip + 0.3) * 0.5 - top, side * 0.58), mat(BARK), Vector3(-side * 0.2, 0.0, 0.0))
+	box(leg, Vector3(0.3, 0.08, 0.24), Vector3(0.05, 0.04 - top, side * 0.66), mat(BONE_DARK))
 
 
 ## The body of a Brackenfold beast: a dark belly under three overlapping

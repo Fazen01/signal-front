@@ -18,6 +18,8 @@ var owner_id: int = -1
 var altitude: float = 0.0  ## aircraft are drawn this far above the ground
 var _rotors: Array[Node3D] = []
 var _spins: Array[Node3D] = []  ## radar dishes and the like, turning slowly
+var _legs: Array[Node3D] = []  ## the legs of walking machines and beasts, swung in step
+var _leg_phase: PackedFloat32Array = PackedFloat32Array()  ## 0 or PI for each leg: diagonal legs step together
 var _cargo: Node3D = null  ## a hauler's load, shown while it carries salvage
 var _turret_home: Vector3 = Vector3.ZERO
 var _kick: float = 0.0  ## turret recoil, 1 just after firing, decaying to 0
@@ -170,12 +172,24 @@ func _find_parts() -> void:
 	_cargo = model.get_node_or_null("Cargo") as Node3D
 	_rotors.clear()
 	_spins.clear()
+	_legs.clear()
 	for child: Node in model.find_children("*", "Node3D", true, false):
 		var part: String = str(child.name)
 		if part.begins_with("Rotor"):
 			_rotors.append(child as Node3D)
 		elif part.begins_with("Spin"):
 			_spins.append(child as Node3D)
+		elif part.begins_with("Leg"):
+			_legs.append(child as Node3D)
+	# A leg steps with the one diagonally across from it: count how far along
+	# its own flank each leg is, and flip the count on the other flank.
+	_leg_phase.resize(_legs.size())
+	for i: int in _legs.size():
+		var rank: int = 0 if _legs[i].position.z < 0.0 else 1
+		for other: Node3D in _legs:
+			if (other.position.z < 0.0) == (_legs[i].position.z < 0.0) and other.position.x < _legs[i].position.x - 0.01:
+				rank += 1
+		_leg_phase[i] = PI * float(rank % 2)
 
 
 ## The unit just fired: its turret jolts back.
@@ -324,6 +338,15 @@ func sync(e: SimEntity, map: SimMap, alpha: float) -> void:
 				var moving: bool = e.pos.distance_squared_to(e.prev_pos) > 0.000001
 				_stride = lerpf(_stride, 1.0 if moving else 0.0, 0.2)
 				model.position.y = absf(sin(t * 9.0 + float(entity_id))) * 0.09 * _stride
+			if not _legs.is_empty():
+				# Walkers step: each leg swings at the hip, diagonal legs
+				# together, and the body rides up a little at every step.
+				var going: bool = e.pos.distance_squared_to(e.prev_pos) > 0.000001
+				_stride = lerpf(_stride, 1.0 if going else 0.0, 0.15)
+				var beat: float = t * 7.5 + float(entity_id)
+				for i: int in _legs.size():
+					_legs[i].rotation.z = sin(beat + _leg_phase[i]) * 0.36 * _stride
+				model.position.y = absf(sin(beat)) * 0.06 * _stride
 			if _cargo != null:
 				var fill: float = clampf(float(e.cargo) / maxf(1.0, float(e.def.capacity)), 0.0, 1.0)
 				_cargo.visible = fill > 0.02
