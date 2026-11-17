@@ -495,16 +495,16 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (02:32 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (02:52 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
 M35 complete (the owner's two picks, unit stances and three save slots
 with an autosave, among them), both AI fixes that came out of the balance
-league, and a league tool that resumes after being cut off. In the check,
-not pushed yet: How to Play laid out again so that it fits on the screen
-(it had grown taller than the window), and flow checks that no menu page
-or in-match panel can outgrow its room. Open: M26's two boxes (balance).
-The league is being replayed with the fixed AI: the first round of three
-is in (last bullet below), nothing is written to the data files yet.
+league, a league tool that resumes after being cut off, and How to Play
+laid out again so that it fits on the screen. In the check, not pushed
+yet: flow checks that no in-match panel can outgrow its room. Open: M26's
+two boxes (balance). The league is being replayed with the fixed AI: the
+first round of three is in (last bullet but one below), the second is
+60% played, nothing is written to the data files yet.
 
 - **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
   now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
