@@ -1209,6 +1209,22 @@ restarted three times; the background tuner died with it).**
       Vesper 47.2%, Verdigris 47.2%, Aegis 36.1%, Zephyr 36.1%. Median
       16.0 minutes, 92% between 12 and 25, three undecided. Furthest from
       even 13.9 points.
+    - Round 3 (03:34 UTC), prices Brackenfold x1.163, Nomad x1.133,
+      Verdigris x1.039, Vesper x1.029, Foundry x1.007, Veil x0.996, Tally
+      x0.979, Aegis x0.887, Zephyr x0.775: Aegis 58.3%, Brackenfold 58.3%,
+      Foundry 52.8%, Vesper 52.8%, Tally 52.8%, Nomad 50.0%, Veil 50.0%,
+      Verdigris 41.7%, Lodestone 41.7%, Zephyr 38.9%. Median 16.1
+      minutes, 95% between 12 and 25, one undecided. Furthest from even
+      11.1 points, with one standard error at 8.3.
+  - **Prices written (03:35 UTC):** the tuner's last step from round 3,
+    Aegis x0.913, Brackenfold x1.197, Nomad x1.133, Verdigris x1.039,
+    Vesper x1.029, Foundry x1.007, Veil x0.996, Tally x0.979, Zephyr
+    x0.745, Lodestone as it was, each cost rounded to five: 47 unit costs
+    in `data/units.json` (a Trooper 55 to 50, a Bulwark 380 to 345, a
+    Barkhide 360 to 430, a Prowler 266 to 300, a Lanner 320 to 240). Only
+    armed units the AI builds are repriced; buildings, builders, haulers
+    and the six signature support units are as they were. The tuner saw
+    seeds 1 to 4 only, so these prices are being tested on seeds 5 to 10.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty
