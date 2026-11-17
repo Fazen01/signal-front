@@ -1222,6 +1222,22 @@ restarted three times; the background tuner died with it).**
     armed units the AI builds are repriced; buildings, builders, haulers
     and the six signature support units are as they were. The tuner saw
     seeds 1 to 4 only, so these prices are being tested on seeds 5 to 10.
+  - **The prices tested on seeds the tuner never saw (04:26 UTC): seeds 5
+    to 10, 270 games, 54 a faction.** Nomad 55.6%, Vesper 55.6%, Zephyr
+    53.7%, Aegis 51.9%, Foundry 50.0%, Tally 50.0%, Veil 50.0%, Verdigris
+    48.1%, Lodestone 42.6%, Brackenfold 37.0%. Nine of ten within 7.4
+    points of even; Brackenfold 13.0 below, so the box is not ticked on
+    this league. One standard error at 54 games is 6.8 points. Median
+    match 16.3 minutes; 57% of games between 15 and 25 minutes (31%
+    shorter, 12% longer); by pairing, the average length is between 15 and
+    25 minutes in 41 of the 45 (shortest Aegis against Nomad at 13.5,
+    longest Nomad against Tally at 28.9); three games undecided at an hour.
+  - Brackenfold had won 72%, 53% and 58% on seeds 1 to 4 and was priced
+    up for it (x1.197); on other maps that was too much. The tuner's own
+    rule applied to this league (a price change of 0.35 of the distance
+    from even, nothing inside one standard error) gives Brackenfold x0.955
+    and Lodestone x0.974 on top: 14 more costs (a Barkhide 430 to 410, an
+    Armature 380 to 370). Being tested again on seeds 11 to 16.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty
