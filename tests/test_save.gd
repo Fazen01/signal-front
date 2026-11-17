@@ -91,6 +91,15 @@ func test_slots_are_separate_and_describe_themselves() -> void:
 	check_eq(int(SimSave.slot_info(TEST_SLOT).get("tick", -1)), b.tick_count, "which now holds the other match")
 	check(not SimSave.save_to_slot(a, first, "../elsewhere"), "a slot name that is not a plain word is refused")
 	check(not FileAccess.file_exists(SimSave.path_of(TEST_SLOT) + ".part"), "nothing half-written is left behind")
+	# Cut off after the old save was cleared but before the new one was moved
+	# into its place: the new one is still found.
+	DirAccess.rename_absolute(SimSave.path_of(TEST_SLOT), SimSave.path_of(TEST_SLOT) + ".part")
+	check(SimSave.has_slot(TEST_SLOT), "a finished save left beside its slot still counts")
+	check_eq(int(SimSave.slot_info(TEST_SLOT).get("tick", -1)), b.tick_count, "and reads as the save it is")
+	check(not SimSave.read_slot(TEST_SLOT).is_empty(), "and loads")
+	check(SimSave.save_to_slot(a, first, TEST_SLOT), "saving again puts things right")
+	check(not FileAccess.file_exists(SimSave.path_of(TEST_SLOT) + ".part"), "with nothing left beside the slot")
+	check_eq(int(SimSave.slot_info(TEST_SLOT).get("tick", -1)), a.tick_count, "and the slot holding the new save")
 	SimSave.delete_slot(TEST_SLOT)
 	SimSave.delete_slot(OTHER_SLOT)
 

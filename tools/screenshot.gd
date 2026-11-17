@@ -510,6 +510,10 @@ func _run_script(battle: BattleScene) -> void:
 		"pause":
 			if _count == 5:
 				battle.toggle_pause_menu()
+		"pausesettings":
+			if _count == 5:
+				battle.toggle_pause_menu()
+				battle.menus.open_settings()
 		"saves":
 			# The save slots from the pause menu, with two of them filled
 			# (in slots of the capture's own) and the autosave written.

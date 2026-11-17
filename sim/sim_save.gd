@@ -32,6 +32,10 @@ static func path_of(slot: String) -> String:
 static func _file_of(slot: String) -> String:
 	if FileAccess.file_exists(path_of(slot)):
 		return path_of(slot)
+	# Cut off between clearing the slot and moving the new save into it:
+	# the new save is whole, and still lying beside the slot.
+	if FileAccess.file_exists(path_of(slot) + ".part"):
+		return path_of(slot) + ".part"
 	if slot == MANUAL_SLOTS[0] and FileAccess.file_exists(PATH):
 		return PATH
 	return ""
@@ -73,8 +77,10 @@ static func save_to_slot(w: SimWorld, config: MatchConfig, slot: String) -> bool
 
 
 static func delete_slot(slot: String) -> void:
-	var held: String = _file_of(slot)
-	if held != "":
+	for i: int in 3:
+		var held: String = _file_of(slot)
+		if held == "":
+			return
 		DirAccess.remove_absolute(held)
 
 
