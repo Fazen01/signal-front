@@ -196,6 +196,10 @@ func _on_mouse_button(mb: InputEventMouseButton) -> void:
 			return
 		if battle.on_right_click(mb.position):
 			return
+		if mb.ctrl_pressed and not battle.watching and not own_unit_ids().is_empty():
+			# Ctrl + right click: attack-move there, without arming it first.
+			order_attack_move(ground_point(mb.position), mb.shift_pressed)
+			return
 		context_order(mb.position, mb.shift_pressed)
 
 
@@ -314,11 +318,13 @@ func _on_key(key: InputEventKey) -> void:
 	var ids: PackedInt32Array = own_unit_ids()
 	if ids.is_empty():
 		return
+	# W, A, S and D belong to the camera, always. The orders sit on keys no
+	# unit or building uses for anything else.
 	match code:
-		KEY_A:
+		KEY_X:
 			mode = Mode.ATTACK_MOVE
 			get_viewport().set_input_as_handled()
-		KEY_S:
+		KEY_O:
 			world.push_command(SimCommand.stop(player, ids))
 			get_viewport().set_input_as_handled()
 		KEY_H:
@@ -390,7 +396,7 @@ func order_attack_move(at: Vector2, queued: bool) -> void:
 	battle.show_order_marker(at, Color(1.0, 0.35, 0.3))
 
 
-## An order given on the minimap: move (or attack-move while A is armed).
+## An order given on the minimap: move (or attack-move while it is armed).
 func order_at_world(at: Vector2, queued: bool) -> void:
 	if battle.watching:
 		return

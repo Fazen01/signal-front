@@ -346,6 +346,21 @@ map generation itself to be improved.
 - [x] Unit stances: aggressive, hold fire, return fire (Z, or the stance
       button on the command card)
 
+## M36 — From the owner's first session with the game (17 November)
+
+- [x] "Annoying constant wind noise": the bed of air under everything is a
+      fifth as loud, half a minute long instead of six seconds, and has
+      neither the two-second pulse nor the hum it had
+- [x] "Ability to see the queue, e.g. in headquarters, and barracks etc.":
+      the queue was there but at the foot of the panel, cut off by the
+      screen. It is now a TRAINING block under the health bar, and every
+      building of yours that is training shows a bar and a pip for each
+      queued unit above it, selected or not
+- [x] "Unable to move the screen correctly with ASDW when selecting a
+      unit": A and S were attack-move and stop while units were selected.
+      W, A, S and D now always move the camera; attack-move is X (or Ctrl
+      + right click) and stop is O
+
 ## Ideas not taken up
 
 Session 1 proposed a list of further ideas. The owner picked the two in M35
@@ -1156,6 +1171,39 @@ restarted three times; the background tuner died with it).**
 - The frame benchmark after tonight's view changes (vehicles tilting,
   legs, the new water and ground shaders are not in it: no GPU): 7.31 ms
   a frame with 300 units, as before.
+- **The owner played, or at least ran, the game for the first time (about
+  09:40 UTC) and wrote in with three things. They are M36.**
+  - *"Annoying constant wind noise or something I hear."* The ambient bed
+    was six seconds of low noise whose loudness rose and fell every two
+    seconds, over a steady 55 Hz hum, played at -6 dB: a loop short enough
+    to hear as a loop. It is now thirty seconds of softer air with one slow
+    swell, no hum, played at -20 dB, which with the samples as they are is
+    a fifth of the old loudness. It can still be turned right off
+    (Settings, Ambience). Nobody here can hear it; if it is still too
+    much the next step is to take it out.
+  - *"Maybe ability to see the queue, e.g. in headquarters"*, then *"and
+    barracks etc"*, then *"oh I didn't see there was a queue"*. There was
+    one: chips under the description and a progress bar under those. On
+    the Headquarters the description is four lines, so the chips were cut
+    in half by the bottom of the screen and the bar was off it. Now a
+    block of its own straight under the health bar: TRAINING, a bar, "Hauler
+    28%  +2 waiting", then numbered chips (the first in the faction's
+    second colour; click one to cancel it); the description keeps to two
+    lines while it is open; an idle building says "nothing - pick a unit on
+    the right". In the field, each of the player's buildings that is
+    training shows the gold bar and one pip a queued unit above it whether
+    or not it is selected (it used to show only when selected or damaged).
+    Several buildings selected say how many units they have in training.
+  - *"Bug where I'm unable to move the screen correctly with ASDW when
+    e.g. selecting a unit and moving the unit."* Not a bug in the code but
+    a bad decision of session 1's: with units selected A was attack-move
+    and S was stop, so two of the four camera keys stopped panning, and S
+    cancelled the move just ordered. **Decision: W, A, S and D always move
+    the camera.** Attack-move is X then left click, or Ctrl + right click;
+    stop is O; hold stays H and stance Z. X and O are the only letters no
+    unit or building uses as a hotkey. The command card, How to Play, the
+    README and the design say so, and the input smoke test checks that A
+    arms nothing.
 - **Found while adding a line about hills to How to Play: the page did
   not fit on the screen.** It was one column of forty-odd lines, taller
   than the window, centred, so its heading was cut off at the top and its

@@ -15,7 +15,6 @@ var focus: Vector2 = Vector2.ZERO  ## world x, z the camera looks at
 var yaw: float = 0.0
 var pitch: float = 0.98
 var distance: float = 42.0
-var wasd_free: bool = true  ## A and S pan only while they are not unit orders
 var edge_pan: bool = true
 var _rotating: bool = false
 var _target_distance: float = 42.0
@@ -80,7 +79,9 @@ func _process(delta: float) -> void:
 		move.x -= 1.0
 	if Input.is_action_pressed("cam_right"):
 		move.x += 1.0
-	if wasd_free and not Input.is_key_pressed(KEY_CTRL):
+	# A and S pan like W and D, whatever is selected (no unit order sits on
+	# them), except with Ctrl held: Ctrl+A selects the army.
+	if not Input.is_key_pressed(KEY_CTRL):
 		if Input.is_physical_key_pressed(KEY_A):
 			move.x -= 1.0
 		if Input.is_physical_key_pressed(KEY_S):

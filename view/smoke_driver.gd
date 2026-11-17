@@ -40,10 +40,12 @@ func _process(_delta: float) -> void:
 					moving += 1
 			expect(moving > 0, "right click moves the selection")
 		50:
-			_key(KEY_S, false, false)
+			_key(KEY_O, false, false)
 		55:
 			_key(KEY_A, false, false)
-			expect(ctl.mode == SelectionController.Mode.ATTACK_MOVE, "A arms attack-move")
+			expect(ctl.mode == SelectionController.Mode.NORMAL, "A belongs to the camera: it arms nothing")
+			_key(KEY_X, false, false)
+			expect(ctl.mode == SelectionController.Mode.ATTACK_MOVE, "X arms attack-move")
 			_click(MOUSE_BUTTON_LEFT, get_viewport().get_visible_rect().size * 0.5 + Vector2(-150.0, 60.0), false)
 			expect(ctl.mode == SelectionController.Mode.NORMAL, "attack-move click returns to normal")
 		70:

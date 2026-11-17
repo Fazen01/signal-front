@@ -175,7 +175,8 @@ mobile Beacon Rigs that deploy and pack up, and the HQ itself can relocate.
 - Camera: WASD / edge pan, mouse-wheel zoom, middle-drag or Q/E rotate.
 - Left click / drag box selects; double-click selects same type on screen;
   Shift adds. Right click is a context order (move, attack, harvest, repair,
-  capture, set rally). A = attack-move, S = stop, H = hold position.
+  capture, set rally). X = attack-move (or Ctrl + right click), O = stop, H = hold position, Z =
+  stance. W, A, S and D always move the camera.
 - Ctrl+1..9 set control groups, 1..9 recall, double-tap centers the camera.
 - HUD: salvage and bandwidth at the top, minimap bottom-left (click to move
   the camera, right-click to order), selection panel and command card with

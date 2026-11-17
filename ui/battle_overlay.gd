@@ -41,7 +41,10 @@ func _draw() -> void:
 		var is_selected: bool = ctl.selected_set.has(e.id)
 		var show_bar: bool = is_selected or e.hp < e.max_hp - 0.5 or not e.constructed
 		var dark: bool = e.owner >= 0 and not e.linked and e.constructed
-		if not show_bar and not dark and e.rank == 0:
+		# Our own buildings show what they are training whether or not
+		# they are selected: how far along, and how many are queued.
+		var training: bool = e.kind == SimEntity.Kind.BUILDING and e.constructed and not e.queue.is_empty() and e.owner == battle.local_player and not battle.watching
+		if not show_bar and not dark and e.rank == 0 and not training:
 			continue
 		var top: Vector3 = Vector3(e.pos.x, world.map.height_at(e.pos) + _bar_height(e), e.pos.y)
 		if cam3d.is_position_behind(top):
@@ -53,11 +56,14 @@ func _draw() -> void:
 			_draw_dark_icon(sp + Vector2(0.0, -14.0))
 		if e.rank > 0:
 			_draw_rank(sp + Vector2(0.0, -9.0 if not dark else -27.0), e.rank)
-		if not show_bar:
+		if not show_bar and not training:
 			continue
 		var edge: Vector2 = cam3d.unproject_position(top + right * e.radius)
 		var half: float = clampf(sp.distance_to(edge), 12.0, 70.0)
 		var bar: Rect2 = Rect2(sp.x - half, sp.y - 3.0, half * 2.0, 5.0)
+		if not show_bar:
+			_draw_training(e, world, bar)
+			continue
 		draw_rect(bar.grow(1.0), Color(0.0, 0.0, 0.0, 0.75))
 		var frac: float = e.hp_fraction()
 		var col: Color = Color(0.3, 0.9, 0.35)
@@ -70,11 +76,8 @@ func _draw() -> void:
 			var prog: Rect2 = Rect2(bar.position + Vector2(0.0, 7.0), Vector2(bar.size.x * e.build_progress, 3.0))
 			draw_rect(Rect2(bar.position + Vector2(-1.0, 6.0), Vector2(bar.size.x + 2.0, 5.0)), Color(0.0, 0.0, 0.0, 0.75))
 			draw_rect(prog, Color(0.4, 0.75, 1.0))
-		elif e.kind == SimEntity.Kind.BUILDING and not e.queue.is_empty() and e.owner == battle.local_player:
-			var total: float = world.data.entity(e.queue[0]).build_time
-			var pf: float = clampf(e.prod_progress / maxf(total, 0.01), 0.0, 1.0)
-			draw_rect(Rect2(bar.position + Vector2(-1.0, 6.0), Vector2(bar.size.x + 2.0, 5.0)), Color(0.0, 0.0, 0.0, 0.75))
-			draw_rect(Rect2(bar.position + Vector2(0.0, 7.0), Vector2(bar.size.x * pf, 3.0)), Color(1.0, 0.85, 0.3))
+		elif training:
+			_draw_training(e, world, bar)
 	if ctl.dragging and ctl.drag_start.distance_to(ctl.drag_now) >= SelectionController.DRAG_THRESHOLD:
 		var box: Rect2 = Rect2(ctl.drag_start, ctl.drag_now - ctl.drag_start).abs()
 		draw_rect(box, Color(0.4, 1.0, 0.5, 0.12))
@@ -84,6 +87,20 @@ func _draw() -> void:
 		draw_arc(m, 14.0, 0.0, TAU, 24, Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(20.0, 0.0), m + Vector2(20.0, 0.0), Color(1.0, 0.35, 0.3), 2.0)
 		draw_line(m - Vector2(0.0, 20.0), m + Vector2(0.0, 20.0), Color(1.0, 0.35, 0.3), 2.0)
+
+
+## Under where a building's health bar goes: a gold bar for the unit it is
+## training now, and a pip for every unit in its queue.
+func _draw_training(e: SimEntity, world: SimWorld, bar: Rect2) -> void:
+	var gold: Color = Color(1.0, 0.85, 0.3)
+	var total: float = world.data.entity(e.queue[0]).build_time
+	var part: float = clampf(e.prod_progress / maxf(total, 0.01), 0.0, 1.0)
+	draw_rect(Rect2(bar.position + Vector2(-1.0, 6.0), Vector2(bar.size.x + 2.0, 5.0)), Color(0.0, 0.0, 0.0, 0.75))
+	draw_rect(Rect2(bar.position + Vector2(0.0, 7.0), Vector2(bar.size.x * part, 3.0)), gold)
+	for i: int in e.queue.size():
+		var pip: Rect2 = Rect2(bar.position + Vector2(float(i) * 8.0, 13.0), Vector2(6.0, 5.0))
+		draw_rect(pip.grow(1.0), Color(0.0, 0.0, 0.0, 0.75))
+		draw_rect(pip, gold if i == 0 else Color(0.78, 0.8, 0.84))
 
 
 ## Where the selected units are going: a line from each through its queued

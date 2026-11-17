@@ -222,7 +222,9 @@ func test_match_setup_economy_runs() -> void:
 
 func test_hotkeys_do_not_clash() -> void:
 	var data: GameData = GameData.shared()
-	var reserved: Array[String] = ["W", "A", "S", "D", "Q", "E", "G", "H"]
+	# The camera (W A S D, Q E), the overlay (G), and the unit orders: hold
+	# (H), attack-move (X), stop (O) and stance (Z).
+	var reserved: Array[String] = ["W", "A", "S", "D", "Q", "E", "G", "H", "X", "O", "Z"]
 	for def: EntityDef in data.entities.values():
 		if def.hotkey != "":
 			check(not reserved.has(def.hotkey), "%s uses reserved key %s" % [def.id, def.hotkey])

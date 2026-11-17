@@ -135,21 +135,27 @@ static func _wav(samples: PackedFloat32Array) -> AudioStreamWAV:
 	return wav
 
 
-## A seamless six-second loop: wind (slow, low-passed noise) over a faint hum.
+## A seamless loop of soft air, barely there: slow, low-passed noise that
+## swells and falls a little over half a minute. (It used to be a
+## six-second loop that pulsed every two seconds over a steady hum, and the
+## owner's first words on hearing the game were "annoying constant wind
+## noise".) The loudness is set where it is played, not here.
 static func _ambient(rng: SimRng) -> AudioStreamWAV:
-	var seconds: float = 6.0
+	var seconds: float = 30.0
 	var n: int = int(seconds * float(RATE))
-	var fade: int = RATE  # one second of cross-fade to hide the loop point
+	var fade: int = RATE * 2  # two seconds of cross-fade to hide the loop point
 	var raw: PackedFloat32Array = PackedFloat32Array()
 	raw.resize(n + fade)
 	var y: float = 0.0
 	var z: float = 0.0
 	for i: int in n + fade:
 		var t: float = float(i) / float(RATE)
-		y += 0.02 * ((rng.next_float() * 2.0 - 1.0) - y)
-		z += 0.2 * (y - z)
-		var gust: float = 0.6 + 0.4 * sin(TAU * t / seconds) * sin(TAU * t / (seconds / 3.0))
-		raw[i] = z * 7.0 * gust + sin(TAU * 55.0 * t) * 0.03 + sin(TAU * 82.5 * t) * 0.015
+		y += 0.035 * ((rng.next_float() * 2.0 - 1.0) - y)
+		z += 0.06 * (y - z)
+		# Whole numbers of cycles in the loop, so that it joins up, and far
+		# enough apart that no beat can be heard in it.
+		var swell: float = 0.8 + 0.13 * sin(TAU * t / seconds) + 0.07 * sin(TAU * 3.0 * t / seconds + 1.3)
+		raw[i] = z * 5.0 * swell
 	var out: PackedFloat32Array = PackedFloat32Array()
 	out.resize(n)
 	for i: int in n:

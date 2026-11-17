@@ -6,6 +6,10 @@ extends Node
 const VOICES: int = 14
 const HEARING_RANGE: float = 95.0
 
+## How loud the bed of air under everything is played. It was -6 dB and
+## the first thing the owner noticed; this is a fifth of that.
+const AMBIENT_DB: float = -20.0
+
 var listener: Vector2 = Vector2.ZERO  ## world x, z the camera looks at
 var _players: Array[AudioStreamPlayer] = []
 var _next: int = 0
@@ -24,7 +28,7 @@ func _ready() -> void:
 	_ambient = AudioStreamPlayer.new()
 	_ambient.bus = "Ambient"
 	_ambient.stream = SoundBank.stream("ambient")
-	_ambient.volume_db = -6.0
+	_ambient.volume_db = AMBIENT_DB
 	add_child(_ambient)
 	_ambient.play()
 

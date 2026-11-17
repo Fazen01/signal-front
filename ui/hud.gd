@@ -37,8 +37,10 @@ var _health_bar: ProgressBar = null
 var _health_text: Label = null
 var _health_fills: Array[StyleBoxFlat] = []  ## green, amber, red
 var _health_tone: int = -1
+var _queue_box: VBoxContainer = null  ## what the selected building is training: progress, then the queue
 var _queue_row: HBoxContainer = null
 var _queue_bar: ProgressBar = null
+var _queue_now: Label = null
 var _info: Label = null
 var _card: GridContainer = null
 var _buttons: Array[Button] = []
@@ -271,19 +273,32 @@ func _build_bottom_bar() -> void:
 	_health_row = health_row
 	for tone: Color in [Color(0.36, 0.86, 0.42), Color(0.98, 0.78, 0.25), RED]:
 		_health_fills.append(UiTheme.box(tone, Color(0.0, 0.0, 0.0, 0.0), mini(3, skin.corners[0]), 0, 0.0))
+	# What a building is training: straight under its health, above the
+	# description, so that a long description cannot push it off the bar.
+	_queue_box = VBoxContainer.new()
+	_queue_box.add_theme_constant_override("separation", 3)
+	_queue_box.visible = false
+	sel.add_child(_queue_box)
+	var queue_head: HBoxContainer = HBoxContainer.new()
+	queue_head.add_theme_constant_override("separation", 9)
+	_queue_box.add_child(queue_head)
+	queue_head.add_child(skin.caption("TRAINING"))
+	_queue_bar = ProgressBar.new()
+	_queue_bar.custom_minimum_size = Vector2(170.0, 9.0)
+	_queue_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_queue_bar.show_percentage = false
+	_queue_bar.max_value = 1.0
+	_queue_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_queue_bar.add_theme_stylebox_override("fill", UiTheme.box(skin.second, Color(0.0, 0.0, 0.0, 0.0), mini(3, skin.corners[0]), 0, 0.0))
+	queue_head.add_child(_queue_bar)
+	_queue_now = make_label("", 13, skin.text)
+	queue_head.add_child(_queue_now)
+	_queue_row = HBoxContainer.new()
+	_queue_row.add_theme_constant_override("separation", 4)
+	_queue_box.add_child(_queue_row)
 	_sel_detail = make_label("", 14, skin.dim)
 	_sel_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sel.add_child(_sel_detail)
-	_queue_row = HBoxContainer.new()
-	_queue_row.add_theme_constant_override("separation", 4)
-	sel.add_child(_queue_row)
-	_queue_bar = ProgressBar.new()
-	_queue_bar.custom_minimum_size = Vector2(220.0, 10.0)
-	_queue_bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_queue_bar.show_percentage = false
-	_queue_bar.max_value = 1.0
-	_queue_bar.visible = false
-	sel.add_child(_queue_bar)
 	_info = make_label("", 13, skin.second)
 	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -542,8 +557,8 @@ func rebuild_card() -> void:
 				var into: EntityDef = world.data.entity(e.def.deploys_to)
 				_add_entry("deploy", null, e.def.deploys_to, "Y", "Deploy", "Deploy: set up as a %s. Must be inside your coverage." % into.name)
 				break
-		_add_entry("order", null, "attack_move", "A", "Attack-move", "Attack-move: advance and engage anything on the way.")
-		_add_entry("order", null, "stop", "S", "Stop", "Stop: drop all orders.")
+		_add_entry("order", null, "attack_move", "X", "Attack-move", "Attack-move (X, then left click; or Ctrl + right click): advance and engage anything on the way.")
+		_add_entry("order", null, "stop", "O", "Stop", "Stop: drop all orders.")
 		_add_entry("order", null, "hold", "H", "Hold", "Hold position: fire only at what comes into range.")
 		for e: SimEntity in units:
 			if e.def.is_armed():
@@ -724,7 +739,7 @@ func cycle_stance() -> void:
 	push_alert("Stance: %s" % STANCE_NAMES[next], CYAN)
 
 
-## Card hotkeys. Order keys (A, S, H) are handled by the controller itself.
+## Card hotkeys. Order keys (X, O, H, Z) are handled by the controller itself.
 func handle_hotkey(key: InputEventKey) -> bool:
 	var code: int = int(key.physical_keycode)
 	if code < int(KEY_A) or code > int(KEY_Z):
@@ -831,6 +846,9 @@ func _refresh_selection() -> void:
 			parts.append("%d %s" % [counts[n], n])
 		_sel_title.text = "%d selected" % sel.size()
 		_sel_detail.text = ", ".join(parts)
+		var training: int = queued_in_selection()
+		if training > 0:
+			_sel_detail.text += "\n%d in training (select one building to see its queue)" % training
 		# A group that is not on the default stance says so.
 		var stance: int = selected_stance()
 		if stance == SimEntity.Stance.RETURN_FIRE:
@@ -895,6 +913,8 @@ func _entity_detail(e: SimEntity) -> String:
 	return "\n".join(lines)
 
 
+## The training block of the selection panel. `b` is the one building
+## selected, if it is ours and trains things; otherwise null.
 func _refresh_queue(b: SimEntity) -> void:
 	var sig: String = ""
 	if b != null:
@@ -907,18 +927,41 @@ func _refresh_queue(b: SimEntity) -> void:
 		if b != null:
 			for i: int in b.queue.size():
 				var btn: Button = Button.new()
-				btn.text = world.data.entity(b.queue[i]).name
+				btn.text = "%d  %s" % [i + 1, world.data.entity(b.queue[i]).name]
 				btn.theme_type_variation = "ChipButton"
-				btn.tooltip_text = "Click to cancel"
+				btn.tooltip_text = "Click to cancel (full refund)"
 				btn.focus_mode = Control.FOCUS_NONE
 				btn.add_theme_font_size_override("font_size", 12)
+				# The one being trained now stands out from those waiting.
+				btn.add_theme_color_override("font_color", skin.second if i == 0 else skin.text)
 				btn.pressed.connect(_on_queue_pressed.bind(b.id, i))
 				_queue_row.add_child(btn)
-	if b != null and not b.queue.is_empty():
-		_queue_bar.visible = true
-		_queue_bar.value = clampf(b.prod_progress / maxf(world.data.entity(b.queue[0]).build_time, 0.01), 0.0, 1.0)
-	else:
-		_queue_bar.visible = false
+	_queue_box.visible = b != null
+	# With the training block open the description keeps to two lines.
+	_sel_detail.max_lines_visible = 2 if b != null else -1
+	if b == null:
+		return
+	if b.queue.is_empty():
+		_queue_bar.value = 0.0
+		_queue_now.text = "nothing - pick a unit on the right" if b.linked else "stopped: this building is Dark"
+		return
+	var first: EntityDef = world.data.entity(b.queue[0])
+	var part: float = clampf(b.prod_progress / maxf(first.build_time, 0.01), 0.0, 1.0)
+	_queue_bar.value = part
+	var more: int = b.queue.size() - 1
+	_queue_now.text = "%s  %d%%%s" % [first.name, int(part * 100.0), ("   +%d waiting" % more) if more > 0 else ""]
+	if not b.linked:
+		_queue_now.text = "%s  stopped: this building is Dark" % first.name
+
+
+## How many units a selection of buildings has in training (for the summary
+## shown when several are selected).
+func queued_in_selection() -> int:
+	var total: int = 0
+	for e: SimEntity in _selected_own():
+		if e.kind == SimEntity.Kind.BUILDING:
+			total += e.queue.size()
+	return total
 
 
 func _on_queue_pressed(building_id: int, index: int) -> void:

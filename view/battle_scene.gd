@@ -391,7 +391,6 @@ func _process(delta: float) -> void:
 	var t1: int = Time.get_ticks_usec()
 	controller.prune()
 	audio.listener = cam.focus
-	cam.wasd_free = controller.own_unit_ids().is_empty()
 	world_view.sync(clampf(_accum / SimWorld.DT, 0.0, 1.0))
 	var t2: int = Time.get_ticks_usec()
 	_update_markers(delta)

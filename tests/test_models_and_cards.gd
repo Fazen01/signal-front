@@ -33,7 +33,7 @@ func test_every_model_builds() -> void:
 
 func test_no_command_card_repeats_a_key() -> void:
 	var data: GameData = GameData.shared()
-	var taken_by_orders: Array[String] = ["A", "S", "H"]
+	var taken_by_orders: Array[String] = ["X", "O", "H", "Z"]
 	for def: EntityDef in data.entities.values():
 		var offered: Array[String] = []
 		offered.append_array(def.produces)

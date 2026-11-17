@@ -77,13 +77,13 @@ coverage is visible, plus a circle around each unit.
 
 | Input | Action |
 |---|---|
-| W / D / arrow keys / screen edge | Pan the camera (A and S also pan while nothing is selected) |
+| W A S D / arrow keys / screen edge | Pan the camera |
 | Mouse wheel | Zoom |
 | Q / E, or middle-drag | Rotate the camera |
 | Left click / drag | Select (Shift adds; double-click selects that type on screen) |
 | Right click | Context order: move, attack, harvest, repair/assist, capture, hijack, set rally point |
-| A, then left click | Attack-move |
-| S / H | Stop / hold position |
+| X, then left click; or Ctrl + right click | Attack-move |
+| O / H | Stop / hold position |
 | Z | Change the selected units' stance: aggressive (shoot any enemy in sight), return fire (only whoever shoots at them or the unit beside them), hold fire (never, unless ordered to attack) |
 | Ctrl+A or F2 | Select the whole army (every armed unit) |
 | Shift + order | Queue the order |
@@ -93,7 +93,7 @@ coverage is visible, plus a circle around each unit.
 | Ctrl+F5..F8, then F5..F8 | Save / recall a camera bookmark |
 | Minimap: left click / right click | Move the camera / order the selection there |
 | Alt+1..6, or click a Directive in the bottom bar | Unlock or use a Directive (left click to target, right click to cancel) |
-| Letter on a command card button | Build or train that item (hold Shift to queue five) |
+| Letter on a command card button | Build or train that item (hold Shift to queue five). A selected building lists what it is training under its health bar; click an entry to cancel it. Buildings that are training show a gold bar and a pip for each queued unit |
 | Space | Look at the latest warning |
 | + / - | Game speed, from half to three times |
 | Y | Deploy a deployable unit, or pack a deployed building back up |

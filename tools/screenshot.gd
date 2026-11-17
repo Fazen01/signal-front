@@ -341,6 +341,27 @@ func _run_script(battle: BattleScene) -> void:
 			if _count == 8:
 				battle.begin_placement(battle.world.data.entity("barracks"))
 				Input.warp_mouse(Vector2(1050.0, 380.0))
+		"queue", "queue_far":
+			# The Headquarters with three units queued and a Barracks with two:
+			# the training block in the selection panel, and the bars over the
+			# buildings. "queue_far" selects nothing, to see the bars alone.
+			if _count == 5:
+				var qw: SimWorld = battle.world
+				var qme: int = battle.local_player
+				qw.players[qme].salvage = 5000
+				qw.players[qme].bandwidth_cap = 60
+				var qhq: SimEntity = null
+				for e: SimEntity in qw.entities:
+					if e.owner == qme and e.def != null and e.def.signal_root:
+						qhq = e
+				var qbar: SimEntity = qw.spawn_building("barracks", qme, qw.map.cell_of(qhq.pos) + Vector2i(7, -3), true)
+				for id: String in ["hauler", "field_engineer", "hauler"]:
+					qw.push_command(SimCommand.train(qme, qhq.id, id))
+				for id: String in ["trooper", "lancer"]:
+					qw.push_command(SimCommand.train(qme, qbar.id, id))
+				if _script_name == "queue":
+					battle.controller.set_selection([qhq.id])
+				battle.cam.center_on(qhq.pos + Vector2(5.0, -2.0))
 		"hud_hq":
 			if _count == 5:
 				for e: SimEntity in battle.world.entities:

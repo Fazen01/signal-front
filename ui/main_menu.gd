@@ -25,15 +25,15 @@ You only see what your coverage and your units see. Ground units and buildings
 on a hill shoot 15% further and see 25% further.
 
 CAMERA
-  W / D / arrow keys / screen edge   pan  (A and S also pan with nothing selected)
+  W A S D / arrow keys / screen edge pan
   Mouse wheel                        zoom
   Q / E or middle-drag               rotate
 
 SELECTION AND ORDERS
   Left click / drag                  select  (Shift adds, double-click selects a type)
   Right click                        move, attack, harvest, repair or set a rally point
-  A then left click                  attack-move
-  S / H                              stop / hold position
+  X then left click                  attack-move  (or Ctrl + right click)
+  O / H                              stop / hold position
   Z                                  stance: aggressive, return fire, hold fire
   Ctrl+A or F2                       select the whole army
   Ctrl+1..9, then 1..9               set and recall control groups (double-tap centres)
