@@ -505,16 +505,16 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (01:02 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+**Working now (01:30 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
 and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M28 to
-M33 (high ground included), the combat half of M34, new water, vehicles
-that lie along the slope, the optional Light setting, session 7's branch,
-and the fixes listed in the log below. Going through the check, not yet
-pushed: walking legs, hills on the hand-made maps. **The owner asked at
-00:50 UTC for two more things, which are M35: unit stances (written,
-tested, committed here) and autosave with several save slots (being
-written now).** Running: the balance tuner over all ten factions (M26);
-its first league is in the log below. Open after that: M26's two boxes.
+M34 complete (high ground, new water, vehicles that lie along the slope,
+walking legs, hills on the hand-made maps), the optional Light setting,
+session 7's branch, and the fixes listed in the log below. **The owner
+asked at 00:50 UTC for two more things, M35: unit stances, and autosave
+with three save slots. Both are written, tested and committed here, and
+are in the check now.** Open: M26's two boxes (balance). The league below
+found that the AI itself held some factions back (see the last bullet),
+which is being fixed before any prices are written.
 
 - **Balance league, round 1 (00:30 UTC), all ten factions, the AI as it
   now is, seeds 1-4, 180 games, prices as in the data files:** Nomad
@@ -522,8 +522,25 @@ its first league is in the log below. Open after that: M26's two boxes.
   Aegis 41.7%, Vesper 41.7%, Lodestone 41.7%, Tally 36.1%, Zephyr 19.4%.
   Median match 14.9 minutes, 93% between 12 and 25, two undecided at an
   hour. One standard error at 36 games a faction is 8.3 points, so only
-  Nomad (far too strong) and Zephyr (far too weak) are clearly out; the
-  tuner is repricing and replaying. These maps had no hills yet.
+  Nomad (far too strong) and Zephyr (far too weak) are clearly out. These
+  maps had no hills yet.
+- **Round 2 (01:12 UTC), prices Nomad x1.136, Foundry x1.058, Brackenfold
+  x1.029, Tally x0.951, Zephyr x0.893:** Nomad 63.9%, Brackenfold 63.9%,
+  Verdigris 61.1%, Vesper 58.3%, Foundry 55.6%, Tally 44.4%, Lodestone
+  44.4%, Aegis 41.7%, Veil 30.6%, Zephyr 25.0%. Median 15.3 minutes, 88%
+  between 12 and 25, four undecided. Furthest from even 25 points, down
+  from 39. Not written to the data files.
+- **Why Zephyr does not answer to price (01:20 UTC).** Traced one of its
+  matches minute by minute: it sat on 2,000 to 5,000 salvage with one
+  Roost and one Flight Deck for the whole match. The build order returns
+  the first need that is not met, and "relays below the early count" came
+  before "salvage is piling up, add production"; an enemy that kept
+  shooting its forward Masts down kept it at the relay step for ever. A
+  faction that cannot spend its salvage is not helped by cheaper units.
+  Fix (in the check next): with 1,500 or more in the bank the AI adds a
+  works and a barracks (up to three over its usual number) before it goes
+  back to relays. This is in every faction's AI, so the league is being
+  played again from the tuner's present prices before anything is written.
 - **A mistake, and its repair (00:45 UTC).** Two status pushes of this
   session (`e1aa916` at 00:23 and `1eb8be5` at 00:40) replaced the wrong
   paragraph: the text search for "Working now" found session 7's paragraph
