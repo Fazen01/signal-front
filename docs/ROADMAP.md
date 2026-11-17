@@ -517,20 +517,15 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Status (09:30 UTC, 17 Nov) — session 1, for whoever is next.**
-Everything written is pushed, with `tools/check.sh` passing (32 steps).
-**Every box in this roadmap is ticked except one**: the frame rate on
-real hardware (M13), which needs a GPU and a person. Done since 15:00 UTC
-on the 16th, all asked for by the owner: M28 to M35 (an interface per
-faction, teams with AI allies, two more factions, a better AI, a unit of
-its own for six factions, prize maps, a map preview, high ground, new
-water, combat effects, vehicles that tilt and walkers that step, unit
-stances, three save slots and an autosave) and M26 (balance: three AI
-flaws fixed, 62 unit costs changed, every faction within 8.3 points of
-even over 720 AI-against-AI games; read "What that tick does and does
-not say" in the log below before relying on it). Nothing is half-built
-and nothing is running. If the owner writes in, that comes first;
-otherwise there is nothing queued.
+**Working now (10:08 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
+and 7 to read.** Pushed, with `tools/check.sh` passing (32 steps): M0 to
+M35, every box ticked but the frame rate on real hardware (M13), which
+needs a GPU and a person. **The owner ran the game for the first time at
+about 09:40 UTC and wrote in with three things (M36): a wind noise that
+annoyed, a training queue that could not be seen, and A and S not moving
+the camera while units are selected.** All three are fixed and committed
+here, in the check now, not pushed yet. The owner is at the keyboard:
+whatever they write next comes first.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
