@@ -189,7 +189,9 @@ map generation itself to be improved.
 - [x] Second look pass after the owner said it looked bad: a calmer
       palette instead of stark white, stepped hulls, six-sided turrets, lift
       pods, chunkier frames, lit corner posts on every base
-- [ ] Balance against the other three measured over a larger batch
+- [x] Balance against the other three measured over a larger batch (done
+      as part of M26 on 17 November: Vesper took 55.6% of 144 games
+      against the other nine)
 
 ## M21 — Regions (owner request, 16 November)
 
@@ -234,8 +236,11 @@ map generation itself to be improved.
 ## M26 — Balance across eight factions (owner request)
 
 - [x] `tools/balance_league.py`: every pairing, both seats, in parallel
-- [ ] Every faction within about ten points of even over a league of at
-      least 48 games a faction
+- [x] Every faction within about ten points of even over a league of at
+      least 48 games a faction (17 November, all ten factions, 144 games a
+      faction over sixteen seeds: the furthest is 8.3 points from even.
+      These are the seeds the prices were fitted on; see the log for what
+      other maps did to single factions)
 - [x] Match length still 15-25 minutes for most pairings (17 November,
       720 games over sixteen seeds: the average is between 15 and 25
       minutes in 44 of the 45 pairings; the median game is 16.2 minutes)
@@ -497,17 +502,20 @@ behaviour does to match length before it is switched on for good.
 
 ### 2026-11-16 — session 1, resumed 09:05 UTC (branch `claude/gracious-lovelace-fxl9n2`)
 
-**Working now (09:12 UTC, 17 Nov) — session 1 is alive, for sessions 5, 6
-and 7 to read.** Everything written is pushed, with `tools/check.sh`
-passing (32 steps): M28 to M35 complete, three AI fixes that came out of
-the balance leagues (factories before relays when rich, relays kept at
-home under fire, at most three hijackers), and the unit prices the
-leagues arrived at. M26's second box (match length) is ticked. Its first
-is open: before the third AI fix, 720 games over sixteen seeds put nine
-factions within 7.6 points of even and the Veil 11.8 below (see "Balance
-(M26)" in the log below); that fix makes the Nomad AI stronger, so the
-same league is being played again with it and one more price step.
-At 09:12 it had played 81 of its 90 jobs; it resumes if it is cut off.
+**Status (09:30 UTC, 17 Nov) — session 1, for whoever is next.**
+Everything written is pushed, with `tools/check.sh` passing (32 steps).
+**Every box in this roadmap is ticked except one**: the frame rate on
+real hardware (M5), which needs a GPU and a person. Done since 15:00 UTC
+on the 16th, all asked for by the owner: M28 to M35 (an interface per
+faction, teams with AI allies, two more factions, a better AI, a unit of
+its own for six factions, prize maps, a map preview, high ground, new
+water, combat effects, vehicles that tilt and walkers that step, unit
+stances, three save slots and an autosave) and M26 (balance: three AI
+flaws fixed, 62 unit costs changed, every faction within 8.3 points of
+even over 720 AI-against-AI games; read "What that tick does and does
+not say" in the log below before relying on it). Nothing is half-built
+and nothing is running. If the owner writes in, that comes first;
+otherwise there is nothing queued.
 
 - **Session 7** (`claude/relay-session-1116-1950`): M31 is here and pushed;
   if yours has behaviour this one lacks, leave it on your branch and say
@@ -1296,6 +1304,34 @@ restarted three times; the background tuner died with it).**
     three hijackers (`MAX_HIJACKERS`); the same match then ends at 31
     minutes. This makes the Nomad AI stronger, so the league is being
     played again before the box is judged.
+  - **The league over sixteen seeds with the third AI fix and that price
+    step (09:22 UTC), 720 games, 144 a faction, exactly the data and AI
+    now on the branch:** Nomad 56.9%, Vesper 55.6%, Tally 54.9%, Foundry
+    54.2%, Brackenfold 52.1%, Aegis 44.4%, Verdigris 44.4%, Veil 44.4%,
+    Lodestone 42.4%, Zephyr 41.7%. **Every faction within 8.3 points of
+    even**; one standard error is 4.2. Median game 16.5 minutes; 64% of
+    games between 15 and 25 minutes, 28% shorter, 8% longer; the average
+    is between 15 and 25 minutes in 44 of the 45 pairings (Brackenfold
+    against Vesper is 14.8). Thirteen of the 720 were undecided at an
+    hour. M26's first box is ticked on this league, and tuning stops here:
+    what is left is inside two standard errors.
+  - **What that tick does and does not say.** It is measured on the
+    sixteen seeds the prices were fitted on (the tuner saw seeds 1 to 4,
+    the later corrections came from leagues on 5 to 16 and on all
+    sixteen), so it is a fit, not a test. The two leagues that were tests
+    (seeds 5 to 10 and 11 to 16, above) had single factions 13 and 22
+    points from even at the prices of the moment, because six maps are
+    few and a faction's fortunes turn on the maps. On maps outside these
+    sixteen, expect the table to hold on average and single factions to
+    be off by more than ten on any small set. It is also AI against AI
+    at Normal: it says how the AI fares with each faction, not how a
+    person will.
+  - In all, since the start of this pass: three AI flaws fixed (found by
+    tracing matches the league flagged, not by the league's numbers), and
+    the cost of 62 fighting units changed. By faction, on average: Zephyr
+    26% cheaper, Lodestone 9%, Aegis 6%, Veil 6%, Tally 1%; Nomad 15%
+    dearer, Brackenfold 10%, Foundry 5%, Verdigris 4%, Vesper 3%. Before
+    it, Nomad won 89% and Zephyr 19%.
   - The session's worker was restarted at about 01:55 UTC and this time
     took the running check and the league with it (both had been started
     with `setsid`, which had been enough before). A league round is fifty

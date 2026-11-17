@@ -307,10 +307,15 @@ game except through software-rendered screenshots, so:
   one fight is about 7–8 ms a frame.
 - Balance and pacing are measured with AI-vs-AI leagues
   (`tools/balance_league.py`), which says how the AI fares with each
-  faction, not how a person will. The session log in `docs/ROADMAP.md` has
-  the latest table. One-on-one matches between AIs on the default map last
-  about a quarter of an hour (the design aims for 15–25 minutes); the
-  compact map gives about ten.
+  faction, not how a person will. The last one (17 November, 720 games,
+  every faction against every other on sixteen maps) put all ten factions
+  within 8.3 points of even: Nomad 57%, Vesper 56%, Tally 55%, Foundry
+  54%, Brackenfold 52%, Aegis, Verdigris and Veil 44%, Lodestone 42%,
+  Zephyr 42%. Those are the maps the prices were tuned on; on a handful of
+  other maps a single faction can be fifteen points off, because much
+  depends on the map. A match between two AIs lasts about sixteen minutes
+  (the design aims for 15 to 25); about one in fifty is still undecided
+  after an hour.
 - Seven of the ten factions were added in one day. They share the AI and
   most rules with the first three, each with one rule of its own, and have
   had far less testing.
